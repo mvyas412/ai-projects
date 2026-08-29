@@ -5,3 +5,6 @@ __pycache__/
 .DS_Store
 .ipynb_checkpoints/
 env
+
+# Local project memory (internal decisions, paths, and operational notes)
+/PROJECT_CONTEXT.md
