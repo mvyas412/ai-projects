@@ -1,3 +1,6 @@
+# Legacy V1 compatibility export.
+# Phase 2 dependencies are managed in pyproject.toml and locked in uv.lock.
+
 # PDF parsing and document processing
 PyMuPDF==1.28.2
 pdfplumber==0.11.10

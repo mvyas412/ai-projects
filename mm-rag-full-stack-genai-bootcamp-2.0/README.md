@@ -1,170 +1,148 @@
-# Multimodal RAG Full-Stack GenAI Bootcamp
+# Multimodal RAG Production — Phase 2
 
-This repository is the workspace for a full-stack Generative AI bootcamp project focused on multimodal Retrieval-Augmented Generation (RAG). The project will combine document ingestion, retrieval, and generative AI components with a user-facing application.
+Phase 2 evolves the working multimodal RAG prototype into a reproducible,
+secure, tenant-aware, and presentation-quality application. The V1 application
+remains unchanged in the sibling `mm-rag-full-stack-genai-bootcamp-1.0/`
+directory and at the immutable `mm-rag-v1.0.0` Git tag.
 
-> The project is currently in its initial setup stage. Application source code and dependencies will be added as the bootcamp progresses.
+## Current status
 
-## Project Goals
+The Phase 2 branch currently contains:
 
-- Build an end-to-end multimodal RAG application.
-- Process and retrieve information from multiple content types.
-- Use retrieved context to produce grounded AI responses.
-- Connect the AI workflow to a full-stack application.
-- Keep the Python environment and dependencies reproducible.
+- The verified V1 parsing, ingestion, retrieval, generation, and Streamlit flow.
+- A dedicated Python 3.12 environment managed by uv.
+- Locked runtime and development dependencies.
+- Isolated local PostgreSQL and Qdrant service definitions.
+- Environment and Streamlit configuration boundaries.
+- Automated environment and Streamlit startup smoke tests.
+
+The FastAPI boundary, PostgreSQL schema, authentication, workspaces, and new
+frontend structure will be introduced incrementally in later milestones.
 
 ## Prerequisites
 
-Install the following before setting up the project:
-
 - [uv](https://docs.astral.sh/uv/)
-- Git
 - Python 3.12, installed directly or managed by uv
+- Tesseract OCR with the English language data
+- Docker Desktop or another Compose-compatible container runtime for local
+  PostgreSQL and Qdrant
 
-This project uses Python 3.12.
+## Create the dedicated environment
 
-## Python and Virtual Environment Setup
-
-### 1. List available Python versions
-
-Use uv to display Python installations found on your machine and Python versions available for download:
-
-```bash
-uv python list
-```
-
-By default, uv displays installed Python interpreters and the latest downloadable patch release for each supported Python minor version.
-
-To display older patch releases as well, run:
-
-```bash
-uv python list --all-versions
-```
-
-To show only Python 3.12 versions, run:
-
-```bash
-uv python list 3.12 --all-versions
-```
-
-### 2. Install Python 3.12 if needed
-
-If Python 3.12 is not installed, let uv install the latest available Python 3.12 patch release:
+Run all commands from this `2.0` directory:
 
 ```bash
 uv python install 3.12
+uv sync
 ```
 
-Verify that uv can find it:
+`uv sync` creates an ignored `.venv/` beside `pyproject.toml` and installs the
+exact versions recorded in `uv.lock`. There is no need to activate the virtual
+environment when commands are run with `uv run`.
+
+Confirm the interpreter is isolated from V1:
 
 ```bash
-uv python find 3.12
+uv run python -c "import sys; print(sys.executable)"
 ```
 
-### 3. Create the virtual environment
+The printed path must be inside this directory's `.venv/`.
 
-From the project root, create a virtual environment named `env` with Python 3.12:
+## Configure local settings
+
+Create a local configuration file and replace placeholder credentials:
 
 ```bash
-uv venv env --python 3.12
+cp .env.example .env
 ```
 
-The general command format is:
+Never commit `.env`, `.streamlit/secrets.toml`, private keys, credentials,
+uploaded documents, or generated RAG artifacts. The tracked `.env.example`
+contains names and safe placeholders only.
+
+The backend will own OpenAI, PostgreSQL, and Qdrant credentials. The Streamlit
+frontend should receive only its API URL and, later, its own OIDC settings.
+
+## Start PostgreSQL and Qdrant
+
+After configuring `.env` and installing a container runtime:
 
 ```bash
-uv venv env --python <python-version>
+docker compose up -d
+docker compose ps
 ```
 
-For example, an exact Python patch version can be requested with:
+Local endpoints are intentionally separated from V1:
+
+| Component | Endpoint |
+| --- | --- |
+| Streamlit | `http://127.0.0.1:8502` |
+| Future FastAPI backend | `http://127.0.0.1:8000` |
+| PostgreSQL | `127.0.0.1:5433` |
+| Qdrant HTTP | `http://127.0.0.1:6335` |
+| Qdrant gRPC | `127.0.0.1:6336` |
+
+PostgreSQL and Qdrant use Compose-managed Phase 2 volumes. Do not mount or
+reuse V1 runtime data.
+
+Readiness checks:
 
 ```bash
-uv venv env --python 3.12.11
+docker compose exec postgres pg_isready -U mm_rag -d mm_rag_phase2
+curl --fail http://127.0.0.1:6335/readyz
 ```
 
-If the requested interpreter is not already installed, uv normally downloads a compatible managed Python build automatically when one is available.
-
-### 4. Activate the virtual environment
-
-On macOS or Linux Terminal:
+Stop services without deleting their volumes:
 
 ```bash
-source env/bin/activate
+docker compose down
 ```
 
-On Windows Terminal or Command Prompt:
-
-```bat
-env\Scripts\activate.bat
-```
-
-### 5. Verify the active Python version
+## Run the current Streamlit baseline
 
 ```bash
-python --version
+uv run streamlit run ui/app.py
 ```
 
-The output should report Python 3.12.x.
+The committed `.streamlit/config.toml` assigns Phase 2 port `8502` and disables
+usage-statistics collection.
 
-You can also confirm which interpreter is active on macOS or Linux:
+## Verify the environment
 
 ```bash
-which python
+uv lock --check
+uv sync --locked
+uv run pytest
+uv run ruff check tests
 ```
 
-It should point to the `env/bin/python` executable inside this project.
+The tests verify Python 3.12, the Phase 2 interpreter path, required imports,
+and Streamlit startup without uncaught exceptions.
 
-## Install Project Dependencies
+## Dependency policy
 
-After activating the virtual environment, install the dependencies listed in `requirements.txt`:
+- `pyproject.toml` is the human-maintained dependency source of truth.
+- `uv.lock` is generated by uv and records exact direct and transitive versions.
+- The `dev` dependency group contains tests, linting, formatting, and typing tools.
+- The optional `notebooks` group is installed with `uv sync --group notebooks`.
+- Use `uv add` and `uv remove` for dependency changes.
+- Do not install project dependencies manually into `.venv`.
+- `requirements.txt` is retained temporarily as a V1 migration reference.
 
-```bash
-uv pip install -r requirements.txt
-```
-
-The dependency file is currently empty and will be updated as packages are introduced.
-
-## Typical Setup Workflow
-
-Run these commands after cloning the repository:
-
-```bash
-git clone <repository-url>
-cd mm-rag-full-stack-genai-bootcamp-1.0
-uv python list
-uv python install 3.12
-uv venv env --python 3.12
-source env/bin/activate
-uv pip install -r requirements.txt
-python --version
-```
-
-If Python 3.12 is already installed, `uv python install 3.12` is optional.
-
-## Environment Variables
-
-Store local API keys and configuration values in a `.env` file. Never commit secrets to version control.
-
-Example:
-
-```dotenv
-# Add project-specific environment variables here.
-# API_KEY=your-api-key
-```
-
-## Deactivate the Environment
-
-When you finish working on the project, leave the virtual environment with:
-
-```bash
-deactivate
-```
-
-## Repository Structure
+## Project structure
 
 ```text
 .
-├── README.md          # Project documentation and setup instructions
-├── requirements.txt  # Python dependencies
-└── .env               # Local environment variables (not committed)
+├── .env.example              # Safe configuration template
+├── .python-version           # Supported Python line
+├── .streamlit/config.toml    # Shareable Streamlit settings
+├── compose.yaml              # Phase 2 PostgreSQL and Qdrant
+├── pyproject.toml            # Dependencies and Python tool configuration
+├── uv.lock                   # Exact reproducible dependency resolution
+├── src/                      # Current RAG implementation
+├── ui/app.py                 # Current Streamlit baseline
+└── tests/                    # Environment and smoke tests
 ```
 
-The structure will expand as backend, frontend, ingestion, retrieval, and evaluation components are implemented.
+Future foundation milestones will introduce `backend/`, `frontend/`, reusable
+RAG-core packages, Alembic migrations, and CI while preserving current behavior.
