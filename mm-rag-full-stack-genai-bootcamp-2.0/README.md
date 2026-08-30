@@ -29,6 +29,9 @@ The Phase 2 branch currently contains:
   document-indexer boundary, with mandatory workspace/document/version vector scope.
 - Persistent workspace-, collection-, or document-scoped conversations with
   backend-mediated retrieval, answer generation, and structured citations.
+- A presentation-focused native Streamlit experience with top navigation,
+  workspace switching, document/collection management, persistent chat,
+  evidence inspection, downloads, settings, and coordinated light/dark themes.
 - Automated environment, backend, tenant-isolation, storage, and Streamlit tests.
 
 Live OpenAI indexing and generation require an environment-specific API key. The
@@ -227,7 +230,7 @@ uv run streamlit run ui/app.py
 The committed `.streamlit/config.toml` assigns Phase 2 port `8502` and disables
 usage-statistics collection.
 
-## Run the authenticated Phase 2 shell
+## Run the authenticated Phase 2 application
 
 After completing the Auth0 configuration and starting FastAPI:
 
@@ -235,10 +238,15 @@ After completing the Auth0 configuration and starting FastAPI:
 uv run streamlit run frontend/streamlit_app.py
 ```
 
-The shell uses native Streamlit OIDC login, keeps the access token out of Session
-State, calls the protected current-user API, and displays only authorized
-workspaces. The existing `ui/app.py` remains available as the preserved RAG flow
-until its capabilities are moved behind FastAPI.
+The application uses native Streamlit OIDC login, keeps the access token out of
+Session State, and routes product operations through protected FastAPI APIs.
+
+- **Overview** summarizes documents, indexed readiness, collections, and recent chat.
+- **Library** uploads/downloads sources, starts indexing, and manages collections.
+- **Ask** creates scoped persistent conversations and opens citation evidence.
+- **Settings** shows account/workspace access and safe service readiness.
+
+The existing `ui/app.py` remains available as the preserved V1 RAG reference.
 
 ## Verify the environment
 

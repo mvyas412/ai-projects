@@ -201,12 +201,13 @@ product and security boundaries.
 
 ## Phase 2 — secure product foundation
 
-**Status:** In progress. Milestones 2.0.0–2.3 are implemented and accepted.
-The polished UI and delivery hardening remain.
+**Status:** In progress. Milestones 2.0.0–2.3 are implemented and accepted;
+2.4 is implemented with authenticated visual acceptance pending. Delivery
+hardening remains.
 
 ```mermaid
 flowchart LR
-    user["User"] --> st["Authenticated Streamlit shell<br/>implemented; pages expand incrementally"]
+    user["User"] --> st["Multipage Streamlit product<br/>Overview · Library · Ask · Settings"]
     st <-->|"login/logout"| idp["Auth0 OIDC<br/>configured and live-validated"]
     st -->|"token + API request"| routes["FastAPI /api/v1<br/>implemented"]
     routes --> authn["RS256 JWT + identity mapping<br/>implemented"]

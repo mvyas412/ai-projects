@@ -78,6 +78,21 @@ class DocumentLibraryService:
             raise ResourceNotFoundError
         return document, self._documents.list_versions(workspace_id, document_id)
 
+    def read_version_content(
+        self,
+        *,
+        user: User,
+        workspace_id: UUID,
+        document_id: UUID,
+        version_id: UUID,
+    ) -> tuple[Document, DocumentVersion, bytes]:
+        self._require_workspace(user, workspace_id)
+        document = self._documents.get_document(workspace_id, document_id)
+        version = self._documents.get_version(workspace_id, document_id, version_id)
+        if document is None or version is None:
+            raise ResourceNotFoundError
+        return document, version, self._storage.read(version.object_key)
+
     def create_document(
         self,
         *,

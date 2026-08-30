@@ -43,7 +43,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 2.4 presentation-quality multipage Streamlit |
+| Active milestone | Phase 2.5 CI, audit/activity, and demo hardening |
 | Phases 3–9 | Planned |
 
 ## Delivery sequence and gates
@@ -120,7 +120,7 @@ product with an API boundary and a presentation-quality Streamlit experience.
 | 2.1 | Auth0 identity, users, workspaces, memberships, storage boundary | Completed | Live login/logout/re-login, expiry rejection, and idempotent provisioning verified |
 | 2.2 | Document library, collections, versioning, scoped Qdrant payloads | Completed | Cross-user API tests, real migration cycle, and mandatory vector scope checks pass |
 | 2.3 | Persistent conversations and backend-mediated RAG | Completed | Restart-persistence, citation authorization, migration, and safe-failure tests pass |
-| 2.4 | Polished multipage Streamlit and evidence viewer | Planned | Principal flows pass accessibility and presentation review |
+| 2.4 | Polished multipage Streamlit and evidence viewer | Implemented; visual acceptance pending | Automated gates pass; authenticated browser presentation review remains |
 | 2.5 | CI, broader tests, activity/audit surface, demo hardening | Planned | Automated release gates and reproducible demonstration |
 
 ### Milestone 2.1 acceptance status
@@ -177,6 +177,23 @@ Completed:
   and safe behavior when model services are unconfigured.
 - PostgreSQL migration upgraded, downgraded only after all new tables were proven
   empty, and restored successfully to head `20260830_0004`.
+
+### Milestone 2.4 implementation status
+
+Implemented:
+
+- Replaced the one-page authenticated shell with native `st.navigation` pages for
+  Overview, Library, Ask, and Settings plus a shared authorized workspace selector.
+- Added complete document upload, index/re-index, download, collection creation,
+  collection membership, conversation creation, resume, and message workflows.
+- Added structured citation cards and an evidence dialog with source/page/excerpt,
+  retrieval score, and authorized original-source download.
+- Added deliberate empty/loading/error/success states, sentence-case copy, Material
+  Symbols, accessible widget labels, responsive native containers, and no custom CSS.
+- Added coordinated WCAG-oriented light/dark theme tokens in `config.toml`.
+- Full automated suite, Ruff, Mypy, Streamlit smoke test, live service readiness,
+  and live OpenAPI route checks pass. Automated browser control was unavailable;
+  authenticated desktop/mobile presentation review remains a user acceptance gate.
 
 ### Phase 2 completion gate
 
@@ -440,10 +457,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Build the 2.4 navigation shell and cohesive visual system | Authenticated pages share workspace and session context |
-| 2 | Add document upload, version, indexing, and collection workflows | Principal document lifecycle works without API tools |
-| 3 | Add persistent chat with target selection and citation evidence viewer | Conversation can resume and inspect authorized evidence |
-| 4 | Complete responsive, empty/error/loading, accessibility, and presentation review | UI acceptance checklist passes |
+| 1 | Add immutable activity/audit records and authorized activity API | Security-relevant product actions are attributable and tenant-scoped |
+| 2 | Add activity UI and broader negative-path/API-client tests | Operators can inspect safe activity; failure behavior is covered |
+| 3 | Add CI release gate and reproducible demo/check scripts | A clean checkout can validate Phase 2 consistently |
+| 4 | Complete authenticated browser presentation review | Desktop/mobile principal flows are accepted visually |
 
 ## Update protocol
 

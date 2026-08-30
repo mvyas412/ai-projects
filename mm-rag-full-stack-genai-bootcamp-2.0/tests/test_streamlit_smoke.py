@@ -30,5 +30,5 @@ def test_authenticated_streamlit_shell_starts_in_a_safe_unauthenticated_state() 
     buttons = [button.label for button in app.button]
     assert (
         "Authentication has not been configured for this environment." in warnings
-        or "Continue with Auth0" in buttons
+        or "Continue securely" in buttons
     )

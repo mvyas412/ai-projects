@@ -80,6 +80,14 @@ def test_document_upload_list_version_and_archive(client: TestClient) -> None:
     detail = client.get(f"/api/v1/workspaces/{workspace_id}/documents/{document_id}")
     assert detail.status_code == 200
     assert [version["version_number"] for version in detail.json()["versions"]] == [2, 1]
+    latest_version_id = detail.json()["versions"][0]["id"]
+    downloaded = client.get(
+        f"/api/v1/workspaces/{workspace_id}/documents/{document_id}/versions/"
+        f"{latest_version_id}/content"
+    )
+    assert downloaded.status_code == 200
+    assert downloaded.content == b"%PDF-1.7 revised"
+    assert downloaded.headers["content-type"].startswith("application/pdf")
 
     archived = client.delete(f"/api/v1/workspaces/{workspace_id}/documents/{document_id}")
     assert archived.status_code == 204
@@ -133,7 +141,9 @@ def test_collections_are_idempotent_and_workspace_scoped(client: TestClient) -> 
 
 def test_non_member_cannot_discover_or_modify_documents(client: TestClient) -> None:
     workspace_id = _workspace_id(client)
-    document_id = _upload(client, workspace_id).json()["id"]
+    uploaded = _upload(client, workspace_id).json()
+    document_id = uploaded["id"]
+    version_id = uploaded["latest_version"]["id"]
 
     app = cast(FastAPI, client.app)
     app.dependency_overrides[get_current_identity] = lambda: AuthenticatedIdentity(
@@ -148,6 +158,10 @@ def test_non_member_cannot_discover_or_modify_documents(client: TestClient) -> N
         == 404
     )
     assert _upload(client, workspace_id).status_code == 404
+    assert client.get(
+        f"/api/v1/workspaces/{workspace_id}/documents/{document_id}/versions/"
+        f"{version_id}/content"
+    ).status_code == 404
 
 
 def test_viewer_can_read_but_cannot_change_document_library(client: TestClient) -> None:

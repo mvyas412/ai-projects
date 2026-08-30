@@ -1,7 +1,17 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+    status,
+)
 from sqlalchemy.orm import Session
 
 from backend.app.api.dependencies import (
@@ -235,6 +245,37 @@ def index_document_version(
         ) from exc
     return DocumentIndexingResponse(
         version=_version_summary(version), chunk_count=result.chunk_count
+    )
+
+
+@router.get(
+    "/documents/{document_id}/versions/{version_id}/content",
+    summary="Download authorized document content",
+)
+def download_document_version(
+    workspace_id: UUID,
+    document_id: UUID,
+    version_id: UUID,
+    user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[Session, Depends(get_db_session)],
+    storage: Annotated[ObjectStorage, Depends(get_object_storage)],
+) -> Response:
+    try:
+        document, _, content = DocumentLibraryService(
+            session, storage
+        ).read_version_content(
+            user=user,
+            workspace_id=workspace_id,
+            document_id=document_id,
+            version_id=version_id,
+        )
+    except DocumentLibraryError as exc:
+        raise _translate_error(exc) from exc
+    safe_name = document.original_filename.replace('"', "")
+    return Response(
+        content=content,
+        media_type=document.media_type,
+        headers={"Content-Disposition": f'inline; filename="{safe_name}"'},
     )
 
 
