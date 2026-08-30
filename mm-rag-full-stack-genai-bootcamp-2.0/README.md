@@ -187,6 +187,17 @@ API documentation is available at `http://127.0.0.1:8000/docs`.
 | `GET /api/v1/workspaces` | List only the caller's workspaces | HTTP 200 with membership-scoped results |
 | `POST /api/v1/workspaces` | Create a workspace owned by the caller | HTTP 201 with an `owner` membership |
 | `GET /api/v1/workspaces/{id}` | Read one authorized workspace | HTTP 404 for missing or unauthorized workspace |
+| `GET/POST /api/v1/workspaces/{id}/documents` | List or upload workspace documents | Membership-scoped; write roles only for upload |
+| `GET/DELETE /api/v1/workspaces/{id}/documents/{document_id}` | Inspect or archive one document | Unauthorized resources remain hidden with HTTP 404 |
+| `POST /api/v1/workspaces/{id}/documents/{document_id}/versions` | Add an immutable document version | Duplicate content/config returns HTTP 409 |
+| `GET/POST /api/v1/workspaces/{id}/collections` | List or create collections | Collection names are unique per workspace |
+| `PUT/DELETE /api/v1/workspaces/{id}/collections/{collection_id}/documents/{document_id}` | Add or remove a collection document | Both resources must belong to the authorized workspace |
+
+Uploads are bounded by `MAX_UPLOAD_BYTES` (25 MiB by default), stored through the
+path-safe object-storage adapter, and identified by content and ingestion
+fingerprints. Vector payloads reserve keyword-indexed `tenant_id`, `workspace_id`,
+`document_id`, and `document_version_id` fields; trusted backend helpers construct
+all retrieval filters.
 
 Verify from another terminal:
 

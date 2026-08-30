@@ -7,9 +7,25 @@ from sqlalchemy import engine_from_config, pool
 
 from backend.app.core.config import get_settings
 from backend.app.db.base import Base
-from backend.app.models import User, Workspace, WorkspaceMembership
+from backend.app.models import (
+    Collection,
+    CollectionDocument,
+    Document,
+    DocumentVersion,
+    User,
+    Workspace,
+    WorkspaceMembership,
+)
 
-_REGISTERED_MODELS = (User, Workspace, WorkspaceMembership)
+_REGISTERED_MODELS = (
+    User,
+    Workspace,
+    WorkspaceMembership,
+    Document,
+    DocumentVersion,
+    Collection,
+    CollectionDocument,
+)
 
 config = context.config
 

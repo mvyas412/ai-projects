@@ -117,7 +117,7 @@ product with an API boundary and a presentation-quality Streamlit experience.
 | 2.0.1 | Python 3.12/uv environment, secrets boundary, Docker PostgreSQL/Qdrant | Completed | Reproducible isolated startup |
 | 2.0.2 | FastAPI, logging, database layer, Alembic, health/readiness | Completed | API/service tests and live dependency checks |
 | 2.1 | Auth0 identity, users, workspaces, memberships, storage boundary | Completed | Live login/logout/re-login, expiry rejection, and idempotent provisioning verified |
-| 2.2 | Document library, collections, versioning, scoped Qdrant payloads | Planned | Two users cannot list or retrieve each other's documents |
+| 2.2 | Document library, collections, versioning, scoped Qdrant payloads | Completed | Cross-user API tests, real migration cycle, and mandatory vector scope checks pass |
 | 2.3 | Persistent conversations and backend-mediated RAG | Planned | Chat survives logout/restart and citations remain authorized |
 | 2.4 | Polished multipage Streamlit and evidence viewer | Planned | Principal flows pass accessibility and presentation review |
 | 2.5 | CI, broader tests, activity/audit surface, demo hardening | Planned | Automated release gates and reproducible demonstration |
@@ -139,17 +139,24 @@ Completed:
 - Re-login and refresh remained idempotent: PostgreSQL still contained exactly
   one user, one personal workspace, and one `owner` membership.
 
-### Milestone 2.2 planned work
+### Milestone 2.2 acceptance status
 
-- Define `documents`, `document_versions`, `collections`, and
-  `collection_documents` schemas and migrations.
-- Use stable UUIDs and content/config fingerprints for version identity.
-- Add authorized upload metadata, document list/detail, archive, and collection APIs.
-- Define ingestion state without introducing the Phase 3 worker system prematurely.
-- Add mandatory `tenant_id`, `workspace_id`, `document_id`, and
-  `document_version_id` Qdrant payload and indexes.
-- Construct Qdrant filters exclusively from authenticated backend context.
-- Add positive and negative multi-user integration tests.
+Completed:
+
+- Added `documents`, immutable `document_versions`, `collections`, and
+  workspace-consistent `collection_documents` with migration `20260830_0003`.
+- Added bounded multipart uploads, version fingerprints, duplicate detection,
+  archive semantics, path-safe object keys, and storage rollback compensation.
+- Added workspace-scoped list/detail/version/archive and collection APIs with
+  owner/admin/member writes, owner/admin archive, viewer reads, and hidden
+  unauthorized resources.
+- Added mandatory `tenant_id`, `workspace_id`, `document_id`, and
+  `document_version_id` vector payload/filter helpers plus keyword-index setup.
+- Cross-user and read-only-role tests prove another authenticated user cannot
+  list, read, upload, or archive outside authorized policy. The full suite passes
+  with 58 tests.
+- PostgreSQL upgraded to `20260830_0003`, reported no drift, downgraded safely
+  while the new tables were verified empty, and returned to head.
 
 ### Phase 2 completion gate
 

@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     auth0_jwks_timeout_seconds: int = Field(default=5, ge=1, le=30)
 
     local_storage_root: Path = PROJECT_ROOT / "data/runtime/storage"
+    max_upload_bytes: int = Field(default=25 * 1024 * 1024, ge=1024, le=250 * 1024 * 1024)
 
     database_url: SecretStr | None = None
     database_echo: bool = False
