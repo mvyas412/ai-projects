@@ -121,7 +121,7 @@ product with an API boundary and a presentation-quality Streamlit experience.
 | 2.2 | Document library, collections, versioning, scoped Qdrant payloads | Completed | Cross-user API tests, real migration cycle, and mandatory vector scope checks pass |
 | 2.3 | Persistent conversations and backend-mediated RAG | Completed | Restart-persistence, citation authorization, migration, and safe-failure tests pass |
 | 2.4 | Polished multipage Streamlit and evidence viewer | Implemented; visual acceptance pending | Automated gates pass; authenticated browser presentation review remains |
-| 2.5 | CI, broader tests, activity/audit surface, demo hardening | Implemented | Local release gate passes; first GitHub CI run pending push |
+| 2.5 | CI, broader tests, activity/audit surface, demo hardening | Completed | Local and GitHub release gates pass |
 
 ### Milestone 2.1 acceptance status
 
@@ -209,6 +209,8 @@ Implemented:
 - Added a Makefile, executable verification script, and presentation runbook.
 - Local coverage gate passes at 84%; audit, frontend-adapter, migration, and UI smoke
   tests pass. Migration downgrade/upgrade validation returns PostgreSQL to head.
+- Published in commit `71e65ef`; GitHub Actions run `33323110305` completed
+  successfully across every release-gate step.
 
 ### Phase 2 completion gate
 
@@ -472,10 +474,9 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Push Phase 2.5 and confirm the first GitHub Actions run | Remote release gate is green |
-| 2 | Complete authenticated browser presentation review | Desktop/mobile principal flows are accepted visually |
-| 3 | Configure a local OpenAI key and run one representative index/chat flow | Live answer and evidence are accepted without exposing the key |
-| 4 | Mark Phase 2 accepted and decide merge timing | Completion evidence agrees across code, plans, and context |
+| 1 | Complete authenticated browser presentation review | Desktop/mobile principal flows are accepted visually |
+| 2 | Configure a local OpenAI key and run one representative index/chat flow | Live answer and evidence are accepted without exposing the key |
+| 3 | Mark Phase 2 accepted and decide merge timing | Completion evidence agrees across code, plans, and context |
 
 ## Update protocol
 

@@ -202,8 +202,8 @@ product and security boundaries.
 ## Phase 2 — secure product foundation
 
 **Status:** In progress. Milestones 2.0.0–2.3 are implemented and accepted;
-2.4 and 2.5 are implemented with authenticated visual and live-model acceptance
-pending.
+2.5 is implemented and accepted; 2.4 authenticated visual review and the final
+live-model walkthrough remain Phase 2 acceptance gates.
 
 ```mermaid
 flowchart LR
