@@ -10,7 +10,7 @@ def test_migration_history_has_document_library_head() -> None:
     config = Config(PROJECT_ROOT / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260830_0003"]
+    assert scripts.get_heads() == ["20260830_0004"]
     baseline = scripts.get_revision("20260829_0001")
     assert baseline is not None
     assert baseline.down_revision is None
@@ -20,3 +20,6 @@ def test_migration_history_has_document_library_head() -> None:
     document_library = scripts.get_revision("20260830_0003")
     assert document_library is not None
     assert document_library.down_revision == "20260829_0002"
+    conversations = scripts.get_revision("20260830_0004")
+    assert conversations is not None
+    assert conversations.down_revision == "20260830_0003"

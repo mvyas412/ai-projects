@@ -1,3 +1,10 @@
+from backend.app.models.conversation import (
+    Conversation,
+    ConversationDocument,
+    ConversationMessage,
+    ConversationTargetType,
+    MessageRole,
+)
 from backend.app.models.document import (
     Collection,
     CollectionDocument,
@@ -11,9 +18,14 @@ from backend.app.models.workspace import Workspace, WorkspaceMembership, Workspa
 __all__ = [
     "Collection",
     "CollectionDocument",
+    "Conversation",
+    "ConversationDocument",
+    "ConversationMessage",
+    "ConversationTargetType",
     "Document",
     "DocumentVersion",
     "DocumentVersionStatus",
+    "MessageRole",
     "User",
     "Workspace",
     "WorkspaceMembership",

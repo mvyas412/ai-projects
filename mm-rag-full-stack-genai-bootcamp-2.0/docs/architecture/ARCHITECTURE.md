@@ -201,8 +201,8 @@ product and security boundaries.
 
 ## Phase 2 — secure product foundation
 
-**Status:** In progress. Milestones 2.0.0–2.2 are implemented and accepted.
-Persistent chat, the polished UI, and delivery hardening remain.
+**Status:** In progress. Milestones 2.0.0–2.3 are implemented and accepted.
+The polished UI and delivery hardening remain.
 
 ```mermaid
 flowchart LR
@@ -212,13 +212,13 @@ flowchart LR
     routes --> authn["RS256 JWT + identity mapping<br/>implemented"]
     authn --> idp
     authn --> authz["Workspace membership guard<br/>implemented; action policy expands later"]
-    authz <-->|"identity, workspace, documents, versions, collections"| pg[("PostgreSQL<br/>schema at 20260830_0003")]
+    authz <-->|"identity, workspace, documents, versions, collections, conversations"| pg[("PostgreSQL<br/>schema at 20260830_0004")]
     authz --> services["Application services"]
     services --> repos["Repositories / gateways"]
     repos --> pg
-    repos -->|"trusted tenant/workspace/document/version filters"| qd[("Qdrant<br/>mandatory scope helpers and indexes")]
+    repos -->|"trusted tenant/workspace/document/version filters"| qd[("Qdrant<br/>scoped chunks and keyword indexes")]
     repos --> files[("Path-safe local storage adapter<br/>implemented; object storage in Phase 3")]
-    services --> openai["OpenAI"]
+    services -->|"extract/chunk/embed; retrieve/generate"| openai["OpenAI<br/>backend-only model boundary"]
     health["Live + readiness APIs<br/>implemented"] --> pg
     health --> qd
     routes --> health

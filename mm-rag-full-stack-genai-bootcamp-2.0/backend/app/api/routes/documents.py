@@ -4,16 +4,26 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
 from sqlalchemy.orm import Session
 
-from backend.app.api.dependencies import get_current_user, get_object_storage
+from backend.app.api.dependencies import (
+    get_current_user,
+    get_document_indexer,
+    get_object_storage,
+)
 from backend.app.db.session import get_db_session
 from backend.app.models.document import Collection, Document, DocumentVersion
 from backend.app.models.user import User
+from backend.app.rag.indexing import (
+    DocumentIndexer,
+    EmptyDocumentError,
+    IndexingUnavailableError,
+)
 from backend.app.repositories.documents import DocumentRepository
 from backend.app.schemas.documents import (
     CollectionCreate,
     CollectionDetail,
     CollectionSummary,
     DocumentDetail,
+    DocumentIndexingResponse,
     DocumentSummary,
     DocumentVersionSummary,
 )
@@ -25,6 +35,12 @@ from backend.app.services.documents import (
     InvalidUploadError,
     PermissionDeniedError,
     ResourceNotFoundError,
+)
+from backend.app.services.indexing import (
+    DocumentIndexingService,
+    IndexingInProgressError,
+    IndexingNotFoundError,
+    IndexingPermissionError,
 )
 from backend.app.storage.base import ObjectStorage
 
@@ -182,6 +198,44 @@ def upload_document_version(
     except DocumentLibraryError as exc:
         raise _translate_error(exc) from exc
     return _version_summary(version)
+
+
+@router.post(
+    "/documents/{document_id}/versions/{version_id}/index",
+    response_model=DocumentIndexingResponse,
+    summary="Index a document version",
+)
+def index_document_version(
+    workspace_id: UUID,
+    document_id: UUID,
+    version_id: UUID,
+    user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[Session, Depends(get_db_session)],
+    storage: Annotated[ObjectStorage, Depends(get_object_storage)],
+    indexer: Annotated[DocumentIndexer, Depends(get_document_indexer)],
+) -> DocumentIndexingResponse:
+    try:
+        version, result = DocumentIndexingService(session, storage, indexer).index_version(
+            user=user,
+            workspace_id=workspace_id,
+            document_id=document_id,
+            version_id=version_id,
+        )
+    except IndexingNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Resource not found") from exc
+    except IndexingPermissionError as exc:
+        raise HTTPException(status_code=403, detail="Insufficient access") from exc
+    except IndexingInProgressError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except EmptyDocumentError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except IndexingUnavailableError as exc:
+        raise HTTPException(
+            status_code=503, detail="Document indexing is temporarily unavailable"
+        ) from exc
+    return DocumentIndexingResponse(
+        version=_version_summary(version), chunk_count=result.chunk_count
+    )
 
 
 @router.delete(

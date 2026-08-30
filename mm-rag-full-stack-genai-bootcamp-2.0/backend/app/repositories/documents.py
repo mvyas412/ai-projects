@@ -8,6 +8,7 @@ from backend.app.models.document import (
     CollectionDocument,
     Document,
     DocumentVersion,
+    DocumentVersionStatus,
 )
 
 
@@ -55,6 +56,17 @@ class DocumentRepository:
         )
         return list(self._session.scalars(statement))
 
+    def get_version(
+        self, workspace_id: UUID, document_id: UUID, version_id: UUID
+    ) -> DocumentVersion | None:
+        return self._session.scalar(
+            select(DocumentVersion).where(
+                DocumentVersion.workspace_id == workspace_id,
+                DocumentVersion.document_id == document_id,
+                DocumentVersion.id == version_id,
+            )
+        )
+
     def latest_version(self, workspace_id: UUID, document_id: UUID) -> DocumentVersion:
         version = self._session.scalar(
             select(DocumentVersion)
@@ -68,6 +80,20 @@ class DocumentRepository:
         if version is None:  # Database invariants require every document to have a version.
             raise RuntimeError("Document has no version")
         return version
+
+    def latest_ready_version(
+        self, workspace_id: UUID, document_id: UUID
+    ) -> DocumentVersion | None:
+        return self._session.scalar(
+            select(DocumentVersion)
+            .where(
+                DocumentVersion.workspace_id == workspace_id,
+                DocumentVersion.document_id == document_id,
+                DocumentVersion.status == DocumentVersionStatus.READY.value,
+            )
+            .order_by(DocumentVersion.version_number.desc())
+            .limit(1)
+        )
 
     def next_version_number(self, workspace_id: UUID, document_id: UUID) -> int:
         current = self._session.scalar(

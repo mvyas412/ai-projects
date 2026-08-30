@@ -37,6 +37,11 @@ class DocumentDetail(DocumentSummary):
     versions: list[DocumentVersionSummary]
 
 
+class DocumentIndexingResponse(BaseModel):
+    version: DocumentVersionSummary
+    chunk_count: int
+
+
 class CollectionCreate(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     description: str | None = Field(default=None, max_length=1000)

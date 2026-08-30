@@ -41,8 +41,9 @@ Rules:
 | Phase 2 infrastructure foundation | Completed in `5db9dd5` |
 | Architecture handbook | Published in `299a0ad` |
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
-| Phase 2.1 remaining gate | Live Auth0 tenant/browser acceptance |
-| Next unstarted milestone | Phase 2.2 multi-document library and tenant-safe retrieval |
+| Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
+| Phase 2.2 | Completed and published in `fb0fc86` |
+| Active milestone | Phase 2.4 presentation-quality multipage Streamlit |
 | Phases 3–9 | Planned |
 
 ## Delivery sequence and gates
@@ -118,7 +119,7 @@ product with an API boundary and a presentation-quality Streamlit experience.
 | 2.0.2 | FastAPI, logging, database layer, Alembic, health/readiness | Completed | API/service tests and live dependency checks |
 | 2.1 | Auth0 identity, users, workspaces, memberships, storage boundary | Completed | Live login/logout/re-login, expiry rejection, and idempotent provisioning verified |
 | 2.2 | Document library, collections, versioning, scoped Qdrant payloads | Completed | Cross-user API tests, real migration cycle, and mandatory vector scope checks pass |
-| 2.3 | Persistent conversations and backend-mediated RAG | Planned | Chat survives logout/restart and citations remain authorized |
+| 2.3 | Persistent conversations and backend-mediated RAG | Completed | Restart-persistence, citation authorization, migration, and safe-failure tests pass |
 | 2.4 | Polished multipage Streamlit and evidence viewer | Planned | Principal flows pass accessibility and presentation review |
 | 2.5 | CI, broader tests, activity/audit surface, demo hardening | Planned | Automated release gates and reproducible demonstration |
 
@@ -157,6 +158,25 @@ Completed:
   with 58 tests.
 - PostgreSQL upgraded to `20260830_0003`, reported no drift, downgraded safely
   while the new tables were verified empty, and returned to head.
+
+### Milestone 2.3 acceptance status
+
+Completed:
+
+- Added migration `20260830_0004` for durable conversations, explicit document
+  targets, ordered messages, model metadata, and structured citations.
+- Added workspace-, collection-, and explicit-document conversation targets. Only
+  active documents and their latest READY versions enter a retrieval request.
+- Added synchronous text/PDF/DOCX extraction and image description, chunking,
+  OpenAI embeddings, scoped Qdrant upserts, and retry-safe version status changes
+  behind a replaceable indexing protocol.
+- Added backend-only OpenAI/Qdrant retrieval and generation with mandatory
+  tenant/workspace/document/version filters and post-generation citation validation.
+- Deterministic acceptance tests prove persistence across application restart,
+  ordered message/citation storage, cross-user hiding, unsafe-citation rejection,
+  and safe behavior when model services are unconfigured.
+- PostgreSQL migration upgraded, downgraded only after all new tables were proven
+  empty, and restored successfully to head `20260830_0004`.
 
 ### Phase 2 completion gate
 
@@ -420,11 +440,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Produce the 2.2 document/version data model and API contract for review | Approved schema, endpoints, security invariants, and migration plan |
-| 2 | Implement 2.2 relational models and Alembic migration | Schema constraints, upgrade/downgrade, and drift checks pass |
-| 3 | Implement authorized document, version, and collection APIs | Workspace-scoped positive and negative API tests pass |
-| 4 | Add tenant-safe Qdrant payload indexes and filter construction | Cross-workspace retrieval is impossible in integration tests |
-| 5 | Complete the 2.2 vertical-slice acceptance and update living documents | Status and evidence agree across documents |
+| 1 | Build the 2.4 navigation shell and cohesive visual system | Authenticated pages share workspace and session context |
+| 2 | Add document upload, version, indexing, and collection workflows | Principal document lifecycle works without API tools |
+| 3 | Add persistent chat with target selection and citation evidence viewer | Conversation can resume and inspect authorized evidence |
+| 4 | Complete responsive, empty/error/loading, accessibility, and presentation review | UI acceptance checklist passes |
 
 ## Update protocol
 

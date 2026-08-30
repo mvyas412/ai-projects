@@ -25,11 +25,14 @@ The Phase 2 branch currently contains:
   Alembic revision `20260829_0002`.
 - Protected current-user and workspace APIs with non-enumerating membership checks.
 - A path-safe local object-storage adapter and separate authenticated Streamlit shell.
+- Synchronous text, PDF, DOCX, and image-description indexing behind a replaceable
+  document-indexer boundary, with mandatory workspace/document/version vector scope.
+- Persistent workspace-, collection-, or document-scoped conversations with
+  backend-mediated retrieval, answer generation, and structured citations.
 - Automated environment, backend, tenant-isolation, storage, and Streamlit tests.
 
-Live Auth0 login requires environment-specific tenant credentials. Multi-document
-metadata, collections, retrieval filters, and persistent conversations remain the
-next product slices.
+Live OpenAI indexing and generation require an environment-specific API key. The
+presentation-quality multipage UI and delivery hardening remain the next slices.
 
 ## Architecture and roadmap
 
@@ -52,6 +55,8 @@ Accepted decisions are recorded as ADRs:
 - [Auth0 through OIDC](docs/architecture/decisions/0001-auth0-oidc.md)
 - [Workspace roles](docs/architecture/decisions/0002-workspace-roles.md)
 - [Local storage adapter](docs/architecture/decisions/0003-local-storage-adapter.md)
+- [Workspace-scoped document library](docs/architecture/decisions/0004-document-library-tenancy.md)
+- [Backend-mediated conversations and RAG](docs/architecture/decisions/0005-backend-rag-conversations.md)
 
 ## Prerequisites
 
@@ -190,8 +195,12 @@ API documentation is available at `http://127.0.0.1:8000/docs`.
 | `GET/POST /api/v1/workspaces/{id}/documents` | List or upload workspace documents | Membership-scoped; write roles only for upload |
 | `GET/DELETE /api/v1/workspaces/{id}/documents/{document_id}` | Inspect or archive one document | Unauthorized resources remain hidden with HTTP 404 |
 | `POST /api/v1/workspaces/{id}/documents/{document_id}/versions` | Add an immutable document version | Duplicate content/config returns HTTP 409 |
+| `POST /api/v1/workspaces/{id}/documents/{document_id}/versions/{version_id}/index` | Extract, embed, and index an authorized immutable version | Returns chunk count; safe 503 when model services are unavailable |
 | `GET/POST /api/v1/workspaces/{id}/collections` | List or create collections | Collection names are unique per workspace |
 | `PUT/DELETE /api/v1/workspaces/{id}/collections/{collection_id}/documents/{document_id}` | Add or remove a collection document | Both resources must belong to the authorized workspace |
+| `GET/POST /api/v1/workspaces/{id}/conversations` | List or create scoped persistent conversations | Targets a workspace, collection, or explicit documents |
+| `GET /api/v1/workspaces/{id}/conversations/{conversation_id}` | Resume a conversation with citations | Unauthorized resources remain hidden with HTTP 404 |
+| `POST /api/v1/workspaces/{id}/conversations/{conversation_id}/messages` | Ask the backend-mediated RAG assistant | Only READY versions in the trusted target scope can be cited |
 
 Uploads are bounded by `MAX_UPLOAD_BYTES` (25 MiB by default), stored through the
 path-safe object-storage adapter, and identified by content and ingestion
@@ -281,6 +290,5 @@ MM_RAG_RUN_INTEGRATION_TESTS=1 uv run pytest tests/backend/test_integration_serv
 └── tests/                    # Unit, integration, environment, and smoke tests
 ```
 
-Future milestones will add documents, collections, tenant-safe Qdrant filters,
-persistent backend-mediated RAG chat, additional frontend pages, reusable
-RAG-core packages, and CI while preserving verified baseline behavior.
+The remaining Phase 2 milestones add the polished multipage frontend, activity
+surface, CI, and demonstration hardening while preserving verified behavior.

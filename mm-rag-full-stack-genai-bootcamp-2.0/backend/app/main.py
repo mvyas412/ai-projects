@@ -13,6 +13,8 @@ from backend.app.core.config import Settings, get_settings
 from backend.app.core.logging import RequestContextMiddleware, configure_logging
 from backend.app.core.security import build_access_token_verifier
 from backend.app.db.session import create_database_engine, create_session_factory
+from backend.app.rag.engine import build_rag_engine
+from backend.app.rag.indexing import build_document_indexer
 from backend.app.services.readiness import ReadinessService, probe_postgres, probe_qdrant
 from backend.app.storage.local import LocalFileStorage
 
@@ -42,6 +44,8 @@ def _lifespan(settings: Settings):
         app.state.qdrant_client = qdrant_client
         app.state.access_token_verifier = build_access_token_verifier(settings)
         app.state.object_storage = LocalFileStorage(settings.local_storage_root)
+        app.state.rag_engine = build_rag_engine(settings, qdrant_client)
+        app.state.document_indexer = build_document_indexer(settings, qdrant_client)
         app.state.readiness_service = ReadinessService(
             service_name=settings.app_name,
             version=settings.app_version,

@@ -46,9 +46,11 @@ class Settings(BaseSettings):
     qdrant_url: str = "http://127.0.0.1:6335"
     qdrant_api_key: SecretStr | None = None
     qdrant_timeout_seconds: int = Field(default=3, ge=1, le=30)
+    qdrant_collection_name: str = "mm_rag_phase2_documents"
+    rag_retrieval_limit: int = Field(default=8, ge=1, le=30)
 
     openai_api_key: SecretStr | None = None
-    openai_chat_model: str | None = None
+    openai_chat_model: str = "gpt-4.1-mini"
     openai_embedding_model: str = "text-embedding-3-small"
 
     @field_validator("log_level", mode="before")

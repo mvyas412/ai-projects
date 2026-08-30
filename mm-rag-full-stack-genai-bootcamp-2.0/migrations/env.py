@@ -10,6 +10,9 @@ from backend.app.db.base import Base
 from backend.app.models import (
     Collection,
     CollectionDocument,
+    Conversation,
+    ConversationDocument,
+    ConversationMessage,
     Document,
     DocumentVersion,
     User,
@@ -25,6 +28,9 @@ _REGISTERED_MODELS = (
     DocumentVersion,
     Collection,
     CollectionDocument,
+    Conversation,
+    ConversationDocument,
+    ConversationMessage,
 )
 
 config = context.config
