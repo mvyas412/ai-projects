@@ -9,3 +9,5 @@ env
 # Local project memory (internal decisions, paths, and operational notes)
 /PROJECT_CONTEXT.md
 /Phase2_context.md
+/Phase3_context.md
+/AGENTS.override.md
