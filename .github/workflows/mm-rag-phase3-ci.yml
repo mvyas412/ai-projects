@@ -79,7 +79,7 @@ jobs:
         run: uv run alembic upgrade head
 
       - name: Verify migration head
-        run: test "$(uv run alembic current | tail -1)" = "20260830_0005 (head)"
+        run: test "$(uv run alembic current | tail -1)" = "20260830_0006 (head)"
 
       - name: Detect schema drift
         run: uv run alembic check
