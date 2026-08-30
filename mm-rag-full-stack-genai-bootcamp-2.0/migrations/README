@@ -1,0 +1,9 @@
+Phase 2 database migrations
+===========================
+
+Run migrations from the application root with:
+
+    uv run alembic upgrade head
+
+Create future revisions only after importing their SQLAlchemy models into the
+shared metadata used by `migrations/env.py`.

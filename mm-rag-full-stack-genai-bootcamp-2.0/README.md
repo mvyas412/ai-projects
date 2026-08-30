@@ -14,10 +14,15 @@ The Phase 2 branch currently contains:
 - Locked runtime and development dependencies.
 - Isolated local PostgreSQL and Qdrant service definitions.
 - Environment and Streamlit configuration boundaries.
+- A modular FastAPI application factory and versioned API router.
+- Structured request logs with correlation IDs.
+- A pooled SQLAlchemy/psycopg PostgreSQL connection layer.
+- Alembic migration infrastructure and a reversible baseline revision.
+- Independent liveness and dependency-aware readiness endpoints.
 - Automated environment and Streamlit startup smoke tests.
 
-The FastAPI boundary, PostgreSQL schema, authentication, workspaces, and new
-frontend structure will be introduced incrementally in later milestones.
+Authentication, product tables, workspaces, and the new frontend structure will
+be introduced incrementally after this backend foundation.
 
 ## Prerequisites
 
@@ -77,7 +82,7 @@ Local endpoints are intentionally separated from V1:
 | Component | Endpoint |
 | --- | --- |
 | Streamlit | `http://127.0.0.1:8502` |
-| Future FastAPI backend | `http://127.0.0.1:8000` |
+| FastAPI backend | `http://127.0.0.1:8000` |
 | PostgreSQL | `127.0.0.1:5433` |
 | Qdrant HTTP | `http://127.0.0.1:6335` |
 | Qdrant gRPC | `127.0.0.1:6336` |
@@ -98,6 +103,47 @@ Stop services without deleting their volumes:
 docker compose down
 ```
 
+Do not add `-v` unless you explicitly intend to delete the Phase 2 PostgreSQL
+and Qdrant data volumes.
+
+## Apply database migrations
+
+The initial migration establishes Alembic's versioned baseline without creating
+product tables prematurely:
+
+```bash
+uv run alembic upgrade head
+uv run alembic current
+```
+
+All future PostgreSQL schema changes must be created and reviewed as Alembic
+revisions. Runtime code and migrations share `backend.app.db.base.Base.metadata`.
+
+## Run and verify the FastAPI backend
+
+Start the backend on its loopback-only development endpoint:
+
+```bash
+uv run uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+```
+
+API documentation is available at `http://127.0.0.1:8000/docs`.
+
+| Endpoint | Meaning | Response behavior |
+| --- | --- | --- |
+| `GET /api/v1/health/live` | The API process can respond | HTTP 200 without checking external services |
+| `GET /api/v1/health/ready` | PostgreSQL and Qdrant are usable | HTTP 200 when ready; safe HTTP 503 otherwise |
+
+Verify from another terminal:
+
+```bash
+curl --fail http://127.0.0.1:8000/api/v1/health/live
+curl --fail http://127.0.0.1:8000/api/v1/health/ready
+```
+
+Readiness responses contain only component state and latency. They never expose
+connection strings, passwords, API keys, stack traces, or raw dependency errors.
+
 ## Run the current Streamlit baseline
 
 ```bash
@@ -113,11 +159,19 @@ usage-statistics collection.
 uv lock --check
 uv sync --locked
 uv run pytest
-uv run ruff check tests
+uv run ruff check backend migrations tests
+uv run mypy backend tests/backend
 ```
 
 The tests verify Python 3.12, the Phase 2 interpreter path, required imports,
-and Streamlit startup without uncaught exceptions.
+Streamlit startup, configuration, transactions, migrations, liveness,
+readiness-success behavior, and safe dependency-failure behavior.
+
+With PostgreSQL and Qdrant running, include the live integration check:
+
+```bash
+MM_RAG_RUN_INTEGRATION_TESTS=1 uv run pytest tests/backend/test_integration_services.py
+```
 
 ## Dependency policy
 
@@ -136,13 +190,17 @@ and Streamlit startup without uncaught exceptions.
 ├── .env.example              # Safe configuration template
 ├── .python-version           # Supported Python line
 ├── .streamlit/config.toml    # Shareable Streamlit settings
+├── alembic.ini               # Migration runner configuration
+├── backend/app/              # FastAPI, settings, database, schemas, and services
 ├── compose.yaml              # Phase 2 PostgreSQL and Qdrant
+├── migrations/               # Versioned PostgreSQL schema changes
 ├── pyproject.toml            # Dependencies and Python tool configuration
 ├── uv.lock                   # Exact reproducible dependency resolution
 ├── src/                      # Current RAG implementation
 ├── ui/app.py                 # Current Streamlit baseline
-└── tests/                    # Environment and smoke tests
+└── tests/                    # Unit, integration, environment, and smoke tests
 ```
 
-Future foundation milestones will introduce `backend/`, `frontend/`, reusable
-RAG-core packages, Alembic migrations, and CI while preserving current behavior.
+Future milestones will introduce product models, authentication, tenant-safe
+workspaces, a multipage `frontend/`, reusable RAG-core packages, and CI while
+preserving the verified baseline behavior.
