@@ -3,6 +3,7 @@ from collections.abc import Mapping
 import streamlit as st
 from streamlit.errors import StreamlitSecretNotFoundError
 from utils.api import BackendAPIClient, BackendAPIError
+from utils.presentation import resolve_user_identity
 
 st.set_page_config(
     page_title="MM-RAG",
@@ -102,10 +103,12 @@ with st.sidebar:
         key="selected_workspace_id",
         on_change=reset_workspace_state,
     )
-    display_name = (
-        profile["user"].get("display_name")
-        or profile["user"].get("email")
-        or "User"
+    display_name, _ = resolve_user_identity(
+        profile["user"],
+        {
+            key: st.user.get(key)
+            for key in ("email", "name", "nickname", "preferred_username")
+        },
     )
     st.caption(f"Signed in as {display_name}")
     st.button("Log out", icon=":material/logout:", on_click=st.logout)

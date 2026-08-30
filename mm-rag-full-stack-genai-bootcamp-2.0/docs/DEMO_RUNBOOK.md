@@ -18,17 +18,20 @@ changing or depending on the immutable V1 checkout.
 ## Five-minute product story
 
 1. **Overview:** establish the workspace, indexed-readiness, collections, and
-   persistent-conversation metrics.
+   persistent-conversation metrics. In a new workspace, **Add your first document**
+   opens Library with the upload form expanded.
 2. **Library:** upload a representative PDF or DOCX, explain immutable versions,
    click **Index**, and wait for the READY badge. Show authorized source download.
 3. **Collections:** create a focused collection and add the indexed document.
-4. **Ask:** start a collection-scoped conversation. Ask one factual question and
+4. **Ask:** explain workspace, collection, and selected-document scope, then start
+   a collection-scoped conversation. Ask one factual question and
    one comparison question. Open **Inspect evidence** to show source, page, excerpt,
    retrieval score, and original download.
 5. **Persistence:** refresh the page or sign out/in and reopen the conversation.
-6. **Activity:** show who uploaded, indexed, organized, and asked—without secrets
-   or raw model prompts being treated as audit details.
-7. **Settings:** finish with Auth0 identity, workspace role, PostgreSQL/Qdrant
+6. **Activity:** show the signed-in user's Auth0 display name and the human-readable
+   upload, index, organization, and answer history—without secrets, raw internal
+   identifiers, or model prompts being treated as audit details.
+7. **Settings:** finish with Auth0 display name/email, workspace role, PostgreSQL/Qdrant
    readiness, and the backend-enforced authorization explanation.
 
 ## Suggested prompts
@@ -52,4 +55,6 @@ changing or depending on the immutable V1 checkout.
 - Check light and dark themes for readable text, badges, buttons, and focus states.
 - Exercise empty, loading, success, validation, 409, and 503 states.
 - Confirm evidence excerpts wrap cleanly and original downloads work.
+- Confirm the sidebar and Settings show the expected Auth0 display name/email.
+- Confirm Ask explains all three scopes and Activity contains no `None` or raw UUID details.
 - Confirm no token, key, database URL, internal exception, or private context appears.

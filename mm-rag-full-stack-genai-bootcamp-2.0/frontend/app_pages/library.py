@@ -20,7 +20,12 @@ documents_tab, collections_tab = st.tabs(
 if documents_tab.open:
     with documents_tab:
         if can_write:
-            with st.expander("Add a document", icon=":material/upload_file:"):
+            expand_upload = bool(st.session_state.pop("library_expand_upload", False))
+            with st.expander(
+                "Add a document",
+                icon=":material/upload_file:",
+                expanded=expand_upload,
+            ):
                 with st.form("library_upload"):
                     uploaded = st.file_uploader(
                         "Document",

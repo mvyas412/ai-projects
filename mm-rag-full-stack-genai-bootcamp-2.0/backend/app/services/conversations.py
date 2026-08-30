@@ -185,6 +185,8 @@ class ConversationService:
         )
         try:
             self._conversations.add_messages(user_message, assistant_message)
+            # Flush UUID defaults before the audit record captures the message ID.
+            self._session.flush()
             # Message activity drives recent-conversation ordering in the UI.
             conversation.updated_at = datetime.now(UTC)
             record_audit_event(

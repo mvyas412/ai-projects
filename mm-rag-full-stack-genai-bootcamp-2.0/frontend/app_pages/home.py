@@ -50,6 +50,14 @@ with right:
         if not documents:
             st.write("Your library is ready for its first document.")
             st.caption("Upload PDF, DOCX, text, Markdown, PNG, or JPEG files from Library.")
+            if workspace["role"] in {"owner", "admin", "member"} and st.button(
+                "Add your first document",
+                icon=":material/upload_file:",
+                type="primary",
+            ):
+                # Carry one-shot UI intent across the programmatic page switch.
+                st.session_state["library_expand_upload"] = True
+                st.switch_page("app_pages/library.py")
         else:
             st.write(f"**{ready_count} of {len(documents)}** documents are ready for retrieval.")
             if ready_count < len(documents):

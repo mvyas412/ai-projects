@@ -63,6 +63,10 @@ with st.expander("Start a conversation", icon=":material/add_comment:"):
             default="Workspace",
             key="chat_target_type",
         )
+        st.caption(
+            "Workspace searches every ready document you can access here; Collection "
+            "searches one named group; Documents searches only the files you select."
+        )
         selected_collection: str | None = None
         selected_documents: list[str] = []
         if target_label == "Collection":

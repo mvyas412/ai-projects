@@ -62,6 +62,7 @@ def test_activity_records_principal_document_actions(client: TestClient) -> None
         "collection.created",
     } <= actions
     assert all(event["actor_display_name"] == "Alice" for event in events)
+    assert all(event["actor_user_id"] == profile["user"]["id"] for event in events)
     assert all("token" not in str(event["details"]).lower() for event in events)
 
     app = cast(FastAPI, client.app)

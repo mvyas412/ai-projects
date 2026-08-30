@@ -143,6 +143,16 @@ def test_conversation_persists_messages_and_authorized_citations(client: TestCli
     listed = client.get(f"/api/v1/workspaces/{workspace_id}/conversations")
     assert listed.status_code == 200
     assert listed.json()[0]["updated_at"] != original_updated_at
+    activity = client.get(f"/api/v1/workspaces/{workspace_id}/activity")
+    answer_event = next(
+        event
+        for event in activity.json()
+        if event["action"] == "conversation.message_created"
+    )
+    assert (
+        answer_event["details"]["assistant_message_id"]
+        == exchange.json()["assistant_message"]["id"]
+    )
 
 
 def test_conversation_survives_application_restart(test_settings) -> None:

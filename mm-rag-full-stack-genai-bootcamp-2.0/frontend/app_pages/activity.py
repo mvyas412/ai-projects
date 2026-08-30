@@ -3,9 +3,12 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 from utils.api import BackendAPIError
-from utils.runtime import api_client, selected_workspace
+from utils.presentation import format_activity_details
+from utils.runtime import api_client, current_user_identity, selected_workspace
 
 workspace_id, _ = selected_workspace()
+profile = st.session_state["current_user_profile"]
+current_display_name, _ = current_user_identity()
 st.caption("A workspace-scoped record of security-relevant product actions.")
 
 try:
@@ -44,9 +47,13 @@ rows = [
     {
         "When": datetime.fromisoformat(event["created_at"].replace("Z", "+00:00")),
         "Action": labels.get(event["action"], event["action"]),
-        "Actor": event["actor_display_name"],
+        "Actor": (
+            current_display_name
+            if event["actor_user_id"] == profile["user"]["id"]
+            else event["actor_display_name"]
+        ),
         "Resource": event["resource_type"].capitalize(),
-        "Details": ", ".join(f"{key}: {value}" for key, value in event["details"].items()),
+        "Details": format_activity_details(event["details"]),
     }
     for event in filtered
 ]

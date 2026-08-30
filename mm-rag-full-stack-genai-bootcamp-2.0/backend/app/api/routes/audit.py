@@ -32,6 +32,7 @@ def list_activity(
             action=event.action,
             resource_type=event.resource_type,
             resource_id=event.resource_id,
+            actor_user_id=event.actor_user_id,
             actor_display_name=actor.display_name or actor.email or "User",
             details=event.details,
             created_at=event.created_at,

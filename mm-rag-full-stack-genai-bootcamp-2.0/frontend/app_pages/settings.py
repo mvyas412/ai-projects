@@ -1,16 +1,16 @@
 import streamlit as st
 from utils.api import BackendAPIError
-from utils.runtime import api_client, selected_workspace
+from utils.runtime import api_client, current_user_identity, selected_workspace
 
 _, workspace = selected_workspace()
-profile = st.session_state["current_user_profile"]
+display_name, email = current_user_identity()
 st.caption("Review your session, workspace access, and service readiness.")
 
 identity, access = st.columns(2, gap="large")
 with identity.container(border=True, height="stretch"):
     st.subheader("Account")
-    st.write(profile["user"].get("display_name") or "User")
-    st.caption(profile["user"].get("email") or "Email not provided")
+    st.write(display_name)
+    st.caption(email or "Email not provided by the identity provider")
     st.badge("Authenticated", icon=":material/verified_user:", color="green")
 
 with access.container(border=True, height="stretch"):

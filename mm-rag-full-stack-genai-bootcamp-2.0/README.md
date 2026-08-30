@@ -31,15 +31,20 @@ The Phase 2 branch currently contains:
   backend-mediated retrieval, answer generation, and structured citations.
 - A presentation-focused native Streamlit experience with top navigation,
   workspace switching, document/collection management, persistent chat,
-  evidence inspection, downloads, settings, and coordinated light/dark themes.
-- Immutable workspace activity records and an authorized Activity page.
+  evidence inspection, first-document guidance, downloads, settings, and
+  coordinated light/dark themes.
+- Auth0 profile claims are presented consistently in the sidebar, Settings, and
+  current-user activity while tokens remain outside Session State.
+- Immutable workspace activity records and an authorized, presentation-safe
+  Activity page that suppresses internal identifiers.
 - GitHub Actions quality, typing, migration, live-service, test, and coverage gates.
 - Automated environment, backend, tenant-isolation, storage, and Streamlit tests.
 - An isolated real-OpenAI acceptance command covering text and image indexing,
   scoped retrieval, grounded citations, persistence, audit, and tenant isolation.
 
 Live OpenAI acceptance passes with the ignored local API key. The authenticated
-desktop/mobile visual walkthrough is the remaining Phase 2 sign-off item.
+desktop walkthrough validated the principal flow and produced final presentation
+refinements; a refresh/recheck and responsive mobile review remain for sign-off.
 
 ## Architecture and roadmap
 
@@ -251,10 +256,13 @@ uv run streamlit run frontend/streamlit_app.py
 The application uses native Streamlit OIDC login, keeps the access token out of
 Session State, and routes product operations through protected FastAPI APIs.
 
-- **Overview** summarizes documents, indexed readiness, collections, and recent chat.
+- **Overview** summarizes documents, indexed readiness, collections, and recent chat;
+  an empty workspace links directly to the expanded Library upload form.
 - **Library** uploads/downloads sources, starts indexing, and manages collections.
-- **Ask** creates scoped persistent conversations and opens citation evidence.
-- **Settings** shows account/workspace access and safe service readiness.
+- **Ask** explains each retrieval scope, creates persistent conversations, and
+  opens citation evidence.
+- **Activity** presents authorized workspace actions without raw internal IDs.
+- **Settings** shows the Auth0 profile, workspace access, and safe service readiness.
 
 The existing `ui/app.py` remains available as the preserved V1 RAG reference.
 
@@ -328,4 +336,5 @@ product story, suggested prompts, failure-safe talking points, and visual accept
 ```
 
 Phase 2 implementation and live-model acceptance are complete. Final acceptance
-requires only the recorded authenticated desktop/mobile visual review.
+requires only a refreshed check of the visual-feedback refinements and the recorded
+responsive/mobile review.

@@ -37,13 +37,13 @@ Rules:
 | --- | --- |
 | Active branch | `phase-2/mm-rag-production` |
 | Phase 1 | Completed and frozen at `mm-rag-v1.0.0` |
-| Phase 2 | In progress — implementation and live-model acceptance complete; visual sign-off pending |
+| Phase 2 | In progress — implementation/live acceptance complete; visual feedback refinements await recheck |
 | Phase 2 infrastructure foundation | Completed in `5db9dd5` |
 | Architecture handbook | Published in `299a0ad` |
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Final authenticated desktop/mobile visual acceptance |
+| Active milestone | Recheck desktop feedback refinements and complete responsive visual acceptance |
 | Phases 3–9 | Planned |
 
 ## Delivery sequence and gates
@@ -104,7 +104,8 @@ retrieved, and used to produce grounded multimodal answers with citations.
 ## Phase 2 — secure product foundation
 
 **Status:** In progress. Implementation and live-model acceptance are complete;
-authenticated visual sign-off remains.
+the authenticated desktop flow has been reviewed, its feedback is implemented,
+and the final refreshed/responsive visual sign-off remains.
 
 ### Objective
 
@@ -121,7 +122,7 @@ product with an API boundary and a presentation-quality Streamlit experience.
 | 2.1 | Auth0 identity, users, workspaces, memberships, storage boundary | Completed | Live login/logout/re-login, expiry rejection, and idempotent provisioning verified |
 | 2.2 | Document library, collections, versioning, scoped Qdrant payloads | Completed | Cross-user API tests, real migration cycle, and mandatory vector scope checks pass |
 | 2.3 | Persistent conversations and backend-mediated RAG | Completed | Restart-persistence, citation authorization, migration, and safe-failure tests pass |
-| 2.4 | Polished multipage Streamlit and evidence viewer | Implemented; visual acceptance pending | Automated gates pass; authenticated browser presentation review remains |
+| 2.4 | Polished multipage Streamlit and evidence viewer | Feedback refinements implemented; final recheck pending | Authenticated principal flow reviewed; refreshed desktop and responsive checks remain |
 | 2.5 | CI, broader tests, activity/audit surface, demo hardening | Completed | Local and GitHub release gates pass |
 
 ### Milestone 2.1 acceptance status
@@ -192,9 +193,14 @@ Implemented:
 - Added deliberate empty/loading/error/success states, sentence-case copy, Material
   Symbols, accessible widget labels, responsive native containers, and no custom CSS.
 - Added coordinated WCAG-oriented light/dark theme tokens in `config.toml`.
-- Full automated suite, Ruff, Mypy, Streamlit smoke test, live service readiness,
-  and live OpenAPI route checks pass. Automated browser control was unavailable;
-  authenticated desktop/mobile presentation review remains a user acceptance gate.
+- The authenticated desktop review successfully exercised upload/index, grounded
+  Ask with citations, Activity, Settings, and service readiness.
+- Review feedback added a direct first-document CTA, consistent Auth0 profile display,
+  concise retrieval-scope guidance, and presentation-safe Activity details. It also
+  fixes audit message IDs that were recorded before UUID assignment.
+- The full gate passes with 76 tests, Ruff and Mypy across 81 source files,
+  migration head/no-drift checks, and live PostgreSQL/Qdrant/API/Streamlit readiness.
+  A refreshed desktop check and responsive/mobile review remain the user gate.
 
 ### Milestone 2.5 implementation status
 
@@ -491,7 +497,7 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Complete authenticated browser presentation review | Desktop/mobile principal flows are accepted visually |
+| 1 | Recheck final visual-feedback refinements and responsive layout | Identity, first-document CTA, scope guidance, Activity details, and mobile layout are accepted |
 | 2 | Mark Phase 2 accepted and decide merge timing | Completion evidence agrees across code, plans, and context |
 
 ## Update protocol
