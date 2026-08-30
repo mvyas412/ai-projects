@@ -6,6 +6,7 @@ from backend.app.models.user import User
 from backend.app.models.workspace import Workspace, WorkspaceRole
 from backend.app.repositories.users import UserRepository
 from backend.app.repositories.workspaces import WorkspaceRepository
+from backend.app.services.audit import record_audit_event
 
 
 class IdentityProvisioningService:
@@ -45,10 +46,20 @@ class IdentityProvisioningService:
         )
         users.add(user)
         self._session.flush()
+        workspace = Workspace(name="Personal workspace", created_by_user_id=user.id)
         WorkspaceRepository(self._session).add(
-            Workspace(name="Personal workspace", created_by_user_id=user.id),
+            workspace,
             user_id=user.id,
             role=WorkspaceRole.OWNER,
+        )
+        record_audit_event(
+            self._session,
+            workspace_id=workspace.id,
+            actor_user_id=user.id,
+            action="workspace.provisioned",
+            resource_type="workspace",
+            resource_id=workspace.id,
+            details={"name": workspace.name},
         )
         return user
 

@@ -16,6 +16,7 @@ from backend.app.models.user import User
 from backend.app.models.workspace import WorkspaceRole
 from backend.app.repositories.documents import CollectionRepository, DocumentRepository
 from backend.app.repositories.workspaces import WorkspaceRepository
+from backend.app.services.audit import record_audit_event
 from backend.app.storage.base import ObjectStorage
 
 ALLOWED_MEDIA_TYPES = frozenset(
@@ -181,6 +182,15 @@ class DocumentLibraryService:
                     filename=safe_filename,
                 )
                 self._documents.add_version(version)
+                record_audit_event(
+                    self._session,
+                    workspace_id=workspace_id,
+                    actor_user_id=user.id,
+                    action="document.version_created",
+                    resource_type="document",
+                    resource_id=document_id,
+                    details={"version_id": str(version.id), "version_number": version.version_number},
+                )
                 self._storage.put(version.object_key, content)
                 stored_key = version.object_key
             return version
@@ -196,6 +206,14 @@ class DocumentLibraryService:
             if document is None:
                 raise ResourceNotFoundError
             document.archived_at = datetime.now(UTC)
+            record_audit_event(
+                self._session,
+                workspace_id=workspace_id,
+                actor_user_id=user.id,
+                action="document.archived",
+                resource_type="document",
+                resource_id=document_id,
+            )
 
     def list_collections(self, *, user: User, workspace_id: UUID) -> list[tuple[Collection, int]]:
         self._require_workspace(user, workspace_id)
@@ -228,6 +246,15 @@ class DocumentLibraryService:
                     description=description,
                 )
                 self._collections.add(collection)
+                record_audit_event(
+                    self._session,
+                    workspace_id=workspace_id,
+                    actor_user_id=user.id,
+                    action="collection.created",
+                    resource_type="collection",
+                    resource_id=collection.id,
+                    details={"name": collection.name},
+                )
             return collection
         except IntegrityError as exc:
             self._session.rollback()
@@ -253,6 +280,15 @@ class DocumentLibraryService:
                 document_id=document_id,
                 user_id=user.id,
             )
+            record_audit_event(
+                self._session,
+                workspace_id=workspace_id,
+                actor_user_id=user.id,
+                action="collection.document_added",
+                resource_type="collection",
+                resource_id=collection_id,
+                details={"document_id": str(document_id)},
+            )
 
     def remove_document_from_collection(
         self,
@@ -268,6 +304,15 @@ class DocumentLibraryService:
                 raise ResourceNotFoundError
             if not self._collections.remove_document(collection_id, document_id):
                 raise ResourceNotFoundError
+            record_audit_event(
+                self._session,
+                workspace_id=workspace_id,
+                actor_user_id=user.id,
+                action="collection.document_removed",
+                resource_type="collection",
+                resource_id=collection_id,
+                details={"document_id": str(document_id)},
+            )
 
     def _add_initial_document(
         self,
@@ -278,6 +323,19 @@ class DocumentLibraryService:
     ) -> None:
         self._require_role(user, workspace_id, WRITE_ROLES)
         self._documents.add_document(document, version)
+        record_audit_event(
+            self._session,
+            workspace_id=workspace_id,
+            actor_user_id=user.id,
+            action="document.created",
+            resource_type="document",
+            resource_id=document.id,
+            details={
+                "title": document.title,
+                "version_id": str(version.id),
+                "media_type": document.media_type,
+            },
+        )
 
     def _write_with_storage(
         self, object_key: str, content: bytes, database_write: Callable[[], None]

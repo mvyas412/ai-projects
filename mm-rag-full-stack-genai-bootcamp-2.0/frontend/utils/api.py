@@ -101,6 +101,13 @@ class BackendAPIClient:
     def conversations(self, workspace_id: str) -> list[dict[str, Any]]:
         return self._json("GET", f"/api/v1/workspaces/{workspace_id}/conversations")
 
+    def activity(self, workspace_id: str, *, limit: int = 100) -> list[dict[str, Any]]:
+        return self._json(
+            "GET",
+            f"/api/v1/workspaces/{workspace_id}/activity",
+            params={"limit": limit},
+        )
+
     def conversation(self, workspace_id: str, conversation_id: str) -> dict[str, Any]:
         return self._json(
             "GET",

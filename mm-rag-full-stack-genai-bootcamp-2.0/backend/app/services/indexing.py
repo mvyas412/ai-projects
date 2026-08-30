@@ -13,6 +13,7 @@ from backend.app.rag.indexing import (
 )
 from backend.app.repositories.documents import DocumentRepository
 from backend.app.repositories.workspaces import WorkspaceRepository
+from backend.app.services.audit import record_audit_event
 from backend.app.services.documents import WRITE_ROLES
 from backend.app.storage.base import ObjectStorage
 
@@ -95,5 +96,14 @@ class DocumentIndexingService:
 
         version.status = DocumentVersionStatus.READY.value
         version.failure_reason = None
+        record_audit_event(
+            self._session,
+            workspace_id=workspace_id,
+            actor_user_id=user.id,
+            action="document.version_indexed",
+            resource_type="document",
+            resource_id=document_id,
+            details={"version_id": str(version_id), "chunk_count": result.chunk_count},
+        )
         self._session.commit()
         return version, result

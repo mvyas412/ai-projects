@@ -1,3 +1,4 @@
+from backend.app.models.audit import AuditEvent
 from backend.app.models.conversation import (
     Conversation,
     ConversationDocument,
@@ -16,6 +17,7 @@ from backend.app.models.user import User
 from backend.app.models.workspace import Workspace, WorkspaceMembership, WorkspaceRole
 
 __all__ = [
+    "AuditEvent",
     "Collection",
     "CollectionDocument",
     "Conversation",

@@ -8,6 +8,7 @@ from sqlalchemy import engine_from_config, pool
 from backend.app.core.config import get_settings
 from backend.app.db.base import Base
 from backend.app.models import (
+    AuditEvent,
     Collection,
     CollectionDocument,
     Conversation,
@@ -21,6 +22,7 @@ from backend.app.models import (
 )
 
 _REGISTERED_MODELS = (
+    AuditEvent,
     User,
     Workspace,
     WorkspaceMembership,

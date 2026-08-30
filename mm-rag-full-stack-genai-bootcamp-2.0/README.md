@@ -32,6 +32,8 @@ The Phase 2 branch currently contains:
 - A presentation-focused native Streamlit experience with top navigation,
   workspace switching, document/collection management, persistent chat,
   evidence inspection, downloads, settings, and coordinated light/dark themes.
+- Immutable workspace activity records and an authorized Activity page.
+- GitHub Actions quality, typing, migration, live-service, test, and coverage gates.
 - Automated environment, backend, tenant-isolation, storage, and Streamlit tests.
 
 Live OpenAI indexing and generation require an environment-specific API key. The
@@ -60,6 +62,7 @@ Accepted decisions are recorded as ADRs:
 - [Local storage adapter](docs/architecture/decisions/0003-local-storage-adapter.md)
 - [Workspace-scoped document library](docs/architecture/decisions/0004-document-library-tenancy.md)
 - [Backend-mediated conversations and RAG](docs/architecture/decisions/0005-backend-rag-conversations.md)
+- [Workspace activity and release gates](docs/architecture/decisions/0006-audit-and-release-gates.md)
 
 ## Prerequisites
 
@@ -166,8 +169,9 @@ and Qdrant data volumes.
 
 ## Apply database migrations
 
-The migration history contains the infrastructure baseline and the Phase 2.1
-identity/workspace schema:
+The migration history contains the infrastructure baseline plus identity,
+document-library, conversation, and immutable activity schemas through
+`20260830_0005`:
 
 ```bash
 uv run alembic upgrade head
@@ -204,6 +208,7 @@ API documentation is available at `http://127.0.0.1:8000/docs`.
 | `GET/POST /api/v1/workspaces/{id}/conversations` | List or create scoped persistent conversations | Targets a workspace, collection, or explicit documents |
 | `GET /api/v1/workspaces/{id}/conversations/{conversation_id}` | Resume a conversation with citations | Unauthorized resources remain hidden with HTTP 404 |
 | `POST /api/v1/workspaces/{id}/conversations/{conversation_id}/messages` | Ask the backend-mediated RAG assistant | Only READY versions in the trusted target scope can be cited |
+| `GET /api/v1/workspaces/{id}/activity` | List recent security-relevant workspace actions | Membership-scoped, bounded, newest-first results |
 
 Uploads are bounded by `MAX_UPLOAD_BYTES` (25 MiB by default), stored through the
 path-safe object-storage adapter, and identified by content and ingestion
@@ -268,6 +273,19 @@ With PostgreSQL and Qdrant running, include the live integration check:
 MM_RAG_RUN_INTEGRATION_TESTS=1 uv run pytest tests/backend/test_integration_services.py
 ```
 
+The same gates are available through stable commands:
+
+```bash
+make check       # locked dependencies, lint, types, tests, migration head, diff hygiene
+make check-live  # also checks the running FastAPI and Streamlit services
+```
+
+GitHub Actions runs these gates with PostgreSQL and Qdrant services on pushes to
+the Phase 2 branch and relevant pull requests. Coverage must remain at or above 70%.
+
+Use the [demonstration runbook](docs/DEMO_RUNBOOK.md) for preflight, the five-minute
+product story, suggested prompts, failure-safe talking points, and visual acceptance.
+
 ## Dependency policy
 
 - `pyproject.toml` is the human-maintained dependency source of truth.
@@ -298,5 +316,5 @@ MM_RAG_RUN_INTEGRATION_TESTS=1 uv run pytest tests/backend/test_integration_serv
 └── tests/                    # Unit, integration, environment, and smoke tests
 ```
 
-The remaining Phase 2 milestones add the polished multipage frontend, activity
-surface, CI, and demonstration hardening while preserving verified behavior.
+Phase 2 implementation is feature-complete. Final acceptance requires the recorded
+authenticated visual review and one live OpenAI indexing/chat walkthrough.

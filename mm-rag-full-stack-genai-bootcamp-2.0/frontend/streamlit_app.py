@@ -113,6 +113,7 @@ page = st.navigation(
         st.Page("app_pages/home.py", title="Overview", icon=":material/home:"),
         st.Page("app_pages/library.py", title="Library", icon=":material/folder:"),
         st.Page("app_pages/chat.py", title="Ask", icon=":material/chat:"),
+        st.Page("app_pages/activity.py", title="Activity", icon=":material/history:"),
         st.Page("app_pages/settings.py", title="Settings", icon=":material/settings:"),
     ],
     position="top",

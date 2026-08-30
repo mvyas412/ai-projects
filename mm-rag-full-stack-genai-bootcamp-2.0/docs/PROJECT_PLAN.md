@@ -43,7 +43,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 2.5 CI, audit/activity, and demo hardening |
+| Active milestone | Final Phase 2 visual and live-model acceptance |
 | Phases 3–9 | Planned |
 
 ## Delivery sequence and gates
@@ -121,7 +121,7 @@ product with an API boundary and a presentation-quality Streamlit experience.
 | 2.2 | Document library, collections, versioning, scoped Qdrant payloads | Completed | Cross-user API tests, real migration cycle, and mandatory vector scope checks pass |
 | 2.3 | Persistent conversations and backend-mediated RAG | Completed | Restart-persistence, citation authorization, migration, and safe-failure tests pass |
 | 2.4 | Polished multipage Streamlit and evidence viewer | Implemented; visual acceptance pending | Automated gates pass; authenticated browser presentation review remains |
-| 2.5 | CI, broader tests, activity/audit surface, demo hardening | Planned | Automated release gates and reproducible demonstration |
+| 2.5 | CI, broader tests, activity/audit surface, demo hardening | Implemented | Local release gate passes; first GitHub CI run pending push |
 
 ### Milestone 2.1 acceptance status
 
@@ -194,6 +194,21 @@ Implemented:
 - Full automated suite, Ruff, Mypy, Streamlit smoke test, live service readiness,
   and live OpenAPI route checks pass. Automated browser control was unavailable;
   authenticated desktop/mobile presentation review remains a user acceptance gate.
+
+### Milestone 2.5 implementation status
+
+Implemented:
+
+- Added append-only workspace/actor/action/resource activity records with migration
+  `20260830_0005`, atomic instrumentation for principal product mutations, a bounded
+  membership-scoped API, and an Activity page with safe filtering.
+- Added negative tests for cross-tenant activity discovery and API client handling
+  of expired sessions, safe backend errors, and non-disclosing network failures.
+- Added GitHub Actions with locked sync, Ruff, Mypy, PostgreSQL/Qdrant services,
+  Alembic head validation, full tests, 70% coverage threshold, and diff hygiene.
+- Added a Makefile, executable verification script, and presentation runbook.
+- Local coverage gate passes at 84%; audit, frontend-adapter, migration, and UI smoke
+  tests pass. Migration downgrade/upgrade validation returns PostgreSQL to head.
 
 ### Phase 2 completion gate
 
@@ -457,10 +472,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Add immutable activity/audit records and authorized activity API | Security-relevant product actions are attributable and tenant-scoped |
-| 2 | Add activity UI and broader negative-path/API-client tests | Operators can inspect safe activity; failure behavior is covered |
-| 3 | Add CI release gate and reproducible demo/check scripts | A clean checkout can validate Phase 2 consistently |
-| 4 | Complete authenticated browser presentation review | Desktop/mobile principal flows are accepted visually |
+| 1 | Push Phase 2.5 and confirm the first GitHub Actions run | Remote release gate is green |
+| 2 | Complete authenticated browser presentation review | Desktop/mobile principal flows are accepted visually |
+| 3 | Configure a local OpenAI key and run one representative index/chat flow | Live answer and evidence are accepted without exposing the key |
+| 4 | Mark Phase 2 accepted and decide merge timing | Completion evidence agrees across code, plans, and context |
 
 ## Update protocol
 

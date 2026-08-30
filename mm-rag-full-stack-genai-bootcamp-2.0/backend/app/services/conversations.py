@@ -17,6 +17,7 @@ from backend.app.repositories.conversations import ConversationRepository
 from backend.app.repositories.documents import CollectionRepository, DocumentRepository
 from backend.app.repositories.workspaces import WorkspaceRepository
 from backend.app.schemas.conversations import Citation, ConversationCreate
+from backend.app.services.audit import record_audit_event
 
 
 class ConversationError(Exception):
@@ -87,6 +88,15 @@ class ConversationService:
                 collection_id=payload.collection_id,
             )
             self._conversations.add(conversation, document_ids)
+            record_audit_event(
+                self._session,
+                workspace_id=workspace_id,
+                actor_user_id=user.id,
+                action="conversation.created",
+                resource_type="conversation",
+                resource_id=conversation.id,
+                details={"target_type": payload.target_type.value, "title": payload.title},
+            )
         return conversation, document_ids
 
     def get_conversation(
@@ -173,6 +183,18 @@ class ConversationService:
         try:
             self._conversations.add_messages(user_message, assistant_message)
             conversation.title = conversation.title
+            record_audit_event(
+                self._session,
+                workspace_id=workspace_id,
+                actor_user_id=user.id,
+                action="conversation.message_created",
+                resource_type="conversation",
+                resource_id=conversation_id,
+                details={
+                    "assistant_message_id": str(assistant_message.id),
+                    "citation_count": len(citation_payload),
+                },
+            )
             self._session.commit()
         except Exception:
             self._session.rollback()

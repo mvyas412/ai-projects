@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from backend.app.models.user import User
 from backend.app.models.workspace import Workspace, WorkspaceRole
 from backend.app.repositories.workspaces import WorkspaceRepository
+from backend.app.services.audit import record_audit_event
 
 
 class WorkspaceService:
@@ -19,6 +20,15 @@ class WorkspaceService:
         workspace = Workspace(name=name, created_by_user_id=user.id)
         with self._session.begin():
             self._workspaces.add(workspace, user_id=user.id, role=WorkspaceRole.OWNER)
+            record_audit_event(
+                self._session,
+                workspace_id=workspace.id,
+                actor_user_id=user.id,
+                action="workspace.created",
+                resource_type="workspace",
+                resource_id=workspace.id,
+                details={"name": workspace.name},
+            )
         return workspace, WorkspaceRole.OWNER
 
     def get_for_user(

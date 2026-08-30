@@ -202,8 +202,8 @@ product and security boundaries.
 ## Phase 2 — secure product foundation
 
 **Status:** In progress. Milestones 2.0.0–2.3 are implemented and accepted;
-2.4 is implemented with authenticated visual acceptance pending. Delivery
-hardening remains.
+2.4 and 2.5 are implemented with authenticated visual and live-model acceptance
+pending.
 
 ```mermaid
 flowchart LR
@@ -213,7 +213,7 @@ flowchart LR
     routes --> authn["RS256 JWT + identity mapping<br/>implemented"]
     authn --> idp
     authn --> authz["Workspace membership guard<br/>implemented; action policy expands later"]
-    authz <-->|"identity, workspace, documents, versions, collections, conversations"| pg[("PostgreSQL<br/>schema at 20260830_0004")]
+    authz <-->|"identity, documents, conversations, audit activity"| pg[("PostgreSQL<br/>schema at 20260830_0005")]
     authz --> services["Application services"]
     services --> repos["Repositories / gateways"]
     repos --> pg
@@ -223,6 +223,8 @@ flowchart LR
     health["Live + readiness APIs<br/>implemented"] --> pg
     health --> qd
     routes --> health
+    services -->|"atomic safe action metadata"| audit["Immutable activity service"]
+    audit --> pg
 ```
 
 Phase actions: preserve/isolate V1; establish Python/Docker/configuration; add
