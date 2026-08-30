@@ -171,7 +171,7 @@ flowchart LR
 | --- | --- | --- | --- | --- |
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
 | 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
-| 3 | Durable asynchronous processing | Job API, queue/broker TBD, workers, S3-compatible storage | PostgreSQL, object storage, Qdrant | In progress; ADRs 0007–0008 accepted, technologies pending |
+| 3 | Durable asynchronous processing | Durable job/attempt state implemented; job API, queue/broker TBD, workers, S3-compatible storage planned | PostgreSQL now; object storage and generation-scoped Qdrant planned | In progress; migration `20260830_0006`, ADRs 0007–0008 accepted, technologies pending |
 | 4 | Fine-grained isolation and governance | JWT validation, RBAC/ACL, RLS defense, audit | PostgreSQL, Qdrant, object storage | Planned |
 | 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
@@ -245,25 +245,27 @@ demo hardening.
 
 **Status:** In progress. The isolated Phase 3 baseline is established. Durable
 job/attempt and idempotent output-promotion contracts are accepted in ADRs 0007
-and 0008; queue/broker, object-storage implementation, transactional outbox, and
-worker runtime remain TBD.
+and 0008. PostgreSQL migration `20260830_0006` and a provider-neutral backend state
+machine implement jobs, fenced attempts, retries, progress, cancellation, and lease
+recovery. They are not yet connected to the synchronous product path; queue/broker,
+object-storage implementation, transactional outbox, and worker runtime remain TBD.
 
 ```mermaid
 flowchart LR
-    client["Authorized client"] -->|"upload"| api["Document API"]
-    api --> policy["Workspace policy"]
-    policy -->|"immutable original"| objects[("S3-compatible storage")]
-    policy -->|"document version + queued job"| pg[("PostgreSQL")]
-    api -->|"202 + job ID"| client
-    pg --> outbox["Dispatcher / transactional outbox"]
-    outbox --> queue["Queue / broker TBD"]
-    queue --> worker["Ingestion worker"]
+    client["Authorized client"] -->|"upload · planned async API"| api["Document API"]
+    api --> policy["Workspace policy<br/>implemented"]
+    policy -->|"immutable original · planned"| objects[("S3-compatible storage<br/>TBD")]
+    policy -->|"document version + job · planned wiring"| pg[("PostgreSQL jobs/attempts<br/>implemented at 20260830_0006")]
+    api -->|"202 + job ID · planned"| client
+    pg --> outbox["Dispatcher / transactional outbox<br/>TBD"]
+    outbox --> queue["Queue / broker<br/>TBD"]
+    queue --> worker["Ingestion worker<br/>planned"]
     worker --> objects
     worker --> parse["Parse, OCR, extract"]
     parse --> enrich["Chunk, enrich, embed"]
     enrich --> qdrant[("Qdrant")]
     enrich --> objects
-    worker -->|"progress, heartbeat, result"| pg
+    worker -->|"progress, heartbeat, result<br/>state contract implemented"| pg
     worker -->|"retry"| queue
     queue -->|"attempts exhausted"| dead["Failed/dead-letter state"]
     client -->|"authorized status request"| api

@@ -44,8 +44,8 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | 3.0 core contracts accepted; provider-neutral foundation starting |
-| Phase 3 | In progress — ADRs 0007–0008 accepted; no asynchronous execution yet |
+| Active milestone | 3.0 core contracts accepted; provider-neutral job/attempt foundation implemented |
+| Phase 3 | In progress — durable state implemented; no asynchronous execution yet |
 | Phase 3 bootstrap gate | 76 live tests; 87% coverage; lint, types, migrations, API/UI and dependency readiness pass |
 | Phases 4–9 | Planned |
 
@@ -254,9 +254,10 @@ Completed:
 
 **Status:** In progress. The isolated `3.0` baseline and development worktree are
 established and its local/live quality gate passes. Accepted ADRs 0007 and 0008
-define the durable job/attempt and idempotent output-promotion contracts. The
-provider-neutral persistence foundation is starting; queue/broker, object storage,
-outbox, and worker runtime remain TBD.
+define the durable job/attempt and idempotent output-promotion contracts. Alembic
+revision `20260830_0006` and the backend state machine implement the provider-neutral
+job/attempt foundation. Queue/broker, object storage, outbox, and worker runtime
+remain TBD, and the synchronous product path is unchanged.
 
 ### Objective
 
@@ -273,6 +274,30 @@ scalable while moving original and derived binaries to object storage.
 | 3.3 | Worker process, retry/backoff, heartbeat, cancellation, dead-letter handling | Accepted queue technology |
 | 3.4 | Upload/status API and progress UX | Job and worker contracts |
 | 3.5 | Failure, recovery, load, and operations hardening | End-to-end async flow |
+
+### Milestone 3.0 implementation status
+
+Implemented:
+
+- Added workspace-constrained `ingestion_jobs` and `ingestion_attempts` with
+  Alembic revision `20260830_0006`, including one-running-attempt enforcement,
+  retry schedules, cancellation metadata, progress, leases, and fencing tokens.
+- Added a caller-transaction-owned state machine for idempotent job creation,
+  authorized self/admin control, queued/running/retry/failed/cancelled transitions,
+  three-attempt exhaustion, heartbeats, cancellation races, and expired-lease recovery.
+- Added safe creation/cancellation audit events and regression coverage for tenant
+  hiding, requester-bound replay, immutable terminal history, stale workers,
+  progress retention, retry validation, and cancellation precedence.
+- Applied the migration to local Phase 3 PostgreSQL and verified its empty-table
+  downgrade/upgrade cycle. The deterministic gate passes with 81 tests and one
+  skip; the live gate passes 82 tests plus PostgreSQL/Qdrant/API/Streamlit readiness;
+  Alembic is restored to head with no model/schema drift.
+
+Not yet implemented:
+
+- async upload/status endpoints, dispatch/outbox, a broker, worker process,
+  object-storage provider, immutable output generations, or promotion;
+- the existing synchronous indexing and retrieval behavior remains active.
 
 ### Completion gate
 
@@ -509,8 +534,8 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Implement the accepted provider-neutral job/attempt schema and transition tests | Durable state invariants pass without selecting a broker/runtime |
-| 2 | Resolve outbox, queue/broker, object-storage, and worker-runtime ADRs | Async execution can begin against accepted boundaries and technologies |
+| 1 | Draft and approve ADR 0009 for the transactional outbox boundary | Job creation and dispatch intent share an accepted atomic boundary |
+| 2 | Resolve queue/broker, object-storage, and worker-runtime ADRs | Async execution can begin against accepted technologies and operating assumptions |
 | 3 | Implement the accepted object-storage adapter and immutable keys | Original documents are durable before asynchronous dispatch |
 
 ## Update protocol

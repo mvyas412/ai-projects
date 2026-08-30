@@ -36,6 +36,9 @@ The Phase 3 baseline currently contains:
   current-user activity while tokens remain outside Session State.
 - Immutable workspace activity records and an authorized, presentation-safe
   Activity page that suppresses internal identifiers.
+- Provider-neutral durable ingestion jobs and fenced execution attempts in
+  PostgreSQL, with idempotent creation, workspace-scoped control, three-attempt
+  budgets, leases, progress, cancellation, retry, and expired-lease recovery.
 - GitHub Actions quality, typing, migration, live-service, test, and coverage gates.
 - Automated environment, backend, tenant-isolation, storage, and Streamlit tests.
 - An isolated real-OpenAI acceptance command covering text and image indexing,
@@ -43,9 +46,11 @@ The Phase 3 baseline currently contains:
 
 This directory starts from the accepted V2 tree. Phase 3 is in Milestone 3.0.
 Accepted ADRs 0007 and 0008 define the durable job/attempt and idempotent output-
-promotion contracts. Queue/broker, object storage, transactional
-outbox, and worker runtime remain undecided. No asynchronous behavior is claimed
-until the remaining decisions are accepted and implemented with their tests.
+promotion contracts. The provider-neutral job/attempt persistence and state-machine
+foundation is implemented but is not connected to the synchronous indexing API.
+Queue/broker, object storage, transactional outbox, and worker runtime remain
+undecided. No asynchronous behavior is claimed until the remaining decisions are
+accepted and implemented with their tests.
 
 ## Architecture and roadmap
 
@@ -127,7 +132,8 @@ In Auth0, create a Regular Web Application for Streamlit and an API for FastAPI.
 Use the same API audience in both configurations. For local development, allow:
 
 - Callback URL: `http://localhost:8503/oauth2callback`
-- Logout URL: `http://localhost:8503`
+- Logout URLs: `http://localhost:8503` and
+  `http://localhost:8503/oauth2callback`
 - Web origin: `http://localhost:8503`
 
 Set `AUTH0_ISSUER` and `AUTH0_AUDIENCE` in ignored `.env`. Then create the
@@ -183,8 +189,8 @@ and Qdrant data volumes.
 ## Apply database migrations
 
 The migration history contains the infrastructure baseline plus identity,
-document-library, conversation, and immutable activity schemas through
-`20260830_0005`:
+document-library, conversation, immutable activity, and durable ingestion-job
+schemas through `20260830_0006`:
 
 ```bash
 uv run alembic upgrade head
@@ -281,7 +287,9 @@ uv run mypy backend frontend tests/backend
 
 The tests verify Python 3.12, the Phase 3 interpreter path, required imports,
 Streamlit startup, configuration, transactions, migrations, liveness,
-readiness-success behavior, and safe dependency-failure behavior.
+readiness-success behavior, safe dependency-failure behavior, and the durable
+ingestion transition, authorization, idempotency, lease, retry, and cancellation
+invariants.
 
 With PostgreSQL and Qdrant running, include the live integration check:
 
@@ -339,6 +347,6 @@ product story, suggested prompts, failure-safe talking points, and visual accept
 ```
 
 Phase 2 is merged and recoverable at `mm-rag-v2.0.0`. The active next step is to
-implement the accepted provider-neutral job/attempt foundation, then decide the
-transactional outbox, queue/broker, object-storage implementation, and worker
-runtime before changing the synchronous ingestion path.
+decide the transactional outbox, queue/broker, object-storage implementation, and
+worker runtime before connecting the durable job foundation to the synchronous
+ingestion path.
