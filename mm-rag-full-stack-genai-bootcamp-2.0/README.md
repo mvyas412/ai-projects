@@ -24,6 +24,18 @@ The Phase 2 branch currently contains:
 Authentication, product tables, workspaces, and the new frontend structure will
 be introduced incrementally after this backend foundation.
 
+## Architecture and roadmap
+
+The living [architecture handbook](docs/architecture/ARCHITECTURE.md) contains:
+
+- The whole-system target architecture and end-to-end data flows.
+- A focused component and interaction diagram for every phase from 1 through 9.
+- Current implementation status, architecture invariants, open technology
+  decisions, and documentation-maintenance rules.
+
+Planned components are explicitly labeled so the diagrams do not imply that
+future capabilities have already been implemented.
+
 ## Prerequisites
 
 - [uv](https://docs.astral.sh/uv/)
@@ -193,6 +205,7 @@ MM_RAG_RUN_INTEGRATION_TESTS=1 uv run pytest tests/backend/test_integration_serv
 ├── alembic.ini               # Migration runner configuration
 ├── backend/app/              # FastAPI, settings, database, schemas, and services
 ├── compose.yaml              # Phase 2 PostgreSQL and Qdrant
+├── docs/architecture/        # Living whole-system and Phase 1–9 diagrams
 ├── migrations/               # Versioned PostgreSQL schema changes
 ├── pyproject.toml            # Dependencies and Python tool configuration
 ├── uv.lock                   # Exact reproducible dependency resolution
