@@ -2,8 +2,8 @@
 set -euo pipefail
 
 uv lock --check
-uv run ruff check backend frontend migrations tests
-uv run mypy backend frontend tests/backend
+uv run ruff check backend frontend migrations scripts tests
+uv run mypy backend frontend scripts tests/backend
 uv run pytest
 uv run alembic current
 uv run alembic check

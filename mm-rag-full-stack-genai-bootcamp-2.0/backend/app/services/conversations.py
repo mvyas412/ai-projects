@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -140,6 +141,8 @@ class ConversationService:
                 history=tuple((message.role, message.content) for message in prior_messages),
             )
         )
+        # Treat model citations as untrusted output and revalidate every source
+        # against the backend-resolved scope before anything is persisted.
         allowed = {(document.id, version.id) for document, version in resolved}
         if any(
             (citation.document_id, citation.document_version_id) not in allowed
@@ -182,7 +185,8 @@ class ConversationService:
         )
         try:
             self._conversations.add_messages(user_message, assistant_message)
-            conversation.title = conversation.title
+            # Message activity drives recent-conversation ordering in the UI.
+            conversation.updated_at = datetime.now(UTC)
             record_audit_event(
                 self._session,
                 workspace_id=workspace_id,

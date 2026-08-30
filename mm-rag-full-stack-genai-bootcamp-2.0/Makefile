@@ -1,4 +1,4 @@
-.PHONY: setup services services-stop migrate api ui check check-live
+.PHONY: setup services services-stop migrate api ui check check-live check-acceptance
 
 setup:
 	uv python install 3.12
@@ -26,3 +26,6 @@ check:
 
 check-live:
 	MM_RAG_RUN_INTEGRATION_TESTS=1 ./scripts/verify_phase2.sh --live
+
+check-acceptance: check-live
+	uv run python -m scripts.run_openai_acceptance

@@ -119,6 +119,7 @@ def test_conversation_persists_messages_and_authorized_citations(client: TestCli
     )
     assert created.status_code == 201
     conversation_id = created.json()["id"]
+    original_updated_at = created.json()["updated_at"]
 
     exchange = client.post(
         f"/api/v1/workspaces/{workspace_id}/conversations/{conversation_id}/messages",
@@ -139,6 +140,9 @@ def test_conversation_persists_messages_and_authorized_citations(client: TestCli
         "assistant",
     ]
     assert detail.json()["message_count"] == 2
+    listed = client.get(f"/api/v1/workspaces/{workspace_id}/conversations")
+    assert listed.status_code == 200
+    assert listed.json()[0]["updated_at"] != original_updated_at
 
 
 def test_conversation_survives_application_restart(test_settings) -> None:

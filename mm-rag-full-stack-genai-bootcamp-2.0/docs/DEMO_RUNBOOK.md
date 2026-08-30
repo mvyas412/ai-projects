@@ -10,7 +10,9 @@ changing or depending on the immutable V1 checkout.
    PostgreSQL, Qdrant, and OpenAI settings. Never screen-share those files.
 3. Run `make services`, then `make migrate`.
 4. In separate terminals run `make api` and `make ui`.
-5. Run `make check-live`; all checks must pass before presenting.
+5. Run `make check-acceptance`; all deterministic release checks and the isolated
+   real-OpenAI multimodal acceptance must pass before presenting. This command
+   makes paid OpenAI requests and removes its temporary SQL, file, and Qdrant data.
 6. Open `http://127.0.0.1:8502`, sign in, and confirm the expected workspace.
 
 ## Five-minute product story

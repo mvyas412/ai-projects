@@ -63,6 +63,7 @@ if not st.user.is_logged_in:
     st.caption("Authentication is provided by Auth0. Your password is never handled by MM-RAG.")
     st.stop()
 
+# The backend accepts the audience-bound access token, never the identity token.
 access_token = st.user.tokens.get("access")
 if not access_token:
     st.error("Auth0 did not return an API access token. Check the configured audience.")
@@ -77,6 +78,8 @@ except BackendAPIError as exc:
     st.button("Log out", icon=":material/logout:", on_click=st.logout)
     st.stop()
 
+# Page modules reuse only the safe profile and workspace selection. The access
+# token stays in Streamlit's authenticated user context rather than Session State.
 st.session_state["api_url"] = api_url
 st.session_state["current_user_profile"] = profile
 workspaces = profile["workspaces"]

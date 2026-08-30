@@ -170,7 +170,7 @@ flowchart LR
 | Phase | Capability | Main technologies/components | Stores | Status |
 | --- | --- | --- | --- | --- |
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
-| 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Identity/workspace slice accepted; multi-document product slices planned |
+| 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Implemented; live multimodal model acceptance passed; visual sign-off pending |
 | 3 | Durable asynchronous processing | Job API, queue/broker TBD, workers, S3-compatible storage | PostgreSQL, object storage, Qdrant | Planned |
 | 4 | Fine-grained isolation and governance | JWT validation, RBAC/ACL, RLS defense, audit | PostgreSQL, Qdrant, object storage | Planned |
 | 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
@@ -209,9 +209,9 @@ product and security boundaries.
 
 ## Phase 2 — secure product foundation
 
-**Status:** In progress. Milestones 2.0.0–2.3 are implemented and accepted;
-2.5 is implemented and accepted; 2.4 authenticated visual review and the final
-live-model walkthrough remain Phase 2 acceptance gates.
+**Status:** In progress. Milestones 2.0.0–2.5 and the live multimodal model
+acceptance are complete; only the authenticated visual review remains as the
+Phase 2 acceptance gate.
 
 ```mermaid
 flowchart LR

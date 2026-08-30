@@ -35,9 +35,11 @@ The Phase 2 branch currently contains:
 - Immutable workspace activity records and an authorized Activity page.
 - GitHub Actions quality, typing, migration, live-service, test, and coverage gates.
 - Automated environment, backend, tenant-isolation, storage, and Streamlit tests.
+- An isolated real-OpenAI acceptance command covering text and image indexing,
+  scoped retrieval, grounded citations, persistence, audit, and tenant isolation.
 
-Live OpenAI indexing and generation require an environment-specific API key. The
-presentation-quality multipage UI and delivery hardening remain the next slices.
+Live OpenAI acceptance passes with the ignored local API key. The authenticated
+desktop/mobile visual walkthrough is the remaining Phase 2 sign-off item.
 
 ## Architecture and roadmap
 
@@ -50,6 +52,9 @@ The living [architecture handbook](docs/architecture/ARCHITECTURE.md) contains:
 
 Planned components are explicitly labeled so the diagrams do not imply that
 future capabilities have already been implemented.
+
+The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
+provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
@@ -278,7 +283,12 @@ The same gates are available through stable commands:
 ```bash
 make check       # locked dependencies, lint, types, tests, migration head, diff hygiene
 make check-live  # also checks the running FastAPI and Streamlit services
+make check-acceptance  # also makes paid OpenAI calls in isolated temporary data
 ```
+
+`make check-acceptance` exercises text and generated-image ingestion, embeddings,
+scoped Qdrant retrieval, grounded generation, citations, persistence, audit, and
+cross-tenant denial. It removes its temporary SQL, files, and vector collection.
 
 GitHub Actions runs these gates with PostgreSQL and Qdrant services on pushes to
 the Phase 2 branch and relevant pull requests. Coverage must remain at or above 70%.
@@ -310,11 +320,12 @@ product story, suggested prompts, failure-safe talking points, and visual accept
 ├── frontend/                 # Authenticated Phase 2 Streamlit shell
 ├── migrations/               # Versioned PostgreSQL schema changes
 ├── pyproject.toml            # Dependencies and Python tool configuration
+├── scripts/                  # Deterministic and live acceptance commands
 ├── uv.lock                   # Exact reproducible dependency resolution
 ├── src/                      # Current RAG implementation
 ├── ui/app.py                 # Current Streamlit baseline
 └── tests/                    # Unit, integration, environment, and smoke tests
 ```
 
-Phase 2 implementation is feature-complete. Final acceptance requires the recorded
-authenticated visual review and one live OpenAI indexing/chat walkthrough.
+Phase 2 implementation and live-model acceptance are complete. Final acceptance
+requires only the recorded authenticated desktop/mobile visual review.

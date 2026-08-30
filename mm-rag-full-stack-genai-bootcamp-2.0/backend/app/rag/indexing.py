@@ -74,6 +74,8 @@ class QdrantOpenAIDocumentIndexer:
             scope = VectorScope(
                 request.workspace_id, request.document_id, request.document_version_id
             )
+            # Replace only this authorized version, making retries idempotent without
+            # disturbing vectors owned by another workspace or document version.
             self._qdrant.delete(
                 collection_name=self._settings.qdrant_collection_name,
                 points_selector=models.FilterSelector(filter=scope.filter()),
@@ -137,6 +139,8 @@ def build_document_indexer(
 def _extract_pages(
     request: IndexingRequest, api_key: SecretStr, settings: Settings
 ) -> list[tuple[str, int | None]]:
+    """Normalize supported formats into page-aware text for one indexing path."""
+
     if request.media_type == "application/pdf":
         reader = PdfReader(BytesIO(request.content))
         return [

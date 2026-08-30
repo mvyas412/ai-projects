@@ -8,6 +8,8 @@ from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
+DEFAULT_OPENAI_CHAT_MODEL = "gpt-4.1-mini"
+DEFAULT_OPENAI_EMBEDDING_MODEL = "text-embedding-3-small"
 
 
 class Settings(BaseSettings):
@@ -50,8 +52,8 @@ class Settings(BaseSettings):
     rag_retrieval_limit: int = Field(default=8, ge=1, le=30)
 
     openai_api_key: SecretStr | None = None
-    openai_chat_model: str = "gpt-4.1-mini"
-    openai_embedding_model: str = "text-embedding-3-small"
+    openai_chat_model: str = DEFAULT_OPENAI_CHAT_MODEL
+    openai_embedding_model: str = DEFAULT_OPENAI_EMBEDDING_MODEL
 
     @field_validator("log_level", mode="before")
     @classmethod
@@ -114,6 +116,20 @@ class Settings(BaseSettings):
     @classmethod
     def blank_secret_is_none(cls, value: object) -> object:
         return None if value == "" else value
+
+    @field_validator("openai_chat_model", mode="before")
+    @classmethod
+    def blank_chat_model_uses_default(cls, value: object) -> object:
+        if isinstance(value, str):
+            return value.strip() or DEFAULT_OPENAI_CHAT_MODEL
+        return value
+
+    @field_validator("openai_embedding_model", mode="before")
+    @classmethod
+    def blank_embedding_model_uses_default(cls, value: object) -> object:
+        if isinstance(value, str):
+            return value.strip() or DEFAULT_OPENAI_EMBEDDING_MODEL
+        return value
 
     def require_database_url(self) -> str:
         """Return the database URL without ever including it in model repr output."""

@@ -79,6 +79,8 @@ class QdrantOpenAIRAGEngine:
                 model=self._settings.openai_embedding_model,
             )
             vector = embeddings.embed_query(request.query)
+            # Scope is resolved by the backend and applied inside Qdrant, so the
+            # retriever never receives candidates from an unauthorized version.
             points = self._qdrant.query_points(
                 collection_name=self._settings.qdrant_collection_name,
                 query=vector,
@@ -101,6 +103,8 @@ class QdrantOpenAIRAGEngine:
             f"{f' p.{item.page_number}' if item.page_number else ''}: {item.excerpt}"
             for index, item in enumerate(citations, start=1)
         )
+        # Keep evidence in the system message and bound persisted chat history to
+        # control prompt size while preserving useful conversational context.
         messages: list[BaseMessage] = [
             SystemMessage(
                 content=(

@@ -22,6 +22,8 @@ from backend.app.storage.local import LocalFileStorage
 def _lifespan(settings: Settings):
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        """Create process-wide adapters once and release them on shutdown."""
+
         configure_logging(settings.log_level)
         logger = structlog.get_logger(__name__)
 
@@ -38,6 +40,7 @@ def _lifespan(settings: Settings):
             check_compatibility=False,
         )
 
+        # FastAPI dependencies read these process-wide adapters from app.state.
         app.state.settings = settings
         app.state.database_engine = engine
         app.state.session_factory = session_factory

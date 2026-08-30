@@ -1,6 +1,6 @@
 # Multimodal RAG production project plan
 
-> Living delivery plan — updated 2026-08-29
+> Living delivery plan — updated 2026-08-30
 
 This is the version-controlled planning source of truth for the journey from the
 preserved prototype through the enterprise platform. It defines sequence, scope,
@@ -37,13 +37,13 @@ Rules:
 | --- | --- |
 | Active branch | `phase-2/mm-rag-production` |
 | Phase 1 | Completed and frozen at `mm-rag-v1.0.0` |
-| Phase 2 | In progress |
+| Phase 2 | In progress — implementation and live-model acceptance complete; visual sign-off pending |
 | Phase 2 infrastructure foundation | Completed in `5db9dd5` |
 | Architecture handbook | Published in `299a0ad` |
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Final Phase 2 visual and live-model acceptance |
+| Active milestone | Final authenticated desktop/mobile visual acceptance |
 | Phases 3–9 | Planned |
 
 ## Delivery sequence and gates
@@ -68,7 +68,7 @@ security and data-integrity gates on which it depends.
 | Phase | Outcome | Primary gate | Status |
 | --- | --- | --- | --- |
 | 1 | Working multimodal RAG proof | Reproducible parse-index-retrieve-answer flow | Completed |
-| 2 | Secure, persistent multi-document product | Authenticated tenant-safe product demonstration | In progress |
+| 2 | Secure, persistent multi-document product | Authenticated tenant-safe product demonstration | In progress — visual sign-off pending |
 | 3 | Durable asynchronous ingestion | Retryable jobs survive service failure | Planned |
 | 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Planned |
 | 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Planned |
@@ -103,7 +103,8 @@ retrieved, and used to produce grounded multimodal answers with citations.
 
 ## Phase 2 — secure product foundation
 
-**Status:** In progress.
+**Status:** In progress. Implementation and live-model acceptance are complete;
+authenticated visual sign-off remains.
 
 ### Objective
 
@@ -211,6 +212,22 @@ Implemented:
   tests pass. Migration downgrade/upgrade validation returns PostgreSQL to head.
 - Published in commit `71e65ef`; GitHub Actions run `33323110305` completed
   successfully across every release-gate step.
+
+### Live-model release acceptance
+
+Completed:
+
+- Added `make check-acceptance` and an isolated acceptance harness that creates
+  temporary SQL/files and a unique Qdrant collection, then removes them.
+- Real OpenAI requests validated text ingestion, image understanding, embeddings,
+  authorized vector retrieval, grounded generation, two-source citations, token
+  metadata, persisted chat, audit events, and cross-tenant hiding.
+- Hardened blank OpenAI model settings to use supported defaults and added regression
+  coverage after the live check exposed an empty `.env` model value.
+- Corrected conversation `updated_at` behavior so recent-chat ordering advances when
+  a message is persisted, with regression coverage.
+- Final combined gate: 73 tests; Ruff and Mypy across 80 source files; Alembic at
+  `20260830_0005` with no drift; live PostgreSQL, Qdrant, FastAPI, and Streamlit ready.
 
 ### Phase 2 completion gate
 
@@ -457,7 +474,7 @@ commercial accounting, and compliance-grade administration.
 | Auth0/OIDC provider | 2.1 | Accepted — ADR 0001 |
 | Initial workspace roles | 2.1 | Accepted — ADR 0002 |
 | Local Phase 2 storage adapter | 2.1 | Accepted — ADR 0003 |
-| Document/version identity and temporary ingestion state | 2.2 | Proposed |
+| Document/version identity and temporary ingestion state | 2.2 | Accepted — ADR 0004 |
 | Queue/broker | 3.0 | TBD |
 | S3-compatible storage implementation/vendor | 3.0 | TBD |
 | Fine-grained policy representation | 4.0 | TBD |
@@ -475,8 +492,7 @@ commercial accounting, and compliance-grade administration.
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
 | 1 | Complete authenticated browser presentation review | Desktop/mobile principal flows are accepted visually |
-| 2 | Configure a local OpenAI key and run one representative index/chat flow | Live answer and evidence are accepted without exposing the key |
-| 3 | Mark Phase 2 accepted and decide merge timing | Completion evidence agrees across code, plans, and context |
+| 2 | Mark Phase 2 accepted and decide merge timing | Completion evidence agrees across code, plans, and context |
 
 ## Update protocol
 

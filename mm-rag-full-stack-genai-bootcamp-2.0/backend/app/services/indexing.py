@@ -64,6 +64,8 @@ class DocumentIndexingService:
         if version.status == DocumentVersionStatus.PROCESSING.value:
             raise IndexingInProgressError("This document version is already being indexed")
 
+        # Commit PROCESSING before the external OpenAI/Qdrant work so concurrent
+        # requests see the in-flight state and cannot start a duplicate index run.
         version.status = DocumentVersionStatus.PROCESSING.value
         version.failure_reason = None
         self._session.commit()
