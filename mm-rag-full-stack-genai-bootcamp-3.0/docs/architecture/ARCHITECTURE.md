@@ -170,8 +170,8 @@ flowchart LR
 | Phase | Capability | Main technologies/components | Stores | Status |
 | --- | --- | --- | --- | --- |
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
-| 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Implemented; live multimodal model acceptance passed; visual sign-off pending |
-| 3 | Durable asynchronous processing | Job API, queue/broker TBD, workers, S3-compatible storage | PostgreSQL, object storage, Qdrant | Planned |
+| 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
+| 3 | Durable asynchronous processing | Job API, queue/broker TBD, workers, S3-compatible storage | PostgreSQL, object storage, Qdrant | In progress; isolated baseline established and Milestone 3.0 decisions pending |
 | 4 | Fine-grained isolation and governance | JWT validation, RBAC/ACL, RLS defense, audit | PostgreSQL, Qdrant, object storage | Planned |
 | 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
@@ -505,15 +505,21 @@ reconcile commercial usage.
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
 
 Accepted Phase 2 decisions are recorded in
-[`docs/architecture/decisions`](decisions/): Auth0/OIDC, the initial workspace
-roles, and the local-storage adapter boundary.
+[`docs/architecture/decisions`](decisions/):
+
+- [ADR 0001 — Auth0 through OpenID Connect](decisions/0001-auth0-oidc.md)
+- [ADR 0002 — Initial workspace role model](decisions/0002-workspace-roles.md)
+- [ADR 0003 — Local storage behind an object-storage interface](decisions/0003-local-storage-adapter.md)
+- [ADR 0004 — Workspace-scoped document library and vector identity](decisions/0004-document-library-tenancy.md)
+- [ADR 0005 — Backend-mediated RAG and scoped persistent conversations](decisions/0005-backend-rag-conversations.md)
+- [ADR 0006 — Immutable workspace activity and automated release gates](decisions/0006-audit-and-release-gates.md)
 
 ## Maintenance checklist
 
 1. Update the affected phase, diagram, status, and technology table.
 2. Update the whole-system diagram when a cross-phase boundary or flow changes.
-3. Record consequential decisions and rationale in `Phase2_context.md` or the
-   future active phase context document.
+3. Record consequential Phase 3 decisions and rationale in the ignored
+   `Phase3_context.md` active context document.
 4. Keep unapproved technologies labeled **Proposed / TBD**.
 5. Verify Mermaid fences and links before committing.
 6. Never place credentials, tokens, private URLs, customer data, or other secrets
