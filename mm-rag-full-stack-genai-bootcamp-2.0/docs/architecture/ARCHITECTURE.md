@@ -1,6 +1,6 @@
 # Multimodal RAG architecture handbook
 
-> Living architecture baseline — updated 2026-08-29
+> Living architecture baseline — updated 2026-08-30
 
 This document is the version-controlled architecture source of truth for the
 complete system and Phases 1–9. Update it whenever a component, boundary, data
@@ -8,6 +8,14 @@ flow, technology decision, or phase status changes.
 
 The companion [project plan](../PROJECT_PLAN.md) owns delivery sequence,
 milestones, dependencies, completion gates, risks, and immediate next actions.
+
+## Rendered architecture posters
+
+Presentation-ready rendered diagrams are maintained in the
+[architecture poster gallery](ARCHITECTURE_POSTERS.md). The gallery includes a
+final production-state architecture without phase numbers, a complete-system
+roadmap view, and one diagram for each phase. The Mermaid diagrams in this
+handbook remain the editable source of truth.
 
 ## Status legend
 
