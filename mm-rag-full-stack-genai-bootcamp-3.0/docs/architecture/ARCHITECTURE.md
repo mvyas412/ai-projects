@@ -171,7 +171,7 @@ flowchart LR
 | --- | --- | --- | --- | --- |
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
 | 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
-| 3 | Durable asynchronous processing | Job API, queue/broker TBD, workers, S3-compatible storage | PostgreSQL, object storage, Qdrant | In progress; isolated baseline established and Milestone 3.0 decisions pending |
+| 3 | Durable asynchronous processing | Job API, queue/broker TBD, workers, S3-compatible storage | PostgreSQL, object storage, Qdrant | In progress; ADRs 0007–0008 accepted, technologies pending |
 | 4 | Fine-grained isolation and governance | JWT validation, RBAC/ACL, RLS defense, audit | PostgreSQL, Qdrant, object storage | Planned |
 | 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
@@ -243,8 +243,10 @@ demo hardening.
 
 ## Phase 3 — asynchronous ingestion and object storage
 
-**Status:** In progress. The isolated Phase 3 baseline is established; queue/broker,
-object-storage implementation, and durable job-state contracts are TBD pending ADRs.
+**Status:** In progress. The isolated Phase 3 baseline is established. Durable
+job/attempt and idempotent output-promotion contracts are accepted in ADRs 0007
+and 0008; queue/broker, object-storage implementation, transactional outbox, and
+worker runtime remain TBD.
 
 ```mermaid
 flowchart LR
@@ -513,6 +515,11 @@ Accepted Phase 2 decisions are recorded in
 - [ADR 0004 — Workspace-scoped document library and vector identity](decisions/0004-document-library-tenancy.md)
 - [ADR 0005 — Backend-mediated RAG and scoped persistent conversations](decisions/0005-backend-rag-conversations.md)
 - [ADR 0006 — Immutable workspace activity and automated release gates](decisions/0006-audit-and-release-gates.md)
+
+Accepted Phase 3 decisions are:
+
+- [ADR 0007 — Durable ingestion job and attempt state contract](decisions/0007-durable-ingestion-job-attempt-contract.md)
+- [ADR 0008 — Ingestion idempotency and immutable output promotion](decisions/0008-ingestion-idempotency-output-promotion.md)
 
 ## Maintenance checklist
 

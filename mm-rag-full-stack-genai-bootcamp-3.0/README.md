@@ -41,10 +41,11 @@ The Phase 3 baseline currently contains:
 - An isolated real-OpenAI acceptance command covering text and image indexing,
   scoped retrieval, grounded citations, persistence, audit, and tenant isolation.
 
-This directory starts from the accepted V2 tree. Phase 3 is in Milestone 3.0:
-queue/broker and object-storage decisions plus the durable job-state contract.
-No asynchronous behavior is claimed until those decisions and their acceptance
-tests are implemented.
+This directory starts from the accepted V2 tree. Phase 3 is in Milestone 3.0.
+Accepted ADRs 0007 and 0008 define the durable job/attempt and idempotent output-
+promotion contracts. Queue/broker, object storage, transactional
+outbox, and worker runtime remain undecided. No asynchronous behavior is claimed
+until the remaining decisions are accepted and implemented with their tests.
 
 ## Architecture and roadmap
 
@@ -73,6 +74,8 @@ Accepted decisions are recorded as ADRs:
 - [Workspace-scoped document library](docs/architecture/decisions/0004-document-library-tenancy.md)
 - [Backend-mediated conversations and RAG](docs/architecture/decisions/0005-backend-rag-conversations.md)
 - [Workspace activity and release gates](docs/architecture/decisions/0006-audit-and-release-gates.md)
+- [Durable ingestion job and attempt state contract](docs/architecture/decisions/0007-durable-ingestion-job-attempt-contract.md)
+- [Ingestion idempotency and immutable output promotion](docs/architecture/decisions/0008-ingestion-idempotency-output-promotion.md)
 
 ## Prerequisites
 
@@ -336,5 +339,6 @@ product story, suggested prompts, failure-safe talking points, and visual accept
 ```
 
 Phase 2 is merged and recoverable at `mm-rag-v2.0.0`. The active next step is to
-decide the Phase 3 queue/broker, object-storage implementation, and durable job
-state contract before changing the synchronous ingestion path.
+implement the accepted provider-neutral job/attempt foundation, then decide the
+transactional outbox, queue/broker, object-storage implementation, and worker
+runtime before changing the synchronous ingestion path.

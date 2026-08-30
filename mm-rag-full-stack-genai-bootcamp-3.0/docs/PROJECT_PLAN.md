@@ -44,8 +44,8 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | 3.0 queue/broker, object-storage, and durable job-state ADRs |
-| Phase 3 | In progress — isolated baseline established; architecture decisions pending |
+| Active milestone | 3.0 core contracts accepted; provider-neutral foundation starting |
+| Phase 3 | In progress — ADRs 0007–0008 accepted; no asynchronous execution yet |
 | Phase 3 bootstrap gate | 76 live tests; 87% coverage; lint, types, migrations, API/UI and dependency readiness pass |
 | Phases 4–9 | Planned |
 
@@ -253,8 +253,10 @@ Completed:
 ## Phase 3 — asynchronous ingestion and object storage
 
 **Status:** In progress. The isolated `3.0` baseline and development worktree are
-established and its local/live quality gate passes; Milestone 3.0 architecture
-decisions are next.
+established and its local/live quality gate passes. Accepted ADRs 0007 and 0008
+define the durable job/attempt and idempotent output-promotion contracts. The
+provider-neutral persistence foundation is starting; queue/broker, object storage,
+outbox, and worker runtime remain TBD.
 
 ### Objective
 
@@ -265,7 +267,7 @@ scalable while moving original and derived binaries to object storage.
 
 | Milestone | Deliverable | Dependency |
 | --- | --- | --- |
-| 3.0 | Queue/broker and object-storage ADRs; job state contract | Phase 2 document/version model |
+| 3.0 | Job/attempt and idempotency contracts; outbox, queue/broker, object-storage, and worker-runtime ADRs | Phase 2 document/version model |
 | 3.1 | S3-compatible object-storage adapter and immutable object keys | Storage protocol from Phase 2.1 |
 | 3.2 | Durable jobs, attempts, idempotency, and transactional outbox | PostgreSQL/Alembic foundation |
 | 3.3 | Worker process, retry/backoff, heartbeat, cancellation, dead-letter handling | Accepted queue technology |
@@ -487,8 +489,12 @@ commercial accounting, and compliance-grade administration.
 | Initial workspace roles | 2.1 | Accepted — ADR 0002 |
 | Local Phase 2 storage adapter | 2.1 | Accepted — ADR 0003 |
 | Document/version identity and temporary ingestion state | 2.2 | Accepted — ADR 0004 |
+| Durable ingestion job and attempt contract | 3.0 | Accepted — ADR 0007 |
+| Idempotency and immutable output promotion | 3.0 | Accepted — ADR 0008 |
+| Transactional outbox boundary | 3.0 | TBD |
 | Queue/broker | 3.0 | TBD |
 | S3-compatible storage implementation/vendor | 3.0 | TBD |
+| Worker runtime and operating model | 3.0–3.3 | TBD |
 | Fine-grained policy representation | 4.0 | TBD |
 | Sparse-search engine | 5.1 | TBD |
 | Reranker | 5.4 | TBD |
@@ -503,8 +509,9 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Resolve Phase 3 queue/broker, object-storage, and job-state ADRs | Phase 3 implementation can begin against accepted interfaces |
-| 2 | Implement the accepted object-storage adapter and immutable keys | Original documents are durable before asynchronous dispatch |
+| 1 | Implement the accepted provider-neutral job/attempt schema and transition tests | Durable state invariants pass without selecting a broker/runtime |
+| 2 | Resolve outbox, queue/broker, object-storage, and worker-runtime ADRs | Async execution can begin against accepted boundaries and technologies |
+| 3 | Implement the accepted object-storage adapter and immutable keys | Original documents are durable before asynchronous dispatch |
 
 ## Update protocol
 
