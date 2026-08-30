@@ -37,13 +37,13 @@ Rules:
 | --- | --- |
 | Active branch | `phase-2/mm-rag-production` |
 | Phase 1 | Completed and frozen at `mm-rag-v1.0.0` |
-| Phase 2 | In progress — implementation/live acceptance complete; visual feedback refinements await recheck |
+| Phase 2 | Completed and accepted — implementation, live-model, security, and visual gates pass |
 | Phase 2 infrastructure foundation | Completed in `5db9dd5` |
 | Architecture handbook | Published in `299a0ad` |
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Recheck desktop feedback refinements and complete responsive visual acceptance |
+| Active milestone | Phase 2 merge decision and Phase 3 architecture decisions |
 | Phases 3–9 | Planned |
 
 ## Delivery sequence and gates
@@ -68,7 +68,7 @@ security and data-integrity gates on which it depends.
 | Phase | Outcome | Primary gate | Status |
 | --- | --- | --- | --- |
 | 1 | Working multimodal RAG proof | Reproducible parse-index-retrieve-answer flow | Completed |
-| 2 | Secure, persistent multi-document product | Authenticated tenant-safe product demonstration | In progress — visual sign-off pending |
+| 2 | Secure, persistent multi-document product | Authenticated tenant-safe product demonstration | Completed and accepted |
 | 3 | Durable asynchronous ingestion | Retryable jobs survive service failure | Planned |
 | 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Planned |
 | 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Planned |
@@ -103,9 +103,8 @@ retrieved, and used to produce grounded multimodal answers with citations.
 
 ## Phase 2 — secure product foundation
 
-**Status:** In progress. Implementation and live-model acceptance are complete;
-the authenticated desktop flow has been reviewed, its feedback is implemented,
-and the final refreshed/responsive visual sign-off remains.
+**Status:** Completed and accepted. Implementation, live-model, tenant-isolation,
+authenticated workflow, responsive layout, and light/dark visual gates pass.
 
 ### Objective
 
@@ -122,7 +121,7 @@ product with an API boundary and a presentation-quality Streamlit experience.
 | 2.1 | Auth0 identity, users, workspaces, memberships, storage boundary | Completed | Live login/logout/re-login, expiry rejection, and idempotent provisioning verified |
 | 2.2 | Document library, collections, versioning, scoped Qdrant payloads | Completed | Cross-user API tests, real migration cycle, and mandatory vector scope checks pass |
 | 2.3 | Persistent conversations and backend-mediated RAG | Completed | Restart-persistence, citation authorization, migration, and safe-failure tests pass |
-| 2.4 | Polished multipage Streamlit and evidence viewer | Feedback refinements implemented; final recheck pending | Authenticated principal flow reviewed; refreshed desktop and responsive checks remain |
+| 2.4 | Polished multipage Streamlit and evidence viewer | Completed and accepted | Authenticated principal flow, responsive layout, both themes, identity, and safe Activity presentation verified |
 | 2.5 | CI, broader tests, activity/audit surface, demo hardening | Completed | Local and GitHub release gates pass |
 
 ### Milestone 2.1 acceptance status
@@ -180,12 +179,12 @@ Completed:
 - PostgreSQL migration upgraded, downgraded only after all new tables were proven
   empty, and restored successfully to head `20260830_0004`.
 
-### Milestone 2.4 implementation status
+### Milestone 2.4 acceptance status
 
 Implemented:
 
 - Replaced the one-page authenticated shell with native `st.navigation` pages for
-  Overview, Library, Ask, and Settings plus a shared authorized workspace selector.
+  Overview, Library, Ask, Activity, and Settings plus a shared authorized workspace selector.
 - Added complete document upload, index/re-index, download, collection creation,
   collection membership, conversation creation, resume, and message workflows.
 - Added structured citation cards and an evidence dialog with source/page/excerpt,
@@ -200,7 +199,9 @@ Implemented:
   fixes audit message IDs that were recorded before UUID assignment.
 - The full gate passes with 76 tests, Ruff and Mypy across 81 source files,
   migration head/no-drift checks, and live PostgreSQL/Qdrant/API/Streamlit readiness.
-  A refreshed desktop check and responsive/mobile review remain the user gate.
+- Final authenticated screenshots verify the narrow Overview layout, light/dark
+  contrast, Auth0 identity in the sidebar and Settings, and presentation-safe
+  Activity rows. Milestone 2.4 and Phase 2 are accepted on 2026-08-30.
 
 ### Milestone 2.5 implementation status
 
@@ -497,8 +498,8 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Recheck final visual-feedback refinements and responsive layout | Identity, first-document CTA, scope guidance, Activity details, and mobile layout are accepted |
-| 2 | Mark Phase 2 accepted and decide merge timing | Completion evidence agrees across code, plans, and context |
+| 1 | Decide whether to merge the Phase 2 branch | Accepted Phase 2 remains recoverable and the merge policy is explicit |
+| 2 | Resolve Phase 3 queue/broker, object-storage, and job-state ADRs | Phase 3 implementation can begin against accepted interfaces |
 
 ## Update protocol
 

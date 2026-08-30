@@ -58,3 +58,16 @@ changing or depending on the immutable V1 checkout.
 - Confirm the sidebar and Settings show the expected Auth0 display name/email.
 - Confirm Ask explains all three scopes and Activity contains no `None` or raw UUID details.
 - Confirm no token, key, database URL, internal exception, or private context appears.
+
+## Acceptance record
+
+Phase 2 visual acceptance completed on 2026-08-30. Authenticated screenshots verify:
+
+- The Overview remains coherent at the supplied narrow viewport and presents its
+  metrics, current work, readiness, and evidence lifecycle clearly.
+- Light and dark themes retain readable contrast, hierarchy, borders, links, and badges.
+- The sidebar and Settings consistently present the Auth0 identity and workspace role.
+- Activity presents the current actor and readable action details without null values,
+  raw UUIDs, secrets, or internal implementation fields.
+- The empty-workspace first-document CTA remains covered by automated regression tests;
+  it is intentionally absent from the reviewed workspace because a document exists.

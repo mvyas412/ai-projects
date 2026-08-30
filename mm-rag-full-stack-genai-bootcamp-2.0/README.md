@@ -42,9 +42,9 @@ The Phase 2 branch currently contains:
 - An isolated real-OpenAI acceptance command covering text and image indexing,
   scoped retrieval, grounded citations, persistence, audit, and tenant isolation.
 
-Live OpenAI acceptance passes with the ignored local API key. The authenticated
-desktop walkthrough validated the principal flow and produced final presentation
-refinements; a refresh/recheck and responsive mobile review remain for sign-off.
+Phase 2 is accepted. Live OpenAI acceptance passes with the ignored local API key,
+and the authenticated visual review confirms the principal workflow, responsive
+layout, coordinated light/dark themes, identity presentation, and safe Activity view.
 
 ## Architecture and roadmap
 
@@ -335,6 +335,6 @@ product story, suggested prompts, failure-safe talking points, and visual accept
 └── tests/                    # Unit, integration, environment, and smoke tests
 ```
 
-Phase 2 implementation and live-model acceptance are complete. Final acceptance
-requires only a refreshed check of the visual-feedback refinements and the recorded
-responsive/mobile review.
+Phase 2 implementation, live-model validation, and authenticated visual acceptance
+are complete. The next decision is whether to merge this branch before starting
+Phase 3 architecture decisions and implementation.
