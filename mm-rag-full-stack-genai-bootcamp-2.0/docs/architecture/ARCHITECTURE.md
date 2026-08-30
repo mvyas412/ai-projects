@@ -29,7 +29,7 @@ flowchart LR
         web["Web application<br/>Streamlit now; dedicated UI later"]
         edge["Gateway / load balancer<br/>Phase 8"]
         api["Versioned FastAPI API"]
-        oidc["Managed OIDC identity provider<br/>Provider pending"]
+        oidc["Auth0<br/>Managed OIDC identity provider"]
     end
 
     subgraph product["Identity, policy, and product services"]
@@ -159,7 +159,7 @@ flowchart LR
 | Phase | Capability | Main technologies/components | Stores | Status |
 | --- | --- | --- | --- | --- |
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
-| 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Foundation implemented; product slices planned |
+| 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Backend and identity/workspace foundation implemented; product slices planned |
 | 3 | Durable asynchronous processing | Job API, queue/broker TBD, workers, S3-compatible storage | PostgreSQL, object storage, Qdrant | Planned |
 | 4 | Fine-grained isolation and governance | JWT validation, RBAC/ACL, RLS defense, audit | PostgreSQL, Qdrant, object storage | Planned |
 | 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
@@ -198,24 +198,24 @@ product and security boundaries.
 
 ## Phase 2 — secure product foundation
 
-**Status:** In progress. Milestones 2.0.0–2.0.2 are implemented; identity,
-workspaces, multi-document features, persistent chat, and the polished UI remain
-planned.
+**Status:** In progress. Milestones 2.0.0–2.0.2 and the Phase 2.1
+identity/workspace foundation are implemented. Live Auth0 tenant configuration,
+multi-document features, persistent chat, and the polished UI remain.
 
 ```mermaid
 flowchart LR
-    user["User"] --> st["Multipage Streamlit<br/>planned; V1 UI retained now"]
-    st <-->|"login/logout"| idp["Managed OIDC<br/>Auth0 candidate; pending"]
+    user["User"] --> st["Authenticated Streamlit shell<br/>implemented; pages expand incrementally"]
+    st <-->|"login/logout"| idp["Auth0 OIDC<br/>selected; tenant setup pending"]
     st -->|"token + API request"| routes["FastAPI /api/v1<br/>implemented"]
-    routes --> authn["JWT + identity mapping<br/>planned"]
+    routes --> authn["RS256 JWT + identity mapping<br/>implemented"]
     authn --> idp
-    authn --> authz["Workspace role guard<br/>planned"]
-    authz <-->|"user, workspace, membership"| pg[("PostgreSQL<br/>connection + Alembic implemented")]
+    authn --> authz["Workspace membership guard<br/>implemented; action policy expands later"]
+    authz <-->|"user, workspace, membership"| pg[("PostgreSQL<br/>identity schema at 20260829_0002")]
     authz --> services["Application services"]
     services --> repos["Repositories / gateways"]
     repos --> pg
     repos -->|"mandatory workspace filter"| qd[("Qdrant<br/>service implemented; filters planned")]
-    repos --> files[("Temporary storage<br/>policy pending")]
+    repos --> files[("Path-safe local storage adapter<br/>implemented; object storage in Phase 3")]
     services --> openai["OpenAI"]
     health["Live + readiness APIs<br/>implemented"] --> pg
     health --> qd
@@ -223,8 +223,8 @@ flowchart LR
 ```
 
 Phase actions: preserve/isolate V1; establish Python/Docker/configuration; add
-FastAPI, logs, database pooling, Alembic, and health APIs; then add OIDC users and
-workspaces, multi-document metadata and scoped vectors, backend-mediated RAG,
+FastAPI, logs, database pooling, Alembic, health APIs, Auth0/OIDC users and
+workspaces; then add multi-document metadata and scoped vectors, backend-mediated RAG,
 persistent conversations, multipage Streamlit, CI, negative tenant tests, and
 demo hardening.
 
@@ -482,7 +482,6 @@ reconcile commercial usage.
 
 | Topic | Current position |
 | --- | --- |
-| Identity provider | Managed OIDC; Auth0 is a candidate, not approved |
 | Phase 2 UI | Streamlit multipage application |
 | Dedicated Phase 8 UI | Candidate only; framework not selected |
 | Queue / broker | Required interface; technology not selected |
@@ -490,6 +489,10 @@ reconcile commercial usage.
 | Sparse search | Required in Phase 5; engine not selected |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
+
+Accepted Phase 2 decisions are recorded in
+[`docs/architecture/decisions`](decisions/): Auth0/OIDC, the initial workspace
+roles, and the local-storage adapter boundary.
 
 ## Maintenance checklist
 

@@ -11,8 +11,10 @@ from qdrant_client import QdrantClient
 from backend.app.api.router import api_router
 from backend.app.core.config import Settings, get_settings
 from backend.app.core.logging import RequestContextMiddleware, configure_logging
+from backend.app.core.security import build_access_token_verifier
 from backend.app.db.session import create_database_engine, create_session_factory
 from backend.app.services.readiness import ReadinessService, probe_postgres, probe_qdrant
+from backend.app.storage.local import LocalFileStorage
 
 
 def _lifespan(settings: Settings):
@@ -38,6 +40,8 @@ def _lifespan(settings: Settings):
         app.state.database_engine = engine
         app.state.session_factory = session_factory
         app.state.qdrant_client = qdrant_client
+        app.state.access_token_verifier = build_access_token_verifier(settings)
+        app.state.object_storage = LocalFileStorage(settings.local_storage_root)
         app.state.readiness_service = ReadinessService(
             service_name=settings.app_name,
             version=settings.app_version,
@@ -52,6 +56,7 @@ def _lifespan(settings: Settings):
             app_name=settings.app_name,
             app_version=settings.app_version,
             environment=settings.app_env,
+            authentication_configured=settings.auth0_is_configured,
         )
         try:
             yield

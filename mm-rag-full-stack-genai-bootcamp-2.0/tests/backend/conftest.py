@@ -15,4 +15,5 @@ def test_settings(tmp_path: Path) -> Settings:
         app_env="test",
         database_url=SecretStr(f"sqlite+pysqlite:///{database_path}"),
         qdrant_url="http://127.0.0.1:1",
+        local_storage_root=tmp_path / "storage",
     )

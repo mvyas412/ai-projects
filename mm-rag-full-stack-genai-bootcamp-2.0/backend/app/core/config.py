@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Self
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -25,6 +25,14 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test", "staging", "production"] = "development"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
     api_v1_prefix: str = "/api/v1"
+
+    auth0_issuer: str | None = None
+    auth0_audience: str | None = None
+    auth0_jwks_url: str | None = None
+    auth0_jwks_cache_seconds: int = Field(default=300, ge=60, le=86400)
+    auth0_jwks_timeout_seconds: int = Field(default=5, ge=1, le=30)
+
+    local_storage_root: Path = PROJECT_ROOT / "data/runtime/storage"
 
     database_url: SecretStr | None = None
     database_echo: bool = False
@@ -67,6 +75,38 @@ class Settings(BaseSettings):
             raise ValueError("QDRANT_URL must use http:// or https://")
         return normalized
 
+    @field_validator("auth0_issuer", "auth0_audience", "auth0_jwks_url", mode="before")
+    @classmethod
+    def blank_auth_setting_is_none(cls, value: object) -> object:
+        return None if value == "" else value
+
+    @field_validator("auth0_issuer")
+    @classmethod
+    def normalize_auth0_issuer(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        normalized = value.strip()
+        if not normalized.startswith("https://"):
+            raise ValueError("AUTH0_ISSUER must use https://")
+        return f"{normalized.rstrip('/')}/"
+
+    @field_validator("auth0_jwks_url")
+    @classmethod
+    def validate_auth0_jwks_url(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        normalized = value.strip()
+        if not normalized.startswith("https://"):
+            raise ValueError("AUTH0_JWKS_URL must use https://")
+        return normalized
+
+    @model_validator(mode="after")
+    def validate_auth0_configuration(self) -> Self:
+        configured = (self.auth0_issuer is not None, self.auth0_audience is not None)
+        if any(configured) and not all(configured):
+            raise ValueError("AUTH0_ISSUER and AUTH0_AUDIENCE must be configured together")
+        return self
+
     @field_validator("qdrant_api_key", "openai_api_key", mode="before")
     @classmethod
     def blank_secret_is_none(cls, value: object) -> object:
@@ -78,6 +118,10 @@ class Settings(BaseSettings):
         if self.database_url is None:
             raise RuntimeError("DATABASE_URL is required to start the backend")
         return self.database_url.get_secret_value()
+
+    @property
+    def auth0_is_configured(self) -> bool:
+        return self.auth0_issuer is not None and self.auth0_audience is not None
 
 
 @lru_cache(maxsize=1)
