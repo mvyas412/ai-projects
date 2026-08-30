@@ -1,0 +1,103 @@
+# Secrets and machine-local configuration
+.env
+.env.*
+!.env.example
+!.env.*.example
+.streamlit/secrets.toml
+.secrets/
+secrets/
+config/local.yaml
+config/local.yml
+
+# Private keys, certificates, and credential exports
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+credentials*.json
+client_secret*.json
+service-account*.json
+service_account*.json
+token.json
+
+# Local planning and collaboration context
+PROJECT_CONTEXT.md
+
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python bytecode and tool caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyright/
+.hypothesis/
+.tox/
+.nox/
+.uv-cache/
+
+# Test coverage
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Python packaging and build output
+build/
+dist/
+*.egg-info/
+.eggs/
+wheels/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Runtime logs, caches, and temporary files
+logs/
+*.log
+.cache/
+tmp/
+temp/
+
+# Generated and user-provided RAG data
+# Keep curated, sanitized fixtures under data/samples/ if needed.
+data/uploads/
+data/parsed_pdf_output/
+data/runtime/
+
+# Local databases and service volumes
+*.db
+*.sqlite
+*.sqlite3
+postgres-data/
+qdrant_storage/
+minio-data/
+celerybeat-schedule
+celerybeat-schedule.*
+
+# Machine-local agent integrations (currently link into .venv)
+.agents/
+.claude/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Operating-system metadata
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
