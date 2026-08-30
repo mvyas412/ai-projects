@@ -2,8 +2,7 @@ from collections.abc import Mapping
 
 import streamlit as st
 from streamlit.errors import StreamlitSecretNotFoundError
-
-from frontend.utils.api import BackendAPIClient, BackendAPIError
+from utils.api import BackendAPIClient, BackendAPIError
 
 st.set_page_config(
     page_title="MM-RAG",

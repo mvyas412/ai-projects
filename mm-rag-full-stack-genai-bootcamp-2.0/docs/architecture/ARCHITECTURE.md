@@ -162,7 +162,7 @@ flowchart LR
 | Phase | Capability | Main technologies/components | Stores | Status |
 | --- | --- | --- | --- | --- |
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
-| 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Backend and identity/workspace foundation implemented; product slices planned |
+| 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Identity/workspace slice accepted; multi-document product slices planned |
 | 3 | Durable asynchronous processing | Job API, queue/broker TBD, workers, S3-compatible storage | PostgreSQL, object storage, Qdrant | Planned |
 | 4 | Fine-grained isolation and governance | JWT validation, RBAC/ACL, RLS defense, audit | PostgreSQL, Qdrant, object storage | Planned |
 | 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
@@ -201,14 +201,13 @@ product and security boundaries.
 
 ## Phase 2 — secure product foundation
 
-**Status:** In progress. Milestones 2.0.0–2.0.2 and the Phase 2.1
-identity/workspace foundation are implemented. Live Auth0 tenant configuration,
-multi-document features, persistent chat, and the polished UI remain.
+**Status:** In progress. Milestones 2.0.0–2.1 are implemented and accepted.
+Multi-document features, persistent chat, and the polished UI remain.
 
 ```mermaid
 flowchart LR
     user["User"] --> st["Authenticated Streamlit shell<br/>implemented; pages expand incrementally"]
-    st <-->|"login/logout"| idp["Auth0 OIDC<br/>selected; tenant setup pending"]
+    st <-->|"login/logout"| idp["Auth0 OIDC<br/>configured and live-validated"]
     st -->|"token + API request"| routes["FastAPI /api/v1<br/>implemented"]
     routes --> authn["RS256 JWT + identity mapping<br/>implemented"]
     authn --> idp

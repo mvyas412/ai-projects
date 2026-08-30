@@ -116,22 +116,28 @@ product with an API boundary and a presentation-quality Streamlit experience.
 | 2.0.0 | Preserve V1; isolate branch, worktree, and `2.0` copy | Completed | V1 tag/worktree recovery verified |
 | 2.0.1 | Python 3.12/uv environment, secrets boundary, Docker PostgreSQL/Qdrant | Completed | Reproducible isolated startup |
 | 2.0.2 | FastAPI, logging, database layer, Alembic, health/readiness | Completed | API/service tests and live dependency checks |
-| 2.1 | Auth0 identity, users, workspaces, memberships, storage boundary | In progress | Live browser login/provision/logout and negative auth tests |
+| 2.1 | Auth0 identity, users, workspaces, memberships, storage boundary | Completed | Live login/logout/re-login, expiry rejection, and idempotent provisioning verified |
 | 2.2 | Document library, collections, versioning, scoped Qdrant payloads | Planned | Two users cannot list or retrieve each other's documents |
 | 2.3 | Persistent conversations and backend-mediated RAG | Planned | Chat survives logout/restart and citations remain authorized |
 | 2.4 | Polished multipage Streamlit and evidence viewer | Planned | Principal flows pass accessibility and presentation review |
 | 2.5 | CI, broader tests, activity/audit surface, demo hardening | Planned | Automated release gates and reproducible demonstration |
 
-### Milestone 2.1 remaining work
+### Milestone 2.1 acceptance status
 
-1. Create/configure an Auth0 Regular Web Application and API.
-2. Configure local callback, logout, origin, issuer, audience, client ID, and
-   ignored secrets.
-3. Validate browser login and API access-token delivery.
-4. Confirm first login provisions exactly one user and personal owner workspace.
-5. Confirm repeated login is idempotent and profile claims refresh safely.
-6. Validate logout, expiry, malformed token, wrong issuer, and wrong audience.
-7. Record acceptance evidence and mark 2.1 completed.
+Completed:
+
+- Auth0 Regular Web Application, custom API, callbacks, origins, issuer, JWKS,
+  audience, client ID, and ignored local secrets are configured.
+- Live browser login succeeds and delivers an RS256 access token for the custom
+  API audience; the protected `/users/me` request returns HTTP 200.
+- First login provisioned exactly one user, one personal workspace, and one
+  `owner` membership without exposing identity data during verification.
+- Automated checks reject expired tokens, malformed or missing credentials,
+  wrong issuer, and wrong audience.
+- Live expiry handling rejected the prior access token with HTTP 401; browser
+  logout/re-login then produced a fresh token accepted with HTTP 200.
+- Re-login and refresh remained idempotent: PostgreSQL still contained exactly
+  one user, one personal workspace, and one `owner` membership.
 
 ### Milestone 2.2 planned work
 
@@ -407,11 +413,11 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Configure the Auth0 tenant, application, and API locally | Browser callback succeeds and API receives correct JWT audience |
-| 2 | Execute the Phase 2.1 live acceptance checklist | Login/provision/relogin/logout/expiry/negative cases recorded |
-| 3 | Mark 2.1 completed and update plan, architecture, README, and context | Status and evidence agree across documents |
-| 4 | Produce the 2.2 document/version data model and API contract for review | Approved schema, endpoints, security invariants, and migration plan |
-| 5 | Implement 2.2 as one tenant-safe document-library vertical slice | Multi-user negative tests and scoped Qdrant evidence pass |
+| 1 | Produce the 2.2 document/version data model and API contract for review | Approved schema, endpoints, security invariants, and migration plan |
+| 2 | Implement 2.2 relational models and Alembic migration | Schema constraints, upgrade/downgrade, and drift checks pass |
+| 3 | Implement authorized document, version, and collection APIs | Workspace-scoped positive and negative API tests pass |
+| 4 | Add tenant-safe Qdrant payload indexes and filter construction | Cross-workspace retrieval is impossible in integration tests |
+| 5 | Complete the 2.2 vertical-slice acceptance and update living documents | Status and evidence agree across documents |
 
 ## Update protocol
 
