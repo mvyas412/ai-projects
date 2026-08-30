@@ -43,6 +43,10 @@ The living [architecture handbook](docs/architecture/ARCHITECTURE.md) contains:
 Planned components are explicitly labeled so the diagrams do not imply that
 future capabilities have already been implemented.
 
+The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
+sequence, milestones, dependencies, completion gates, risks, decision backlog,
+and current next actions. Update it with evidence whenever progress or scope changes.
+
 Accepted decisions are recorded as ADRs:
 
 - [Auth0 through OIDC](docs/architecture/decisions/0001-auth0-oidc.md)
@@ -256,7 +260,7 @@ MM_RAG_RUN_INTEGRATION_TESTS=1 uv run pytest tests/backend/test_integration_serv
 ├── alembic.ini               # Migration runner configuration
 ├── backend/app/              # FastAPI, auth, models, repositories, services, storage
 ├── compose.yaml              # Phase 2 PostgreSQL and Qdrant
-├── docs/architecture/        # Living whole-system and Phase 1–9 diagrams
+├── docs/                     # Living project plan, architecture, and ADRs
 ├── frontend/                 # Authenticated Phase 2 Streamlit shell
 ├── migrations/               # Versioned PostgreSQL schema changes
 ├── pyproject.toml            # Dependencies and Python tool configuration

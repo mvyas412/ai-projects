@@ -6,6 +6,9 @@ This document is the version-controlled architecture source of truth for the
 complete system and Phases 1–9. Update it whenever a component, boundary, data
 flow, technology decision, or phase status changes.
 
+The companion [project plan](../PROJECT_PLAN.md) owns delivery sequence,
+milestones, dependencies, completion gates, risks, and immediate next actions.
+
 ## Status legend
 
 | Status | Meaning |
