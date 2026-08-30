@@ -79,6 +79,12 @@ class DocumentVersion(TimestampMixin, Base):
         UniqueConstraint(
             "id", "workspace_id", name="uq_document_versions_id_workspace_id"
         ),
+        UniqueConstraint(
+            "id",
+            "document_id",
+            "workspace_id",
+            name="uq_document_versions_id_document_workspace",
+        ),
         UniqueConstraint("object_key", name="uq_document_versions_object_key"),
     )
 

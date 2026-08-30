@@ -6,11 +6,11 @@ from alembic.script import ScriptDirectory
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_migration_history_has_document_library_head() -> None:
+def test_migration_history_has_ingestion_jobs_head() -> None:
     config = Config(PROJECT_ROOT / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260830_0005"]
+    assert scripts.get_heads() == ["20260830_0006"]
     baseline = scripts.get_revision("20260829_0001")
     assert baseline is not None
     assert baseline.down_revision is None
@@ -26,3 +26,6 @@ def test_migration_history_has_document_library_head() -> None:
     audit_events = scripts.get_revision("20260830_0005")
     assert audit_events is not None
     assert audit_events.down_revision == "20260830_0004"
+    ingestion_jobs = scripts.get_revision("20260830_0006")
+    assert ingestion_jobs is not None
+    assert ingestion_jobs.down_revision == "20260830_0005"

@@ -13,6 +13,14 @@ from backend.app.models.document import (
     DocumentVersion,
     DocumentVersionStatus,
 )
+from backend.app.models.ingestion import (
+    IngestionAttempt,
+    IngestionAttemptState,
+    IngestionJob,
+    IngestionJobState,
+    IngestionOperation,
+    IngestionProgressStage,
+)
 from backend.app.models.user import User
 from backend.app.models.workspace import Workspace, WorkspaceMembership, WorkspaceRole
 
@@ -27,6 +35,12 @@ __all__ = [
     "Document",
     "DocumentVersion",
     "DocumentVersionStatus",
+    "IngestionAttempt",
+    "IngestionAttemptState",
+    "IngestionJob",
+    "IngestionJobState",
+    "IngestionOperation",
+    "IngestionProgressStage",
     "MessageRole",
     "User",
     "Workspace",
