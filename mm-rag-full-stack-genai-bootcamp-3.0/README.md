@@ -48,10 +48,11 @@ This directory starts from the accepted V2 tree. Phase 3 is in Milestone 3.0.
 Accepted ADRs 0007 and 0008 define the durable job/attempt and idempotent output-
 promotion contracts. The provider-neutral job/attempt persistence and state-machine
 foundation is implemented but is not connected to the synchronous indexing API.
-ADR 0009 accepts the provider-neutral transactional-outbox boundary. Queue/broker,
-object storage, dispatcher/worker runtime, and all outbox implementation remain
-undecided or unimplemented. No asynchronous behavior is claimed until the remaining
-decisions are accepted and implemented with their tests.
+ADR 0009 accepts the provider-neutral transactional-outbox boundary. ADRs 0010–0012
+select free self-hosted RabbitMQ, an S3-compatible adapter with open-source SeaweedFS
+for local/CI, and separate purpose-built Python dispatcher/worker processes. These
+components and all asynchronous API wiring remain unimplemented. No asynchronous
+behavior is claimed until the accepted contracts are implemented with their tests.
 
 ## Architecture and roadmap
 
@@ -67,6 +68,9 @@ future capabilities have already been implemented.
 
 The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
+The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
+shows the exact pre-implementation Phase 3 checkpoint and distinguishes live,
+accepted/pending, and planned components.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
@@ -83,6 +87,9 @@ Accepted decisions are recorded as ADRs:
 - [Durable ingestion job and attempt state contract](docs/architecture/decisions/0007-durable-ingestion-job-attempt-contract.md)
 - [Ingestion idempotency and immutable output promotion](docs/architecture/decisions/0008-ingestion-idempotency-output-promotion.md)
 - [Transactional outbox dispatch and recovery boundary](docs/architecture/decisions/0009-transactional-outbox-dispatch-boundary.md)
+- [RabbitMQ ingestion broker](docs/architecture/decisions/0010-rabbitmq-ingestion-broker.md)
+- [S3-compatible object storage with SeaweedFS for local development](docs/architecture/decisions/0011-s3-compatible-object-storage-seaweedfs.md)
+- [Purpose-built Python dispatcher and ingestion worker runtime](docs/architecture/decisions/0012-python-dispatcher-worker-runtime.md)
 
 ## Prerequisites
 
@@ -90,7 +97,7 @@ Accepted decisions are recorded as ADRs:
 - Python 3.12, installed directly or managed by uv
 - Tesseract OCR with the English language data
 - Docker Desktop or another Compose-compatible container runtime for local
-  PostgreSQL and Qdrant
+  PostgreSQL, Qdrant, RabbitMQ, and SeaweedFS
 
 ## Create the dedicated environment
 

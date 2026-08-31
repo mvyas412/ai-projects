@@ -44,9 +44,9 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | 3.0 durable foundation implemented; transactional outbox contract accepted in ADR 0009 |
-| Phase 3 | In progress — provider technology decisions remain; no asynchronous execution yet |
-| Phase 3 bootstrap gate | 76 live tests; 87% coverage; lint, types, migrations, API/UI and dependency readiness pass |
+| Active milestone | 3.0 contracts complete; Milestone 3.1 S3 adapter and SeaweedFS implementation is next |
+| Phase 3 | In progress — ADRs 0007–0012 accepted; no asynchronous execution yet |
+| Phase 3 bootstrap gate | 81 deterministic tests plus one skip; live PostgreSQL/Qdrant/API/Streamlit and CI gates pass |
 | Phases 4–9 | Planned |
 
 ## Delivery sequence and gates
@@ -257,9 +257,10 @@ established and its local/live quality gate passes. Accepted ADRs 0007 and 0008
 define the durable job/attempt and idempotent output-promotion contracts. Alembic
 revision `20260830_0006` and the backend state machine implement the provider-neutral
 job/attempt foundation. ADR 0009 accepts a PostgreSQL transactional-outbox and
-at-least-once dispatch/recovery boundary. It remains unimplemented; queue/broker,
-object storage, dispatcher, and worker runtime remain TBD, and the synchronous
-product path is unchanged.
+at-least-once dispatch/recovery boundary. ADRs 0010–0012 accept open-source
+RabbitMQ, an S3-compatible adapter with open-source SeaweedFS for local/CI, and
+separate purpose-built Python dispatcher/worker processes. None of those components
+is implemented yet, and the synchronous product path is unchanged.
 
 ### Objective
 
@@ -295,13 +296,20 @@ Implemented:
   skip; the live gate passes 82 tests plus PostgreSQL/Qdrant/API/Streamlit readiness;
   Alembic is restored to head with no model/schema drift.
 
-Accepted decision:
+Accepted decisions:
 
 - ADR 0009 atomically records each dispatch intent with its job in
   PostgreSQL, then publishing outside the API request with leased, at-least-once
   delivery. Its retry, alert, retention, per-job ordering, operational replay, and
-  deferred lease/batch tuning recommendations are accepted. Broker and runtime
-  technologies remain explicitly undecided.
+  recovery recommendations are accepted.
+- ADR 0010 selects open-source RabbitMQ as the free local/CI wake-up broker, with
+  publisher confirms, manual acknowledgements, prefetch `1`, a durable quorum
+  queue, and an operational dead-letter queue.
+- ADR 0011 selects an S3-compatible Python adapter with open-source SeaweedFS for
+  free local/CI object storage. Amazon S3 remains an unprovisioned, usage-priced
+  future production option.
+- ADR 0012 selects separate purpose-built Python dispatcher and worker processes,
+  including initial lease, heartbeat, concurrency, and graceful-shutdown defaults.
 
 Not yet implemented:
 
@@ -527,9 +535,9 @@ commercial accounting, and compliance-grade administration.
 | Durable ingestion job and attempt contract | 3.0 | Accepted — ADR 0007 |
 | Idempotency and immutable output promotion | 3.0 | Accepted — ADR 0008 |
 | Transactional outbox boundary | 3.0 | Accepted — ADR 0009 |
-| Queue/broker | 3.0 | TBD |
-| S3-compatible storage implementation/vendor | 3.0 | TBD |
-| Worker runtime and operating model | 3.0–3.3 | TBD |
+| Queue/broker | 3.0 | Accepted — RabbitMQ in ADR 0010 |
+| S3-compatible storage implementation/vendor | 3.0 | Accepted — SeaweedFS for local/CI in ADR 0011; production provider deferred |
+| Worker runtime and operating model | 3.0–3.3 | Accepted — purpose-built Python dispatcher/worker in ADR 0012 |
 | Fine-grained policy representation | 4.0 | TBD |
 | Sparse-search engine | 5.1 | TBD |
 | Reranker | 5.4 | TBD |
@@ -544,9 +552,9 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Draft and approve ADR 0010 for the queue/broker | Outbox publication and worker delivery target an accepted technology |
-| 2 | Draft and approve ADRs 0011–0012 for object storage and worker runtime | Async execution can begin against accepted storage and operating assumptions |
-| 3 | Implement the accepted object-storage adapter and immutable keys | Original documents are durable before asynchronous dispatch |
+| 1 | Implement the accepted S3-compatible adapter, immutable keys, and SeaweedFS contract tests | Original and attempt objects satisfy ADRs 0008 and 0011 |
+| 2 | Implement the transactional outbox schema and repository contract | Every eligible job mutation commits exactly one durable dispatch intent |
+| 3 | Add RabbitMQ topology, dispatcher, and worker process foundations | Confirmed publication and fenced consumption satisfy ADRs 0009–0012 |
 
 ## Update protocol
 

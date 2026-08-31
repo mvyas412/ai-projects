@@ -4,6 +4,13 @@
 > The handbook remains the editable source of truth; regenerate these posters
 > whenever architecture, data flow, technology, or phase status changes.
 
+## Current Phase 3 workflow and DEV architecture
+
+This checkpoint distinguishes verified behavior from accepted-but-pending Phase 3
+components before asynchronous ingestion implementation begins.
+
+![MM-RAG current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
+
 ## Final production architecture
 
 This is the target production system without phase or roadmap labels.

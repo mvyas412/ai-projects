@@ -17,6 +17,10 @@ final production-state architecture without phase numbers, a complete-system
 roadmap view, and one diagram for each phase. The Mermaid diagrams in this
 handbook remain the editable source of truth.
 
+The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
+is the pre-implementation checkpoint for ADRs 0010–0012. It distinguishes verified
+product behavior from accepted-but-pending and later planned components.
+
 ## Status legend
 
 | Status | Meaning |
@@ -55,8 +59,8 @@ flowchart LR
         intake["Upload / connector intake"]
         jobs["Durable job orchestration"]
         outbox["Transactional outbox + dispatcher<br/>Accepted ADR 0009; planned"]
-        queue["Queue / broker<br/>TBD"]
-        workers["Ingestion workers"]
+        queue["RabbitMQ<br/>Accepted ADR 0010; planned"]
+        workers["Python ingestion workers<br/>Accepted ADR 0012; planned"]
         parse["PyMuPDF + pdfplumber<br/>Tesseract + Pillow"]
         enrich["Text, table, and visual enrichment"]
         indexer["Embedding and index writer"]
@@ -75,7 +79,7 @@ flowchart LR
     subgraph stores["Persistent data services"]
         pg[("PostgreSQL<br/>identity, metadata, jobs, chat, audit")]
         qdrant[("Qdrant<br/>vectors + tenant-scoped payload")]
-        objects[("S3-compatible object storage<br/>originals + derived artifacts")]
+        objects[("S3-compatible object storage<br/>SeaweedFS local/CI accepted ADR 0011")]
     end
 
     subgraph ops["Quality, security, and operations"]
@@ -249,20 +253,22 @@ demo hardening.
 job/attempt and idempotent output-promotion contracts are accepted in ADRs 0007
 and 0008. PostgreSQL migration `20260830_0006` and a provider-neutral backend state
 machine implement jobs, fenced attempts, retries, progress, cancellation, and lease
-recovery. They are not yet connected to the synchronous product path; queue/broker,
-object-storage implementation, outbox implementation, and worker runtime remain TBD.
-ADR 0009 accepts the transactional outbox dispatch/recovery contract.
+recovery. They are not yet connected to the synchronous product path. ADR 0009
+accepts the transactional outbox dispatch/recovery contract. ADRs 0010–0012 accept
+open-source RabbitMQ, an S3-compatible adapter with open-source SeaweedFS for free
+local/CI use, and separate purpose-built Python dispatcher/worker processes. These
+accepted components remain unimplemented at this checkpoint.
 
 ```mermaid
 flowchart LR
     client["Authorized client"] -->|"upload · planned async API"| api["Document API"]
     api --> policy["Workspace policy<br/>implemented"]
-    policy -->|"immutable original · planned"| objects[("S3-compatible storage<br/>TBD")]
+    policy -->|"immutable original · planned"| objects[("SeaweedFS S3 local/CI<br/>Accepted ADR 0011; not implemented")]
     policy -->|"document version + job · planned wiring"| pg[("PostgreSQL jobs/attempts<br/>implemented at 20260830_0006")]
     api -->|"202 + job ID · planned"| client
     pg --> outbox["Transactional outbox + dispatcher<br/>Accepted ADR 0009; not implemented"]
-    outbox --> queue["Queue / broker<br/>TBD"]
-    queue --> worker["Ingestion worker<br/>planned"]
+    outbox --> queue["RabbitMQ quorum queue<br/>Accepted ADR 0010; not implemented"]
+    queue --> worker["Python ingestion worker<br/>Accepted ADR 0012; not implemented"]
     worker --> objects
     worker --> parse["Parse, OCR, extract"]
     parse --> enrich["Chunk, enrich, embed"]
@@ -507,9 +513,10 @@ reconcile commercial usage.
 | --- | --- |
 | Phase 2 UI | Streamlit multipage application |
 | Dedicated Phase 8 UI | Candidate only; framework not selected |
-| Queue / broker | Required interface; technology not selected |
-| Object storage | S3-compatible interface; vendor not selected |
+| Queue / broker | Open-source RabbitMQ accepted in ADR 0010; not implemented |
+| Object storage | S3-compatible adapter plus open-source SeaweedFS local/CI accepted in ADR 0011; production provider deferred |
 | Transactional outbox | PostgreSQL boundary accepted in ADR 0009; not implemented |
+| Worker runtime | Purpose-built Python dispatcher/worker accepted in ADR 0012; not implemented |
 | Sparse search | Required in Phase 5; engine not selected |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
@@ -529,6 +536,9 @@ Accepted Phase 3 decisions are:
 - [ADR 0007 — Durable ingestion job and attempt state contract](decisions/0007-durable-ingestion-job-attempt-contract.md)
 - [ADR 0008 — Ingestion idempotency and immutable output promotion](decisions/0008-ingestion-idempotency-output-promotion.md)
 - [ADR 0009 — Transactional outbox dispatch and recovery boundary](decisions/0009-transactional-outbox-dispatch-boundary.md)
+- [ADR 0010 — RabbitMQ ingestion broker](decisions/0010-rabbitmq-ingestion-broker.md)
+- [ADR 0011 — S3-compatible object storage with SeaweedFS for local development](decisions/0011-s3-compatible-object-storage-seaweedfs.md)
+- [ADR 0012 — Purpose-built Python dispatcher and ingestion worker runtime](decisions/0012-python-dispatcher-worker-runtime.md)
 
 ## Maintenance checklist
 
