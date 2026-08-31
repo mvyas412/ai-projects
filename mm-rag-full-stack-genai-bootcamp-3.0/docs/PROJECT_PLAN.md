@@ -1,6 +1,6 @@
 # Multimodal RAG production project plan
 
-> Living delivery plan — updated 2026-08-30
+> Living delivery plan — updated 2026-08-31
 
 This is the version-controlled planning source of truth for the journey from the
 preserved prototype through the enterprise platform. It defines sequence, scope,
@@ -35,7 +35,7 @@ Rules:
 
 | Item | Status |
 | --- | --- |
-| Active branch | `phase-3/mm-rag-async-ingestion` |
+| Active branch | `phase-4/mm-rag-governance` |
 | Phase 1 | Completed and frozen at `mm-rag-v1.0.0` |
 | Phase 2 | Completed and accepted — implementation, live-model, security, and visual gates pass |
 | Phase 2 release | Squash-merged at `52d4cfa`; tagged `mm-rag-v2.0.0` |
@@ -44,12 +44,13 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 3 completed, accepted, and merged; Phase 4 decision kickoff awaits approval |
+| Active milestone | Phase 4.0 decision kickoff in progress; policy/threat model and ADRs 0013–0017 are Proposed |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
 | Phase 3 quality gate | 110 deterministic tests pass with four opt-in integration skips; all 114 tests pass in the free live-service gate; CI-equivalent coverage is 81.39% against the 70% threshold; one explicitly approved signed-in real-OpenAI async promotion/retrieval proof passed |
-| Phases 4–9 | Planned |
+| Phase 4 | In progress — decision contracts only; runtime behavior remains at accepted Phase 3 |
+| Phases 5–9 | Planned |
 
 ## Delivery sequence and gates
 
@@ -74,8 +75,8 @@ security and data-integrity gates on which it depends.
 | --- | --- | --- | --- |
 | 1 | Working multimodal RAG proof | Reproducible parse-index-retrieve-answer flow | Completed |
 | 2 | Secure, persistent multi-document product | Authenticated tenant-safe product demonstration | Completed and accepted |
-| 3 | Durable asynchronous ingestion | Retryable jobs survive service failure | In progress |
-| 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Planned |
+| 3 | Durable asynchronous ingestion | Retryable jobs survive service failure | Completed and accepted |
+| 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | In progress — Milestone 4.0 decisions |
 | 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Planned |
 | 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Planned |
 | 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Planned |
@@ -453,23 +454,34 @@ Implemented and validated:
 
 ## Phase 4 — fine-grained authorization and governance
 
-**Status:** Planned.
+**Status:** In progress — Milestone 4.0 decision kickoff. The policy matrix,
+threat model, and ADRs 0013–0017 are Proposed; no Phase 4 runtime behavior has
+been implemented.
 
 ### Objective
 
 Extend workspace membership into consistent resource-level policy, defense in
 depth, auditable administration, and lifecycle governance.
 
-### Proposed milestones
+### Milestones
 
-| Milestone | Deliverable |
-| --- | --- |
-| 4.0 | Action/resource policy matrix and threat-model update |
-| 4.1 | Central role/ACL policy service and reusable authorization dependencies |
-| 4.2 | PostgreSQL row-level-security defense and mandatory Qdrant scope enforcement |
-| 4.3 | Authorized signed-object access and connector permission propagation contract |
-| 4.4 | Append-only audit events, activity views, and compliance export |
-| 4.5 | Retention, deletion, encryption/key, and incident-response controls |
+| Milestone | Deliverable | Status |
+| --- | --- | --- |
+| 4.0 | Action/resource policy matrix, threat-model update, and ADR sequence | In progress — Proposed review package drafted |
+| 4.1 | Central role/ACL policy service and reusable authorization dependencies | Planned; blocked on ADR 0013 acceptance |
+| 4.2 | PostgreSQL row-level-security defense and mandatory Qdrant scope enforcement | Planned; blocked on ADRs 0014–0015 acceptance |
+| 4.3 | Authorized object access and connector permission propagation contract | Planned; blocked on ADR 0015 acceptance |
+| 4.4 | Append-only audit events, activity views, and compliance export | Planned; blocked on ADR 0016 acceptance |
+| 4.5 | Retention, deletion, encryption/key, and incident-response controls | Planned; blocked on ADR 0017 acceptance |
+
+Milestone 4.0 review material:
+
+- [Phase 4 policy matrix and threat model](architecture/PHASE4_POLICY_THREAT_MODEL.md)
+- ADR 0013 — central RBAC and optional resource ACLs.
+- ADR 0014 — PostgreSQL RLS defense and runtime database roles.
+- ADR 0015 — authorized Qdrant/object/worker boundaries.
+- ADR 0016 — security audit and compliance export.
+- ADR 0017 — governed retention, deletion, encryption, and incident response.
 
 ### Completion gate
 
@@ -662,7 +674,11 @@ commercial accounting, and compliance-grade administration.
 | Queue/broker | 3.0 | Accepted — RabbitMQ in ADR 0010 |
 | S3-compatible storage implementation/vendor | 3.0 | Accepted — SeaweedFS for local/CI in ADR 0011; production provider deferred |
 | Worker runtime and operating model | 3.0–3.3 | Accepted — purpose-built Python dispatcher/worker in ADR 0012 |
-| Fine-grained policy representation | 4.0 | TBD |
+| Fine-grained policy representation | 4.0 | Proposed — central RBAC ceiling plus optional positive user ACLs in ADR 0013 |
+| PostgreSQL tenant defense | 4.0–4.2 | Proposed — RLS beneath application policy in ADR 0014 |
+| Vector/object/async authorization | 4.0–4.3 | Proposed — trusted PostgreSQL scope compilation in ADR 0015 |
+| Security audit and compliance export | 4.0–4.4 | Proposed — append-only PostgreSQL contract in ADR 0016 |
+| Retention and deletion policy | 4.0–4.5 | Proposed — tombstone-first durable lifecycle in ADR 0017 |
 | Sparse-search engine | 5.1 | TBD |
 | Reranker | 5.4 | TBD |
 | Vision embedding/enrichment models | 6.1–6.2 | TBD |
@@ -676,7 +692,8 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Approve the Phase 4 decision kickoff when ready | Governance scope, alternatives, and ADR sequence reviewed before implementation |
+| 1 | Review and approve, revise, or reject ADRs 0013–0017 | Accepted contracts and resolved approval points before schema/runtime implementation |
+| 2 | After ADR approval, implement Milestone 4.1 as the first vertical slice | Central policy replaces distributed role checks with compatibility and negative-test evidence |
 
 ## Update protocol
 

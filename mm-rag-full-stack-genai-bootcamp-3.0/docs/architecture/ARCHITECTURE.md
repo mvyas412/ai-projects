@@ -1,6 +1,6 @@
 # Multimodal RAG architecture handbook
 
-> Living architecture baseline — updated 2026-08-30
+> Living architecture baseline — updated 2026-08-31
 
 This document is the version-controlled architecture source of truth for the
 complete system and Phases 1–9. Update it whenever a component, boundary, data
@@ -26,6 +26,7 @@ product/runtime and signed-in live-model proof from later planned phases.
 | Status | Meaning |
 | --- | --- |
 | Implemented | Present and verified in V1, accepted V2, or accepted Phase 3 |
+| In progress | Approved decision or implementation work has started but its phase gate has not passed |
 | Planned | Intended capability or boundary that is not implemented yet |
 | Proposed / TBD | Candidate design or technology requiring a decision |
 
@@ -165,7 +166,7 @@ flowchart LR
     p1["Phase 1<br/>Prototype<br/>Implemented"] -->
     p2["Phase 2<br/>Product foundation<br/>Completed"] -->
     p3["Phase 3<br/>Async ingestion<br/>Completed"] -->
-    p4["Phase 4<br/>Governance<br/>Planned"] -->
+    p4["Phase 4<br/>Governance decisions<br/>In progress"] -->
     p5["Phase 5<br/>Hybrid retrieval<br/>Planned"] -->
     p6["Phase 6<br/>Visual/table intelligence<br/>Planned"] -->
     p7["Phase 7<br/>Evaluation/observability<br/>Planned"] -->
@@ -178,7 +179,7 @@ flowchart LR
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
 | 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
-| 4 | Fine-grained isolation and governance | JWT validation, RBAC/ACL, RLS defense, audit | PostgreSQL, Qdrant, object storage | Planned |
+| 4 | Fine-grained isolation and governance | Proposed central RBAC/ACL, RLS defense, cross-store policy, audit, lifecycle | PostgreSQL, Qdrant, object storage | In progress — Milestone 4.0 decisions; no runtime change |
 | 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
@@ -292,7 +293,12 @@ live embedding, promotion, active-generation retrieval, citation, and persistenc
 
 ## Phase 4 — fine-grained authorization and governance
 
-**Status:** Planned. Phase 2 starts isolation; this phase deepens it.
+**Status:** In progress at Milestone 4.0 decision kickoff. Phase 2 starts isolation;
+this phase deepens it. The proposed contracts below are not implemented behavior.
+
+The review source is the
+[Phase 4 policy matrix and threat model](PHASE4_POLICY_THREAT_MODEL.md). ADRs
+0013–0017 remain Proposed until their approval points are resolved.
 
 ```mermaid
 flowchart LR
@@ -519,6 +525,11 @@ reconcile commercial usage.
 | Object storage | S3-compatible adapter plus open-source SeaweedFS local/CI implemented under ADR 0011; production provider deferred |
 | Transactional outbox | PostgreSQL events plus confirmed leased dispatcher, retry/alert/retention operations implemented under ADR 0009 |
 | Worker runtime | Purpose-built Python dispatcher/worker implemented under ADR 0012; one in-flight job per process |
+| Fine-grained authorization | Proposed central RBAC ceiling plus optional positive user ACLs under ADR 0013 |
+| PostgreSQL tenant defense | Proposed RLS beneath application policy under ADR 0014 |
+| Vector/object/async policy | Proposed trusted PostgreSQL scope compilation under ADR 0015 |
+| Security audit/export | Proposed append-only PostgreSQL security events under ADR 0016 |
+| Retention/deletion | Proposed tombstone-first durable lifecycle under ADR 0017; destructive cleanup remains disabled |
 | Sparse search | Required in Phase 5; engine not selected |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
@@ -542,12 +553,20 @@ Accepted Phase 3 decisions are:
 - [ADR 0011 — S3-compatible object storage with SeaweedFS for local development](decisions/0011-s3-compatible-object-storage-seaweedfs.md)
 - [ADR 0012 — Purpose-built Python dispatcher and ingestion worker runtime](decisions/0012-python-dispatcher-worker-runtime.md)
 
+Proposed Phase 4 decisions awaiting review are:
+
+- [ADR 0013 — Central RBAC and resource ACL policy](decisions/0013-central-rbac-resource-acl-policy.md)
+- [ADR 0014 — PostgreSQL row-level-security defense](decisions/0014-postgresql-row-level-security.md)
+- [ADR 0015 — Authorized vector, object, and asynchronous access](decisions/0015-authorized-vector-object-async-access.md)
+- [ADR 0016 — Security audit and compliance export](decisions/0016-security-audit-compliance-export.md)
+- [ADR 0017 — Governed retention, deletion, encryption, and incident controls](decisions/0017-governed-retention-deletion-incident-controls.md)
+
 ## Maintenance checklist
 
 1. Update the affected phase, diagram, status, and technology table.
 2. Update the whole-system diagram when a cross-phase boundary or flow changes.
-3. Record consequential Phase 3 decisions and rationale in the ignored
-   `Phase3_context.md` active context document.
+3. Record consequential Phase 4 decisions and rationale in the ignored
+   `Phase4_context.md` active context document; keep `Phase3_context.md` historical.
 4. Keep unapproved technologies labeled **Proposed / TBD**.
 5. Verify Mermaid fences and links before committing.
 6. Never place credentials, tokens, private URLs, customer data, or other secrets

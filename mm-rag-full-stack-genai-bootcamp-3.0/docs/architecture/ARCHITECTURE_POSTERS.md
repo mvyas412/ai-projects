@@ -36,6 +36,10 @@ This is the target production system without phase or roadmap labels.
 
 ## Phase 4 — Fine-grained authorization and governance
 
+The poster remains the target-state visual. The editable Milestone 4.0 review
+contract is the [Phase 4 policy matrix and threat model](PHASE4_POLICY_THREAT_MODEL.md);
+its ADRs are Proposed and no Phase 4 runtime component is implemented yet.
+
 ![Phase 4 fine-grained authorization and governance](images/04-phase-4-governance.png)
 
 ## Phase 5 — Hybrid retrieval, fusion, and reranking

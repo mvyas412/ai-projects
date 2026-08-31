@@ -1,10 +1,15 @@
-# Multimodal RAG Production — Phase 3
+# Multimodal RAG Production — Phase 3 accepted baseline
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
 remain unchanged at the immutable `mm-rag-v1.0.0` and `mm-rag-v2.0.0` Git tags.
 
 ## Current status
+
+Phase 3 is accepted and preserved at `mm-rag-v3.0.0`. Phase 4 Milestone 4.0 is
+now in decision kickoff on `phase-4/mm-rag-governance`. Its policy matrix, threat
+model, and ADRs 0013–0017 are Proposed for review; no Phase 4 schema, authorization
+service, RLS policy, ACL, audit export, or deletion behavior is implemented yet.
 
 The Phase 3 baseline currently contains:
 
@@ -87,6 +92,10 @@ The living [architecture handbook](docs/architecture/ARCHITECTURE.md) contains:
 - Current implementation status, architecture invariants, open technology
   decisions, and documentation-maintenance rules.
 
+The proposed [Phase 4 policy matrix and threat model](docs/architecture/PHASE4_POLICY_THREAT_MODEL.md)
+defines the first review contract for roles, resource visibility, ACL inheritance,
+trust boundaries, and cross-store authorization. It does not change runtime behavior.
+
 Planned components are explicitly labeled so the diagrams do not imply that
 future capabilities have already been implemented.
 
@@ -116,6 +125,14 @@ Accepted decisions are recorded as ADRs:
 - [RabbitMQ ingestion broker](docs/architecture/decisions/0010-rabbitmq-ingestion-broker.md)
 - [S3-compatible object storage with SeaweedFS for local development](docs/architecture/decisions/0011-s3-compatible-object-storage-seaweedfs.md)
 - [Purpose-built Python dispatcher and ingestion worker runtime](docs/architecture/decisions/0012-python-dispatcher-worker-runtime.md)
+
+Proposed Phase 4 decisions awaiting review are:
+
+- [Central RBAC and resource ACL policy](docs/architecture/decisions/0013-central-rbac-resource-acl-policy.md)
+- [PostgreSQL row-level-security defense](docs/architecture/decisions/0014-postgresql-row-level-security.md)
+- [Authorized vector, object, and asynchronous access](docs/architecture/decisions/0015-authorized-vector-object-async-access.md)
+- [Security audit and compliance export](docs/architecture/decisions/0016-security-audit-compliance-export.md)
+- [Governed retention, deletion, encryption, and incident controls](docs/architecture/decisions/0017-governed-retention-deletion-incident-controls.md)
 
 ## Prerequisites
 
