@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.api.dependencies import get_current_user, get_rag_engine
 from backend.app.db.session import get_db_session
+from backend.app.models.access import ResourceVisibility
 from backend.app.models.conversation import (
     Conversation,
     ConversationMessage,
@@ -26,6 +27,7 @@ from backend.app.schemas.conversations import (
 from backend.app.services.conversations import (
     ConversationError,
     ConversationNotFoundError,
+    ConversationPermissionError,
     ConversationService,
     NoIndexedEvidenceError,
     UnsafeCitationError,
@@ -56,6 +58,7 @@ def _summary(
         target_type=ConversationTargetType(conversation.target_type),
         collection_id=conversation.collection_id,
         document_ids=document_ids,
+        visibility=ResourceVisibility(conversation.visibility),
         message_count=message_count,
         created_at=conversation.created_at,
         updated_at=conversation.updated_at,
@@ -65,6 +68,8 @@ def _summary(
 def _translate(exc: Exception) -> HTTPException:
     if isinstance(exc, ConversationNotFoundError):
         return HTTPException(status_code=404, detail="Resource not found")
+    if isinstance(exc, ConversationPermissionError):
+        return HTTPException(status_code=403, detail="Insufficient access")
     if isinstance(exc, NoIndexedEvidenceError):
         return HTTPException(status_code=409, detail=str(exc))
     if isinstance(exc, (RAGUnavailableError, UnsafeCitationError)):

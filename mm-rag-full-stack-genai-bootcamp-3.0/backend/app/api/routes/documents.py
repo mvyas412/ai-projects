@@ -20,6 +20,7 @@ from backend.app.api.dependencies import (
     get_object_storage,
 )
 from backend.app.db.session import get_db_session
+from backend.app.models.access import ResourceVisibility
 from backend.app.models.document import Collection, Document, DocumentVersion
 from backend.app.models.user import User
 from backend.app.rag.indexing import (
@@ -70,6 +71,7 @@ def _document_summary(
         title=document.title,
         original_filename=document.original_filename,
         media_type=document.media_type,
+        visibility=ResourceVisibility(document.visibility),
         archived_at=document.archived_at,
         latest_version=_version_summary(latest_version),
         created_at=document.created_at,
@@ -83,6 +85,7 @@ def _collection_summary(collection: Collection, document_count: int) -> Collecti
         workspace_id=collection.workspace_id,
         name=collection.name,
         description=collection.description,
+        visibility=ResourceVisibility(collection.visibility),
         document_count=document_count,
         archived_at=collection.archived_at,
         created_at=collection.created_at,

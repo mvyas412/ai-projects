@@ -20,6 +20,13 @@ from backend.app.models.workspace import WorkspaceRole
 from backend.app.repositories.documents import CollectionRepository, DocumentRepository
 from backend.app.repositories.workspaces import WorkspaceRepository
 from backend.app.services.audit import record_audit_event
+from backend.app.services.policy import (
+    PolicyAction,
+    PolicyDeniedError,
+    PolicyNotFoundError,
+    PolicyService,
+    resource_context,
+)
 from backend.app.storage.base import ObjectStorage
 from backend.app.storage.keys import original_object_key
 
@@ -74,19 +81,29 @@ class DocumentLibraryService:
         self._documents = DocumentRepository(session)
         self._collections = CollectionRepository(session)
         self._workspaces = WorkspaceRepository(session)
+        self._policy = PolicyService(session)
         self._settings = settings or Settings.model_construct()
 
     def list_documents(self, *, user: User, workspace_id: UUID) -> list[Document]:
-        self._require_workspace(user, workspace_id)
-        return self._documents.list_documents(workspace_id)
+        self._require_policy(user, workspace_id, PolicyAction.DOCUMENT_READ)
+        return [
+            document
+            for document in self._documents.list_documents(workspace_id)
+            if self._policy.can_read(user=user, resource=resource_context(document))
+        ]
 
     def get_document(
         self, *, user: User, workspace_id: UUID, document_id: UUID
     ) -> tuple[Document, list[DocumentVersion]]:
-        self._require_workspace(user, workspace_id)
         document = self._documents.get_document(workspace_id, document_id)
         if document is None:
             raise ResourceNotFoundError
+        self._require_policy(
+            user,
+            workspace_id,
+            PolicyAction.DOCUMENT_READ,
+            resource=resource_context(document),
+        )
         return document, self._documents.list_versions(workspace_id, document_id)
 
     def read_version_content(
@@ -97,11 +114,16 @@ class DocumentLibraryService:
         document_id: UUID,
         version_id: UUID,
     ) -> tuple[Document, DocumentVersion, bytes]:
-        self._require_workspace(user, workspace_id)
         document = self._documents.get_document(workspace_id, document_id)
         version = self._documents.get_version(workspace_id, document_id, version_id)
         if document is None or version is None:
             raise ResourceNotFoundError
+        self._require_policy(
+            user,
+            workspace_id,
+            PolicyAction.DOCUMENT_DOWNLOAD,
+            resource=resource_context(document),
+        )
         return document, version, self._storage.read(version.object_key)
 
     def create_document(
@@ -251,10 +273,15 @@ class DocumentLibraryService:
         stored_key: str | None = None
         try:
             with self._session.begin():
-                self._require_role(user, workspace_id, WRITE_ROLES)
                 document = self._documents.get_document(workspace_id, document_id)
                 if document is None:
                     raise ResourceNotFoundError
+                self._require_policy(
+                    user,
+                    workspace_id,
+                    PolicyAction.DOCUMENT_VERSION_CREATE,
+                    resource=resource_context(document),
+                )
                 if normalized_media_type != document.media_type:
                     raise InvalidUploadError("A new version must keep the document media type")
                 content_hash = hashlib.sha256(content).hexdigest()
@@ -300,10 +327,15 @@ class DocumentLibraryService:
 
     def archive_document(self, *, user: User, workspace_id: UUID, document_id: UUID) -> None:
         with self._session.begin():
-            self._require_role(user, workspace_id, ADMIN_ROLES)
             document = self._documents.get_document(workspace_id, document_id)
             if document is None:
                 raise ResourceNotFoundError
+            self._require_policy(
+                user,
+                workspace_id,
+                PolicyAction.DOCUMENT_ARCHIVE,
+                resource=resource_context(document),
+            )
             document.archived_at = datetime.now(UTC)
             record_audit_event(
                 self._session,
@@ -315,17 +347,31 @@ class DocumentLibraryService:
             )
 
     def list_collections(self, *, user: User, workspace_id: UUID) -> list[tuple[Collection, int]]:
-        self._require_workspace(user, workspace_id)
-        return self._collections.list_collections(workspace_id)
+        self._require_policy(user, workspace_id, PolicyAction.COLLECTION_READ)
+        return [
+            (collection, count)
+            for collection, count in self._collections.list_collections(workspace_id)
+            if self._policy.can_read(user=user, resource=resource_context(collection))
+        ]
 
     def get_collection(
         self, *, user: User, workspace_id: UUID, collection_id: UUID
     ) -> tuple[Collection, list[Document]]:
-        self._require_workspace(user, workspace_id)
         collection = self._collections.get_collection(workspace_id, collection_id)
         if collection is None:
             raise ResourceNotFoundError
-        return collection, self._collections.list_documents(workspace_id, collection_id)
+        self._require_policy(
+            user,
+            workspace_id,
+            PolicyAction.COLLECTION_READ,
+            resource=resource_context(collection),
+        )
+        documents = [
+            document
+            for document in self._collections.list_documents(workspace_id, collection_id)
+            if self._policy.can_read(user=user, resource=resource_context(document))
+        ]
+        return collection, documents
 
     def create_collection(
         self,
@@ -337,7 +383,7 @@ class DocumentLibraryService:
     ) -> Collection:
         try:
             with self._session.begin():
-                self._require_role(user, workspace_id, WRITE_ROLES)
+                self._require_policy(user, workspace_id, PolicyAction.COLLECTION_CREATE)
                 collection = Collection(
                     workspace_id=workspace_id,
                     created_by_user_id=user.id,
@@ -368,11 +414,24 @@ class DocumentLibraryService:
         document_id: UUID,
     ) -> None:
         with self._session.begin():
-            self._require_role(user, workspace_id, WRITE_ROLES)
-            if self._collections.get_collection(workspace_id, collection_id) is None:
+            collection = self._collections.get_collection(workspace_id, collection_id)
+            if collection is None:
                 raise ResourceNotFoundError
-            if self._documents.get_document(workspace_id, document_id) is None:
+            self._require_policy(
+                user,
+                workspace_id,
+                PolicyAction.COLLECTION_MEMBERSHIP_UPDATE,
+                resource=resource_context(collection),
+            )
+            document = self._documents.get_document(workspace_id, document_id)
+            if document is None:
                 raise ResourceNotFoundError
+            self._require_policy(
+                user,
+                workspace_id,
+                PolicyAction.DOCUMENT_READ,
+                resource=resource_context(document),
+            )
             self._collections.add_document(
                 workspace_id=workspace_id,
                 collection_id=collection_id,
@@ -398,9 +457,15 @@ class DocumentLibraryService:
         document_id: UUID,
     ) -> None:
         with self._session.begin():
-            self._require_role(user, workspace_id, WRITE_ROLES)
-            if self._collections.get_collection(workspace_id, collection_id) is None:
+            collection = self._collections.get_collection(workspace_id, collection_id)
+            if collection is None:
                 raise ResourceNotFoundError
+            self._require_policy(
+                user,
+                workspace_id,
+                PolicyAction.COLLECTION_MEMBERSHIP_UPDATE,
+                resource=resource_context(collection),
+            )
             if not self._collections.remove_document(collection_id, document_id):
                 raise ResourceNotFoundError
             record_audit_event(
@@ -420,7 +485,7 @@ class DocumentLibraryService:
         document: Document,
         version: DocumentVersion,
     ) -> None:
-        self._require_role(user, workspace_id, WRITE_ROLES)
+        self._require_policy(user, workspace_id, PolicyAction.DOCUMENT_CREATE)
         self._documents.add_document(document, version)
         record_audit_event(
             self._session,
@@ -477,6 +542,26 @@ class DocumentLibraryService:
         if result is None:
             raise ResourceNotFoundError
         return result[1]
+
+    def _require_policy(
+        self,
+        user: User,
+        workspace_id: UUID,
+        action: PolicyAction,
+        *,
+        resource=None,
+    ) -> None:
+        try:
+            self._policy.require(
+                user=user,
+                workspace_id=workspace_id,
+                action=action,
+                resource=resource,
+            )
+        except PolicyNotFoundError as exc:
+            raise ResourceNotFoundError from exc
+        except PolicyDeniedError as exc:
+            raise PermissionDeniedError from exc
 
     def _require_role(
         self, user: User, workspace_id: UUID, allowed: frozenset[WorkspaceRole]

@@ -6,10 +6,11 @@ remain unchanged at the immutable `mm-rag-v1.0.0` and `mm-rag-v2.0.0` Git tags.
 
 ## Current status
 
-Phase 3 is accepted and preserved at `mm-rag-v3.0.0`. Phase 4 Milestone 4.0 is
-complete on `phase-4/mm-rag-governance`: its policy matrix, threat model, and ADRs
-0013–0017 were accepted on 2026-08-31. Milestone 4.1 is next; no Phase 4 schema,
-authorization service, RLS policy, ACL, audit export, or deletion behavior is implemented yet.
+Phase 3 is accepted and preserved at `mm-rag-v3.0.0`. Phase 4 Milestones 4.0–4.1
+are complete on `phase-4/mm-rag-governance`: ADRs 0013–0017 are accepted and
+migration `20260831_0009` adds the central default-deny policy, workspace-compatible
+visibility, tenant-constrained user ACLs, creator-private new conversations, and
+shared product-path enforcement. RLS, security export, and lifecycle deletion follow.
 
 The Phase 3 baseline currently contains:
 
@@ -264,7 +265,8 @@ Qdrant, SeaweedFS, and RabbitMQ data volumes.
 
 The migration history contains the infrastructure baseline plus identity,
 document-library, conversation, immutable activity, durable ingestion-job,
-transactional-outbox, and immutable-generation schemas through `20260830_0008`:
+transactional-outbox, immutable-generation, and Phase 4 ACL schemas through
+`20260831_0009`:
 
 ```bash
 uv run alembic upgrade head

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.models.audit import AuditEvent
 from backend.app.models.user import User
-from backend.app.repositories.workspaces import WorkspaceRepository
+from backend.app.services.policy import PolicyAction, PolicyNotFoundError, PolicyService
 
 
 class AuditNotFoundError(Exception):
@@ -37,12 +37,18 @@ def record_audit_event(
 class AuditService:
     def __init__(self, session: Session) -> None:
         self._session = session
-        self._workspaces = WorkspaceRepository(session)
+        self._policy = PolicyService(session)
 
     def list_events(
         self, *, user: User, workspace_id: UUID, limit: int
     ) -> list[tuple[AuditEvent, User]]:
-        if self._workspaces.get_for_user(workspace_id, user.id) is None:
+        try:
+            self._policy.require(
+                user=user,
+                workspace_id=workspace_id,
+                action=PolicyAction.ACTIVITY_READ,
+            )
+        except PolicyNotFoundError:
             raise AuditNotFoundError
         statement = (
             select(AuditEvent, User)

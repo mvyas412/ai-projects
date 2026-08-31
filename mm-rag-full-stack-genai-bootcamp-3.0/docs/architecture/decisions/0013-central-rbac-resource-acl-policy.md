@@ -97,3 +97,13 @@ The review accepted these first-revision defaults on 2026-08-31:
 - Role/ACL removal prevents subsequent access without waiting for a process restart.
 - Existing-resource migration preserves current visibility.
 - Public errors and audit payloads contain no secret, token, raw content, or object coordinate.
+
+## Implementation evidence
+
+Milestone 4.1 implements this decision at Alembic revision `20260831_0009`.
+The in-process policy service owns stable action evaluation, role ceilings,
+visibility, creator authority, ACL lookup, and non-enumerating decisions. Composite
+tenant foreign keys constrain positive grants to same-workspace documents,
+collections, or conversations. Existing resources retain workspace visibility,
+new conversations default to restricted, and document, collection, conversation,
+job, indexing, citation-scope, and download paths consume the shared policy.

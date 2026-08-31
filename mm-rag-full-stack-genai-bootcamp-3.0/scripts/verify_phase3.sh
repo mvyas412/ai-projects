@@ -15,4 +15,4 @@ if [[ "${1:-}" == "--live" ]]; then
 fi
 
 git diff --check
-printf '\nPhase 3 verification passed.\n'
+printf '\nMM-RAG verification passed.\n'

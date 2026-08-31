@@ -179,7 +179,7 @@ flowchart LR
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
 | 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
-| 4 | Fine-grained isolation and governance | Accepted central RBAC/ACL, RLS defense, cross-store policy, audit, lifecycle | PostgreSQL, Qdrant, object storage | In progress — Milestone 4.0 complete; no runtime change yet |
+| 4 | Fine-grained isolation and governance | Central RBAC/ACL implemented; RLS defense, cross-store policy, audit, lifecycle follow | PostgreSQL, Qdrant, object storage | In progress — Milestones 4.0–4.1 complete |
 | 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
@@ -293,20 +293,20 @@ live embedding, promotion, active-generation retrieval, citation, and persistenc
 
 ## Phase 4 — fine-grained authorization and governance
 
-**Status:** In progress. Milestone 4.0 decisions were accepted on 2026-08-31.
-Phase 2 starts isolation; this phase deepens it. The accepted contracts below are
-not implementation evidence.
+**Status:** In progress. Milestones 4.0–4.1 are complete. Phase 2 starts isolation;
+this phase deepens it. Central policy and ACL persistence are implemented; RLS,
+expanded audit/export, and lifecycle components remain milestone work.
 
 The review source is the
 [Phase 4 policy matrix and threat model](PHASE4_POLICY_THREAT_MODEL.md). ADRs
-0013–0017 are Accepted; Milestone 4.1 is the next implementation slice.
+0013–0017 are Accepted; Milestone 4.2 is the next implementation slice.
 
 ```mermaid
 flowchart LR
     client["Authenticated client"] --> api["FastAPI"]
     api --> jwt["JWT validation"]
     jwt --> identity["Internal identity"]
-    identity --> policy["Workspace RBAC + resource ACL"]
+    identity --> policy["Workspace RBAC + resource ACL<br/>implemented at 20260831_0009"]
     policy <-->|"membership, ownership, sharing"| pg[("PostgreSQL")]
     policy -->|"allow + trusted scope"| service["Application service"]
     policy -->|"deny"| denied["403 + audit"]
@@ -526,7 +526,7 @@ reconcile commercial usage.
 | Object storage | S3-compatible adapter plus open-source SeaweedFS local/CI implemented under ADR 0011; production provider deferred |
 | Transactional outbox | PostgreSQL events plus confirmed leased dispatcher, retry/alert/retention operations implemented under ADR 0009 |
 | Worker runtime | Purpose-built Python dispatcher/worker implemented under ADR 0012; one in-flight job per process |
-| Fine-grained authorization | Accepted central RBAC ceiling plus optional positive user ACLs under ADR 0013; not implemented |
+| Fine-grained authorization | Central RBAC ceiling plus positive in-workspace user ACLs implemented under ADR 0013 at `20260831_0009` |
 | PostgreSQL tenant defense | Accepted RLS beneath application policy under ADR 0014; not implemented |
 | Vector/object/async policy | Accepted trusted PostgreSQL scope compilation under ADR 0015; not implemented |
 | Security audit/export | Accepted append-only PostgreSQL security events under ADR 0016; not implemented |

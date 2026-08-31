@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.api.dependencies import get_current_user, get_object_storage
 from backend.app.db.session import get_db_session
+from backend.app.models.access import ResourceVisibility
 from backend.app.models.document import Document, DocumentVersion
 from backend.app.models.ingestion import IngestionJobState, IngestionProgressStage
 from backend.app.models.user import User
@@ -127,6 +128,7 @@ def _document_detail(document: Document, version: DocumentVersion) -> DocumentDe
         title=document.title,
         original_filename=document.original_filename,
         media_type=document.media_type,
+        visibility=ResourceVisibility(document.visibility),
         archived_at=document.archived_at,
         latest_version=version_summary,
         created_at=document.created_at,

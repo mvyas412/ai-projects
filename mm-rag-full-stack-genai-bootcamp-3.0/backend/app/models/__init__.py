@@ -1,3 +1,4 @@
+from backend.app.models.access import ResourceACLGrant, ResourceVisibility
 from backend.app.models.audit import AuditEvent
 from backend.app.models.conversation import (
     Conversation,
@@ -48,6 +49,8 @@ __all__ = [
     "IngestionGeneration",
     "IngestionGenerationState",
     "MessageRole",
+    "ResourceACLGrant",
+    "ResourceVisibility",
     "User",
     "Workspace",
     "WorkspaceMembership",

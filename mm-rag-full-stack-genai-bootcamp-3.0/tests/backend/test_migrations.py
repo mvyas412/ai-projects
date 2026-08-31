@@ -6,11 +6,11 @@ from alembic.script import ScriptDirectory
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_migration_history_has_ingestion_outbox_head() -> None:
+def test_migration_history_has_phase4_policy_head() -> None:
     config = Config(PROJECT_ROOT / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260830_0008"]
+    assert scripts.get_heads() == ["20260831_0009"]
     baseline = scripts.get_revision("20260829_0001")
     assert baseline is not None
     assert baseline.down_revision is None
@@ -34,3 +34,6 @@ def test_migration_history_has_ingestion_outbox_head() -> None:
     assert ingestion_outbox is not None
     assert ingestion_outbox.down_revision == "20260830_0006"
     assert ingestion_generations.down_revision == "20260830_0007"
+    phase4_policy = scripts.get_revision("20260831_0009")
+    assert phase4_policy is not None
+    assert phase4_policy.down_revision == "20260830_0008"

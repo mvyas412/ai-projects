@@ -44,12 +44,12 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 4.0 complete; accepted ADRs 0013–0017 unblock Milestone 4.1 implementation |
+| Active milestone | Phase 4.1 complete; Milestone 4.2 PostgreSQL RLS and mandatory Qdrant enforcement is next |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
 | Phase 3 quality gate | 110 deterministic tests pass with four opt-in integration skips; all 114 tests pass in the free live-service gate; CI-equivalent coverage is 81.39% against the 70% threshold; one explicitly approved signed-in real-OpenAI async promotion/retrieval proof passed |
-| Phase 4 | In progress — Milestone 4.0 complete; runtime behavior remains at accepted Phase 3 |
+| Phase 4 | In progress — Milestones 4.0–4.1 complete |
 | Phases 5–9 | Planned |
 
 ## Delivery sequence and gates
@@ -76,7 +76,7 @@ security and data-integrity gates on which it depends.
 | 1 | Working multimodal RAG proof | Reproducible parse-index-retrieve-answer flow | Completed |
 | 2 | Secure, persistent multi-document product | Authenticated tenant-safe product demonstration | Completed and accepted |
 | 3 | Durable asynchronous ingestion | Retryable jobs survive service failure | Completed and accepted |
-| 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | In progress — Milestone 4.0 decisions |
+| 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | In progress — Milestones 4.0–4.1 complete |
 | 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Planned |
 | 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Planned |
 | 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Planned |
@@ -454,9 +454,9 @@ Implemented and validated:
 
 ## Phase 4 — fine-grained authorization and governance
 
-**Status:** In progress — Milestone 4.0 is complete. The policy matrix, threat
-model, and ADRs 0013–0017 were accepted on 2026-08-31; no Phase 4 runtime behavior
-has been implemented yet.
+**Status:** In progress — Milestones 4.0 and 4.1 are complete. The accepted policy
+matrix now has a central default-deny service and tenant-constrained ACL persistence;
+RLS and remaining provider, audit, and lifecycle controls follow.
 
 ### Objective
 
@@ -468,8 +468,8 @@ depth, auditable administration, and lifecycle governance.
 | Milestone | Deliverable | Status |
 | --- | --- | --- |
 | 4.0 | Action/resource policy matrix, threat-model update, and ADR sequence | Completed — ADRs 0013–0017 accepted |
-| 4.1 | Central role/ACL policy service and reusable authorization dependencies | Ready for implementation |
-| 4.2 | PostgreSQL row-level-security defense and mandatory Qdrant scope enforcement | Planned after 4.1 |
+| 4.1 | Central role/ACL policy service and reusable authorization dependencies | Completed at `20260831_0009` |
+| 4.2 | PostgreSQL row-level-security defense and mandatory Qdrant scope enforcement | Ready for implementation |
 | 4.3 | Authorized object access and connector permission propagation contract | Planned after 4.2 |
 | 4.4 | Append-only audit events, activity views, and compliance export | Planned after 4.3 |
 | 4.5 | Retention, deletion, encryption/key, and incident-response controls | Planned after 4.4 |
@@ -482,6 +482,21 @@ Milestone 4.0 review material:
 - ADR 0015 — authorized Qdrant/object/worker boundaries.
 - ADR 0016 — security audit and compliance export.
 - ADR 0017 — governed retention, deletion, encryption, and incident response.
+
+### Milestone 4.1 implementation status
+
+- Added one typed, default-deny policy service with stable action codes, preserved
+  role ceilings, non-enumerating decisions, and request-scoped evaluation.
+- Added workspace/restricted visibility to documents, collections, and conversations.
+  Migration `20260831_0009` preserves existing resources as workspace-visible while
+  new conversations default to creator-private restricted visibility.
+- Added positive user ACL persistence with same-workspace composite foreign keys.
+  Grantees must be current members and grants never bypass role ceilings.
+- Document, collection, conversation, job, citation-scope, indexing, and backend-
+  streamed download paths now consume the shared policy decision.
+- Focused policy and compatibility evidence passes 35 tests. The full deterministic
+  gate passes 119 tests with four opt-in skips, clean Ruff/Mypy, migration head
+  `20260831_0009`, and no schema drift.
 
 ### Completion gate
 
@@ -692,7 +707,7 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Implement Milestone 4.1 as the first vertical slice | Central policy replaces distributed role checks with compatibility and negative-test evidence |
+| 1 | Implement Milestone 4.2 PostgreSQL RLS and Qdrant authorization defense | Runtime roles, transaction-local context, fail-closed provider scope, and live cross-tenant evidence |
 | 2 | Open and maintain the Phase 4 draft pull request | Reviewable commits, green CI, and squash-and-merge only after explicit approval |
 
 ## Update protocol

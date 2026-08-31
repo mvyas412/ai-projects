@@ -16,9 +16,15 @@ from backend.app.models.user import User
 from backend.app.rag.engine import RAGDocumentScope, RAGEngine, RAGRequest
 from backend.app.repositories.conversations import ConversationRepository
 from backend.app.repositories.documents import CollectionRepository, DocumentRepository
-from backend.app.repositories.workspaces import WorkspaceRepository
 from backend.app.schemas.conversations import Citation, ConversationCreate
 from backend.app.services.audit import record_audit_event
+from backend.app.services.policy import (
+    PolicyAction,
+    PolicyDeniedError,
+    PolicyNotFoundError,
+    PolicyService,
+    resource_context,
+)
 
 
 class ConversationError(Exception):
@@ -26,6 +32,10 @@ class ConversationError(Exception):
 
 
 class ConversationNotFoundError(ConversationError):
+    pass
+
+
+class ConversationPermissionError(ConversationError):
     pass
 
 
@@ -48,12 +58,12 @@ class ConversationService:
         self._conversations = ConversationRepository(session)
         self._documents = DocumentRepository(session)
         self._collections = CollectionRepository(session)
-        self._workspaces = WorkspaceRepository(session)
+        self._policy = PolicyService(session)
 
     def list_conversations(
         self, *, user: User, workspace_id: UUID
     ) -> list[tuple[Conversation, int, list[UUID]]]:
-        self._require_workspace(user, workspace_id)
+        self._require_policy(user, workspace_id, PolicyAction.CONVERSATION_READ)
         return [
             (
                 conversation,
@@ -61,6 +71,7 @@ class ConversationService:
                 self._conversations.document_ids(workspace_id, conversation.id),
             )
             for conversation, count in self._conversations.list_for_workspace(workspace_id)
+            if self._policy.can_read(user=user, resource=resource_context(conversation))
         ]
 
     def create_conversation(
@@ -68,19 +79,33 @@ class ConversationService:
     ) -> tuple[Conversation, list[UUID]]:
         document_ids = list(payload.document_ids)
         with self._session.begin():
-            self._require_workspace(user, workspace_id)
+            self._require_policy(user, workspace_id, PolicyAction.CONVERSATION_CREATE)
             if payload.target_type == ConversationTargetType.COLLECTION:
                 collection_id = payload.collection_id
-                if collection_id is None or self._collections.get_collection(
-                    workspace_id, collection_id
-                ) is None:
+                collection = (
+                    self._collections.get_collection(workspace_id, collection_id)
+                    if collection_id is not None
+                    else None
+                )
+                if collection is None:
                     raise ConversationNotFoundError
+                self._require_policy(
+                    user,
+                    workspace_id,
+                    PolicyAction.COLLECTION_READ,
+                    resource=resource_context(collection),
+                )
             elif payload.target_type == ConversationTargetType.DOCUMENTS:
-                if any(
-                    self._documents.get_document(workspace_id, document_id) is None
-                    for document_id in document_ids
-                ):
-                    raise ConversationNotFoundError
+                for document_id in document_ids:
+                    document = self._documents.get_document(workspace_id, document_id)
+                    if document is None:
+                        raise ConversationNotFoundError
+                    self._require_policy(
+                        user,
+                        workspace_id,
+                        PolicyAction.DOCUMENT_READ,
+                        resource=resource_context(document),
+                    )
             conversation = Conversation(
                 workspace_id=workspace_id,
                 created_by_user_id=user.id,
@@ -103,10 +128,15 @@ class ConversationService:
     def get_conversation(
         self, *, user: User, workspace_id: UUID, conversation_id: UUID
     ) -> tuple[Conversation, list[UUID], list[ConversationMessage]]:
-        self._require_workspace(user, workspace_id)
         conversation = self._conversations.get(workspace_id, conversation_id)
         if conversation is None:
             raise ConversationNotFoundError
+        self._require_policy(
+            user,
+            workspace_id,
+            PolicyAction.CONVERSATION_READ,
+            resource=resource_context(conversation),
+        )
         return (
             conversation,
             self._conversations.document_ids(workspace_id, conversation_id),
@@ -126,7 +156,13 @@ class ConversationService:
             workspace_id=workspace_id,
             conversation_id=conversation_id,
         )
-        resolved = self._ready_scope(conversation)
+        self._require_policy(
+            user,
+            workspace_id,
+            PolicyAction.CONVERSATION_MESSAGE_CREATE,
+            resource=resource_context(conversation),
+        )
+        resolved = self._ready_scope(user, conversation)
         if not resolved:
             raise NoIndexedEvidenceError("No indexed document is available for this scope")
 
@@ -212,7 +248,7 @@ class ConversationService:
         return user_message, assistant_message
 
     def _ready_scope(
-        self, conversation: Conversation
+        self, user: User, conversation: Conversation
     ) -> list[tuple[Document, DocumentVersion]]:
         target = ConversationTargetType(conversation.target_type)
         if target == ConversationTargetType.WORKSPACE:
@@ -236,6 +272,8 @@ class ConversationService:
 
         resolved: list[tuple[Document, DocumentVersion]] = []
         for document in documents:
+            if not self._policy.can_read(user=user, resource=resource_context(document)):
+                continue
             version = self._documents.latest_ready_version(
                 conversation.workspace_id, document.id
             )
@@ -243,6 +281,22 @@ class ConversationService:
                 resolved.append((document, version))
         return resolved
 
-    def _require_workspace(self, user: User, workspace_id: UUID) -> None:
-        if self._workspaces.get_for_user(workspace_id, user.id) is None:
-            raise ConversationNotFoundError
+    def _require_policy(
+        self,
+        user: User,
+        workspace_id: UUID,
+        action: PolicyAction,
+        *,
+        resource=None,
+    ) -> None:
+        try:
+            self._policy.require(
+                user=user,
+                workspace_id=workspace_id,
+                action=action,
+                resource=resource,
+            )
+        except PolicyNotFoundError as exc:
+            raise ConversationNotFoundError from exc
+        except PolicyDeniedError as exc:
+            raise ConversationPermissionError from exc

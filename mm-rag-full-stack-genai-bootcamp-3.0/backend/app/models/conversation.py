@@ -20,6 +20,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.app.db.base import Base
+from backend.app.models.access import ResourceVisibility
 from backend.app.models.mixins import TimestampMixin
 
 
@@ -37,6 +38,10 @@ class MessageRole(StrEnum):
 class Conversation(TimestampMixin, Base):
     __tablename__ = "conversations"
     __table_args__ = (
+        CheckConstraint(
+            "visibility IN ('workspace', 'restricted')",
+            name="ck_conversations_visibility",
+        ),
         CheckConstraint(
             "target_type IN ('workspace', 'collection', 'documents')",
             name="ck_conversations_target_type",
@@ -69,6 +74,12 @@ class Conversation(TimestampMixin, Base):
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     target_type: Mapped[str] = mapped_column(String(20), nullable=False)
     collection_id: Mapped[UUID | None] = mapped_column(Uuid(as_uuid=True), nullable=True)
+    visibility: Mapped[str] = mapped_column(
+        String(16),
+        nullable=False,
+        default=ResourceVisibility.RESTRICTED.value,
+        server_default=ResourceVisibility.RESTRICTED.value,
+    )
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 

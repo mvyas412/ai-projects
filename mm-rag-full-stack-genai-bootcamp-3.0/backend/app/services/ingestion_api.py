@@ -23,14 +23,20 @@ from backend.app.models.ingestion import (
 from backend.app.models.user import User
 from backend.app.repositories.documents import DocumentRepository
 from backend.app.repositories.ingestion_jobs import IngestionJobRepository
-from backend.app.repositories.workspaces import WorkspaceRepository
-from backend.app.services.documents import WRITE_ROLES, DocumentLibraryService
+from backend.app.services.documents import DocumentLibraryService
 from backend.app.services.ingestion_jobs import (
     IngestionIdempotencyConflictError,
     IngestionJobNotFoundError,
     IngestionJobPermissionError,
     IngestionJobStateMachine,
     IngestionJobValidationError,
+)
+from backend.app.services.policy import (
+    PolicyAction,
+    PolicyDeniedError,
+    PolicyNotFoundError,
+    PolicyService,
+    resource_context,
 )
 from backend.app.storage.base import ObjectStorage
 
@@ -53,7 +59,7 @@ class IngestionAPIService:
         self._settings = settings
         self._jobs = IngestionJobRepository(session)
         self._documents = DocumentRepository(session)
-        self._workspaces = WorkspaceRepository(session)
+        self._policy = PolicyService(session)
 
     def upload_and_enqueue(
         self,
@@ -170,10 +176,10 @@ class IngestionAPIService:
     def get_job(
         self, *, user: User, workspace_id: UUID, job_id: UUID
     ) -> IngestionJobView:
-        self._require_membership(user, workspace_id)
         job = self._jobs.get_job(workspace_id, job_id)
         if job is None:
             raise IngestionJobNotFoundError
+        self._require_job_read(user, job)
         return IngestionJobView(job, self._jobs.latest_attempt(job.id))
 
     def list_jobs(
@@ -184,15 +190,19 @@ class IngestionAPIService:
         document_version_id: UUID | None = None,
         limit: int = 100,
     ) -> list[IngestionJobView]:
-        self._require_membership(user, workspace_id)
-        return [
-            IngestionJobView(job, self._jobs.latest_attempt(job.id))
-            for job in self._jobs.list_for_workspace(
-                workspace_id,
-                document_version_id=document_version_id,
-                limit=limit,
-            )
-        ]
+        self._require_workspace_job_read(user, workspace_id)
+        views: list[IngestionJobView] = []
+        for job in self._jobs.list_for_workspace(
+            workspace_id,
+            document_version_id=document_version_id,
+            limit=limit,
+        ):
+            try:
+                self._require_job_read(user, job)
+            except (IngestionJobNotFoundError, IngestionJobPermissionError):
+                continue
+            views.append(IngestionJobView(job, self._jobs.latest_attempt(job.id)))
+        return views
 
     def cancel_job(
         self, *, user: User, workspace_id: UUID, job_id: UUID
@@ -237,15 +247,11 @@ class IngestionAPIService:
         idempotency_key: str,
         predecessor_job_id: UUID | None,
     ) -> tuple[IngestionJob, bool]:
-        membership = self._workspaces.get_for_user(workspace_id, user.id)
-        if membership is None:
-            raise IngestionJobNotFoundError
-        if membership[1] not in WRITE_ROLES:
-            raise IngestionJobPermissionError
         document = self._documents.get_document(workspace_id, document_id)
         version = self._documents.get_version(workspace_id, document_id, version_id)
         if document is None or version is None:
             raise IngestionJobNotFoundError
+        self._require_document_action(user, document, PolicyAction.DOCUMENT_INDEX)
         current_fingerprint = pipeline_fingerprint(self._settings, document.media_type)
         if version.ingestion_fingerprint != current_fingerprint:
             raise IngestionJobValidationError(
@@ -278,11 +284,6 @@ class IngestionAPIService:
         request_hash: str,
     ) -> tuple[Document, DocumentVersion, IngestionJob] | None:
         with self._session.begin():
-            membership = self._workspaces.get_for_user(workspace_id, user.id)
-            if membership is None:
-                raise IngestionJobNotFoundError
-            if membership[1] not in WRITE_ROLES:
-                raise IngestionJobPermissionError
             existing = self._jobs.get_by_idempotency_key(
                 workspace_id,
                 IngestionOperation.INDEX_DOCUMENT_VERSION.value,
@@ -305,11 +306,41 @@ class IngestionAPIService:
             )
             if document is None or version is None:
                 raise IngestionJobNotFoundError
+            self._require_document_action(user, document, PolicyAction.DOCUMENT_INDEX)
             return document, version, existing
 
-    def _require_membership(self, user: User, workspace_id: UUID) -> None:
-        if self._workspaces.get_for_user(workspace_id, user.id) is None:
+    def _require_workspace_job_read(self, user: User, workspace_id: UUID) -> None:
+        try:
+            self._policy.require(
+                user=user,
+                workspace_id=workspace_id,
+                action=PolicyAction.JOB_READ,
+            )
+        except PolicyNotFoundError as exc:
+            raise IngestionJobNotFoundError from exc
+        except PolicyDeniedError as exc:
+            raise IngestionJobPermissionError from exc
+
+    def _require_job_read(self, user: User, job: IngestionJob) -> None:
+        document = self._documents.get_document(job.workspace_id, job.document_id)
+        if document is None:
             raise IngestionJobNotFoundError
+        self._require_document_action(user, document, PolicyAction.JOB_READ)
+
+    def _require_document_action(
+        self, user: User, document: Document, action: PolicyAction
+    ) -> None:
+        try:
+            self._policy.require(
+                user=user,
+                workspace_id=document.workspace_id,
+                action=action,
+                resource=resource_context(document),
+            )
+        except PolicyNotFoundError as exc:
+            raise IngestionJobNotFoundError from exc
+        except PolicyDeniedError as exc:
+            raise IngestionJobPermissionError from exc
 
 
 def _upload_request_hash(

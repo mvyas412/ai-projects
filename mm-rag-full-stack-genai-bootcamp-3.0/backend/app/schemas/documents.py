@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from backend.app.models.access import ResourceVisibility
 from backend.app.models.document import DocumentVersionStatus
 
 
@@ -29,6 +30,7 @@ class DocumentSummary(BaseModel):
     title: str
     original_filename: str
     media_type: str
+    visibility: ResourceVisibility
     archived_at: datetime | None
     latest_version: DocumentVersionSummary
     created_at: datetime
@@ -70,6 +72,7 @@ class CollectionSummary(BaseModel):
     workspace_id: UUID
     name: str
     description: str | None
+    visibility: ResourceVisibility
     document_count: int
     archived_at: datetime | None
     created_at: datetime
