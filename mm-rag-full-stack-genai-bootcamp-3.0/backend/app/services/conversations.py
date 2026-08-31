@@ -121,7 +121,7 @@ class ConversationService:
                 action="conversation.created",
                 resource_type="conversation",
                 resource_id=conversation.id,
-                details={"target_type": payload.target_type.value, "title": payload.title},
+                details={"target_type": payload.target_type.value},
             )
         return conversation, document_ids
 

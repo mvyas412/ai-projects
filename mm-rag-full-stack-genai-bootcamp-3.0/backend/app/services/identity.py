@@ -59,7 +59,6 @@ class IdentityProvisioningService:
             action="workspace.provisioned",
             resource_type="workspace",
             resource_id=workspace.id,
-            details={"name": workspace.name},
         )
         return user
 

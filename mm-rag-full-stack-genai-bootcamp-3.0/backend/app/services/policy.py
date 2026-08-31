@@ -241,9 +241,71 @@ class PolicyService:
                 principal_id=user.id,
             )
             return decision
+        try:
+            self._record_denial_best_effort(
+                user=user,
+                workspace_id=workspace_id,
+                action=str(action),
+                resource=resource,
+                decision=decision,
+            )
+        except Exception:
+            pass
         if decision.discoverable:
             raise PolicyDeniedError
         raise PolicyNotFoundError
+
+    def _record_denial_best_effort(
+        self,
+        *,
+        user: User,
+        workspace_id: UUID,
+        action: str,
+        resource: ResourceContext | None,
+        decision: PolicyDecision,
+    ) -> None:
+        if not decision.discoverable:
+            return
+        try:
+            from backend.app.models.audit import AuditResult
+            from backend.app.services.audit import record_audit_event
+
+            bind = self._session.get_bind()
+            if bind.dialect.name != "postgresql":
+                return
+            with Session(bind=bind) as audit_session:
+                with audit_session.begin():
+                    set_rls_context(
+                        audit_session,
+                        purpose=DatabasePurpose.API,
+                        workspace_id=workspace_id,
+                        principal_id=user.id,
+                    )
+                    record_audit_event(
+                        audit_session,
+                        workspace_id=workspace_id,
+                        actor_user_id=user.id,
+                        action="policy.denied",
+                        resource_type=(
+                            resource.resource_type.value
+                            if resource is not None
+                            else "workspace"
+                        ),
+                        resource_id=(
+                            resource.resource_id
+                            if resource is not None
+                            else workspace_id
+                        ),
+                        result=AuditResult.DENIED,
+                        policy_revision=decision.policy_revision,
+                        details={
+                            "requested_action": action,
+                            "denial_reason": decision.reason,
+                        },
+                    )
+        except Exception:
+            # Authorization remains denied even when best-effort denial evidence fails.
+            return
 
     def can_read(self, *, user: User, resource: ResourceContext) -> bool:
         action = {

@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.core.config import Settings
 from backend.app.ingestion.pipeline import pipeline_fingerprint
+from backend.app.models.audit import AuditResult
 from backend.app.models.document import Collection, Document, DocumentVersion
 from backend.app.models.user import User
 from backend.app.models.workspace import WorkspaceRole
@@ -22,6 +23,7 @@ from backend.app.repositories.workspaces import WorkspaceRepository
 from backend.app.services.audit import record_audit_event
 from backend.app.services.policy import (
     PolicyAction,
+    PolicyDecision,
     PolicyDeniedError,
     PolicyNotFoundError,
     PolicyService,
@@ -142,7 +144,7 @@ class DocumentLibraryService:
         version = self._documents.get_version(workspace_id, document_id, version_id)
         if document is None or version is None:
             raise ResourceNotFoundError
-        self._require_policy(
+        decision = self._require_policy(
             user,
             workspace_id,
             PolicyAction.DOCUMENT_DOWNLOAD,
@@ -150,6 +152,18 @@ class DocumentLibraryService:
         )
         try:
             stored = resolve_original_object(self._storage, document, version)
+            record_audit_event(
+                self._session,
+                workspace_id=workspace_id,
+                actor_user_id=user.id,
+                action="document.content_downloaded",
+                resource_type="document",
+                resource_id=document.id,
+                result=AuditResult.ALLOWED,
+                policy_revision=decision.policy_revision,
+                details={"version_id": str(version.id)},
+            )
+            self._session.commit()
             return document, version, self._storage.open_stream(stored.key)
         except ObjectStorageError as exc:
             raise ObjectAccessError from exc
@@ -426,7 +440,6 @@ class DocumentLibraryService:
                     action="collection.created",
                     resource_type="collection",
                     resource_id=collection.id,
-                    details={"name": collection.name},
                 )
             return collection
         except IntegrityError as exc:
@@ -523,7 +536,6 @@ class DocumentLibraryService:
             resource_type="document",
             resource_id=document.id,
             details={
-                "title": document.title,
                 "version_id": str(version.id),
                 "media_type": document.media_type,
             },
@@ -578,9 +590,9 @@ class DocumentLibraryService:
         action: PolicyAction,
         *,
         resource=None,
-    ) -> None:
+    ) -> PolicyDecision:
         try:
-            self._policy.require(
+            return self._policy.require(
                 user=user,
                 workspace_id=workspace_id,
                 action=action,

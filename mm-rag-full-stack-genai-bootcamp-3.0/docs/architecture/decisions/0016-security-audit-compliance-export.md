@@ -83,3 +83,19 @@ ledger/SIEM selection.
 - Export is bounded, checksummed, authorized, reproducible, and records its own creation/download.
 - Schema tests reject secret-bearing, content-bearing, oversized, and unknown detail fields.
 - Application roles cannot update or delete audit rows.
+
+## Implementation evidence
+
+Migration `20260831_0012` extends each event with a user or named service actor,
+explicit result, policy revision, correlation ID, and schema version. A strict details
+allowlist rejects secret/content-bearing, unknown, nested, and oversized fields.
+Required privileged audit writes remain in the mutation transaction; discoverable
+PostgreSQL policy denials use best-effort independent evidence and remain denied when
+that write is unavailable. A live effective-role test proves application roles cannot
+update or delete audit rows.
+
+Owner/admin security review is bounded and audits the read. Compliance exports are
+private canonical JSON artifacts limited to 31 days and 5,000 events, idempotent for
+an exact range/schema request, SHA-256 checksummed, and downloaded through the
+authorized backend. Creation and download are audited; members receive 403 and
+outsiders receive non-enumerating 404 responses. Deterministic and full live gates pass.

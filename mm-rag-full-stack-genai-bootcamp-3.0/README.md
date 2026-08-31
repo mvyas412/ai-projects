@@ -6,15 +6,16 @@ remain unchanged at the immutable `mm-rag-v1.0.0` and `mm-rag-v2.0.0` Git tags.
 
 ## Current status
 
-Phase 3 is accepted and preserved at `mm-rag-v3.0.0`. Phase 4 Milestones 4.0–4.3
+Phase 3 is accepted and preserved at `mm-rag-v3.0.0`. Phase 4 Milestones 4.0–4.4
 are complete on `phase-4/mm-rag-governance`: ADRs 0013–0017 are accepted and
-migrations through `20260831_0011` add the central default-deny policy, workspace-compatible
+migrations through `20260831_0012` add the central default-deny policy, workspace-compatible
 visibility, tenant-constrained user ACLs, creator-private new conversations, and
 shared product-path enforcement plus PostgreSQL RLS runtime roles. Qdrant retrieval
 now requires bounded document/version/generation scope and revalidates every returned
 point. Backend-streamed objects use canonical references and integrity checks, and a
 fail-closed future-connector permission envelope is durable without selecting a
-connector. Security export and lifecycle deletion follow.
+connector. Safe append-only security review and checksummed compliance export are
+implemented; lifecycle deletion and incident controls follow.
 
 The Phase 3 baseline currently contains:
 
@@ -270,7 +271,7 @@ Qdrant, SeaweedFS, and RabbitMQ data volumes.
 The migration history contains the infrastructure baseline plus identity,
 document-library, conversation, immutable activity, durable ingestion-job,
 transactional-outbox, immutable-generation, Phase 4 ACL, and PostgreSQL RLS schemas
-through `20260831_0011`:
+through `20260831_0012`:
 
 ```bash
 uv run alembic upgrade head

@@ -27,7 +27,6 @@ class WorkspaceService:
                 action="workspace.created",
                 resource_type="workspace",
                 resource_id=workspace.id,
-                details={"name": workspace.name},
             )
         return workspace, WorkspaceRole.OWNER
 

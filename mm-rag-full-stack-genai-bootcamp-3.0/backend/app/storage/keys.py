@@ -31,6 +31,13 @@ def generation_artifact_key(
     )
 
 
+def compliance_export_key(*, workspace_id: UUID, export_id: UUID) -> str:
+    return (
+        f"workspaces/{workspace_id}/compliance-exports/{export_id}/"
+        "audit-events-v1.json"
+    )
+
+
 def _validated_artifact_name(value: str) -> str:
     if not _ARTIFACT_NAME.fullmatch(value) or ".." in value:
         raise ValueError("Artifact name must use a safe internal identifier")

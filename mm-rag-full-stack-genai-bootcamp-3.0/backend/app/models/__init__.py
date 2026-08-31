@@ -1,5 +1,10 @@
 from backend.app.models.access import ResourceACLGrant, ResourceVisibility
-from backend.app.models.audit import AuditEvent
+from backend.app.models.audit import (
+    AuditActorKind,
+    AuditEvent,
+    AuditResult,
+    ComplianceExport,
+)
 from backend.app.models.conversation import (
     Conversation,
     ConversationDocument,
@@ -33,12 +38,15 @@ from backend.app.models.workspace import Workspace, WorkspaceMembership, Workspa
 
 __all__ = [
     "AuditEvent",
+    "AuditActorKind",
+    "AuditResult",
     "Collection",
     "CollectionDocument",
     "Conversation",
     "ConversationDocument",
     "ConversationMessage",
     "ConversationTargetType",
+    "ComplianceExport",
     "Document",
     "DocumentVersion",
     "DocumentVersionStatus",

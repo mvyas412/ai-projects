@@ -10,7 +10,7 @@ def test_migration_history_has_phase4_permission_envelope_head() -> None:
     config = Config(PROJECT_ROOT / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260831_0011"]
+    assert scripts.get_heads() == ["20260831_0012"]
     baseline = scripts.get_revision("20260829_0001")
     assert baseline is not None
     assert baseline.down_revision is None
@@ -43,3 +43,6 @@ def test_migration_history_has_phase4_permission_envelope_head() -> None:
     phase4_permissions = scripts.get_revision("20260831_0011")
     assert phase4_permissions is not None
     assert phase4_permissions.down_revision == "20260831_0010"
+    phase4_audit = scripts.get_revision("20260831_0012")
+    assert phase4_audit is not None
+    assert phase4_audit.down_revision == "20260831_0011"

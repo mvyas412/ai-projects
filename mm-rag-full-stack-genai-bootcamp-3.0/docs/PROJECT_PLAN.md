@@ -44,12 +44,12 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 4.3 complete; Milestone 4.4 security audit views and compliance export is next |
+| Active milestone | Phase 4.4 complete; Milestone 4.5 lifecycle, deletion, encryption, and incident controls is next |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
 | Phase 3 quality gate | 110 deterministic tests pass with four opt-in integration skips; all 114 tests pass in the free live-service gate; CI-equivalent coverage is 81.39% against the 70% threshold; one explicitly approved signed-in real-OpenAI async promotion/retrieval proof passed |
-| Phase 4 | In progress — Milestones 4.0–4.3 complete |
+| Phase 4 | In progress — Milestones 4.0–4.4 complete |
 | Phases 5–9 | Planned |
 
 ## Delivery sequence and gates
@@ -454,11 +454,11 @@ Implemented and validated:
 
 ## Phase 4 — fine-grained authorization and governance
 
-**Status:** In progress — Milestones 4.0–4.3 are complete. The accepted policy
+**Status:** In progress — Milestones 4.0–4.4 are complete. The accepted policy
 matrix now has a central default-deny service, tenant-constrained ACL persistence,
 PostgreSQL RLS defense, mandatory Qdrant scope enforcement, backend-mediated object
-resolution, and a future connector permission-envelope contract. Audit/export and
-lifecycle controls follow.
+resolution, a future connector permission-envelope contract, safe append-only
+security review, and checksummed compliance export. Lifecycle controls follow.
 
 ### Objective
 
@@ -473,8 +473,8 @@ depth, auditable administration, and lifecycle governance.
 | 4.1 | Central role/ACL policy service and reusable authorization dependencies | Completed at `20260831_0009` |
 | 4.2 | PostgreSQL row-level-security defense and mandatory Qdrant scope enforcement | Completed at `20260831_0010` |
 | 4.3 | Authorized object access and connector permission propagation contract | Completed at `20260831_0011` |
-| 4.4 | Append-only audit events, activity views, and compliance export | Ready for implementation |
-| 4.5 | Retention, deletion, encryption/key, and incident-response controls | Planned after 4.4 |
+| 4.4 | Append-only audit events, activity views, and compliance export | Completed at `20260831_0012` |
+| 4.5 | Retention, deletion, encryption/key, and incident-response controls | Ready for implementation |
 
 Milestone 4.0 review material:
 
@@ -535,6 +535,23 @@ Milestone 4.0 review material:
 - The full deterministic gate passes 129 tests with eight opt-in skips; the free live
   gate passes all 137 tests, including PostgreSQL and SeaweedFS isolation evidence,
   migration reversal, and no schema drift. No paid model call was invoked.
+
+### Milestone 4.4 implementation status
+
+- Extended activity into a versioned security event contract with user/service
+  actors, explicit result, policy revision, request/job correlation, and strict
+  allowlisted details that reject secrets, content, unknown fields, and oversize values.
+- Privileged ACL changes remain transaction-coupled to required audit writes; policy
+  denials stay denied if best-effort evidence fails. PostgreSQL records discoverable
+  denials independently without exposing outsider resource existence.
+- PostgreSQL runtime roles cannot update or delete audit rows. Owner/admin receive a
+  separate bounded security view; members receive 403 and outsiders 404.
+- Added durable, private, schema-versioned JSON compliance exports with a 31-day/
+  5,000-event bound, deterministic idempotent replay, SHA-256 checksum, authorized
+  backend download, and audited creation/download.
+- Migration `20260831_0012` is reversible with no schema drift. The deterministic
+  gate passes 138 tests with nine opt-in skips; the complete free live gate passes
+  all 147 tests. No paid OpenAI call was invoked.
 
 ### Completion gate
 
@@ -745,7 +762,7 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Implement Milestone 4.4 security audit views and compliance export | Append-only safe events, privileged review, reproducible export, and checksum evidence |
+| 1 | Implement Milestone 4.5 lifecycle, deletion, encryption, and incident controls | Tombstone/restore/purge plans, retention preview/apply, encryption posture, and incident runbook evidence |
 | 2 | Maintain draft PR #3 | Reviewable commits, green CI, and squash-and-merge only after explicit approval |
 
 ## Update protocol

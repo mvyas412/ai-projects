@@ -23,6 +23,10 @@ def get_object_storage(request: Request) -> ObjectStorage:
     return request.app.state.object_storage
 
 
+def get_artifact_storage(request: Request) -> ObjectStorage:
+    return request.app.state.artifact_storage
+
+
 def get_rag_engine(request: Request) -> RAGEngine:
     return request.app.state.rag_engine
 

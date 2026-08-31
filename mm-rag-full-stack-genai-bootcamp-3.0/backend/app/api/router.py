@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from backend.app.api.routes.access import router as access_router
 from backend.app.api.routes.audit import router as audit_router
+from backend.app.api.routes.audit import security_router
 from backend.app.api.routes.conversations import router as conversations_router
 from backend.app.api.routes.documents import router as documents_router
 from backend.app.api.routes.health import router as health_router
@@ -18,3 +19,4 @@ api_router.include_router(documents_router)
 api_router.include_router(ingestion_router)
 api_router.include_router(conversations_router)
 api_router.include_router(audit_router)
+api_router.include_router(security_router)

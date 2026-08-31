@@ -11,6 +11,7 @@ from backend.app.models import (
     AuditEvent,
     Collection,
     CollectionDocument,
+    ComplianceExport,
     Conversation,
     ConversationDocument,
     ConversationMessage,
@@ -29,6 +30,7 @@ from backend.app.models import (
 
 _REGISTERED_MODELS = (
     AuditEvent,
+    ComplianceExport,
     User,
     Workspace,
     WorkspaceMembership,

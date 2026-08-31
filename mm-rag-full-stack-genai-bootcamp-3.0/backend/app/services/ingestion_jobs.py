@@ -506,10 +506,11 @@ class IngestionJobStateMachine:
         record_audit_event(
             self._session,
             workspace_id=job.workspace_id,
-            actor_user_id=job.requested_by_user_id,
+            service_actor="ingestion-worker",
             action="ingestion.job_succeeded",
             resource_type="document",
             resource_id=job.document_id,
+            correlation_id=str(job.id),
             details={
                 "job_id": str(job.id),
                 "version_id": str(job.document_version_id),
