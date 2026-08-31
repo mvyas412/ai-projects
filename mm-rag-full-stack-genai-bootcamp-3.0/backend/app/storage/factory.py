@@ -11,6 +11,18 @@ def create_object_storage(settings: Settings) -> ObjectStorage:
     if settings.object_storage_backend == "local":
         return LocalFileStorage(settings.local_storage_root)
 
+    return _create_s3_storage(settings, settings.s3_originals_bucket)
+
+
+def create_artifact_storage(settings: Settings) -> ObjectStorage:
+    if settings.object_storage_backend == "local":
+        return LocalFileStorage(settings.local_storage_root)
+
+    return _create_s3_storage(settings, settings.s3_artifacts_bucket)
+
+
+def _create_s3_storage(settings: Settings, bucket: str) -> ObjectStorage:
+
     assert settings.s3_access_key_id is not None
     assert settings.s3_secret_access_key is not None
     client = boto3.client(
@@ -29,4 +41,4 @@ def create_object_storage(settings: Settings) -> ObjectStorage:
             response_checksum_validation="when_required",
         ),
     )
-    return S3ObjectStorage(client, settings.s3_originals_bucket)
+    return S3ObjectStorage(client, bucket)

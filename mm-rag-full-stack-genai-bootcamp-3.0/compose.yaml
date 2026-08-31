@@ -53,6 +53,94 @@ services:
     networks:
       - phase3
 
+  rabbitmq:
+    image: rabbitmq:4.2.3-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-mmrag-local-dev}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-mmrag-local-dev-only}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-mm_rag_phase3}
+    ports:
+      - "127.0.0.1:${RABBITMQ_PORT:-5673}:5672"
+      - "127.0.0.1:${RABBITMQ_MANAGEMENT_PORT:-15673}:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    networks:
+      - phase3
+
+  dispatcher:
+    profiles: ["runtime"]
+    build:
+      context: .
+    restart: unless-stopped
+    command: ["uv", "run", "python", "-m", "backend.app.workers.outbox_dispatcher"]
+    environment: &runtime-environment
+      APP_ENV: development
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-mm_rag}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-mm_rag_phase3}
+      QDRANT_URL: http://qdrant:6333
+      OBJECT_STORAGE_BACKEND: s3
+      S3_ENDPOINT_URL: http://seaweedfs:8333
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-mmrag-local-dev}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-mmrag-local-dev-only}
+      S3_ORIGINALS_BUCKET: ${S3_ORIGINALS_BUCKET:-mm-rag-phase3-originals}
+      S3_ARTIFACTS_BUCKET: ${S3_ARTIFACTS_BUCKET:-mm-rag-phase3-artifacts}
+      S3_PATH_STYLE: "true"
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-mmrag-local-dev}:${RABBITMQ_PASSWORD:-mmrag-local-dev-only}@rabbitmq:5672/${RABBITMQ_VHOST:-mm_rag_phase3}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_CHAT_MODEL: ${OPENAI_CHAT_MODEL:-gpt-4.1-mini}
+      OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+      RUNTIME_HEALTH_DIRECTORY: /app/data/runtime/health
+    volumes:
+      - runtime_health:/app/data/runtime/health
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "uv", "run", "python", "-m", "backend.app.workers.outbox_dispatcher", "--health-check"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - phase3
+
+  worker:
+    profiles: ["runtime"]
+    build:
+      context: .
+    restart: unless-stopped
+    command: ["uv", "run", "python", "-m", "backend.app.workers.ingestion_worker"]
+    environment: *runtime-environment
+    volumes:
+      - runtime_health:/app/data/runtime/health
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      seaweedfs:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "uv", "run", "python", "-m", "backend.app.workers.ingestion_worker", "--health-check"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - phase3
+
 networks:
   phase3:
     driver: bridge
@@ -61,3 +149,5 @@ volumes:
   postgres_data:
   qdrant_data:
   seaweedfs_data:
+  rabbitmq_data:
+  runtime_health:

@@ -7,7 +7,8 @@ from uuid import UUID
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from backend.app.models.document import DocumentVersion
+from backend.app.models.document import DocumentVersion, DocumentVersionStatus
+from backend.app.models.generation import IngestionGeneration, IngestionGenerationState
 from backend.app.models.ingestion import (
     IngestionAttempt,
     IngestionAttemptState,
@@ -247,7 +248,48 @@ class IngestionJobStateMachine:
             last_heartbeat_at=now,
         )
         self._jobs.add_attempt(attempt)
+        version = self._documents.get_version(
+            job.workspace_id,
+            job.document_id,
+            job.document_version_id,
+            for_update=True,
+        )
+        if version is None:
+            raise IngestionJobNotFoundError
+        if version.active_generation_id is None:
+            version.status = DocumentVersionStatus.PROCESSING.value
+            version.failure_reason = None
         return job, attempt
+
+    def create_generation(
+        self,
+        *,
+        job_id: UUID,
+        attempt_id: UUID,
+        fencing_token: int,
+        now: datetime,
+    ) -> IngestionGeneration:
+        self._require_transaction()
+        now = self._utc(now)
+        job, attempt = self._active_attempt(
+            job_id=job_id,
+            attempt_id=attempt_id,
+            fencing_token=fencing_token,
+            now=now,
+        )
+        existing = self._jobs.get_generation_for_attempt(attempt.id, for_update=True)
+        if existing is not None:
+            return existing
+        generation = IngestionGeneration(
+            workspace_id=job.workspace_id,
+            document_id=job.document_id,
+            document_version_id=job.document_version_id,
+            job_id=job.id,
+            attempt_id=attempt.id,
+            pipeline_fingerprint=job.pipeline_fingerprint,
+        )
+        self._jobs.add_generation(generation)
+        return generation
 
     def heartbeat(
         self,
@@ -274,21 +316,30 @@ class IngestionJobStateMachine:
         )
         attempt.last_heartbeat_at = now
         attempt.lease_expires_at = now + lease_duration
+        stage_changed = stage is not None and attempt.progress_stage != stage.value
         next_completed = (
             completed_units
             if completed_units is not None
-            else attempt.progress_completed
+            else (None if stage_changed else attempt.progress_completed)
         )
-        next_total = total_units if total_units is not None else attempt.progress_total
-        next_unit = self._normalize_unit(unit) if unit is not None else attempt.progress_unit
+        next_total = (
+            total_units
+            if total_units is not None
+            else (None if stage_changed else attempt.progress_total)
+        )
+        next_unit = (
+            self._normalize_unit(unit)
+            if unit is not None
+            else (None if stage_changed else attempt.progress_unit)
+        )
         self._validate_progress(next_completed, next_total, next_unit)
         if stage is not None:
             attempt.progress_stage = stage.value
-        if completed_units is not None:
-            attempt.progress_completed = completed_units
-        if total_units is not None:
-            attempt.progress_total = total_units
-        if unit is not None:
+        if completed_units is not None or stage_changed:
+            attempt.progress_completed = next_completed
+        if total_units is not None or stage_changed:
+            attempt.progress_total = next_total
+        if unit is not None or stage_changed:
             attempt.progress_unit = next_unit
         self._advance_revision(job)
         return job.cancel_requested_at is not None
@@ -317,6 +368,7 @@ class IngestionJobStateMachine:
             job.state = IngestionJobState.CANCELLED.value
             job.next_attempt_at = None
             job.completed_at = now
+            self._project_version(job, cancelled=True)
         self._outbox.discard_unpublished_for_job(
             job_id=job.id,
             now=now,
@@ -361,8 +413,103 @@ class IngestionJobStateMachine:
             now=now,
             reason="job_cancelled",
         )
+        self._abandon_generation(attempt.id, now)
+        self._project_version(job, cancelled=True)
         self._advance_revision(job)
         return job, attempt
+
+    def complete_success(
+        self,
+        *,
+        job_id: UUID,
+        attempt_id: UUID,
+        fencing_token: int,
+        generation_id: UUID,
+        manifest: dict[str, object],
+        manifest_object_key: str,
+        manifest_sha256: str,
+        chunk_count: int,
+        vector_count: int,
+        now: datetime,
+    ) -> tuple[IngestionJob, IngestionAttempt, IngestionGeneration, bool]:
+        self._require_transaction()
+        now = self._utc(now)
+        job, attempt = self._active_attempt(
+            job_id=job_id,
+            attempt_id=attempt_id,
+            fencing_token=fencing_token,
+            now=now,
+        )
+        generation = self._jobs.get_generation(generation_id, for_update=True)
+        if (
+            generation is None
+            or generation.job_id != job.id
+            or generation.attempt_id != attempt.id
+            or generation.workspace_id != job.workspace_id
+            or generation.document_version_id != job.document_version_id
+        ):
+            raise IngestionAttemptOwnershipError("Generation ownership is invalid")
+        if generation.state != IngestionGenerationState.BUILDING.value:
+            raise IngestionInvalidTransitionError("Generation is not buildable")
+        if _HEX64.fullmatch(manifest_sha256) is None:
+            raise IngestionJobValidationError("manifest_sha256 is invalid")
+        if not manifest_object_key or len(manifest_object_key) > 1024:
+            raise IngestionJobValidationError("manifest_object_key is invalid")
+        if chunk_count <= 0 or vector_count <= 0:
+            raise IngestionJobValidationError("A promoted generation must contain vectors")
+
+        if job.cancel_requested_at is not None:
+            self._finish_attempt(attempt, IngestionAttemptState.CANCELLED, now)
+            generation.state = IngestionGenerationState.ABANDONED.value
+            generation.abandoned_at = now
+            job.state = IngestionJobState.CANCELLED.value
+            job.completed_at = now
+            job.next_attempt_at = None
+            self._project_version(job, cancelled=True)
+            self._advance_revision(job)
+            return job, attempt, generation, False
+
+        version = self._documents.get_version(
+            job.workspace_id,
+            job.document_id,
+            job.document_version_id,
+            for_update=True,
+        )
+        if version is None:
+            raise IngestionJobNotFoundError
+        generation.manifest = manifest
+        generation.manifest_object_key = manifest_object_key
+        generation.manifest_sha256 = manifest_sha256
+        generation.chunk_count = chunk_count
+        generation.vector_count = vector_count
+        generation.validated_at = now
+        generation.promoted_at = now
+        generation.state = IngestionGenerationState.PROMOTED.value
+        version.active_generation_id = generation.id
+        version.active_generation_promoted_at = now
+        version.status = DocumentVersionStatus.READY.value
+        version.failure_reason = None
+        self._finish_attempt(attempt, IngestionAttemptState.SUCCEEDED, now)
+        job.state = IngestionJobState.SUCCEEDED.value
+        job.completed_at = now
+        job.next_attempt_at = None
+        job.last_error_code = None
+        job.last_error_message = None
+        record_audit_event(
+            self._session,
+            workspace_id=job.workspace_id,
+            actor_user_id=job.requested_by_user_id,
+            action="ingestion.job_succeeded",
+            resource_type="document",
+            resource_id=job.document_id,
+            details={
+                "job_id": str(job.id),
+                "version_id": str(job.document_version_id),
+                "chunk_count": chunk_count,
+            },
+        )
+        self._advance_revision(job)
+        return job, attempt, generation, True
 
     def record_failure(
         self,
@@ -394,6 +541,8 @@ class IngestionJobStateMachine:
                 now=now,
                 reason="job_cancelled",
             )
+            self._abandon_generation(attempt.id, now)
+            self._project_version(job, cancelled=True)
             self._advance_revision(job)
             return job, attempt
 
@@ -437,6 +586,8 @@ class IngestionJobStateMachine:
                 now=now,
                 reason="job_terminal",
             )
+        self._abandon_generation(attempt.id, now)
+        self._project_version(job, terminal_failure=scheduled_retry_at is None)
         self._advance_revision(job)
         return job, attempt
 
@@ -500,8 +651,34 @@ class IngestionJobStateMachine:
                 now=now,
                 reason="job_terminal",
             )
+        self._abandon_generation(attempt.id, now)
+        self._project_version(
+            job,
+            cancelled=job.state == IngestionJobState.CANCELLED.value,
+            terminal_failure=job.state == IngestionJobState.FAILED.value,
+        )
         self._advance_revision(job)
         return job, attempt
+
+    def recover_expired_jobs(
+        self, *, now: datetime, limit: int = 25
+    ) -> list[UUID]:
+        self._require_transaction()
+        if not 1 <= limit <= 100:
+            raise IngestionJobValidationError("Recovery limit must be between 1 and 100")
+        now = self._utc(now)
+        recovered: list[UUID] = []
+        for job_id in self._jobs.claim_expired_running_job_ids(now=now, limit=limit):
+            job = self._jobs.get_job_by_id(job_id, for_update=True)
+            if job is None:
+                continue
+            self.recover_expired_lease(
+                job_id=job.id,
+                now=now,
+                retry_at=now + retry_delay(job.attempt_count, job.id),
+            )
+            recovered.append(job.id)
+        return recovered
 
     def _resolve_replay(
         self,
@@ -605,6 +782,42 @@ class IngestionJobStateMachine:
             raise IngestionAttemptOwnershipError("Attempt lease has expired")
         return job, attempt
 
+    def _abandon_generation(self, attempt_id: UUID, now: datetime) -> None:
+        generation = self._jobs.get_generation_for_attempt(attempt_id, for_update=True)
+        if generation is not None and generation.state in {
+            IngestionGenerationState.BUILDING.value,
+            IngestionGenerationState.VALIDATED.value,
+        }:
+            generation.state = IngestionGenerationState.ABANDONED.value
+            generation.abandoned_at = now
+
+    def _project_version(
+        self,
+        job: IngestionJob,
+        *,
+        cancelled: bool = False,
+        terminal_failure: bool = False,
+    ) -> None:
+        version = self._documents.get_version(
+            job.workspace_id,
+            job.document_id,
+            job.document_version_id,
+            for_update=True,
+        )
+        if version is None:
+            raise IngestionJobNotFoundError
+        if version.active_generation_id is not None:
+            version.status = DocumentVersionStatus.READY.value
+            version.failure_reason = None
+        elif cancelled:
+            version.status = DocumentVersionStatus.UPLOADED.value
+            version.failure_reason = None
+        elif terminal_failure:
+            version.status = DocumentVersionStatus.FAILED.value
+            version.failure_reason = job.last_error_message
+        else:
+            version.status = DocumentVersionStatus.PROCESSING.value
+
     @staticmethod
     def _finish_attempt(
         attempt: IngestionAttempt,
@@ -673,3 +886,11 @@ class IngestionJobStateMachine:
         if value.tzinfo is None:
             return value.replace(tzinfo=UTC)
         return value.astimezone(UTC)
+
+
+def retry_delay(attempt_number: int, job_id: UUID) -> timedelta:
+    """Return the accepted two-step execution retry policy with stable bounded jitter."""
+
+    base = 30 if attempt_number <= 1 else 120
+    jitter = 0.8 + ((job_id.int % 401) / 1000)
+    return timedelta(seconds=base * jitter)

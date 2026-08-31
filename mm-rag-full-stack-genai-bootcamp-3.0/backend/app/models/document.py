@@ -86,6 +86,17 @@ class DocumentVersion(TimestampMixin, Base):
             name="uq_document_versions_id_document_workspace",
         ),
         UniqueConstraint("object_key", name="uq_document_versions_object_key"),
+        ForeignKeyConstraint(
+            ["active_generation_id", "id", "workspace_id"],
+            [
+                "ingestion_generations.id",
+                "ingestion_generations.document_version_id",
+                "ingestion_generations.workspace_id",
+            ],
+            name="fk_document_versions_active_generation",
+            use_alter=True,
+            ondelete="RESTRICT",
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
@@ -105,6 +116,12 @@ class DocumentVersion(TimestampMixin, Base):
         String(24), nullable=False, default=DocumentVersionStatus.UPLOADED.value
     )
     failure_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    active_generation_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True), nullable=True, index=True
+    )
+    active_generation_promoted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
 
 class Collection(TimestampMixin, Base):

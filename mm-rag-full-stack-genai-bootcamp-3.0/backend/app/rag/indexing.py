@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import base64
+import hashlib
+from collections.abc import Callable
 from dataclasses import dataclass
 from io import BytesIO
 from typing import Protocol
@@ -36,19 +38,28 @@ class IndexingRequest:
     document_title: str
     media_type: str
     content: bytes
+    generation_id: UUID | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class IndexingResult:
     chunk_count: int
+    vector_count: int | None = None
+
+
+IndexingProgress = Callable[[str, int | None, int | None, str | None], None]
 
 
 class DocumentIndexer(Protocol):
-    def index(self, request: IndexingRequest) -> IndexingResult: ...
+    def index(
+        self, request: IndexingRequest, *, progress: IndexingProgress | None = None
+    ) -> IndexingResult: ...
 
 
 class UnavailableDocumentIndexer:
-    def index(self, request: IndexingRequest) -> IndexingResult:
+    def index(
+        self, request: IndexingRequest, *, progress: IndexingProgress | None = None
+    ) -> IndexingResult:
         raise IndexingUnavailableError("Document indexing is not configured")
 
 
@@ -57,36 +68,46 @@ class QdrantOpenAIDocumentIndexer:
         self._settings = settings
         self._qdrant = qdrant
 
-    def index(self, request: IndexingRequest) -> IndexingResult:
+    def index(
+        self, request: IndexingRequest, *, progress: IndexingProgress | None = None
+    ) -> IndexingResult:
         api_key = self._settings.openai_api_key
         if api_key is None:
             raise IndexingUnavailableError("Document indexing is not configured")
         try:
+            _notify(progress, "extracting")
             pages = _extract_pages(request, api_key, self._settings)
+            _notify(progress, "chunking", 0, len(pages), "pages")
             chunks = _chunk_pages(pages)
             if not chunks:
                 raise EmptyDocumentError("No readable content was found in the document")
+            _notify(progress, "embedding", 0, len(chunks), "chunks")
             embeddings = OpenAIEmbeddings(
                 api_key=api_key,
                 model=self._settings.openai_embedding_model,
             ).embed_documents([content for content, _ in chunks])
             self._ensure_collection(len(embeddings[0]))
             scope = VectorScope(
-                request.workspace_id, request.document_id, request.document_version_id
+                request.workspace_id,
+                request.document_id,
+                request.document_version_id,
+                request.generation_id,
             )
-            # Replace only this authorized version, making retries idempotent without
-            # disturbing vectors owned by another workspace or document version.
-            self._qdrant.delete(
-                collection_name=self._settings.qdrant_collection_name,
-                points_selector=models.FilterSelector(filter=scope.filter()),
-                wait=True,
-            )
+            if request.generation_id is None:
+                # Preserve the accepted synchronous compatibility path. Async workers
+                # always provide a generation and never delete-before-replace.
+                self._qdrant.delete(
+                    collection_name=self._settings.qdrant_collection_name,
+                    points_selector=models.FilterSelector(filter=scope.filter()),
+                    wait=True,
+                )
+            _notify(progress, "writing_outputs", 0, len(chunks), "vectors")
             points = [
                 models.PointStruct(
                     id=str(
                         uuid5(
                             POINT_NAMESPACE,
-                            f"{request.document_version_id}:{index}",
+                            _point_identity(request, content, page_number, index),
                         )
                     ),
                     vector=vector,
@@ -108,7 +129,8 @@ class QdrantOpenAIDocumentIndexer:
                 points=points,
                 wait=True,
             )
-            return IndexingResult(chunk_count=len(points))
+            _notify(progress, "validating", len(points), len(points), "vectors")
+            return IndexingResult(chunk_count=len(points), vector_count=len(points))
         except EmptyDocumentError:
             raise
         except Exception as exc:
@@ -199,3 +221,26 @@ def _chunk_pages(
         for chunk in splitter.split_text(text)
         if chunk.strip()
     ]
+
+
+def _point_identity(
+    request: IndexingRequest,
+    content: str,
+    page_number: int | None,
+    chunk_index: int,
+) -> str:
+    content_hash = hashlib.sha256(content.strip().encode("utf-8")).hexdigest()
+    generation = request.generation_id or request.document_version_id
+    locator = f"page={page_number or 0};chunk={chunk_index};sha256={content_hash}"
+    return f"{request.workspace_id}:{request.document_version_id}:{generation}:{locator}"
+
+
+def _notify(
+    progress: IndexingProgress | None,
+    stage: str,
+    completed: int | None = None,
+    total: int | None = None,
+    unit: str | None = None,
+) -> None:
+    if progress is not None:
+        progress(stage, completed, total, unit)

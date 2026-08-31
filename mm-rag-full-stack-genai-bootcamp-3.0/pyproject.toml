@@ -31,6 +31,7 @@ dependencies = [
     "tabulate==0.10.0",
     "uvicorn[standard]>=0.35,<1",
     "boto3>=1.40,<2",
+    "aio-pika>=9.5,<10",
 ]
 
 [dependency-groups]

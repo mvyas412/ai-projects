@@ -20,6 +20,7 @@ class RAGUnavailableError(Exception):
 class RAGDocumentScope:
     document_id: UUID
     document_version_id: UUID
+    generation_id: UUID | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -153,6 +154,16 @@ def _retrieval_filter(request: RAGRequest) -> models.Filter:
                 models.FieldCondition(
                     key="document_version_id",
                     match=models.MatchValue(value=str(scope.document_version_id)),
+                ),
+                *(
+                    [
+                        models.FieldCondition(
+                            key="generation_id",
+                            match=models.MatchValue(value=str(scope.generation_id)),
+                        )
+                    ]
+                    if scope.generation_id is not None
+                    else []
                 ),
             ]
         )

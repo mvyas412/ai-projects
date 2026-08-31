@@ -3,9 +3,10 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from uuid import UUID
 
-from sqlalchemy import exists, or_, select, update
+from sqlalchemy import delete, exists, or_, select, update
 from sqlalchemy.orm import Session, aliased
 
+from backend.app.models.ingestion import IngestionJob
 from backend.app.models.outbox import IngestionOutboxEvent
 
 
@@ -23,9 +24,7 @@ class IngestionOutboxRepository:
         *,
         for_update: bool = False,
     ) -> IngestionOutboxEvent | None:
-        statement = select(IngestionOutboxEvent).where(
-            IngestionOutboxEvent.id == event_id
-        )
+        statement = select(IngestionOutboxEvent).where(IngestionOutboxEvent.id == event_id)
         if for_update:
             statement = statement.with_for_update()
         return self._session.scalar(statement)
@@ -107,3 +106,23 @@ class IngestionOutboxRepository:
             )
         )
         self._session.flush()
+
+    def delete_terminal_before(self, *, cutoff: datetime) -> int:
+        terminal_jobs = select(IngestionJob.id).where(
+            IngestionJob.state.in_(("succeeded", "failed", "cancelled"))
+        )
+        deleted_ids = list(
+            self._session.scalars(
+                delete(IngestionOutboxEvent)
+                .where(
+                    IngestionOutboxEvent.created_at < cutoff,
+                    or_(
+                        IngestionOutboxEvent.published_at.is_not(None),
+                        IngestionOutboxEvent.discarded_at.is_not(None),
+                    ),
+                    IngestionOutboxEvent.job_id.in_(terminal_jobs),
+                )
+                .returning(IngestionOutboxEvent.id)
+            )
+        )
+        return len(deleted_ids)

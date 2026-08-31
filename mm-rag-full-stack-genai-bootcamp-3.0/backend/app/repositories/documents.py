@@ -57,15 +57,21 @@ class DocumentRepository:
         return list(self._session.scalars(statement))
 
     def get_version(
-        self, workspace_id: UUID, document_id: UUID, version_id: UUID
+        self,
+        workspace_id: UUID,
+        document_id: UUID,
+        version_id: UUID,
+        *,
+        for_update: bool = False,
     ) -> DocumentVersion | None:
-        return self._session.scalar(
-            select(DocumentVersion).where(
+        statement = select(DocumentVersion).where(
                 DocumentVersion.workspace_id == workspace_id,
                 DocumentVersion.document_id == document_id,
                 DocumentVersion.id == version_id,
-            )
         )
+        if for_update:
+            statement = statement.with_for_update()
+        return self._session.scalar(statement)
 
     def latest_version(self, workspace_id: UUID, document_id: UUID) -> DocumentVersion:
         version = self._session.scalar(

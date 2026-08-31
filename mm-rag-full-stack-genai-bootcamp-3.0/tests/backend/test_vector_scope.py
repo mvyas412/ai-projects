@@ -3,6 +3,7 @@ from uuid import uuid4
 from qdrant_client import models
 
 from backend.app.retrieval.scope import (
+    INDEXED_SCOPE_PAYLOAD_FIELDS,
     SCOPE_PAYLOAD_FIELDS,
     VectorScope,
     ensure_scope_payload_indexes,
@@ -62,7 +63,7 @@ def test_scope_payload_indexes_are_created_for_existing_collection() -> None:
     client = FakeIndexClient(exists=True)
 
     assert ensure_scope_payload_indexes(client, "documents") is True
-    assert [call[1] for call in client.calls] == list(SCOPE_PAYLOAD_FIELDS)
+    assert [call[1] for call in client.calls] == list(INDEXED_SCOPE_PAYLOAD_FIELDS)
     assert all(call[2] == models.PayloadSchemaType.KEYWORD for call in client.calls)
     assert all(call[3] is True for call in client.calls)
 

@@ -56,6 +56,27 @@ class Settings(BaseSettings):
     database_pool_recycle_seconds: int = Field(default=1800, ge=60)
     database_connect_timeout_seconds: int = Field(default=3, ge=1, le=30)
 
+    rabbitmq_url: SecretStr | None = None
+    rabbitmq_exchange: str = "mm-rag.ingestion"
+    rabbitmq_queue: str = "mm-rag.ingestion.jobs"
+    rabbitmq_routing_key: str = "ingestion.job.available"
+    rabbitmq_dead_letter_exchange: str = "mm-rag.ingestion.dlx"
+    rabbitmq_dead_letter_queue: str = "mm-rag.ingestion.dead"
+    rabbitmq_dead_letter_routing_key: str = "ingestion.job.dead"
+    rabbitmq_connect_timeout_seconds: int = Field(default=5, ge=1, le=60)
+    rabbitmq_publish_timeout_seconds: int = Field(default=10, ge=1, le=60)
+    dispatcher_batch_size: int = Field(default=50, ge=1, le=50)
+    dispatcher_lease_seconds: int = Field(default=30, ge=5, le=300)
+    dispatcher_poll_seconds: float = Field(default=1.0, ge=0.1, le=30)
+    worker_lease_seconds: int = Field(default=60, ge=15, le=600)
+    worker_heartbeat_seconds: int = Field(default=15, ge=5, le=300)
+    worker_shutdown_seconds: int = Field(default=120, ge=5, le=600)
+    worker_recovery_poll_seconds: int = Field(default=15, ge=5, le=300)
+    runtime_health_directory: Path = PROJECT_ROOT / "data/runtime/health"
+    outbox_terminal_retention_days: int = Field(default=30, ge=1, le=365)
+    outbox_alert_attempts: int = Field(default=10, ge=1, le=1000)
+    outbox_alert_age_seconds: int = Field(default=900, ge=60, le=86400)
+
     qdrant_url: str = "http://127.0.0.1:6337"
     qdrant_api_key: SecretStr | None = None
     qdrant_timeout_seconds: int = Field(default=3, ge=1, le=30)
@@ -151,6 +172,7 @@ class Settings(BaseSettings):
         "openai_api_key",
         "s3_access_key_id",
         "s3_secret_access_key",
+        "rabbitmq_url",
         mode="before",
     )
     @classmethod
@@ -173,6 +195,27 @@ class Settings(BaseSettings):
             raise ValueError("S3 credentials are required when OBJECT_STORAGE_BACKEND=s3")
         return self
 
+    @field_validator(
+        "rabbitmq_exchange",
+        "rabbitmq_queue",
+        "rabbitmq_routing_key",
+        "rabbitmq_dead_letter_exchange",
+        "rabbitmq_dead_letter_queue",
+        "rabbitmq_dead_letter_routing_key",
+    )
+    @classmethod
+    def validate_rabbitmq_name(cls, value: str) -> str:
+        normalized = value.strip()
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,199}", normalized):
+            raise ValueError("RabbitMQ names must use safe non-empty identifiers")
+        return normalized
+
+    @model_validator(mode="after")
+    def validate_worker_timing(self) -> Self:
+        if self.worker_heartbeat_seconds * 2 >= self.worker_lease_seconds:
+            raise ValueError("WORKER_HEARTBEAT_SECONDS must be less than half the lease")
+        return self
+
     @field_validator("openai_chat_model", mode="before")
     @classmethod
     def blank_chat_model_uses_default(cls, value: object) -> object:
@@ -193,6 +236,13 @@ class Settings(BaseSettings):
         if self.database_url is None:
             raise RuntimeError("DATABASE_URL is required to start the backend")
         return self.database_url.get_secret_value()
+
+    def require_rabbitmq_url(self) -> str:
+        """Return the broker URL only to dispatcher and worker process builders."""
+
+        if self.rabbitmq_url is None:
+            raise RuntimeError("RABBITMQ_URL is required for asynchronous ingestion")
+        return self.rabbitmq_url.get_secret_value()
 
     @property
     def auth0_is_configured(self) -> bool:

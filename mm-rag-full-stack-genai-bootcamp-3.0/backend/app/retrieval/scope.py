@@ -10,6 +10,7 @@ SCOPE_PAYLOAD_FIELDS = (
     "document_id",
     "document_version_id",
 )
+INDEXED_SCOPE_PAYLOAD_FIELDS = (*SCOPE_PAYLOAD_FIELDS, "generation_id")
 
 
 class PayloadIndexClient(Protocol):
@@ -30,15 +31,19 @@ class VectorScope:
     workspace_id: UUID
     document_id: UUID
     document_version_id: UUID
+    generation_id: UUID | None = None
 
     def payload(self) -> dict[str, str]:
         workspace = str(self.workspace_id)
-        return {
+        payload = {
             "tenant_id": workspace,
             "workspace_id": workspace,
             "document_id": str(self.document_id),
             "document_version_id": str(self.document_version_id),
         }
+        if self.generation_id is not None:
+            payload["generation_id"] = str(self.generation_id)
+        return payload
 
     def filter(self) -> models.Filter:
         return models.Filter(
@@ -63,7 +68,7 @@ def ensure_scope_payload_indexes(client: PayloadIndexClient, collection_name: st
     """Create mandatory keyword indexes once the document-vector collection exists."""
     if not client.collection_exists(collection_name):
         return False
-    for field in SCOPE_PAYLOAD_FIELDS:
+    for field in INDEXED_SCOPE_PAYLOAD_FIELDS:
         client.create_payload_index(
             collection_name=collection_name,
             field_name=field,

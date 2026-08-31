@@ -1,8 +1,10 @@
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.app.models.generation import IngestionGeneration
 from backend.app.models.ingestion import (
     IngestionAttempt,
     IngestionAttemptState,
@@ -55,9 +57,52 @@ class IngestionJobRepository:
             )
         )
 
+    def list_for_workspace(
+        self,
+        workspace_id: UUID,
+        *,
+        document_version_id: UUID | None = None,
+        limit: int = 100,
+    ) -> list[IngestionJob]:
+        statement = select(IngestionJob).where(
+            IngestionJob.workspace_id == workspace_id
+        )
+        if document_version_id is not None:
+            statement = statement.where(
+                IngestionJob.document_version_id == document_version_id
+            )
+        statement = statement.order_by(
+            IngestionJob.created_at.desc(), IngestionJob.id.desc()
+        ).limit(limit)
+        return list(self._session.scalars(statement))
+
     def add_attempt(self, attempt: IngestionAttempt) -> None:
         self._session.add(attempt)
         self._session.flush()
+
+    def add_generation(self, generation: IngestionGeneration) -> None:
+        self._session.add(generation)
+        self._session.flush()
+
+    def get_generation(
+        self, generation_id: UUID, *, for_update: bool = False
+    ) -> IngestionGeneration | None:
+        statement = select(IngestionGeneration).where(
+            IngestionGeneration.id == generation_id
+        )
+        if for_update:
+            statement = statement.with_for_update()
+        return self._session.scalar(statement)
+
+    def get_generation_for_attempt(
+        self, attempt_id: UUID, *, for_update: bool = False
+    ) -> IngestionGeneration | None:
+        statement = select(IngestionGeneration).where(
+            IngestionGeneration.attempt_id == attempt_id
+        )
+        if for_update:
+            statement = statement.with_for_update()
+        return self._session.scalar(statement)
 
     def get_attempt(
         self,
@@ -90,5 +135,30 @@ class IngestionJobRepository:
             select(IngestionAttempt)
             .where(IngestionAttempt.job_id == job_id)
             .order_by(IngestionAttempt.attempt_number)
+        )
+        return list(self._session.scalars(statement))
+
+    def latest_attempt(self, job_id: UUID) -> IngestionAttempt | None:
+        return self._session.scalar(
+            select(IngestionAttempt)
+            .where(IngestionAttempt.job_id == job_id)
+            .order_by(IngestionAttempt.attempt_number.desc())
+            .limit(1)
+        )
+
+    def claim_expired_running_job_ids(
+        self, *, now: datetime, limit: int
+    ) -> list[UUID]:
+        statement = (
+            select(IngestionJob.id)
+            .join(IngestionAttempt, IngestionAttempt.job_id == IngestionJob.id)
+            .where(
+                IngestionJob.state == "running",
+                IngestionAttempt.state == IngestionAttemptState.RUNNING.value,
+                IngestionAttempt.lease_expires_at <= now,
+            )
+            .order_by(IngestionAttempt.lease_expires_at, IngestionJob.id)
+            .limit(limit)
+            .with_for_update(skip_locked=True, of=IngestionJob)
         )
         return list(self._session.scalars(statement))

@@ -13,6 +13,7 @@ from backend.app.models.document import (
     DocumentVersion,
     DocumentVersionStatus,
 )
+from backend.app.models.generation import IngestionGeneration, IngestionGenerationState
 from backend.app.models.ingestion import (
     IngestionAttempt,
     IngestionAttemptState,
@@ -44,6 +45,8 @@ __all__ = [
     "IngestionOutboxEvent",
     "IngestionOutboxEventType",
     "IngestionProgressStage",
+    "IngestionGeneration",
+    "IngestionGenerationState",
     "MessageRole",
     "User",
     "Workspace",

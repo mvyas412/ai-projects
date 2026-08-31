@@ -134,7 +134,11 @@ class ConversationService:
             RAGRequest(
                 workspace_id=workspace_id,
                 documents=tuple(
-                    RAGDocumentScope(document.id, version.id)
+                    RAGDocumentScope(
+                        document.id,
+                        version.id,
+                        version.active_generation_id,
+                    )
                     for document, version in resolved
                 ),
                 query=content,
