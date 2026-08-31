@@ -19,6 +19,7 @@ from backend.app.models import (
     IngestionAttemptState,
     IngestionJob,
     IngestionJobState,
+    IngestionOutboxEvent,
     IngestionProgressStage,
     User,
     Workspace,
@@ -33,6 +34,10 @@ from backend.app.services.ingestion_jobs import (
     IngestionJobPermissionError,
     IngestionJobStateMachine,
     IngestionJobValidationError,
+)
+from backend.app.services.ingestion_outbox import (
+    IngestionOutboxLeaseError,
+    IngestionOutboxStateMachine,
 )
 
 REQUEST_HASH = "a" * 64
@@ -144,6 +149,7 @@ def _create_job(
     user: User,
     key: str,
     predecessor_job_id: UUID | None = None,
+    now: datetime | None = None,
 ) -> UUID:
     with context.factory.begin() as session:
         job, created = IngestionJobStateMachine(session).create_job(
@@ -155,6 +161,7 @@ def _create_job(
             request_hash=REQUEST_HASH,
             pipeline_fingerprint=PIPELINE_FINGERPRINT,
             predecessor_job_id=predecessor_job_id,
+            now=now,
         )
         assert created
         return job.id
@@ -188,6 +195,23 @@ def test_job_creation_is_idempotent_and_authorized(job_context: JobContext) -> N
         assert first.max_attempts == 3
         assert first.attempt_count == 0
         session.flush()
+        outbox_events = list(
+            session.scalars(
+                select(IngestionOutboxEvent).where(
+                    IngestionOutboxEvent.job_id == first.id
+                )
+            )
+        )
+        assert len(outbox_events) == 1
+        assert outbox_events[0].dispatch_sequence == 1
+        assert outbox_events[0].payload == {
+            "event_id": str(outbox_events[0].id),
+            "event_type": "ingestion.job.available",
+            "schema_version": 1,
+            "job_id": str(first.id),
+            "occurred_at": outbox_events[0].payload["occurred_at"],
+        }
+        assert "workspace_id" not in outbox_events[0].payload
         creation_events = list(
             session.scalars(
                 select(AuditEvent).where(
@@ -389,6 +413,15 @@ def test_retry_budget_creates_three_append_only_attempts(job_context: JobContext
         )
         assert [attempt.id for attempt in attempts] == attempt_ids
         assert [attempt.fencing_token for attempt in attempts] == [1, 2, 3]
+        outbox_events = list(
+            session.scalars(
+                select(IngestionOutboxEvent)
+                .where(IngestionOutboxEvent.job_id == job_id)
+                .order_by(IngestionOutboxEvent.dispatch_sequence)
+            )
+        )
+        assert [event.dispatch_sequence for event in outbox_events] == [1, 2, 3]
+        assert all(event.discard_reason == "job_terminal" for event in outbox_events)
 
 
 def test_member_cancellation_is_self_scoped_and_fenced(job_context: JobContext) -> None:
@@ -428,6 +461,11 @@ def test_member_cancellation_is_self_scoped_and_fenced(job_context: JobContext) 
             )
         )
         assert len(cancellation_events) == 1
+        outbox_event = session.scalar(
+            select(IngestionOutboxEvent).where(IngestionOutboxEvent.job_id == job_id)
+        )
+        assert outbox_event is not None
+        assert outbox_event.discard_reason == "job_cancelled"
 
     running_job_id = _create_job(
         job_context, user=job_context.member, key="running-cancel-request"
@@ -467,6 +505,183 @@ def test_member_cancellation_is_self_scoped_and_fenced(job_context: JobContext) 
         version = session.get(DocumentVersion, job_context.version_id)
         assert version is not None
         assert version.status == DocumentVersionStatus.UPLOADED.value
+
+
+def test_job_and_initial_dispatch_intent_roll_back_together(
+    job_context: JobContext,
+) -> None:
+    now = datetime(2026, 8, 31, 1, 0, tzinfo=UTC)
+    with pytest.raises(RuntimeError, match="force rollback"):
+        with job_context.factory.begin() as session:
+            IngestionJobStateMachine(session).create_job(
+                user=job_context.member,
+                workspace_id=job_context.workspace_id,
+                document_id=job_context.document_id,
+                document_version_id=job_context.version_id,
+                idempotency_key="rolled-back-request",
+                request_hash=REQUEST_HASH,
+                pipeline_fingerprint=PIPELINE_FINGERPRINT,
+                now=now,
+            )
+            raise RuntimeError("force rollback")
+
+    with job_context.factory() as session:
+        assert session.scalar(
+            select(IngestionJob).where(
+                IngestionJob.idempotency_key == "rolled-back-request"
+            )
+        ) is None
+        assert session.scalar(select(IngestionOutboxEvent)) is None
+
+
+def test_outbox_claim_failure_backoff_and_ack_are_lease_safe(
+    job_context: JobContext,
+) -> None:
+    now = datetime(2026, 8, 31, 2, 0, tzinfo=UTC)
+    _create_job(
+        job_context,
+        user=job_context.member,
+        key="outbox-publish-request",
+        now=now,
+    )
+
+    with job_context.factory.begin() as session:
+        outbox = IngestionOutboxStateMachine(session)
+        claimed = outbox.claim_due_events(
+            lease_owner="dispatcher-a:claim-1",
+            now=now,
+            lease_duration=timedelta(seconds=30),
+        )
+        assert len(claimed) == 1
+        event_id = claimed[0].id
+        assert claimed[0].publication_attempt_count == 0
+        started = outbox.start_publication(
+            event_id=event_id,
+            lease_owner="dispatcher-a:claim-1",
+            now=now,
+        )
+        assert started.publication_attempt_count == 1
+        with pytest.raises(IngestionOutboxLeaseError):
+            outbox.mark_published(
+                event_id=event_id,
+                lease_owner="dispatcher-b:claim-1",
+                now=now + timedelta(seconds=1),
+            )
+        failed = outbox.record_publication_failure(
+            event_id=event_id,
+            lease_owner="dispatcher-a:claim-1",
+            now=now + timedelta(seconds=1),
+            next_available_at=now + timedelta(seconds=6),
+            error_code="broker_unavailable",
+        )
+        assert failed.lease_owner is None
+        assert failed.last_error_code == "broker_unavailable"
+
+    with job_context.factory.begin() as session:
+        outbox = IngestionOutboxStateMachine(session)
+        assert outbox.claim_due_events(
+            lease_owner="dispatcher-a:too-early",
+            now=now + timedelta(seconds=5),
+            lease_duration=timedelta(seconds=30),
+        ) == []
+        claimed = outbox.claim_due_events(
+            lease_owner="dispatcher-b:claim-2",
+            now=now + timedelta(seconds=6),
+            lease_duration=timedelta(seconds=30),
+        )
+        assert [event.id for event in claimed] == [event_id]
+        assert claimed[0].publication_attempt_count == 1
+        started = outbox.start_publication(
+            event_id=event_id,
+            lease_owner="dispatcher-b:claim-2",
+            now=now + timedelta(seconds=6),
+        )
+        assert started.publication_attempt_count == 2
+        event, job, changed = outbox.mark_published(
+            event_id=event_id,
+            lease_owner="dispatcher-b:claim-2",
+            now=now + timedelta(seconds=7),
+        )
+        assert changed
+        assert event.published_at is not None
+        assert job.state == IngestionJobState.QUEUED.value
+        _, replayed_job, replayed = outbox.mark_published(
+            event_id=event_id,
+            lease_owner="stale-owner",
+            now=now + timedelta(seconds=8),
+        )
+        assert not replayed
+        assert replayed_job.state == IngestionJobState.QUEUED.value
+
+
+def test_retry_dispatch_intents_publish_in_per_job_sequence(
+    job_context: JobContext,
+) -> None:
+    now = datetime(2026, 8, 31, 3, 0, tzinfo=UTC)
+    retry_at = now + timedelta(seconds=30)
+    job_id = _create_job(
+        job_context,
+        user=job_context.member,
+        key="ordered-retry-request",
+        now=now,
+    )
+    with job_context.factory.begin() as session:
+        state_machine = IngestionJobStateMachine(session)
+        _, attempt = state_machine.claim_job(
+            job_id=job_id,
+            worker_id="worker-before-publish-ack",
+            now=now,
+            lease_duration=timedelta(minutes=1),
+        )
+        job, _ = state_machine.record_failure(
+            job_id=job_id,
+            attempt_id=attempt.id,
+            fencing_token=attempt.fencing_token,
+            now=now + timedelta(seconds=1),
+            retryable=True,
+            error_code="dependency_unavailable",
+            error_message="Dependency is temporarily unavailable.",
+            retry_at=retry_at,
+        )
+        assert job.state == IngestionJobState.RETRY_SCHEDULED.value
+
+    with job_context.factory.begin() as session:
+        outbox = IngestionOutboxStateMachine(session)
+        first_claim = outbox.claim_due_events(
+            lease_owner="dispatcher:sequence-1",
+            now=retry_at,
+            lease_duration=timedelta(seconds=30),
+        )
+        assert [event.dispatch_sequence for event in first_claim] == [1]
+        outbox.start_publication(
+            event_id=first_claim[0].id,
+            lease_owner="dispatcher:sequence-1",
+            now=retry_at,
+        )
+        _, job, _ = outbox.mark_published(
+            event_id=first_claim[0].id,
+            lease_owner="dispatcher:sequence-1",
+            now=retry_at,
+        )
+        assert job.state == IngestionJobState.RETRY_SCHEDULED.value
+        second_claim = outbox.claim_due_events(
+            lease_owner="dispatcher:sequence-2",
+            now=retry_at,
+            lease_duration=timedelta(seconds=30),
+        )
+        assert [event.dispatch_sequence for event in second_claim] == [2]
+        outbox.start_publication(
+            event_id=second_claim[0].id,
+            lease_owner="dispatcher:sequence-2",
+            now=retry_at,
+        )
+        _, job, _ = outbox.mark_published(
+            event_id=second_claim[0].id,
+            lease_owner="dispatcher:sequence-2",
+            now=retry_at,
+        )
+        assert job.state == IngestionJobState.QUEUED.value
+        assert job.next_attempt_at is None
 
 
 def test_expired_lease_is_recovered_and_stale_worker_is_rejected(

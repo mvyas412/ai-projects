@@ -21,6 +21,7 @@ from backend.app.models.ingestion import (
     IngestionOperation,
     IngestionProgressStage,
 )
+from backend.app.models.outbox import IngestionOutboxEvent, IngestionOutboxEventType
 from backend.app.models.user import User
 from backend.app.models.workspace import Workspace, WorkspaceMembership, WorkspaceRole
 
@@ -40,6 +41,8 @@ __all__ = [
     "IngestionJob",
     "IngestionJobState",
     "IngestionOperation",
+    "IngestionOutboxEvent",
+    "IngestionOutboxEventType",
     "IngestionProgressStage",
     "MessageRole",
     "User",

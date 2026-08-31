@@ -31,6 +31,8 @@ def create_database_engine(settings: Settings) -> Engine:
             pool_recycle=settings.database_pool_recycle_seconds,
             connect_args={"connect_timeout": settings.database_connect_timeout_seconds},
         )
+    elif database_url.startswith("sqlite"):
+        engine_options["connect_args"] = {"autocommit": False}
 
     return create_engine(database_url, **engine_options)
 

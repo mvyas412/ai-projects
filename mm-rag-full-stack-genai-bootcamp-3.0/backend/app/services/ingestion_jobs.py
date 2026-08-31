@@ -23,6 +23,7 @@ from backend.app.repositories.ingestion_jobs import IngestionJobRepository
 from backend.app.repositories.workspaces import WorkspaceRepository
 from backend.app.services.audit import record_audit_event
 from backend.app.services.documents import ADMIN_ROLES, WRITE_ROLES
+from backend.app.services.ingestion_outbox import IngestionOutboxStateMachine
 
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
 _ERROR_CODE = re.compile(r"^[a-z0-9][a-z0-9_.-]{0,79}$")
@@ -77,6 +78,7 @@ class IngestionJobStateMachine:
         self._session = session
         self._documents = DocumentRepository(session)
         self._jobs = IngestionJobRepository(session)
+        self._outbox = IngestionOutboxStateMachine(session)
         self._workspaces = WorkspaceRepository(session)
 
     def create_job(
@@ -90,8 +92,10 @@ class IngestionJobStateMachine:
         request_hash: str,
         pipeline_fingerprint: str,
         predecessor_job_id: UUID | None = None,
+        now: datetime | None = None,
     ) -> tuple[IngestionJob, bool]:
         self._require_transaction()
+        occurred_at = self._utc(now or datetime.now(UTC))
         normalized_key = self._validate_idempotency_key(idempotency_key)
         self._validate_hash("request_hash", request_hash)
         self._validate_hash("pipeline_fingerprint", pipeline_fingerprint)
@@ -157,6 +161,12 @@ class IngestionJobStateMachine:
                 pipeline_fingerprint=pipeline_fingerprint,
                 requested_by_user_id=user.id,
             )
+        self._outbox.enqueue_job_available(
+            job=job,
+            dispatch_sequence=1,
+            available_at=occurred_at,
+            occurred_at=occurred_at,
+        )
         record_audit_event(
             self._session,
             workspace_id=workspace_id,
@@ -307,6 +317,11 @@ class IngestionJobStateMachine:
             job.state = IngestionJobState.CANCELLED.value
             job.next_attempt_at = None
             job.completed_at = now
+        self._outbox.discard_unpublished_for_job(
+            job_id=job.id,
+            now=now,
+            reason="job_cancelled",
+        )
         record_audit_event(
             self._session,
             workspace_id=workspace_id,
@@ -341,6 +356,11 @@ class IngestionJobStateMachine:
         job.state = IngestionJobState.CANCELLED.value
         job.completed_at = now
         job.next_attempt_at = None
+        self._outbox.discard_unpublished_for_job(
+            job_id=job.id,
+            now=now,
+            reason="job_cancelled",
+        )
         self._advance_revision(job)
         return job, attempt
 
@@ -369,6 +389,11 @@ class IngestionJobStateMachine:
             job.state = IngestionJobState.CANCELLED.value
             job.completed_at = now
             job.next_attempt_at = None
+            self._outbox.discard_unpublished_for_job(
+                job_id=job.id,
+                now=now,
+                reason="job_cancelled",
+            )
             self._advance_revision(job)
             return job, attempt
 
@@ -391,6 +416,12 @@ class IngestionJobStateMachine:
             job.next_attempt_at = scheduled_retry_at
             job.last_error_code = code
             job.last_error_message = message
+            self._outbox.enqueue_job_available(
+                job=job,
+                dispatch_sequence=job.attempt_count + 1,
+                available_at=scheduled_retry_at,
+                occurred_at=now,
+            )
         else:
             job.state = IngestionJobState.FAILED.value
             job.completed_at = now
@@ -401,6 +432,11 @@ class IngestionJobStateMachine:
             else:
                 job.last_error_code = code
                 job.last_error_message = message
+            self._outbox.discard_unpublished_for_job(
+                job_id=job.id,
+                now=now,
+                reason="job_terminal",
+            )
         self._advance_revision(job)
         return job, attempt
 
@@ -437,17 +473,33 @@ class IngestionJobStateMachine:
             job.state = IngestionJobState.CANCELLED.value
             job.completed_at = now
             job.next_attempt_at = None
+            self._outbox.discard_unpublished_for_job(
+                job_id=job.id,
+                now=now,
+                reason="job_cancelled",
+            )
         elif scheduled_retry_at is not None:
             job.state = IngestionJobState.RETRY_SCHEDULED.value
             job.next_attempt_at = scheduled_retry_at
             job.last_error_code = attempt.error_code
             job.last_error_message = attempt.error_message
+            self._outbox.enqueue_job_available(
+                job=job,
+                dispatch_sequence=job.attempt_count + 1,
+                available_at=scheduled_retry_at,
+                occurred_at=now,
+            )
         else:
             job.state = IngestionJobState.FAILED.value
             job.completed_at = now
             job.next_attempt_at = None
             job.last_error_code = "attempts_exhausted"
             job.last_error_message = "Ingestion failed after the retry limit."
+            self._outbox.discard_unpublished_for_job(
+                job_id=job.id,
+                now=now,
+                reason="job_terminal",
+            )
         self._advance_revision(job)
         return job, attempt
 
