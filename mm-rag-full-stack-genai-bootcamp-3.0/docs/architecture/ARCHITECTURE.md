@@ -179,7 +179,7 @@ flowchart LR
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
 | 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
-| 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS defense, and mandatory vector scope implemented; object propagation, audit, lifecycle follow | PostgreSQL, Qdrant, object storage | In progress — Milestones 4.0–4.2 complete |
+| 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, and future connector permission contract implemented; audit and lifecycle follow | PostgreSQL, Qdrant, object storage | In progress — Milestones 4.0–4.3 complete |
 | 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
@@ -293,14 +293,15 @@ live embedding, promotion, active-generation retrieval, citation, and persistenc
 
 ## Phase 4 — fine-grained authorization and governance
 
-**Status:** In progress. Milestones 4.0–4.2 are complete. Phase 2 starts isolation;
-this phase deepens it. Central policy, ACL persistence, PostgreSQL RLS, and mandatory
-Qdrant scope enforcement are implemented; object propagation, expanded audit/export,
-and lifecycle components remain milestone work.
+**Status:** In progress. Milestones 4.0–4.3 are complete. Phase 2 starts isolation;
+this phase deepens it. Central policy, ACL persistence, PostgreSQL RLS, mandatory
+Qdrant scope, canonical backend-mediated object access, and a fail-closed future
+connector permission contract are implemented; expanded audit/export and lifecycle
+components remain milestone work.
 
 The review source is the
 [Phase 4 policy matrix and threat model](PHASE4_POLICY_THREAT_MODEL.md). ADRs
-0013–0017 are Accepted; Milestone 4.3 is the next implementation slice.
+0013–0017 are Accepted; Milestone 4.4 is the next implementation slice.
 
 ```mermaid
 flowchart LR
@@ -314,7 +315,7 @@ flowchart LR
     service -->|"transaction-local trusted context"| rls["PostgreSQL RLS<br/>implemented at 20260831_0010"]
     rls --> pg
     service -->|"mandatory scope filter"| qdrant[("Qdrant")]
-    service -->|"short-lived signed access"| objects[("Object storage")]
+    service -->|"canonical backend stream + integrity check"| objects[("Object storage")]
     jwt --> audit["Audit event"]
     policy --> audit
     service --> audit
@@ -529,7 +530,7 @@ reconcile commercial usage.
 | Worker runtime | Purpose-built Python dispatcher/worker implemented under ADR 0012; one in-flight job per process |
 | Fine-grained authorization | Central RBAC ceiling plus positive in-workspace user ACLs implemented under ADR 0013 at `20260831_0009` |
 | PostgreSQL tenant defense | RLS beneath application policy implemented under ADR 0014 at `20260831_0010`; live role and pooled-tenant tests pass |
-| Vector/object/async policy | Mandatory bounded Qdrant scope and returned-point validation implemented under ADR 0015; object/connector propagation remains Milestone 4.3 |
+| Vector/object/async policy | Bounded Qdrant scope, returned-point validation, canonical object resolution, membership-removal behavior, and future connector permission snapshots implemented under ADR 0015 through `20260831_0011` |
 | Security audit/export | Accepted append-only PostgreSQL security events under ADR 0016; not implemented |
 | Retention/deletion | Accepted tombstone-first durable lifecycle under ADR 0017; destructive cleanup remains disabled |
 | Sparse search | Required in Phase 5; engine not selected |

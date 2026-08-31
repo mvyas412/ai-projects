@@ -6,7 +6,7 @@ import unicodedata
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import PurePath
-from typing import BinaryIO, TypeVar
+from typing import BinaryIO, ContextManager, TypeVar
 from uuid import UUID, uuid4
 
 from sqlalchemy.exc import IntegrityError
@@ -27,7 +27,8 @@ from backend.app.services.policy import (
     PolicyService,
     resource_context,
 )
-from backend.app.storage.base import ObjectStorage
+from backend.app.storage.authorized import resolve_original_object
+from backend.app.storage.base import ObjectStorage, ObjectStorageError
 from backend.app.storage.keys import original_object_key
 
 ALLOWED_MEDIA_TYPES = frozenset(
@@ -66,6 +67,10 @@ class DuplicateVersionError(DocumentLibraryError):
 
 
 class DuplicateCollectionError(DocumentLibraryError):
+    pass
+
+
+class ObjectAccessError(DocumentLibraryError):
     pass
 
 
@@ -114,6 +119,25 @@ class DocumentLibraryService:
         document_id: UUID,
         version_id: UUID,
     ) -> tuple[Document, DocumentVersion, bytes]:
+        document, version, _ = self.open_version_content(
+            user=user,
+            workspace_id=workspace_id,
+            document_id=document_id,
+            version_id=version_id,
+        )
+        try:
+            return document, version, self._storage.read(version.object_key)
+        except ObjectStorageError as exc:
+            raise ObjectAccessError from exc
+
+    def open_version_content(
+        self,
+        *,
+        user: User,
+        workspace_id: UUID,
+        document_id: UUID,
+        version_id: UUID,
+    ) -> tuple[Document, DocumentVersion, ContextManager[BinaryIO]]:
         document = self._documents.get_document(workspace_id, document_id)
         version = self._documents.get_version(workspace_id, document_id, version_id)
         if document is None or version is None:
@@ -124,7 +148,11 @@ class DocumentLibraryService:
             PolicyAction.DOCUMENT_DOWNLOAD,
             resource=resource_context(document),
         )
-        return document, version, self._storage.read(version.object_key)
+        try:
+            stored = resolve_original_object(self._storage, document, version)
+            return document, version, self._storage.open_stream(stored.key)
+        except ObjectStorageError as exc:
+            raise ObjectAccessError from exc
 
     def create_document(
         self,

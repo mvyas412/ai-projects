@@ -20,7 +20,8 @@ from backend.app.services.policy import (
     PolicyService,
     resource_context,
 )
-from backend.app.storage.base import ObjectStorage
+from backend.app.storage.authorized import resolve_original_object
+from backend.app.storage.base import ObjectStorage, ObjectStorageError
 
 
 class IndexingNotFoundError(Exception):
@@ -73,6 +74,10 @@ class DocumentIndexingService:
             raise IndexingPermissionError from exc
         if version.status == DocumentVersionStatus.PROCESSING.value:
             raise IndexingInProgressError("This document version is already being indexed")
+        try:
+            stored = resolve_original_object(self._storage, document, version)
+        except ObjectStorageError as exc:
+            raise IndexingUnavailableError("Document content is unavailable") from exc
 
         # Commit PROCESSING before the external OpenAI/Qdrant work so concurrent
         # requests see the in-flight state and cannot start a duplicate index run.
@@ -87,7 +92,7 @@ class DocumentIndexingService:
                     document_version_id=version_id,
                     document_title=document.title,
                     media_type=document.media_type,
-                    content=self._storage.read(version.object_key),
+                    content=self._storage.read(stored.key),
                 )
             )
         except IndexingUnavailableError:

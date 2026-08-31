@@ -96,5 +96,16 @@ Qdrant retrieval now rejects empty, incomplete, oversized, or generation-less sc
 before provider access and intersects mandatory tenant, workspace, document, version,
 generation, and vector-kind predicates. Returned payloads are independently checked
 against that trusted scope before citation use. Deterministic negative tests and a
-live two-tenant Qdrant test pass. The object-access and future connector-envelope
-parts of this ADR remain the Milestone 4.3 delivery slice.
+live two-tenant Qdrant test pass.
+
+Milestone 4.3 adds one canonical original-object resolver for API downloads,
+synchronous indexing, and workers. Provider access verifies the trusted tenant,
+document, version, server-generated key, byte count, media type, and checksum before
+use; downloads stream through FastAPI and never accept or disclose provider keys.
+
+Migration `20260831_0011` adds versioned source permission snapshots linked to an
+immutable document version. It stores a hashed source-item reference, source/sync/
+permission revisions, resolved internal user principals, verification/expiry, and a
+canonical fingerprint. Unsupported semantics, unresolved principals, non-members,
+stale evidence, tampering, and cross-workspace RLS access fail closed. No connector,
+group mapper, direct presigning, or provider-specific ACL engine was selected.

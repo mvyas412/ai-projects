@@ -29,9 +29,14 @@ from backend.app.models import (
     WorkspaceRole,
 )
 from backend.app.rag.indexing import IndexingRequest, IndexingResult, IndexingUnavailableError
-from backend.app.services.ingestion_jobs import IngestionJobStateMachine
+from backend.app.services.ingestion_api import IngestionAPIService
+from backend.app.services.ingestion_jobs import (
+    IngestionJobNotFoundError,
+    IngestionJobStateMachine,
+)
 from backend.app.services.ingestion_operations import IngestionOperationsService
 from backend.app.services.ingestion_worker import DeliveryDisposition, IngestionWorkerService
+from backend.app.storage.keys import original_object_key
 from backend.app.storage.local import LocalFileStorage
 from backend.app.workers.health import ProcessHealth
 from backend.app.workers.outbox_dispatcher import OutboxDispatcher
@@ -93,7 +98,11 @@ def worker_context(test_settings) -> Iterator[WorkerContext]:
     content = b"durable asynchronous ingestion"
     checksum = hashlib.sha256(content).hexdigest()
     fingerprint = "b" * 64
-    object_key = f"workspaces/{workspace_id}/documents/{document_id}/original.txt"
+    object_key = original_object_key(
+        workspace_id=workspace_id,
+        document_id=document_id,
+        version_id=version_id,
+    )
     storage.put(object_key, content, media_type="text/plain")
     with factory.begin() as session:
         session.add(user)
@@ -205,6 +214,32 @@ def test_worker_promotes_one_immutable_generation(test_settings, worker_context)
         assert generation.manifest_object_key is not None
         assert worker_context.storage.exists(generation.manifest_object_key)
         assert len(attempts) == 1
+
+
+def test_membership_removal_blocks_job_read_but_not_workspace_owned_processing(
+    test_settings, worker_context
+) -> None:
+    with worker_context.factory.begin() as session:
+        membership = session.get(
+            WorkspaceMembership,
+            (worker_context.workspace_id, worker_context.user.id),
+        )
+        assert membership is not None
+        session.delete(membership)
+
+    with worker_context.factory() as session:
+        with pytest.raises(IngestionJobNotFoundError):
+            IngestionAPIService(session, worker_context.storage, test_settings).get_job(
+                user=worker_context.user,
+                workspace_id=worker_context.workspace_id,
+                job_id=worker_context.job_id,
+            )
+
+    worker = _worker(test_settings, worker_context, SuccessfulIndexer())
+    assert worker.process(worker_context.message) == DeliveryDisposition.ACK
+    with worker_context.factory() as session:
+        job = session.get(IngestionJob, worker_context.job_id)
+        assert job is not None and job.state == IngestionJobState.SUCCEEDED.value
         terminal_revision = job.revision
 
     assert worker.process(worker_context.message) == DeliveryDisposition.ACK

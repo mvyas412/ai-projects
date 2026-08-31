@@ -6,11 +6,11 @@ from alembic.script import ScriptDirectory
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_migration_history_has_phase4_policy_head() -> None:
+def test_migration_history_has_phase4_permission_envelope_head() -> None:
     config = Config(PROJECT_ROOT / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260831_0010"]
+    assert scripts.get_heads() == ["20260831_0011"]
     baseline = scripts.get_revision("20260829_0001")
     assert baseline is not None
     assert baseline.down_revision is None
@@ -40,3 +40,6 @@ def test_migration_history_has_phase4_policy_head() -> None:
     phase4_rls = scripts.get_revision("20260831_0010")
     assert phase4_rls is not None
     assert phase4_rls.down_revision == "20260831_0009"
+    phase4_permissions = scripts.get_revision("20260831_0011")
+    assert phase4_permissions is not None
+    assert phase4_permissions.down_revision == "20260831_0010"

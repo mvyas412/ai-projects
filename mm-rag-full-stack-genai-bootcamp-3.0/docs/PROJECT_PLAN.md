@@ -44,12 +44,12 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 4.2 complete; Milestone 4.3 authorized object access and permission propagation is next |
+| Active milestone | Phase 4.3 complete; Milestone 4.4 security audit views and compliance export is next |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
 | Phase 3 quality gate | 110 deterministic tests pass with four opt-in integration skips; all 114 tests pass in the free live-service gate; CI-equivalent coverage is 81.39% against the 70% threshold; one explicitly approved signed-in real-OpenAI async promotion/retrieval proof passed |
-| Phase 4 | In progress — Milestones 4.0–4.2 complete |
+| Phase 4 | In progress — Milestones 4.0–4.3 complete |
 | Phases 5–9 | Planned |
 
 ## Delivery sequence and gates
@@ -454,10 +454,11 @@ Implemented and validated:
 
 ## Phase 4 — fine-grained authorization and governance
 
-**Status:** In progress — Milestones 4.0–4.2 are complete. The accepted policy
+**Status:** In progress — Milestones 4.0–4.3 are complete. The accepted policy
 matrix now has a central default-deny service, tenant-constrained ACL persistence,
-PostgreSQL RLS defense, and mandatory Qdrant scope enforcement. Remaining object,
-permission-propagation, audit, and lifecycle controls follow.
+PostgreSQL RLS defense, mandatory Qdrant scope enforcement, backend-mediated object
+resolution, and a future connector permission-envelope contract. Audit/export and
+lifecycle controls follow.
 
 ### Objective
 
@@ -471,8 +472,8 @@ depth, auditable administration, and lifecycle governance.
 | 4.0 | Action/resource policy matrix, threat-model update, and ADR sequence | Completed — ADRs 0013–0017 accepted |
 | 4.1 | Central role/ACL policy service and reusable authorization dependencies | Completed at `20260831_0009` |
 | 4.2 | PostgreSQL row-level-security defense and mandatory Qdrant scope enforcement | Completed at `20260831_0010` |
-| 4.3 | Authorized object access and connector permission propagation contract | Ready for implementation |
-| 4.4 | Append-only audit events, activity views, and compliance export | Planned after 4.3 |
+| 4.3 | Authorized object access and connector permission propagation contract | Completed at `20260831_0011` |
+| 4.4 | Append-only audit events, activity views, and compliance export | Ready for implementation |
 | 4.5 | Retention, deletion, encryption/key, and incident-response controls | Planned after 4.4 |
 
 Milestone 4.0 review material:
@@ -515,6 +516,25 @@ Milestone 4.0 review material:
 - A full free live gate passes 127 tests with migration downgrade/upgrade, Alembic
   no-drift, PostgreSQL, Qdrant, SeaweedFS, RabbitMQ, FastAPI, and Streamlit checks.
   No paid OpenAI acceptance run was invoked because model behavior did not change.
+
+### Milestone 4.3 implementation status
+
+- Added one canonical original-object resolver shared by downloads, synchronous
+  indexing, and asynchronous workers. It rejects mismatched tenant/document/version
+  keys or object size/hash/media identity before content use.
+- Downloads remain backend-mediated and now stream from private storage with safe
+  headers. Client object-key input is ignored and provider coordinates remain absent
+  from public schemas, errors, links, and headers.
+- Added migration `20260831_0011` for append-only, versioned source permission
+  snapshots and resolved internal principals. The contract stores only hashed source
+  item identity and does not choose or implement a connector.
+- Unsupported semantics, unresolved or non-member principals, stale evidence,
+  fingerprint tampering, and cross-workspace RLS access fail closed.
+- Membership removal immediately hides jobs from the former member while accepted
+  workspace-owned processing remains recoverable and can complete safely.
+- The full deterministic gate passes 129 tests with eight opt-in skips; the free live
+  gate passes all 137 tests, including PostgreSQL and SeaweedFS isolation evidence,
+  migration reversal, and no schema drift. No paid model call was invoked.
 
 ### Completion gate
 
@@ -725,7 +745,7 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Implement Milestone 4.3 authorized object access and permission propagation | Backend-mediated object checks, future connector envelope, and revocation/worker evidence |
+| 1 | Implement Milestone 4.4 security audit views and compliance export | Append-only safe events, privileged review, reproducible export, and checksum evidence |
 | 2 | Maintain draft PR #3 | Reviewable commits, green CI, and squash-and-merge only after explicit approval |
 
 ## Update protocol

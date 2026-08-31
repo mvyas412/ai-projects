@@ -30,6 +30,7 @@ from backend.app.services.ingestion_jobs import (
     IngestionJobStateMachine,
     retry_delay,
 )
+from backend.app.storage.authorized import resolve_original_object
 from backend.app.storage.base import (
     ObjectIntegrityError,
     ObjectNotFoundError,
@@ -105,7 +106,10 @@ class IngestionWorkerService:
             self._checkpoint(work, IngestionProgressStage.LOADING_ORIGINAL)
             if self._shutdown.is_set():
                 raise WorkerShutdown
-            content = self._original_storage.read(work.version.object_key)
+            stored = resolve_original_object(
+                self._original_storage, work.document, work.version
+            )
+            content = self._original_storage.read(stored.key)
             if hashlib.sha256(content).hexdigest() != work.version.content_sha256:
                 raise ObjectIntegrityError("Original identity mismatch")
 
