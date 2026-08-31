@@ -27,10 +27,17 @@ def test_openai_model_names_are_trimmed() -> None:
 
 def test_s3_backend_requires_a_complete_credential_pair() -> None:
     with pytest.raises(ValidationError, match="S3 credentials are required"):
-        Settings(object_storage_backend="s3")
+        Settings(
+            object_storage_backend="s3",
+            s3_access_key_id=SecretStr(""),
+            s3_secret_access_key=SecretStr(""),
+        )
 
     with pytest.raises(ValidationError, match="must be configured together"):
-        Settings(s3_access_key_id=SecretStr("local-access"))
+        Settings(
+            s3_access_key_id=SecretStr("local-access"),
+            s3_secret_access_key=SecretStr(""),
+        )
 
 
 def test_s3_configuration_is_normalized_without_exposing_secrets() -> None:
