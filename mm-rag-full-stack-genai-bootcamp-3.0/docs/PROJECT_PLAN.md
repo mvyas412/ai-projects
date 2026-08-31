@@ -44,8 +44,8 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | 3.0 core contracts accepted; provider-neutral job/attempt foundation implemented |
-| Phase 3 | In progress — durable state implemented; no asynchronous execution yet |
+| Active milestone | 3.0 durable foundation implemented; transactional outbox contract accepted in ADR 0009 |
+| Phase 3 | In progress — provider technology decisions remain; no asynchronous execution yet |
 | Phase 3 bootstrap gate | 76 live tests; 87% coverage; lint, types, migrations, API/UI and dependency readiness pass |
 | Phases 4–9 | Planned |
 
@@ -256,8 +256,10 @@ Completed:
 established and its local/live quality gate passes. Accepted ADRs 0007 and 0008
 define the durable job/attempt and idempotent output-promotion contracts. Alembic
 revision `20260830_0006` and the backend state machine implement the provider-neutral
-job/attempt foundation. Queue/broker, object storage, outbox, and worker runtime
-remain TBD, and the synchronous product path is unchanged.
+job/attempt foundation. ADR 0009 accepts a PostgreSQL transactional-outbox and
+at-least-once dispatch/recovery boundary. It remains unimplemented; queue/broker,
+object storage, dispatcher, and worker runtime remain TBD, and the synchronous
+product path is unchanged.
 
 ### Objective
 
@@ -292,6 +294,14 @@ Implemented:
   downgrade/upgrade cycle. The deterministic gate passes with 81 tests and one
   skip; the live gate passes 82 tests plus PostgreSQL/Qdrant/API/Streamlit readiness;
   Alembic is restored to head with no model/schema drift.
+
+Accepted decision:
+
+- ADR 0009 atomically records each dispatch intent with its job in
+  PostgreSQL, then publishing outside the API request with leased, at-least-once
+  delivery. Its retry, alert, retention, per-job ordering, operational replay, and
+  deferred lease/batch tuning recommendations are accepted. Broker and runtime
+  technologies remain explicitly undecided.
 
 Not yet implemented:
 
@@ -516,7 +526,7 @@ commercial accounting, and compliance-grade administration.
 | Document/version identity and temporary ingestion state | 2.2 | Accepted — ADR 0004 |
 | Durable ingestion job and attempt contract | 3.0 | Accepted — ADR 0007 |
 | Idempotency and immutable output promotion | 3.0 | Accepted — ADR 0008 |
-| Transactional outbox boundary | 3.0 | TBD |
+| Transactional outbox boundary | 3.0 | Accepted — ADR 0009 |
 | Queue/broker | 3.0 | TBD |
 | S3-compatible storage implementation/vendor | 3.0 | TBD |
 | Worker runtime and operating model | 3.0–3.3 | TBD |
@@ -534,8 +544,8 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Draft and approve ADR 0009 for the transactional outbox boundary | Job creation and dispatch intent share an accepted atomic boundary |
-| 2 | Resolve queue/broker, object-storage, and worker-runtime ADRs | Async execution can begin against accepted technologies and operating assumptions |
+| 1 | Draft and approve ADR 0010 for the queue/broker | Outbox publication and worker delivery target an accepted technology |
+| 2 | Draft and approve ADRs 0011–0012 for object storage and worker runtime | Async execution can begin against accepted storage and operating assumptions |
 | 3 | Implement the accepted object-storage adapter and immutable keys | Original documents are durable before asynchronous dispatch |
 
 ## Update protocol

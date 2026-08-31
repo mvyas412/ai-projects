@@ -54,6 +54,7 @@ flowchart LR
     subgraph ingestion["Asynchronous ingestion"]
         intake["Upload / connector intake"]
         jobs["Durable job orchestration"]
+        outbox["Transactional outbox + dispatcher<br/>Accepted ADR 0009; planned"]
         queue["Queue / broker<br/>TBD"]
         workers["Ingestion workers"]
         parse["PyMuPDF + pdfplumber<br/>Tesseract + Pillow"]
@@ -102,7 +103,8 @@ flowchart LR
     intake -->|"store immutable original"| objects
     intake -->|"create document version + job"| jobs
     jobs <-->|"state, attempt, idempotency"| pg
-    jobs --> queue
+    jobs --> outbox
+    outbox --> queue
     queue --> workers
     workers --> parse
     parse --> enrich
@@ -171,7 +173,7 @@ flowchart LR
 | --- | --- | --- | --- | --- |
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
 | 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
-| 3 | Durable asynchronous processing | Durable job/attempt state implemented; job API, queue/broker TBD, workers, S3-compatible storage planned | PostgreSQL now; object storage and generation-scoped Qdrant planned | In progress; migration `20260830_0006`, ADRs 0007–0008 accepted, technologies pending |
+| 3 | Durable asynchronous processing | Durable job/attempt state implemented; transactional outbox accepted but planned; job API, queue/broker TBD, workers, S3-compatible storage planned | PostgreSQL now; object storage and generation-scoped Qdrant planned | In progress; migration `20260830_0006`, ADRs 0007–0009 accepted |
 | 4 | Fine-grained isolation and governance | JWT validation, RBAC/ACL, RLS defense, audit | PostgreSQL, Qdrant, object storage | Planned |
 | 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
@@ -248,7 +250,8 @@ job/attempt and idempotent output-promotion contracts are accepted in ADRs 0007
 and 0008. PostgreSQL migration `20260830_0006` and a provider-neutral backend state
 machine implement jobs, fenced attempts, retries, progress, cancellation, and lease
 recovery. They are not yet connected to the synchronous product path; queue/broker,
-object-storage implementation, transactional outbox, and worker runtime remain TBD.
+object-storage implementation, outbox implementation, and worker runtime remain TBD.
+ADR 0009 accepts the transactional outbox dispatch/recovery contract.
 
 ```mermaid
 flowchart LR
@@ -257,7 +260,7 @@ flowchart LR
     policy -->|"immutable original · planned"| objects[("S3-compatible storage<br/>TBD")]
     policy -->|"document version + job · planned wiring"| pg[("PostgreSQL jobs/attempts<br/>implemented at 20260830_0006")]
     api -->|"202 + job ID · planned"| client
-    pg --> outbox["Dispatcher / transactional outbox<br/>TBD"]
+    pg --> outbox["Transactional outbox + dispatcher<br/>Accepted ADR 0009; not implemented"]
     outbox --> queue["Queue / broker<br/>TBD"]
     queue --> worker["Ingestion worker<br/>planned"]
     worker --> objects
@@ -274,8 +277,10 @@ flowchart LR
 
 The API acknowledges quickly; the original is durable before dispatch; jobs use
 idempotency keys, explicit state, retries/backoff, cancellation, safe errors, and
-versioned outputs. Exit: processing survives API/worker failure, scales
-independently, and every job is traceable and safely retryable.
+versioned outputs. Accepted ADR 0009 atomically records dispatch intent with each
+eligible job and publishes it at least once outside the API request. Exit:
+processing survives API/worker failure, scales independently, and every job is
+traceable and safely retryable.
 
 ## Phase 4 — fine-grained authorization and governance
 
@@ -504,6 +509,7 @@ reconcile commercial usage.
 | Dedicated Phase 8 UI | Candidate only; framework not selected |
 | Queue / broker | Required interface; technology not selected |
 | Object storage | S3-compatible interface; vendor not selected |
+| Transactional outbox | PostgreSQL boundary accepted in ADR 0009; not implemented |
 | Sparse search | Required in Phase 5; engine not selected |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
@@ -522,6 +528,7 @@ Accepted Phase 3 decisions are:
 
 - [ADR 0007 — Durable ingestion job and attempt state contract](decisions/0007-durable-ingestion-job-attempt-contract.md)
 - [ADR 0008 — Ingestion idempotency and immutable output promotion](decisions/0008-ingestion-idempotency-output-promotion.md)
+- [ADR 0009 — Transactional outbox dispatch and recovery boundary](decisions/0009-transactional-outbox-dispatch-boundary.md)
 
 ## Maintenance checklist
 

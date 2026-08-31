@@ -48,9 +48,10 @@ This directory starts from the accepted V2 tree. Phase 3 is in Milestone 3.0.
 Accepted ADRs 0007 and 0008 define the durable job/attempt and idempotent output-
 promotion contracts. The provider-neutral job/attempt persistence and state-machine
 foundation is implemented but is not connected to the synchronous indexing API.
-Queue/broker, object storage, transactional outbox, and worker runtime remain
-undecided. No asynchronous behavior is claimed until the remaining decisions are
-accepted and implemented with their tests.
+ADR 0009 accepts the provider-neutral transactional-outbox boundary. Queue/broker,
+object storage, dispatcher/worker runtime, and all outbox implementation remain
+undecided or unimplemented. No asynchronous behavior is claimed until the remaining
+decisions are accepted and implemented with their tests.
 
 ## Architecture and roadmap
 
@@ -81,6 +82,7 @@ Accepted decisions are recorded as ADRs:
 - [Workspace activity and release gates](docs/architecture/decisions/0006-audit-and-release-gates.md)
 - [Durable ingestion job and attempt state contract](docs/architecture/decisions/0007-durable-ingestion-job-attempt-contract.md)
 - [Ingestion idempotency and immutable output promotion](docs/architecture/decisions/0008-ingestion-idempotency-output-promotion.md)
+- [Transactional outbox dispatch and recovery boundary](docs/architecture/decisions/0009-transactional-outbox-dispatch-boundary.md)
 
 ## Prerequisites
 
@@ -347,6 +349,5 @@ product story, suggested prompts, failure-safe talking points, and visual accept
 ```
 
 Phase 2 is merged and recoverable at `mm-rag-v2.0.0`. The active next step is to
-decide the transactional outbox, queue/broker, object-storage implementation, and
-worker runtime before connecting the durable job foundation to the synchronous
-ingestion path.
+decide the queue/broker, object-storage implementation, and worker runtime before
+connecting the durable job foundation to the synchronous ingestion path.
