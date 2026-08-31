@@ -1,8 +1,10 @@
-name: MM-RAG Phase 3 CI
+name: MM-RAG Phase 3/4 CI
 
 on:
   push:
-    branches: ["phase-3/mm-rag-async-ingestion"]
+    branches:
+      - "phase-3/mm-rag-async-ingestion"
+      - "phase-4/mm-rag-governance"
     paths:
       - "mm-rag-full-stack-genai-bootcamp-3.0/**"
       - ".github/workflows/mm-rag-phase3-ci.yml"
@@ -12,7 +14,7 @@ on:
       - ".github/workflows/mm-rag-phase3-ci.yml"
 
 concurrency:
-  group: mm-rag-phase3-${{ github.ref }}
+  group: mm-rag-phase3-4-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:

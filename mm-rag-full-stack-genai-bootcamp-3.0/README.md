@@ -396,8 +396,8 @@ scoped Qdrant retrieval, grounded generation, citations, persistence, audit, and
 cross-tenant denial. It removes its temporary SQL, files, and vector collection.
 
 GitHub Actions runs deterministic and PostgreSQL/Qdrant integration gates on pushes
-to the Phase 3 branch and relevant pull requests. The SeaweedFS contract remains in
-the local live gate until CI provisions that command-based service explicitly.
+to the Phase 3 and Phase 4 branches and relevant pull requests. The SeaweedFS contract
+remains in the local live gate until CI provisions that command-based service explicitly.
 Coverage must remain at or above 70%.
 
 Use the [demonstration runbook](docs/DEMO_RUNBOOK.md) for preflight, the five-minute
