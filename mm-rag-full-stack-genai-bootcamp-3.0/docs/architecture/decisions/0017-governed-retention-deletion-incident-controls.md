@@ -101,3 +101,18 @@ and provider-managed encryption as the initial future production posture.
 - Qdrant, object, and PostgreSQL reconciliation proves no governed copy remains before completion.
 - Audit tombstones and reports contain no deleted content, credentials, or raw object keys.
 - Backup/restore, retention rollback, and incident runbooks are exercised with free local services.
+
+## Implementation evidence
+
+Migration `20260831_0013` implements recoverable tombstones, retention holds,
+durable checkpointed deletion plans, and private orphan evidence under tenant RLS.
+The API exposes bounded preview and exact-token apply; automatic destructive
+scheduling remains disabled. Worker claim/promotion fences make tombstones win
+ingestion races, and the lifecycle service removes scoped vectors and verified
+objects before SQL metadata with resumable blocked plans.
+
+Deterministic validation passes 147 tests with ten opt-in skips. The complete free
+live gate passes all 157 tests, including PostgreSQL, Qdrant, SeaweedFS, RabbitMQ,
+cross-store purge/recovery, hold, orphan, RLS, and audit-retention evidence. Migration
+downgrade/upgrade, Alembic no-drift, and an isolated PostgreSQL restore at revision
+`20260831_0013` pass. No paid OpenAI acceptance run was invoked.

@@ -55,3 +55,26 @@ def test_s3_configuration_is_normalized_without_exposing_secrets() -> None:
 def test_s3_bucket_names_must_be_dns_compatible() -> None:
     with pytest.raises(ValidationError, match="DNS-compatible"):
         Settings(s3_originals_bucket="Not_A_Bucket")
+
+
+def test_production_nonlocal_boundaries_require_tls_and_explicit_s3_encryption() -> None:
+    with pytest.raises(ValidationError, match="server-side encryption"):
+        Settings(
+            app_env="production",
+            object_storage_backend="s3",
+            s3_endpoint_url="https://storage.example.test",
+            s3_access_key_id=SecretStr("access"),
+            s3_secret_access_key=SecretStr("secret"),
+        )
+
+    with pytest.raises(ValidationError, match="QDRANT_URL"):
+        Settings(
+            app_env="production",
+            object_storage_backend="local",
+            qdrant_url="http://qdrant.example.test",
+        )
+
+
+def test_kms_encryption_requires_a_key_identifier() -> None:
+    with pytest.raises(ValidationError, match="S3_KMS_KEY_ID"):
+        Settings(s3_server_side_encryption="aws:kms")

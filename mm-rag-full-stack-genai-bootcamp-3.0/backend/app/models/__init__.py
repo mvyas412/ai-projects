@@ -28,6 +28,13 @@ from backend.app.models.ingestion import (
     IngestionOperation,
     IngestionProgressStage,
 )
+from backend.app.models.lifecycle import (
+    LifecycleDeletionPlan,
+    LifecyclePlanState,
+    LifecycleResourceType,
+    OrphanObjectEvidence,
+    RetentionHold,
+)
 from backend.app.models.outbox import IngestionOutboxEvent, IngestionOutboxEventType
 from backend.app.models.source_permission import (
     SourcePermissionPrincipal,
@@ -58,11 +65,16 @@ __all__ = [
     "IngestionOutboxEvent",
     "IngestionOutboxEventType",
     "IngestionProgressStage",
+    "LifecycleDeletionPlan",
+    "LifecyclePlanState",
+    "LifecycleResourceType",
+    "OrphanObjectEvidence",
     "IngestionGeneration",
     "IngestionGenerationState",
     "MessageRole",
     "ResourceACLGrant",
     "ResourceVisibility",
+    "RetentionHold",
     "SourcePermissionPrincipal",
     "SourcePermissionSnapshot",
     "User",

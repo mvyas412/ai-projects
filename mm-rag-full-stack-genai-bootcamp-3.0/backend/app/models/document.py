@@ -37,6 +37,12 @@ class Document(TimestampMixin, Base):
             "visibility IN ('workspace', 'restricted')",
             name="ck_documents_visibility",
         ),
+        CheckConstraint(
+            "(tombstoned_at IS NULL AND tombstone_expires_at IS NULL AND "
+            "tombstoned_by_user_id IS NULL) OR (tombstoned_at IS NOT NULL AND "
+            "tombstone_expires_at > tombstoned_at AND tombstoned_by_user_id IS NOT NULL)",
+            name="ck_documents_tombstone_contract",
+        ),
         UniqueConstraint("id", "workspace_id", name="uq_documents_id_workspace_id"),
     )
 
@@ -62,6 +68,17 @@ class Document(TimestampMixin, Base):
         server_default=ResourceVisibility.WORKSPACE.value,
     )
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    tombstoned_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
+    tombstone_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    tombstoned_by_user_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        nullable=True,
+    )
 
 
 class DocumentVersion(TimestampMixin, Base):

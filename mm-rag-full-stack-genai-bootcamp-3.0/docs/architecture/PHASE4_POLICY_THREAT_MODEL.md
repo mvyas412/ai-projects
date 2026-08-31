@@ -162,6 +162,17 @@ Unknown action/resource combinations deny by default.
 6. After acceptance, implement Milestones 4.1–4.5 as small vertical slices with
    deterministic and live cross-tenant tests before any Phase 4 release claim.
 
+## Implementation evidence
+
+Milestones 4.1–4.5 now implement the accepted contract through migration
+`20260831_0013`. The deterministic gate passes 147 tests with ten explicitly
+opt-in integration skips, and the complete free live gate passes all 157 tests.
+Evidence includes PostgreSQL RLS and role isolation, bounded Qdrant enforcement,
+canonical SeaweedFS object verification, append-only audit/export, immediate
+tombstone hiding, holds, exact retention preview/apply, resumable cross-store purge,
+aged orphan recheck, migration downgrade/upgrade, schema no-drift, and isolated
+backup/restore. No paid OpenAI test was run because RAG model behavior did not change.
+
 ## Accepted resolutions
 
 All recommendations below were approved on 2026-08-31. Future changes require a

@@ -28,11 +28,20 @@ _BUCKET_NAME = re.compile(r"^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$")
 class S3ObjectStorage:
     """S3-compatible immutable object adapter with provider-neutral failures."""
 
-    def __init__(self, client: Any, bucket: str) -> None:
+    def __init__(
+        self,
+        client: Any,
+        bucket: str,
+        *,
+        server_side_encryption: str | None = None,
+        kms_key_id: str | None = None,
+    ) -> None:
         if not _BUCKET_NAME.fullmatch(bucket):
             raise ObjectStorageConfigurationError("Object-storage bucket name is invalid")
         self._client = client
         self._bucket = bucket
+        self._server_side_encryption = server_side_encryption
+        self._kms_key_id = kms_key_id
 
     def put(
         self,
@@ -78,6 +87,10 @@ class S3ObjectStorage:
         }
         if if_absent:
             request["IfNoneMatch"] = "*"
+        if self._server_side_encryption is not None:
+            request["ServerSideEncryption"] = self._server_side_encryption
+        if self._kms_key_id is not None:
+            request["SSEKMSKeyId"] = self._kms_key_id
 
         try:
             response = self._client.put_object(**request)
@@ -172,6 +185,29 @@ class S3ObjectStorage:
         except ObjectNotFoundError:
             return False
         return True
+
+    def list_objects(self, prefix: str = "") -> list[StoredObject]:
+        normalized = prefix.strip("/")
+        if normalized:
+            _validate_key(normalized)
+        request: dict[str, Any] = {"Bucket": self._bucket}
+        if normalized:
+            request["Prefix"] = f"{normalized}/"
+        records: list[StoredObject] = []
+        try:
+            while True:
+                response = self._client.list_objects_v2(**request)
+                for item in response.get("Contents") or []:
+                    records.append(self.head(str(item["Key"])))
+                token = response.get("NextContinuationToken")
+                if not response.get("IsTruncated") or not token:
+                    break
+                request["ContinuationToken"] = token
+        except ClientError as exc:
+            raise _storage_error(exc) from None
+        except BotoCoreError:
+            raise ObjectStorageUnavailableError("Object storage request failed") from None
+        return sorted(records, key=lambda item: item.key)
 
     def delete(self, key: str) -> None:
         _validate_key(key)

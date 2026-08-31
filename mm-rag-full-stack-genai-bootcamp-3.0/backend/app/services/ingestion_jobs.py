@@ -226,6 +226,18 @@ class IngestionJobStateMachine:
             raise IngestionJobNotFoundError
         if job.state not in _RUNNABLE_STATES:
             raise IngestionInvalidTransitionError("Job is not runnable")
+        document = self._documents.get_document(
+            job.workspace_id,
+            job.document_id,
+            include_archived=True,
+            include_tombstoned=True,
+        )
+        if document is None:
+            raise IngestionJobNotFoundError
+        if document.tombstoned_at is not None and job.cancel_requested_at is None:
+            job.cancel_requested_at = now
+            job.cancel_requested_by_user_id = document.tombstoned_by_user_id
+
         if job.cancel_requested_at is not None:
             raise IngestionInvalidTransitionError("Job cancellation was requested")
         if (
@@ -465,6 +477,18 @@ class IngestionJobStateMachine:
             raise IngestionJobValidationError("manifest_object_key is invalid")
         if chunk_count <= 0 or vector_count <= 0:
             raise IngestionJobValidationError("A promoted generation must contain vectors")
+
+        document = self._documents.get_document(
+            job.workspace_id,
+            job.document_id,
+            include_archived=True,
+            include_tombstoned=True,
+        )
+        if document is None:
+            raise IngestionJobNotFoundError
+        if document.tombstoned_at is not None and job.cancel_requested_at is None:
+            job.cancel_requested_at = now
+            job.cancel_requested_by_user_id = document.tombstoned_by_user_id
 
         if job.cancel_requested_at is not None:
             self._finish_attempt(attempt, IngestionAttemptState.CANCELLED, now)

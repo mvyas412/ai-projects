@@ -333,6 +333,36 @@ def test_worker_observes_cancellation_before_promotion(
         assert generation.state == IngestionGenerationState.ABANDONED.value
 
 
+def test_document_tombstone_wins_the_final_worker_promotion_race(
+    test_settings, worker_context
+) -> None:
+    class TombstoningIndexer:
+        def index(self, request: IndexingRequest, *, progress=None) -> IndexingResult:
+            now = datetime.now(UTC)
+            with worker_context.factory.begin() as session:
+                document = session.get(Document, worker_context.document_id)
+                assert document is not None
+                document.tombstoned_at = now
+                document.tombstone_expires_at = now + timedelta(days=30)
+                document.tombstoned_by_user_id = worker_context.user.id
+            return IndexingResult(1, 1)
+
+    worker = _worker(test_settings, worker_context, TombstoningIndexer())
+    assert worker.process(worker_context.message) == DeliveryDisposition.ACK
+    with worker_context.factory() as session:
+        job = session.get(IngestionJob, worker_context.job_id)
+        version = session.get(DocumentVersion, worker_context.version_id)
+        generation = session.scalar(
+            select(IngestionGeneration).where(
+                IngestionGeneration.job_id == worker_context.job_id
+            )
+        )
+        assert job is not None and job.state == IngestionJobState.CANCELLED.value
+        assert version is not None and version.active_generation_id is None
+        assert generation is not None
+        assert generation.state == IngestionGenerationState.ABANDONED.value
+
+
 @pytest.mark.asyncio
 async def test_dispatcher_marks_job_queued_only_after_confirmed_publish(
     test_settings, worker_context

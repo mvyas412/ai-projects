@@ -46,6 +46,7 @@ _SAFE_DETAIL_FIELDS = frozenset(
         "event_count",
         "export_id",
         "job_id",
+        "lifecycle_plan_id",
         "media_type",
         "policy_revision",
         "predecessor_job_id",
@@ -54,11 +55,15 @@ _SAFE_DETAIL_FIELDS = frozenset(
         "range_end",
         "range_start",
         "requested_action",
+        "reason_code",
         "denial_reason",
         "target_type",
         "version_id",
         "version_number",
         "visibility",
+        "deleted_object_count",
+        "deleted_vector_count",
+        "resource_type",
     }
 )
 

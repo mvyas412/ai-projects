@@ -169,6 +169,20 @@ class LocalFileStorage:
     def exists(self, key: str) -> bool:
         return self._resolve(key).is_file()
 
+    def list_objects(self, prefix: str = "") -> list[StoredObject]:
+        normalized = prefix.strip("/")
+        if normalized:
+            self._resolve(f"{normalized}/inventory-probe")
+        records: list[StoredObject] = []
+        for path in self._root.rglob("*"):
+            if not path.is_file() or path.is_relative_to(self._metadata_root):
+                continue
+            key = path.relative_to(self._root).as_posix()
+            if normalized and not key.startswith(f"{normalized}/"):
+                continue
+            records.append(self.head(key))
+        return sorted(records, key=lambda item: item.key)
+
     def delete(self, key: str) -> None:
         self._resolve(key).unlink(missing_ok=True)
         self._metadata_path(key).unlink(missing_ok=True)

@@ -23,7 +23,7 @@ def main() -> None:
     factory = create_session_factory(engine)
     try:
         if args.command == "status":
-            with factory() as session:
+            with factory.begin() as session:
                 set_rls_context(session, purpose=DatabasePurpose.OPERATIONS)
                 payload = IngestionOperationsService(session, settings).report().safe_dict()
         elif args.command == "recover-expired":
@@ -35,7 +35,7 @@ def main() -> None:
                 )
             payload = {"recovered_expired_jobs": len(recovered)}
         elif args.command == "retention-preview":
-            with factory() as session:
+            with factory.begin() as session:
                 set_rls_context(session, purpose=DatabasePurpose.OPERATIONS)
                 count = IngestionOperationsService(
                     session, settings
