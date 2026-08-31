@@ -144,10 +144,17 @@ if documents_tab.open:
                                 f"Job {job['state'].replace('_', ' ')} · "
                                 f"Attempt {progress['attempt_number']} of {job['max_attempts']}"
                             )
-                            if progress.get("stage"):
+                            if job["state"] == "succeeded":
+                                details.write(":material/check_circle: Completed")
+                            elif progress.get("stage"):
+                                stage_label = progress["stage"].replace("_", " ").capitalize()
+                                prefix = (
+                                    "Last stage: "
+                                    if job["state"] in {"failed", "cancelled"}
+                                    else ""
+                                )
                                 details.write(
-                                    f":material/progress_activity: "
-                                    f"{progress['stage'].replace('_', ' ').capitalize()}"
+                                    f":material/progress_activity: {prefix}{stage_label}"
                                 )
                             if progress.get("percentage") is not None:
                                 details.progress(
