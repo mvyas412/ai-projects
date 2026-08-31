@@ -44,12 +44,12 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 4.0 decision kickoff in progress; policy/threat model and ADRs 0013–0017 are Proposed |
+| Active milestone | Phase 4.0 complete; accepted ADRs 0013–0017 unblock Milestone 4.1 implementation |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
 | Phase 3 quality gate | 110 deterministic tests pass with four opt-in integration skips; all 114 tests pass in the free live-service gate; CI-equivalent coverage is 81.39% against the 70% threshold; one explicitly approved signed-in real-OpenAI async promotion/retrieval proof passed |
-| Phase 4 | In progress — decision contracts only; runtime behavior remains at accepted Phase 3 |
+| Phase 4 | In progress — Milestone 4.0 complete; runtime behavior remains at accepted Phase 3 |
 | Phases 5–9 | Planned |
 
 ## Delivery sequence and gates
@@ -454,9 +454,9 @@ Implemented and validated:
 
 ## Phase 4 — fine-grained authorization and governance
 
-**Status:** In progress — Milestone 4.0 decision kickoff. The policy matrix,
-threat model, and ADRs 0013–0017 are Proposed; no Phase 4 runtime behavior has
-been implemented.
+**Status:** In progress — Milestone 4.0 is complete. The policy matrix, threat
+model, and ADRs 0013–0017 were accepted on 2026-08-31; no Phase 4 runtime behavior
+has been implemented yet.
 
 ### Objective
 
@@ -467,12 +467,12 @@ depth, auditable administration, and lifecycle governance.
 
 | Milestone | Deliverable | Status |
 | --- | --- | --- |
-| 4.0 | Action/resource policy matrix, threat-model update, and ADR sequence | In progress — Proposed review package drafted |
-| 4.1 | Central role/ACL policy service and reusable authorization dependencies | Planned; blocked on ADR 0013 acceptance |
-| 4.2 | PostgreSQL row-level-security defense and mandatory Qdrant scope enforcement | Planned; blocked on ADRs 0014–0015 acceptance |
-| 4.3 | Authorized object access and connector permission propagation contract | Planned; blocked on ADR 0015 acceptance |
-| 4.4 | Append-only audit events, activity views, and compliance export | Planned; blocked on ADR 0016 acceptance |
-| 4.5 | Retention, deletion, encryption/key, and incident-response controls | Planned; blocked on ADR 0017 acceptance |
+| 4.0 | Action/resource policy matrix, threat-model update, and ADR sequence | Completed — ADRs 0013–0017 accepted |
+| 4.1 | Central role/ACL policy service and reusable authorization dependencies | Ready for implementation |
+| 4.2 | PostgreSQL row-level-security defense and mandatory Qdrant scope enforcement | Planned after 4.1 |
+| 4.3 | Authorized object access and connector permission propagation contract | Planned after 4.2 |
+| 4.4 | Append-only audit events, activity views, and compliance export | Planned after 4.3 |
+| 4.5 | Retention, deletion, encryption/key, and incident-response controls | Planned after 4.4 |
 
 Milestone 4.0 review material:
 
@@ -674,11 +674,11 @@ commercial accounting, and compliance-grade administration.
 | Queue/broker | 3.0 | Accepted — RabbitMQ in ADR 0010 |
 | S3-compatible storage implementation/vendor | 3.0 | Accepted — SeaweedFS for local/CI in ADR 0011; production provider deferred |
 | Worker runtime and operating model | 3.0–3.3 | Accepted — purpose-built Python dispatcher/worker in ADR 0012 |
-| Fine-grained policy representation | 4.0 | Proposed — central RBAC ceiling plus optional positive user ACLs in ADR 0013 |
-| PostgreSQL tenant defense | 4.0–4.2 | Proposed — RLS beneath application policy in ADR 0014 |
-| Vector/object/async authorization | 4.0–4.3 | Proposed — trusted PostgreSQL scope compilation in ADR 0015 |
-| Security audit and compliance export | 4.0–4.4 | Proposed — append-only PostgreSQL contract in ADR 0016 |
-| Retention and deletion policy | 4.0–4.5 | Proposed — tombstone-first durable lifecycle in ADR 0017 |
+| Fine-grained policy representation | 4.0 | Accepted — central RBAC ceiling plus optional positive user ACLs in ADR 0013 |
+| PostgreSQL tenant defense | 4.0–4.2 | Accepted — RLS beneath application policy in ADR 0014 |
+| Vector/object/async authorization | 4.0–4.3 | Accepted — trusted PostgreSQL scope compilation in ADR 0015 |
+| Security audit and compliance export | 4.0–4.4 | Accepted — append-only PostgreSQL contract in ADR 0016 |
+| Retention and deletion policy | 4.0–4.5 | Accepted — tombstone-first durable lifecycle in ADR 0017 |
 | Sparse-search engine | 5.1 | TBD |
 | Reranker | 5.4 | TBD |
 | Vision embedding/enrichment models | 6.1–6.2 | TBD |
@@ -692,8 +692,8 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Review and approve, revise, or reject ADRs 0013–0017 | Accepted contracts and resolved approval points before schema/runtime implementation |
-| 2 | After ADR approval, implement Milestone 4.1 as the first vertical slice | Central policy replaces distributed role checks with compatibility and negative-test evidence |
+| 1 | Implement Milestone 4.1 as the first vertical slice | Central policy replaces distributed role checks with compatibility and negative-test evidence |
+| 2 | Open and maintain the Phase 4 draft pull request | Reviewable commits, green CI, and squash-and-merge only after explicit approval |
 
 ## Update protocol
 

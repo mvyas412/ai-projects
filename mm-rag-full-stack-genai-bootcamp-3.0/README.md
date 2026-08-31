@@ -7,9 +7,9 @@ remain unchanged at the immutable `mm-rag-v1.0.0` and `mm-rag-v2.0.0` Git tags.
 ## Current status
 
 Phase 3 is accepted and preserved at `mm-rag-v3.0.0`. Phase 4 Milestone 4.0 is
-now in decision kickoff on `phase-4/mm-rag-governance`. Its policy matrix, threat
-model, and ADRs 0013–0017 are Proposed for review; no Phase 4 schema, authorization
-service, RLS policy, ACL, audit export, or deletion behavior is implemented yet.
+complete on `phase-4/mm-rag-governance`: its policy matrix, threat model, and ADRs
+0013–0017 were accepted on 2026-08-31. Milestone 4.1 is next; no Phase 4 schema,
+authorization service, RLS policy, ACL, audit export, or deletion behavior is implemented yet.
 
 The Phase 3 baseline currently contains:
 
@@ -92,7 +92,7 @@ The living [architecture handbook](docs/architecture/ARCHITECTURE.md) contains:
 - Current implementation status, architecture invariants, open technology
   decisions, and documentation-maintenance rules.
 
-The proposed [Phase 4 policy matrix and threat model](docs/architecture/PHASE4_POLICY_THREAT_MODEL.md)
+The accepted [Phase 4 policy matrix and threat model](docs/architecture/PHASE4_POLICY_THREAT_MODEL.md)
 defines the first review contract for roles, resource visibility, ACL inheritance,
 trust boundaries, and cross-store authorization. It does not change runtime behavior.
 
@@ -126,7 +126,7 @@ Accepted decisions are recorded as ADRs:
 - [S3-compatible object storage with SeaweedFS for local development](docs/architecture/decisions/0011-s3-compatible-object-storage-seaweedfs.md)
 - [Purpose-built Python dispatcher and ingestion worker runtime](docs/architecture/decisions/0012-python-dispatcher-worker-runtime.md)
 
-Proposed Phase 4 decisions awaiting review are:
+Accepted Phase 4 decisions are:
 
 - [Central RBAC and resource ACL policy](docs/architecture/decisions/0013-central-rbac-resource-acl-policy.md)
 - [PostgreSQL row-level-security defense](docs/architecture/decisions/0014-postgresql-row-level-security.md)

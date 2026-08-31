@@ -1,11 +1,11 @@
 # Phase 4 policy matrix and threat model
 
-> Milestone 4.0 decision package — Proposed 2026-08-31
+> Milestone 4.0 decision package — Accepted 2026-08-31
 
-This document defines the proposed authorization vocabulary, first public policy
+This document defines the accepted authorization vocabulary, first public policy
 matrix, trust boundaries, and threat-model changes for Phase 4. It is a review
 artifact, not implementation evidence. Existing Phase 3 behavior remains unchanged
-until the corresponding ADRs are accepted and each enforcement slice is tested.
+until each accepted enforcement slice is implemented and tested.
 
 ## Goals and invariants
 
@@ -26,7 +26,7 @@ until the corresponding ADRs are accepted and each enforcement slice is tested.
 - Tokens, credentials, raw document or message content, object coordinates, and raw
   dependency errors never enter policy, audit, broker, or public-error payloads.
 
-## Proposed policy representation
+## Accepted policy representation
 
 The central policy service evaluates this tuple:
 
@@ -152,7 +152,7 @@ Unknown action/resource combinations deny by default.
 | Admin misuse | An admin reads or exports sensitive workspace content | Explicit admin capability, immutable attribution, least-privilege export, no hidden impersonation, owner-visible security activity |
 | Denial-of-service through denied requests | Attacker floods audit with guessed IDs | Rate limiting later at gateway, bounded denial events, stable metadata only, operational aggregation without weakening denial |
 
-## Proposed Phase 4 decision and delivery sequence
+## Accepted Phase 4 decision and delivery sequence
 
 1. ADR 0013 — central RBAC/ACL representation and policy semantics.
 2. ADR 0014 — PostgreSQL RLS roles, transaction context, and worker boundaries.
@@ -162,7 +162,10 @@ Unknown action/resource combinations deny by default.
 6. After acceptance, implement Milestones 4.1–4.5 as small vertical slices with
    deterministic and live cross-tenant tests before any Phase 4 release claim.
 
-## Approval questions and recommendations
+## Accepted resolutions
+
+All recommendations below were approved on 2026-08-31. Future changes require a
+superseding ADR and compatible migration rather than an undocumented policy change.
 
 | Question | Recommendation |
 | --- | --- |

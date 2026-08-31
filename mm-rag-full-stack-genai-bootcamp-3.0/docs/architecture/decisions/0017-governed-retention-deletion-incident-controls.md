@@ -1,6 +1,6 @@
 # ADR 0017: Governed retention, deletion, encryption, and incident controls
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-08-31
 - Milestone: 4.0–4.5
 
@@ -25,7 +25,7 @@ deployment decisions; legal hold and regulatory policy remain extensible for Pha
 | Provider lifecycle rules only | Low application effort | Cannot coordinate PostgreSQL, Qdrant, object references, jobs, or audit evidence |
 | Tombstone plus durable idempotent deletion workflow | Immediate access denial, retryable cross-store purge, and reviewable evidence | Requires lifecycle state, durable work, reconciliation, and explicit retention classes |
 
-## Proposed decision
+## Decision
 
 Use a versioned lifecycle policy and a durable, idempotent deletion workflow.
 Tombstone the governed resource in PostgreSQL first so new reads, retrieval, jobs,
@@ -33,7 +33,7 @@ and downloads deny immediately. A lifecycle worker then removes derived vectors,
 objects, child metadata, and eligible originals in a recorded order, retries partial
 failure, reconciles absence, and marks completion only when all required stores agree.
 
-### Proposed initial retention profile
+### Accepted initial retention profile
 
 | Data class | Recommendation |
 | --- | --- |
@@ -48,8 +48,8 @@ failure, reconciles absence, and marks completion only when all required stores 
 
 All windows are environment-configurable policy revisions, not hard-coded provider
 lifecycle rules. Shortening a window requires owner-visible preview and audit.
-Deletion remains disabled until this ADR and the exact migration/rollback plan are
-accepted.
+Deletion remains disabled until implementation includes the reviewed migration,
+rollback, authorization, and failure-recovery evidence required by this ADR.
 
 ### Deletion order and safety
 
@@ -86,9 +86,9 @@ reconciliation blocks terminal completion.
 - Audit tombstones may outlive deleted content but contain no content or object coordinates.
 - Production encryption provider choices remain properly deferred to Phase 8.
 
-## Approval points
+## Acceptance resolution
 
-The recommendation requests approval for the proposed retention windows, owner-only
+The review accepted on 2026-08-31 the proposed retention windows, owner-only
 irreversible purge, tombstone-first deletion, durable cross-store reconciliation,
 and provider-managed encryption as the initial future production posture.
 

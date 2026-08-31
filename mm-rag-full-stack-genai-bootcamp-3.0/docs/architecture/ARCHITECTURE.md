@@ -166,7 +166,7 @@ flowchart LR
     p1["Phase 1<br/>Prototype<br/>Implemented"] -->
     p2["Phase 2<br/>Product foundation<br/>Completed"] -->
     p3["Phase 3<br/>Async ingestion<br/>Completed"] -->
-    p4["Phase 4<br/>Governance decisions<br/>In progress"] -->
+    p4["Phase 4<br/>Governance foundation<br/>In progress"] -->
     p5["Phase 5<br/>Hybrid retrieval<br/>Planned"] -->
     p6["Phase 6<br/>Visual/table intelligence<br/>Planned"] -->
     p7["Phase 7<br/>Evaluation/observability<br/>Planned"] -->
@@ -179,7 +179,7 @@ flowchart LR
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
 | 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
-| 4 | Fine-grained isolation and governance | Proposed central RBAC/ACL, RLS defense, cross-store policy, audit, lifecycle | PostgreSQL, Qdrant, object storage | In progress — Milestone 4.0 decisions; no runtime change |
+| 4 | Fine-grained isolation and governance | Accepted central RBAC/ACL, RLS defense, cross-store policy, audit, lifecycle | PostgreSQL, Qdrant, object storage | In progress — Milestone 4.0 complete; no runtime change yet |
 | 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
@@ -293,12 +293,13 @@ live embedding, promotion, active-generation retrieval, citation, and persistenc
 
 ## Phase 4 — fine-grained authorization and governance
 
-**Status:** In progress at Milestone 4.0 decision kickoff. Phase 2 starts isolation;
-this phase deepens it. The proposed contracts below are not implemented behavior.
+**Status:** In progress. Milestone 4.0 decisions were accepted on 2026-08-31.
+Phase 2 starts isolation; this phase deepens it. The accepted contracts below are
+not implementation evidence.
 
 The review source is the
 [Phase 4 policy matrix and threat model](PHASE4_POLICY_THREAT_MODEL.md). ADRs
-0013–0017 remain Proposed until their approval points are resolved.
+0013–0017 are Accepted; Milestone 4.1 is the next implementation slice.
 
 ```mermaid
 flowchart LR
@@ -525,11 +526,11 @@ reconcile commercial usage.
 | Object storage | S3-compatible adapter plus open-source SeaweedFS local/CI implemented under ADR 0011; production provider deferred |
 | Transactional outbox | PostgreSQL events plus confirmed leased dispatcher, retry/alert/retention operations implemented under ADR 0009 |
 | Worker runtime | Purpose-built Python dispatcher/worker implemented under ADR 0012; one in-flight job per process |
-| Fine-grained authorization | Proposed central RBAC ceiling plus optional positive user ACLs under ADR 0013 |
-| PostgreSQL tenant defense | Proposed RLS beneath application policy under ADR 0014 |
-| Vector/object/async policy | Proposed trusted PostgreSQL scope compilation under ADR 0015 |
-| Security audit/export | Proposed append-only PostgreSQL security events under ADR 0016 |
-| Retention/deletion | Proposed tombstone-first durable lifecycle under ADR 0017; destructive cleanup remains disabled |
+| Fine-grained authorization | Accepted central RBAC ceiling plus optional positive user ACLs under ADR 0013; not implemented |
+| PostgreSQL tenant defense | Accepted RLS beneath application policy under ADR 0014; not implemented |
+| Vector/object/async policy | Accepted trusted PostgreSQL scope compilation under ADR 0015; not implemented |
+| Security audit/export | Accepted append-only PostgreSQL security events under ADR 0016; not implemented |
+| Retention/deletion | Accepted tombstone-first durable lifecycle under ADR 0017; destructive cleanup remains disabled |
 | Sparse search | Required in Phase 5; engine not selected |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
@@ -553,7 +554,7 @@ Accepted Phase 3 decisions are:
 - [ADR 0011 — S3-compatible object storage with SeaweedFS for local development](decisions/0011-s3-compatible-object-storage-seaweedfs.md)
 - [ADR 0012 — Purpose-built Python dispatcher and ingestion worker runtime](decisions/0012-python-dispatcher-worker-runtime.md)
 
-Proposed Phase 4 decisions awaiting review are:
+Accepted Phase 4 decisions are:
 
 - [ADR 0013 — Central RBAC and resource ACL policy](decisions/0013-central-rbac-resource-acl-policy.md)
 - [ADR 0014 — PostgreSQL row-level-security defense](decisions/0014-postgresql-row-level-security.md)

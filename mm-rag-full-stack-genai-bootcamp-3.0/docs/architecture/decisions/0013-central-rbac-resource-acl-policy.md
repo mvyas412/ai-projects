@@ -1,6 +1,6 @@
 # ADR 0013: Central RBAC and resource ACL policy
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-08-31
 - Milestone: 4.0–4.1
 
@@ -26,7 +26,7 @@ the frontend or an external policy product authoritative.
 | Central RBAC ceiling plus optional resource ACL grants | Preserves current roles, supports restricted resources, and yields one testable decision path | Requires policy vocabulary, ACL persistence, list filtering, migration defaults, and cache discipline |
 | External policy engine now | Rich policy language and centralized evaluation | New service/runtime, policy deployment, availability, and debugging complexity before scale requires it |
 
-## Proposed decision
+## Decision
 
 Use a central in-process policy service with stable action/resource codes. Preserve
 the accepted `owner`, `admin`, `member`, and `viewer` roles as maximum capability
@@ -77,9 +77,9 @@ tests. Frontend visibility mirrors policy for usability but never grants access.
 - User-only positive grants are intentionally less expressive than enterprise ACLs.
 - Admin content access is powerful and therefore requires immutable attribution.
 
-## Approval points
+## Acceptance resolution
 
-The recommendation requests approval for these first-revision defaults:
+The review accepted these first-revision defaults on 2026-08-31:
 
 1. existing resources remain workspace-visible;
 2. new conversations default to restricted/creator-managed;

@@ -1,6 +1,6 @@
 # ADR 0016: Security audit and compliance export
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-08-31
 - Milestone: 4.0–4.4
 
@@ -21,7 +21,7 @@ a second copy of document, message, token, or provider data.
 | Append-only PostgreSQL security events plus safe exports | Transaction-aware, tenant-scoped, testable, and reuses the product authority | Requires a strict schema, privileges, retention, and separate high-volume telemetry |
 | External tamper-evident compliance ledger now | Strong independent evidence | New provider, cost, delivery guarantees, and operational scope before requirements justify it |
 
-## Proposed decision
+## Decision
 
 Extend the existing append-only PostgreSQL activity model into a versioned security
 audit event contract. Keep high-volume diagnostics in logs/metrics; audit stores
@@ -68,9 +68,9 @@ regulatory retention are deferred until Phase 7/9 requirements justify them.
 - Audit volume and retention require explicit limits and operational health.
 - The design is append-only but not yet an independently tamper-evident compliance ledger.
 
-## Approval points
+## Acceptance resolution
 
-The recommendation requests approval for same-transaction audit on privileged
+The review accepted on 2026-08-31 same-transaction audit on privileged
 mutations, owner/admin-only security views and exports, and deferring an external
 ledger/SIEM selection.
 

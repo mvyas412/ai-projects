@@ -1,6 +1,6 @@
 # ADR 0014: PostgreSQL row-level-security defense
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-08-31
 - Milestone: 4.0–4.2
 
@@ -21,7 +21,7 @@ policy or breaking pooled connections, migrations, workers, and operational jobs
 | RLS defense beneath central application policy | Defense in depth while preserving one product policy | Requires database roles, transaction context, policy migrations, and live tests |
 | Separate database/schema per workspace | Strong physical isolation | High migration, pooling, backup, and operational cost for the current scale |
 
-## Proposed decision
+## Decision
 
 Use PostgreSQL row-level security as defense in depth beneath ADR 0013. Application
 policy decides whether an action is allowed; RLS ensures a runtime query cannot read
@@ -63,9 +63,9 @@ but RLS acceptance requires PostgreSQL integration tests.
 - Incorrect transaction context can deny valid work; diagnostics must remain safe.
 - Table owners and privileged maintenance sessions require tight operational control.
 
-## Approval points
+## Acceptance resolution
 
-The recommendation requests approval to use separate migration, API, worker,
+The review accepted on 2026-08-31 the use of separate migration, API, worker,
 dispatcher, and controlled-operation database roles, with no general runtime
 `BYPASSRLS` role. Exact role names and local passwords remain environment configuration.
 

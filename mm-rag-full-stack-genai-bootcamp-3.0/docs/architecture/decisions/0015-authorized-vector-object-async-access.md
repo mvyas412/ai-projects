@@ -1,6 +1,6 @@
 # ADR 0015: Authorized vector, object, and asynchronous access
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-08-31
 - Milestone: 4.0–4.3
 
@@ -21,7 +21,7 @@ carry source permissions without selecting a connector in Phase 4.
 | Resolve policy in PostgreSQL and compile bounded provider scope | Current policy remains authoritative and provider-neutral | Adds authorization lookups and bounded-scope handling |
 | Issue provider-direct presigned URLs immediately | Reduces API download traffic | Leaks provider coordinates, complicates revocation, and expands replay risk before scale requires it |
 
-## Proposed decision
+## Decision
 
 Resolve authorization in PostgreSQL through ADR 0013, then compile the smallest
 trusted scope needed by each provider. Provider metadata supports validation but is
@@ -74,10 +74,10 @@ enterprise groups and propagating source changes remain Phase 9 work.
 - In-flight ingestion is operationally stable while requester access changes immediately.
 - Connectors have a secure extension point without expanding Phase 4 scope.
 
-## Approval points
+## Acceptance resolution
 
-The recommendation requests approval to keep backend-streamed downloads, treat
-accepted jobs as workspace-owned, and defer direct presigning and connector/group
+The review accepted on 2026-08-31 backend-streamed downloads, treating
+accepted jobs as workspace-owned, and deferring direct presigning and connector/group
 implementation until measured need and later ADRs.
 
 ## Acceptance evidence required
