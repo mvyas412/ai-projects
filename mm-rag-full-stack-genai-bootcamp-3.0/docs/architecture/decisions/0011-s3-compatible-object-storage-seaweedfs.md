@@ -167,3 +167,20 @@ the ADR 0008 immutability and promotion invariants.
 - An unauthorized workspace cannot resolve or read another tenant's object.
 - Existing local-storage behavior remains available only as an explicit development
   fallback until migration and rollback gates are complete.
+
+## Implementation evidence on 2026-08-30
+
+- Boto3 `1.43.83` is locked behind the provider-neutral adapter; domain services do
+  not consume SDK types or provider exceptions.
+- SeaweedFS `4.43` runs as the open-source local Compose service with isolated data,
+  localhost-only S3 exposure, pre-created originals/artifacts buckets, and health checks.
+- Unit tests cover streamed identity verification, immutable conditional replay,
+  conflict/integrity behavior, safe key construction, configuration, and local fallback.
+- The live SeaweedFS contract proves head, streamed put/read, SHA-256/size metadata,
+  same-content replay, different-content conflict, delete/not-found behavior, and
+  object persistence across a container restart.
+- The current maximum upload size is 250 MiB, so the first adapter uses streamed
+  single-part PUT. Multipart upload and abort evidence remain mandatory before the
+  application limit is raised into provider multipart territory.
+- Existing local objects were not migrated or made inaccessible. Enabling the S3
+  backend for an existing database requires an explicit migration/rollback step.

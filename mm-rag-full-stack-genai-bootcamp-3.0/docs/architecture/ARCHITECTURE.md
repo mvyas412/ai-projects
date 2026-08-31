@@ -18,8 +18,8 @@ roadmap view, and one diagram for each phase. The Mermaid diagrams in this
 handbook remain the editable source of truth.
 
 The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
-is the pre-implementation checkpoint for ADRs 0010–0012. It distinguishes verified
-product behavior from accepted-but-pending and later planned components.
+is the active Milestone 3.1 checkpoint. It distinguishes verified product and
+object-storage behavior from accepted-but-pending and later planned components.
 
 ## Status legend
 
@@ -79,7 +79,7 @@ flowchart LR
     subgraph stores["Persistent data services"]
         pg[("PostgreSQL<br/>identity, metadata, jobs, chat, audit")]
         qdrant[("Qdrant<br/>vectors + tenant-scoped payload")]
-        objects[("S3-compatible object storage<br/>SeaweedFS local/CI accepted ADR 0011")]
+        objects[("S3-compatible object storage<br/>SeaweedFS local/CI implemented ADR 0011")]
     end
 
     subgraph ops["Quality, security, and operations"]
@@ -256,14 +256,15 @@ machine implement jobs, fenced attempts, retries, progress, cancellation, and le
 recovery. They are not yet connected to the synchronous product path. ADR 0009
 accepts the transactional outbox dispatch/recovery contract. ADRs 0010–0012 accept
 open-source RabbitMQ, an S3-compatible adapter with open-source SeaweedFS for free
-local/CI use, and separate purpose-built Python dispatcher/worker processes. These
-accepted components remain unimplemented at this checkpoint.
+local/CI use, and separate purpose-built Python dispatcher/worker processes. The S3
+adapter, immutable key builders, and SeaweedFS local service are implemented and
+live-tested. Outbox, RabbitMQ, worker, async API, and progress UX remain unimplemented.
 
 ```mermaid
 flowchart LR
     client["Authorized client"] -->|"upload · planned async API"| api["Document API"]
     api --> policy["Workspace policy<br/>implemented"]
-    policy -->|"immutable original · planned"| objects[("SeaweedFS S3 local/CI<br/>Accepted ADR 0011; not implemented")]
+    policy -->|"immutable original · async wiring planned"| objects[("S3 adapter + SeaweedFS local/CI<br/>Implemented and live-tested ADR 0011")]
     policy -->|"document version + job · planned wiring"| pg[("PostgreSQL jobs/attempts<br/>implemented at 20260830_0006")]
     api -->|"202 + job ID · planned"| client
     pg --> outbox["Transactional outbox + dispatcher<br/>Accepted ADR 0009; not implemented"]
@@ -514,7 +515,7 @@ reconcile commercial usage.
 | Phase 2 UI | Streamlit multipage application |
 | Dedicated Phase 8 UI | Candidate only; framework not selected |
 | Queue / broker | Open-source RabbitMQ accepted in ADR 0010; not implemented |
-| Object storage | S3-compatible adapter plus open-source SeaweedFS local/CI accepted in ADR 0011; production provider deferred |
+| Object storage | S3-compatible adapter plus open-source SeaweedFS local/CI implemented under ADR 0011; production provider deferred |
 | Transactional outbox | PostgreSQL boundary accepted in ADR 0009; not implemented |
 | Worker runtime | Purpose-built Python dispatcher/worker accepted in ADR 0012; not implemented |
 | Sparse search | Required in Phase 5; engine not selected |

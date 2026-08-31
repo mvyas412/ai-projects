@@ -1,3 +1,6 @@
+import pytest
+from pydantic import SecretStr, ValidationError
+
 from backend.app.core.config import (
     DEFAULT_OPENAI_CHAT_MODEL,
     DEFAULT_OPENAI_EMBEDDING_MODEL,
@@ -20,3 +23,28 @@ def test_openai_model_names_are_trimmed() -> None:
 
     assert settings.openai_chat_model == "custom-chat-model"
     assert settings.openai_embedding_model == "custom-embedding-model"
+
+
+def test_s3_backend_requires_a_complete_credential_pair() -> None:
+    with pytest.raises(ValidationError, match="S3 credentials are required"):
+        Settings(object_storage_backend="s3")
+
+    with pytest.raises(ValidationError, match="must be configured together"):
+        Settings(s3_access_key_id=SecretStr("local-access"))
+
+
+def test_s3_configuration_is_normalized_without_exposing_secrets() -> None:
+    settings = Settings(
+        object_storage_backend="s3",
+        s3_endpoint_url="http://127.0.0.1:8333/",
+        s3_access_key_id=SecretStr("local-access"),
+        s3_secret_access_key=SecretStr("local-secret"),
+    )
+
+    assert settings.s3_endpoint_url == "http://127.0.0.1:8333"
+    assert "local-secret" not in repr(settings)
+
+
+def test_s3_bucket_names_must_be_dns_compatible() -> None:
+    with pytest.raises(ValidationError, match="DNS-compatible"):
+        Settings(s3_originals_bucket="Not_A_Bucket")

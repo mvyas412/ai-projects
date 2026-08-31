@@ -13,6 +13,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
     "module_name",
     [
         "alembic",
+        "boto3",
         "fastapi",
         "langchain_core",
         "langchain_openai",

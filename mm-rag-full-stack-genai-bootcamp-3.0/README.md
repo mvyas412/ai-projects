@@ -11,7 +11,7 @@ The Phase 3 baseline currently contains:
 - The verified V1 parsing, ingestion, retrieval, generation, and Streamlit flow.
 - A dedicated Python 3.12 environment managed by uv.
 - Locked runtime and development dependencies.
-- Isolated local PostgreSQL and Qdrant service definitions.
+- Isolated local PostgreSQL, Qdrant, and SeaweedFS service definitions.
 - Environment and Streamlit configuration boundaries.
 - A modular FastAPI application factory and versioned API router.
 - Structured request logs with correlation IDs.
@@ -23,7 +23,12 @@ The Phase 3 baseline currently contains:
 - PostgreSQL users, workspaces, memberships, and owner provisioning through
   Alembic revision `20260829_0002`.
 - Protected current-user and workspace APIs with non-enumerating membership checks.
-- A path-safe local object-storage adapter and separate authenticated Streamlit shell.
+- Provider-neutral local and S3-compatible object-storage adapters with streamed
+  I/O, checksum/size metadata, conditional immutable creation, safe error mapping,
+  and opaque workspace/document/version object keys.
+- A live-tested open-source SeaweedFS local/CI provider with restart persistence;
+  Amazon S3 remains an unprovisioned future production option.
+- A separate authenticated Streamlit shell.
 - Synchronous text, PDF, DOCX, and image-description indexing behind a replaceable
   document-indexer boundary, with mandatory workspace/document/version vector scope.
 - Persistent workspace-, collection-, or document-scoped conversations with
@@ -44,15 +49,17 @@ The Phase 3 baseline currently contains:
 - An isolated real-OpenAI acceptance command covering text and image indexing,
   scoped retrieval, grounded citations, persistence, audit, and tenant isolation.
 
-This directory starts from the accepted V2 tree. Phase 3 is in Milestone 3.0.
+This directory starts from the accepted V2 tree. Phase 3 has completed Milestone 3.1
+and is entering Milestone 3.2.
 Accepted ADRs 0007 and 0008 define the durable job/attempt and idempotent output-
 promotion contracts. The provider-neutral job/attempt persistence and state-machine
 foundation is implemented but is not connected to the synchronous indexing API.
 ADR 0009 accepts the provider-neutral transactional-outbox boundary. ADRs 0010–0012
 select free self-hosted RabbitMQ, an S3-compatible adapter with open-source SeaweedFS
-for local/CI, and separate purpose-built Python dispatcher/worker processes. These
-components and all asynchronous API wiring remain unimplemented. No asynchronous
-behavior is claimed until the accepted contracts are implemented with their tests.
+for local/CI, and separate purpose-built Python dispatcher/worker processes. The S3
+adapter, immutable key contract, SeaweedFS Compose service, and provider contract
+tests are implemented. The outbox, RabbitMQ, dispatcher/worker, asynchronous API,
+and progress UX remain unimplemented, so no asynchronous behavior is claimed yet.
 
 ## Architecture and roadmap
 
@@ -157,7 +164,7 @@ token `iss` claim exactly, including its trailing slash. The frontend requests
 the configured audience so Auth0 returns an API access token rather than an
 opaque user-session token.
 
-## Start PostgreSQL and Qdrant
+## Start PostgreSQL, Qdrant, and SeaweedFS
 
 After configuring `.env` and installing a container runtime:
 
@@ -175,15 +182,23 @@ Local endpoints are intentionally separated from V1:
 | PostgreSQL | `127.0.0.1:5434` |
 | Qdrant HTTP | `http://127.0.0.1:6337` |
 | Qdrant gRPC | `127.0.0.1:6338` |
+| SeaweedFS S3 | `http://127.0.0.1:8333` |
 
-PostgreSQL and Qdrant use Compose-managed Phase 3 volumes. Do not mount or reuse
-V1 or V2 runtime data.
+PostgreSQL, Qdrant, and SeaweedFS use Compose-managed Phase 3 volumes. Do not mount
+or reuse V1 or V2 runtime data. The example SeaweedFS credentials are localhost-only
+development values, not production secrets. Override them in ignored configuration
+for any shared environment.
+
+Existing Phase 3 databases continue using `OBJECT_STORAGE_BACKEND=local` until an
+explicit object migration is implemented. A clean development environment may set
+`OBJECT_STORAGE_BACKEND=s3`; FastAPI then adds `object_storage` to dependency readiness.
 
 Readiness checks:
 
 ```bash
 docker compose exec postgres pg_isready -U mm_rag -d mm_rag_phase3
 curl --fail http://127.0.0.1:6337/readyz
+docker compose ps seaweedfs
 ```
 
 Stop services without deleting their volumes:
@@ -192,8 +207,8 @@ Stop services without deleting their volumes:
 docker compose down
 ```
 
-Do not add `-v` unless you explicitly intend to delete the Phase 3 PostgreSQL
-and Qdrant data volumes.
+Do not add `-v` unless you explicitly intend to delete the Phase 3 PostgreSQL,
+Qdrant, and SeaweedFS data volumes.
 
 ## Apply database migrations
 
@@ -343,7 +358,7 @@ product story, suggested prompts, failure-safe talking points, and visual accept
 ├── .streamlit/               # Shareable settings and safe OIDC secrets template
 ├── alembic.ini               # Migration runner configuration
 ├── backend/app/              # FastAPI, auth, models, repositories, services, storage
-├── compose.yaml              # Isolated Phase 3 PostgreSQL and Qdrant
+├── compose.yaml              # Isolated Phase 3 PostgreSQL, Qdrant, and SeaweedFS
 ├── docs/                     # Living project plan, architecture, and ADRs
 ├── frontend/                 # Authenticated Phase 3 Streamlit shell
 ├── migrations/               # Versioned PostgreSQL schema changes

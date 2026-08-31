@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal, Self
@@ -36,6 +37,16 @@ class Settings(BaseSettings):
 
     local_storage_root: Path = PROJECT_ROOT / "data/runtime/storage"
     max_upload_bytes: int = Field(default=25 * 1024 * 1024, ge=1024, le=250 * 1024 * 1024)
+    object_storage_backend: Literal["local", "s3"] = "local"
+    s3_endpoint_url: str | None = "http://127.0.0.1:8333"
+    s3_region: str = "us-east-1"
+    s3_access_key_id: SecretStr | None = None
+    s3_secret_access_key: SecretStr | None = None
+    s3_originals_bucket: str = "mm-rag-phase3-originals"
+    s3_artifacts_bucket: str = "mm-rag-phase3-artifacts"
+    s3_path_style: bool = True
+    s3_connect_timeout_seconds: int = Field(default=3, ge=1, le=30)
+    s3_read_timeout_seconds: int = Field(default=30, ge=1, le=300)
 
     database_url: SecretStr | None = None
     database_echo: bool = False
@@ -80,6 +91,29 @@ class Settings(BaseSettings):
             raise ValueError("QDRANT_URL must use http:// or https://")
         return normalized
 
+    @field_validator("s3_endpoint_url", mode="before")
+    @classmethod
+    def blank_s3_endpoint_is_none(cls, value: object) -> object:
+        return None if value == "" else value
+
+    @field_validator("s3_endpoint_url")
+    @classmethod
+    def normalize_s3_endpoint(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        normalized = value.strip().rstrip("/")
+        if not normalized.startswith(("http://", "https://")):
+            raise ValueError("S3_ENDPOINT_URL must use http:// or https://")
+        return normalized
+
+    @field_validator("s3_originals_bucket", "s3_artifacts_bucket")
+    @classmethod
+    def validate_s3_bucket(cls, value: str) -> str:
+        normalized = value.strip()
+        if not re.fullmatch(r"[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]", normalized):
+            raise ValueError("S3 bucket names must be DNS-compatible")
+        return normalized
+
     @field_validator("auth0_issuer", "auth0_audience", "auth0_jwks_url", mode="before")
     @classmethod
     def blank_auth_setting_is_none(cls, value: object) -> object:
@@ -112,10 +146,32 @@ class Settings(BaseSettings):
             raise ValueError("AUTH0_ISSUER and AUTH0_AUDIENCE must be configured together")
         return self
 
-    @field_validator("qdrant_api_key", "openai_api_key", mode="before")
+    @field_validator(
+        "qdrant_api_key",
+        "openai_api_key",
+        "s3_access_key_id",
+        "s3_secret_access_key",
+        mode="before",
+    )
     @classmethod
     def blank_secret_is_none(cls, value: object) -> object:
         return None if value == "" else value
+
+    @model_validator(mode="after")
+    def validate_s3_configuration(self) -> Self:
+        credentials = (
+            self.s3_access_key_id is not None
+            and bool(self.s3_access_key_id.get_secret_value().strip()),
+            self.s3_secret_access_key is not None
+            and bool(self.s3_secret_access_key.get_secret_value().strip()),
+        )
+        if any(credentials) and not all(credentials):
+            raise ValueError(
+                "S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY must be configured together"
+            )
+        if self.object_storage_backend == "s3" and not all(credentials):
+            raise ValueError("S3 credentials are required when OBJECT_STORAGE_BACKEND=s3")
+        return self
 
     @field_validator("openai_chat_model", mode="before")
     @classmethod

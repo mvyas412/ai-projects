@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
   <title id="title">MM-RAG Platform — Current Workflow and DEV Architecture</title>
-  <desc id="desc">Phase 3 pre-implementation checkpoint showing implemented Phase 2 product components, the durable job foundation, and approved but not yet implemented RabbitMQ, SeaweedFS, outbox, worker, and asynchronous API components.</desc>
+  <desc id="desc">Phase 3 Milestone 3.1 checkpoint showing the implemented product, durable job foundation, S3-compatible adapter and SeaweedFS service, plus approved but not yet implemented RabbitMQ, outbox, worker, and asynchronous API components.</desc>
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#193b68"/>
@@ -27,7 +27,7 @@
 
   <rect width="1600" height="900" fill="#f8fafc"/>
   <text x="800" y="40" text-anchor="middle" class="title">MM-RAG Platform — Current Workflow &amp; DEV Architecture</text>
-  <text x="800" y="68" text-anchor="middle" class="subtitle">Phase 3 · Milestone 3.0 decision checkpoint · Status as August 30, 2026</text>
+  <text x="800" y="68" text-anchor="middle" class="subtitle">Phase 3 · Milestone 3.1 implementation checkpoint · Status as August 30, 2026</text>
 
   <text x="22" y="101" class="small" font-weight="700">Status snapshot</text>
   <rect x="116" y="84" width="116" height="26" rx="13" fill="#e8f7ef" stroke="#47a477"/>
@@ -38,7 +38,7 @@
   <text x="434" y="101" text-anchor="middle" class="tiny" fill="#5c6c7e">PLANNED</text>
   <rect x="1262" y="82" width="126" height="28" rx="14" fill="#eaf4ff" stroke="#3d83c5"/>
   <text x="1325" y="100" text-anchor="middle" class="tiny" fill="#276aa9">FREE LOCAL DEV</text>
-  <text x="1398" y="100" class="small">RabbitMQ + SeaweedFS approved · AWS S3 not provisioned</text>
+  <text x="1398" y="100" class="small">SeaweedFS live · RabbitMQ pending</text>
 
   <!-- Lane 1 -->
   <rect x="20" y="125" width="300" height="630" rx="13" fill="#edf6ff" stroke="#347bbd" stroke-width="1.5"/>
@@ -159,13 +159,13 @@
   <circle cx="983" cy="148" r="15" fill="#e08713"/><text x="983" y="153" text-anchor="middle" class="step">4</text>
   <text x="1005" y="154" class="lane-title">Objects &amp; Worker Runtime</text>
 
-  <rect x="972" y="190" width="268" height="134" class="card" stroke="#d79a25"/>
-  <text x="989" y="216" class="card-title">SeaweedFS local S3</text>
-  <rect x="1142" y="200" width="85" height="22" rx="11" fill="#fff4d6" stroke="#d79a25"/><text x="1184" y="215" text-anchor="middle" class="tiny" fill="#966611">APPROVED</text>
+  <rect x="972" y="190" width="268" height="134" class="card" stroke="#47a477"/>
+  <text x="989" y="216" class="card-title">S3 + SeaweedFS</text>
+  <rect x="1142" y="200" width="85" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="1184" y="215" text-anchor="middle" class="tiny" fill="#26805a">VERIFIED</text>
   <line x1="984" y1="229" x2="1228" y2="229" class="divider"/>
-  <text x="987" y="250" class="dot" fill="#d79a25">•</text><text x="1001" y="250" class="body">Free local/CI S3-compatible service</text>
-  <text x="987" y="272" class="dot" fill="#d79a25">•</text><text x="1001" y="272" class="body">Immutable originals and derived artifacts</text>
-  <text x="987" y="294" class="dot" fill="#d79a25">•</text><text x="1001" y="294" class="body">AWS S3 remains later paid production option</text>
+  <text x="987" y="250" class="dot" fill="#26805a">•</text><text x="1001" y="250" class="body">Streamed create/read/head + SHA-256</text>
+  <text x="987" y="272" class="dot" fill="#26805a">•</text><text x="1001" y="272" class="body">Conditional immutable replay tested live</text>
+  <text x="987" y="294" class="dot" fill="#26805a">•</text><text x="1001" y="294" class="body">Restart persists; AWS S3 remains later option</text>
 
   <rect x="972" y="342" width="268" height="158" class="card" stroke="#d79a25"/>
   <text x="989" y="368" class="card-title">Python dispatcher + worker</text>
@@ -222,7 +222,7 @@
   <text x="1301" y="646" class="card-title">Quality and release gate</text>
   <rect x="1478" y="630" width="73" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="1514" y="645" text-anchor="middle" class="tiny" fill="#26805a">PASSING</text>
   <line x1="1296" y1="659" x2="1552" y2="659" class="divider"/>
-  <text x="1299" y="681" class="dot" fill="#198789">•</text><text x="1313" y="681" class="body">81 deterministic tests + 1 skip; PR CI passes</text>
+  <text x="1299" y="681" class="dot" fill="#198789">•</text><text x="1313" y="681" class="body">97 deterministic + 2 skips; 99 live pass</text>
   <text x="1299" y="703" class="dot" fill="#198789">•</text><text x="1313" y="703" class="body">Lint, types, migrations, schema drift clean</text>
 
   <!-- Primary and planned flow arrows -->
@@ -246,12 +246,12 @@
   <text x="52" y="854" class="small">Authenticated, persistent, tenant-safe product</text>
   <rect x="336" y="814" width="286" height="50" rx="9" fill="#e8f7ef" stroke="#47a477"/>
   <text x="350" y="836" class="card-title" fill="#26805a">Phase 3.0 · contracts approved</text>
-  <text x="350" y="854" class="small">ADRs 0007–0012 · implementation begins next</text>
-  <rect x="634" y="814" width="286" height="50" rx="9" fill="#fff4d6" stroke="#d79a25"/>
-  <text x="648" y="836" class="card-title" fill="#966611">Phase 3.1 · next</text>
-  <text x="648" y="854" class="small">S3 adapter + immutable keys + SeaweedFS</text>
-  <rect x="932" y="814" width="286" height="50" rx="9" fill="#eef2f6" stroke="#8291a3"/>
-  <text x="946" y="836" class="card-title">Phases 3.2–3.3</text>
+  <text x="350" y="854" class="small">ADRs 0007–0012 · durable jobs implemented</text>
+  <rect x="634" y="814" width="286" height="50" rx="9" fill="#e8f7ef" stroke="#47a477"/>
+  <text x="648" y="836" class="card-title" fill="#26805a">Phase 3.1 · implemented</text>
+  <text x="648" y="854" class="small">S3 adapter + immutable keys + SeaweedFS live</text>
+  <rect x="932" y="814" width="286" height="50" rx="9" fill="#fff4d6" stroke="#d79a25"/>
+  <text x="946" y="836" class="card-title" fill="#966611">Phases 3.2–3.3 · next</text>
   <text x="946" y="854" class="small">Outbox, RabbitMQ dispatcher, worker runtime</text>
   <rect x="1230" y="814" width="332" height="50" rx="9" fill="#eef2f6" stroke="#8291a3"/>
   <text x="1244" y="836" class="card-title">Phases 3.4–3.5</text>

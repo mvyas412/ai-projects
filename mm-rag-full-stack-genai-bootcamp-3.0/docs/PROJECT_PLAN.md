@@ -44,9 +44,9 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | 3.0 contracts complete; Milestone 3.1 S3 adapter and SeaweedFS implementation is next |
-| Phase 3 | In progress — ADRs 0007–0012 accepted; no asynchronous execution yet |
-| Phase 3 bootstrap gate | 81 deterministic tests plus one skip; live PostgreSQL/Qdrant/API/Streamlit and CI gates pass |
+| Active milestone | 3.1 object-storage boundary complete; Milestone 3.2 transactional outbox is next |
+| Phase 3 | In progress — ADRs 0007–0012 and S3/SeaweedFS foundation implemented; no asynchronous execution yet |
+| Phase 3 quality gate | 97 deterministic tests plus two integration skips; 99 live tests and service readiness pass |
 | Phases 4–9 | Planned |
 
 ## Delivery sequence and gates
@@ -259,8 +259,10 @@ revision `20260830_0006` and the backend state machine implement the provider-ne
 job/attempt foundation. ADR 0009 accepts a PostgreSQL transactional-outbox and
 at-least-once dispatch/recovery boundary. ADRs 0010–0012 accept open-source
 RabbitMQ, an S3-compatible adapter with open-source SeaweedFS for local/CI, and
-separate purpose-built Python dispatcher/worker processes. None of those components
-is implemented yet, and the synchronous product path is unchanged.
+separate purpose-built Python dispatcher/worker processes. The S3 adapter, immutable
+key contract, and SeaweedFS local/CI provider are implemented and live-tested. The
+outbox, RabbitMQ, dispatcher/worker, async API, and progress UX remain unimplemented,
+and the synchronous product path remains active.
 
 ### Objective
 
@@ -273,7 +275,7 @@ scalable while moving original and derived binaries to object storage.
 | --- | --- | --- |
 | 3.0 | Job/attempt and idempotency contracts; outbox, queue/broker, object-storage, and worker-runtime ADRs | Phase 2 document/version model |
 | 3.1 | S3-compatible object-storage adapter and immutable object keys | Storage protocol from Phase 2.1 |
-| 3.2 | Durable jobs, attempts, idempotency, and transactional outbox | PostgreSQL/Alembic foundation |
+| 3.2 | Transactional outbox schema/repository and atomic job dispatch intent | PostgreSQL/Alembic and job foundation |
 | 3.3 | Worker process, retry/backoff, heartbeat, cancellation, dead-letter handling | Accepted queue technology |
 | 3.4 | Upload/status API and progress UX | Job and worker contracts |
 | 3.5 | Failure, recovery, load, and operations hardening | End-to-end async flow |
@@ -314,8 +316,36 @@ Accepted decisions:
 Not yet implemented:
 
 - async upload/status endpoints, dispatch/outbox, a broker, worker process,
-  object-storage provider, immutable output generations, or promotion;
+  immutable output generations, or promotion;
 - the existing synchronous indexing and retrieval behavior remains active.
+
+### Milestone 3.1 implementation status
+
+Implemented and validated:
+
+- Added a provider-neutral object contract with streamed create/read, head metadata,
+  SHA-256 and byte-size verification, conditional write-once creation, idempotent
+  same-content replay, safe conflicts, and non-disclosing provider errors.
+- Added opaque trusted key builders for originals, attempt artifacts, and promoted
+  generation artifacts. New document originals no longer include user filenames in keys.
+- Added a Boto3 S3 adapter, configuration factory, secret-safe settings validation,
+  and conditional object-storage readiness when the S3 backend is active.
+- Added the open-source SeaweedFS `4.43` local Compose service with isolated storage,
+  localhost-only S3 exposure, pre-created private-intent buckets, and health checks.
+- Expanded the local fallback to the same checksum/size/conditional-create contract
+  while keeping existing Phase 3 databases on local storage until migration is explicit.
+- The deterministic gate passes 97 tests with two integration skips. The live gate
+  passes 99 tests, including the SeaweedFS provider contract. A manual restart check
+  verified object persistence and removed its test object afterward.
+
+Deferred from this slice:
+
+- Existing local objects are not migrated and the current ignored environment remains
+  on the local adapter, preventing silent loss of access to prior documents.
+- Multipart upload is unnecessary under the current 250 MiB maximum and remains
+  required before raising the application limit into provider multipart territory.
+- The artifacts bucket and promotion keys are defined but remain unused until the
+  worker/output-promotion milestone.
 
 ### Completion gate
 
@@ -552,9 +582,9 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Implement the accepted S3-compatible adapter, immutable keys, and SeaweedFS contract tests | Original and attempt objects satisfy ADRs 0008 and 0011 |
-| 2 | Implement the transactional outbox schema and repository contract | Every eligible job mutation commits exactly one durable dispatch intent |
-| 3 | Add RabbitMQ topology, dispatcher, and worker process foundations | Confirmed publication and fenced consumption satisfy ADRs 0009–0012 |
+| 1 | Implement the transactional outbox schema and repository contract | Every eligible job mutation commits exactly one durable dispatch intent |
+| 2 | Add RabbitMQ topology and confirmed dispatcher publication | Outbox rows publish at least once with safe duplicate recovery |
+| 3 | Add the fenced Python worker process foundation | Worker claims, heartbeats, shutdown, and acknowledgements satisfy ADRs 0007 and 0012 |
 
 ## Update protocol
 

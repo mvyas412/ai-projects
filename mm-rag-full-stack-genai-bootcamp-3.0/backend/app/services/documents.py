@@ -18,6 +18,7 @@ from backend.app.repositories.documents import CollectionRepository, DocumentRep
 from backend.app.repositories.workspaces import WorkspaceRepository
 from backend.app.services.audit import record_audit_event
 from backend.app.storage.base import ObjectStorage
+from backend.app.storage.keys import original_object_key
 
 ALLOWED_MEDIA_TYPES = frozenset(
     {
@@ -128,11 +129,13 @@ class DocumentLibraryService:
             user=user,
             version_number=1,
             content=content,
-            filename=safe_filename,
         )
         self._write_with_storage(
             version.object_key,
             content,
+            document.media_type,
+            document,
+            version,
             lambda: self._add_initial_document(user, workspace_id, document, version),
         )
         return document, version
@@ -180,7 +183,6 @@ class DocumentLibraryService:
                         workspace_id, document_id
                     ),
                     content=content,
-                    filename=safe_filename,
                 )
                 self._documents.add_version(version)
                 record_audit_event(
@@ -192,7 +194,12 @@ class DocumentLibraryService:
                     resource_id=document_id,
                     details={"version_id": str(version.id), "version_number": version.version_number},
                 )
-                self._storage.put(version.object_key, content)
+                self._storage.put(
+                    version.object_key,
+                    content,
+                    media_type=document.media_type,
+                    metadata=self._object_metadata(document, version),
+                )
                 stored_key = version.object_key
             return version
         except Exception:
@@ -339,18 +346,37 @@ class DocumentLibraryService:
         )
 
     def _write_with_storage(
-        self, object_key: str, content: bytes, database_write: Callable[[], None]
+        self,
+        object_key: str,
+        content: bytes,
+        media_type: str,
+        document: Document,
+        version: DocumentVersion,
+        database_write: Callable[[], None],
     ) -> None:
         stored = False
         try:
             with self._session.begin():
                 database_write()
-                self._storage.put(object_key, content)
+                self._storage.put(
+                    object_key,
+                    content,
+                    media_type=media_type,
+                    metadata=self._object_metadata(document, version),
+                )
                 stored = True
         except Exception:
             if stored:
                 self._storage.delete(object_key)
             raise
+
+    @staticmethod
+    def _object_metadata(document: Document, version: DocumentVersion) -> dict[str, str]:
+        return {
+            "workspace-id": str(document.workspace_id),
+            "document-id": str(document.id),
+            "version-id": str(version.id),
+        }
 
     def _require_workspace(self, user: User, workspace_id: UUID) -> WorkspaceRole:
         result = self._workspaces.get_for_user(workspace_id, user.id)
@@ -403,7 +429,6 @@ class DocumentLibraryService:
         user: User,
         version_number: int,
         content: bytes,
-        filename: str,
     ) -> DocumentVersion:
         return DocumentVersion(
             id=version_id,
@@ -413,9 +438,10 @@ class DocumentLibraryService:
             version_number=version_number,
             content_sha256=hashlib.sha256(content).hexdigest(),
             ingestion_fingerprint=cls._ingestion_fingerprint(document.media_type),
-            object_key=(
-                f"workspaces/{document.workspace_id}/documents/{document.id}/"
-                f"versions/{version_id}/{filename}"
+            object_key=original_object_key(
+                workspace_id=document.workspace_id,
+                document_id=document.id,
+                version_id=version_id,
             ),
             byte_size=len(content),
         )

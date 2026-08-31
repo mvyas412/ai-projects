@@ -32,6 +32,27 @@ services:
     networks:
       - phase3
 
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.43
+    restart: unless-stopped
+    command: ["mini", "-dir=/data", "-ip=seaweedfs", "-ip.bind=0.0.0.0"]
+    environment:
+      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-mmrag-local-dev}
+      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-mmrag-local-dev-only}
+      S3_BUCKET: ${S3_ORIGINALS_BUCKET:-mm-rag-phase3-originals},${S3_ARTIFACTS_BUCKET:-mm-rag-phase3-artifacts}
+    ports:
+      - "127.0.0.1:${S3_PORT:-8333}:8333"
+    volumes:
+      - seaweedfs_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:9333/cluster/status >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    networks:
+      - phase3
+
 networks:
   phase3:
     driver: bridge
@@ -39,3 +60,4 @@ networks:
 volumes:
   postgres_data:
   qdrant_data:
+  seaweedfs_data:

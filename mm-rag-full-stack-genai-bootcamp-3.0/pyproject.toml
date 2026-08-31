@@ -30,6 +30,7 @@ dependencies = [
     "structlog==26.1.0",
     "tabulate==0.10.0",
     "uvicorn[standard]>=0.35,<1",
+    "boto3>=1.40,<2",
 ]
 
 [dependency-groups]

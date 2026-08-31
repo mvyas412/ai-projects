@@ -217,6 +217,8 @@ def test_upload_validation_and_storage_metadata(client: TestClient) -> None:
         versions = session.scalars(select(DocumentVersion)).all()
         assert len(versions) == 1
         assert versions[0].object_key.startswith(f"workspaces/{workspace_id}/documents/")
+        assert versions[0].object_key.endswith("/original")
+        assert "report.pdf" not in versions[0].object_key
         assert app.state.object_storage.exists(versions[0].object_key)
         assert session.scalars(select(Collection)).all() == []
         assert session.scalars(select(CollectionDocument)).all() == []
