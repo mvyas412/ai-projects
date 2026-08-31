@@ -14,8 +14,8 @@ from backend.app.storage.s3 import S3ObjectStorage
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    os.getenv("MM_RAG_RUN_INTEGRATION_TESTS") != "1",
-    reason="Set MM_RAG_RUN_INTEGRATION_TESTS=1 with Compose services running",
+    os.getenv("MM_RAG_RUN_S3_INTEGRATION_TESTS") != "1",
+    reason="Set MM_RAG_RUN_S3_INTEGRATION_TESTS=1 with SeaweedFS running",
 )
 def test_seaweedfs_s3_provider_contract() -> None:
     configured = Settings()

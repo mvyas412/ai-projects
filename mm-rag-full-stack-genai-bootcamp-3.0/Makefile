@@ -25,7 +25,7 @@ check:
 	./scripts/verify_phase3.sh
 
 check-live:
-	MM_RAG_RUN_INTEGRATION_TESTS=1 ./scripts/verify_phase3.sh --live
+	MM_RAG_RUN_INTEGRATION_TESTS=1 MM_RAG_RUN_S3_INTEGRATION_TESTS=1 ./scripts/verify_phase3.sh --live
 
 check-acceptance: check-live
 	uv run python -m scripts.run_openai_acceptance

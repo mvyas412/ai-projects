@@ -321,11 +321,17 @@ With PostgreSQL and Qdrant running, include the live integration check:
 MM_RAG_RUN_INTEGRATION_TESTS=1 uv run pytest tests/backend/test_integration_services.py
 ```
 
+With SeaweedFS running, its provider contract has a separate explicit flag:
+
+```bash
+MM_RAG_RUN_S3_INTEGRATION_TESTS=1 uv run pytest tests/backend/test_s3_integration.py
+```
+
 The same gates are available through stable commands:
 
 ```bash
 make check       # locked dependencies, lint, types, tests, migration head, diff hygiene
-make check-live  # also checks the running FastAPI and Streamlit services
+make check-live  # also checks live services and the SeaweedFS provider contract
 make check-acceptance  # also makes paid OpenAI calls in isolated temporary data
 ```
 
@@ -333,8 +339,10 @@ make check-acceptance  # also makes paid OpenAI calls in isolated temporary data
 scoped Qdrant retrieval, grounded generation, citations, persistence, audit, and
 cross-tenant denial. It removes its temporary SQL, files, and vector collection.
 
-GitHub Actions runs these gates with PostgreSQL and Qdrant services on pushes to
-the Phase 3 branch and relevant pull requests. Coverage must remain at or above 70%.
+GitHub Actions runs deterministic and PostgreSQL/Qdrant integration gates on pushes
+to the Phase 3 branch and relevant pull requests. The SeaweedFS contract remains in
+the local live gate until CI provisions that command-based service explicitly.
+Coverage must remain at or above 70%.
 
 Use the [demonstration runbook](docs/DEMO_RUNBOOK.md) for preflight, the five-minute
 product story, suggested prompts, failure-safe talking points, and visual acceptance.
