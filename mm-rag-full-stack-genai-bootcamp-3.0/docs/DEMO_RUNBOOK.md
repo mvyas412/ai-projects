@@ -65,5 +65,10 @@ requests and is separate from the normal Phase 3 release gate.
 - PostgreSQL migration `20260830_0008`, RabbitMQ live topology/confirm/manual-ack,
   SeaweedFS provider behavior, independent runtime health, and temporary database
   restore are verified.
-- The final signed-in real-OpenAI asynchronous success/promotion browser proof remains
-  pending explicit paid-test authorization.
+- On 2026-08-30, one explicitly approved signed-in acceptance upload reached
+  `succeeded` on attempt 1, promoted a READY generation, and remained ready after
+  navigation. API readiness included PostgreSQL, Qdrant, and object storage.
+- The single grounded question returned the expected fact with the uploaded document
+  as its citation; the conversation, answer, and citation persisted after navigation.
+  No authentication token or secret value was displayed or added to tracked files,
+  and no second paid run was made.

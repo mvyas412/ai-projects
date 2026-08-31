@@ -63,10 +63,11 @@ The Phase 3 baseline currently contains:
   scoped retrieval, grounded citations, persistence, audit, and tenant isolation.
 
 This directory starts from the accepted V2 tree. Phase 3 Milestones 3.0–3.5 are
-implemented; final paid live-model asynchronous acceptance remains pending.
+implemented and accepted, including one explicitly approved signed-in live-model
+asynchronous upload, immutable promotion, retrieval, citation, and persistence proof.
 Accepted ADRs 0007 and 0008 define the durable job/attempt and idempotent output-
-promotion contracts. The provider-neutral job/attempt persistence and state-machine
-foundation is implemented but is not connected to the synchronous indexing API.
+promotion contracts. The provider-neutral job/attempt persistence and state machine
+are connected to the asynchronous upload and indexing path.
 ADR 0009's provider-neutral transactional-outbox boundary is now implemented.
 ADRs 0010–0012
 select free self-hosted RabbitMQ, an S3-compatible adapter with open-source SeaweedFS
@@ -75,7 +76,7 @@ adapter, immutable key contract, SeaweedFS Compose service, provider contract te
 outbox persistence/recovery contract, RabbitMQ topology, dispatcher/worker runtime,
 immutable generation promotion, asynchronous API, and progress UX are implemented.
 The deterministic and free live-service gates cover these boundaries; paid OpenAI
-acceptance is never run implicitly.
+acceptance is never run implicitly or repeated without explicit authorization.
 
 ## Architecture and roadmap
 
@@ -92,8 +93,8 @@ future capabilities have already been implemented.
 The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
-shows the exact Milestone 3.5 implementation checkpoint and distinguishes implemented,
-acceptance-pending, and later planned components.
+shows the accepted Phase 3 checkpoint and distinguishes verified current components
+from later planned phases.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
@@ -416,7 +417,7 @@ product story, suggested prompts, failure-safe talking points, and visual accept
 └── tests/                    # Unit, integration, environment, and smoke tests
 ```
 
-Phase 2 is merged and recoverable at `mm-rag-v2.0.0`. Phase 3 implementation is
-complete. The remaining acceptance action is an explicitly authorized paid
-real-OpenAI asynchronous browser proof; production providers and deployment remain
-future Phase 8 decisions.
+Phase 2 is merged and recoverable at `mm-rag-v2.0.0`. Phase 3 is implemented and
+accepted on its review branch after the explicitly authorized real-OpenAI
+asynchronous browser proof. Production providers and deployment remain future
+Phase 8 decisions.

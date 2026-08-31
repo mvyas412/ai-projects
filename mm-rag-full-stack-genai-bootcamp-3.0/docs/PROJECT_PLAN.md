@@ -44,9 +44,9 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Milestone 3.5 implementation complete; final live async-model acceptance pending |
-| Phase 3 | In progress — Milestones 3.0–3.5 implemented under ADRs 0007–0012 |
-| Phase 3 quality gate | 110 deterministic tests pass with four opt-in integration skips; all 114 tests pass in the free live-service gate; CI-equivalent coverage is 81.39% against the 70% threshold; paid real-OpenAI async acceptance not run implicitly |
+| Active milestone | Phase 3 completed and accepted; branch review/merge is next |
+| Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
+| Phase 3 quality gate | 110 deterministic tests pass with four opt-in integration skips; all 114 tests pass in the free live-service gate; CI-equivalent coverage is 81.39% against the 70% threshold; one explicitly approved signed-in real-OpenAI async promotion/retrieval proof passed |
 | Phases 4–9 | Planned |
 
 ## Delivery sequence and gates
@@ -252,28 +252,30 @@ Completed:
 
 ## Phase 3 — asynchronous ingestion and object storage
 
-**Status:** Implementation complete; final paid live-model acceptance pending. The
+**Status:** Completed and accepted. The
 isolated `3.0` tree now connects the accepted ADR 0007–0012 contracts end to end:
 streamed immutable upload, job/outbox commit, confirmed RabbitMQ publication, fenced
 worker execution, immutable generation promotion, active-generation retrieval, safe
 status/control UX, and operational recovery. Alembic revision `20260830_0008` is the
-current head. Production hosting/provider choices remain deferred to Phase 8.
+current head. The signed-in paid acceptance proof completed upload, first-attempt
+promotion, grounded retrieval, citation, and persistence. Production hosting/provider
+choices remain deferred to Phase 8.
 
 ### Objective
 
 Make document processing durable, retryable, observable, and independently
 scalable while moving original and derived binaries to object storage.
 
-### Proposed milestones
+### Milestones
 
 | Milestone | Deliverable | Status |
 | --- | --- | --- |
 | 3.0 | Job/attempt and idempotency contracts; outbox, queue/broker, object-storage, and worker-runtime ADRs | Completed |
 | 3.1 | S3-compatible object-storage adapter and immutable object keys | Completed |
 | 3.2 | Transactional outbox schema/repository and atomic job dispatch intent | Completed |
-| 3.3 | Worker process, retry/backoff, heartbeat, cancellation, dead-letter handling | Implemented and free-live validated |
-| 3.4 | Upload/status API and progress UX | Implemented; authenticated UI verification pending final gate |
-| 3.5 | Failure, recovery, load, and operations hardening | Implemented and free-live validated |
+| 3.3 | Worker process, retry/backoff, heartbeat, cancellation, dead-letter handling | Completed and accepted |
+| 3.4 | Upload/status API and progress UX | Completed and authenticated-browser verified |
+| 3.5 | Failure, recovery, load, and operations hardening | Completed and accepted |
 
 ### Milestone 3.0 implementation status
 
@@ -410,11 +412,16 @@ Implemented:
 - Retrieval now resolves and requires the authorized document version's active
   generation, preventing invisible or abandoned vectors from entering evidence.
 
-Final acceptance still required:
+Acceptance evidence:
 
-- Exercise one real asynchronous document to `succeeded` through the signed-in
-  browser and paid OpenAI embedding boundary. This is not run without explicit
-  paid-test authorization.
+- On 2026-08-30, one explicitly approved signed-in text upload returned a durable
+  job, reached `succeeded` on attempt 1, promoted a READY generation, and remained
+  ready after navigation.
+- One grounded question returned the expected answer with the promoted document as
+  its supporting citation; the two persisted messages and citation reloaded after
+  navigation. No second paid acceptance run was started.
+- The browser-discovered terminal-stage presentation drift was corrected so a
+  succeeded job displays `Completed` rather than its stale last active stage.
 
 ### Milestone 3.5 implementation status
 
@@ -667,8 +674,8 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Review the small Phase 3 commits and PR checks | Reviewable published history with no secrets/private context staged |
-| 2 | Obtain explicit approval for one paid async-model browser proof | Signed-in upload reaches promoted `succeeded`; retrieval sees only that generation |
+| 1 | Review and merge the Phase 3 pull request when approved | Published reviewable history, passing checks, and no secrets/private context staged |
+| 2 | Approve the Phase 4 decision kickoff when ready | Governance scope, alternatives, and ADR sequence reviewed before implementation |
 
 ## Update protocol
 

@@ -18,15 +18,14 @@ roadmap view, and one diagram for each phase. The Mermaid diagrams in this
 handbook remain the editable source of truth.
 
 The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
-is the active Milestone 3.5 implementation checkpoint. It distinguishes the
-implemented asynchronous product/runtime from the final paid live-model acceptance
-proof and later planned phases.
+is the accepted Phase 3 checkpoint. It distinguishes the verified asynchronous
+product/runtime and signed-in live-model proof from later planned phases.
 
 ## Status legend
 
 | Status | Meaning |
 | --- | --- |
-| Implemented | Present and verified in V1, accepted V2, or the active Phase 3 branch |
+| Implemented | Present and verified in V1, accepted V2, or accepted Phase 3 |
 | Planned | Intended capability or boundary that is not implemented yet |
 | Proposed / TBD | Candidate design or technology requiring a decision |
 
@@ -165,7 +164,7 @@ flowchart LR
 flowchart LR
     p1["Phase 1<br/>Prototype<br/>Implemented"] -->
     p2["Phase 2<br/>Product foundation<br/>Completed"] -->
-    p3["Phase 3<br/>Async ingestion<br/>In progress"] -->
+    p3["Phase 3<br/>Async ingestion<br/>Completed"] -->
     p4["Phase 4<br/>Governance<br/>Planned"] -->
     p5["Phase 5<br/>Hybrid retrieval<br/>Planned"] -->
     p6["Phase 6<br/>Visual/table intelligence<br/>Planned"] -->
@@ -178,7 +177,7 @@ flowchart LR
 | --- | --- | --- | --- | --- |
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
 | 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
-| 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Implementation complete at `20260830_0008`; final paid live-model acceptance pending |
+| 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
 | 4 | Fine-grained isolation and governance | JWT validation, RBAC/ACL, RLS defense, audit | PostgreSQL, Qdrant, object storage | Planned |
 | 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
@@ -250,14 +249,15 @@ demo hardening.
 
 ## Phase 3 — asynchronous ingestion and object storage
 
-**Status:** Implementation complete; final paid live-model acceptance pending.
+**Status:** Completed and accepted.
 Migrations through `20260830_0008` implement durable jobs, fenced attempts,
 transactional outbox events, immutable generations, and the active-generation
 pointer. The streamed HTTP 202 intake, status/cancel/successor-retry API and UX,
 confirmed RabbitMQ dispatcher, quorum queue/DLQ, fenced worker, heartbeat/recovery,
 generation-aware Qdrant writes/retrieval, and SeaweedFS artifacts are connected.
-The free deterministic and local-service evidence is complete; the real-OpenAI
-asynchronous browser proof remains deliberately unrun without explicit paid-test approval.
+The deterministic and local-service evidence is complete. One explicitly approved
+signed-in real-OpenAI browser proof reached first-attempt immutable promotion and
+returned a persisted grounded answer with a citation to that active generation.
 
 ```mermaid
 flowchart LR
@@ -287,7 +287,8 @@ wake-ups and reload/fence PostgreSQL state. A validated immutable generation bec
 visible through one active pointer, so failure or cancellation cannot expose partial
 vectors. Aggregate operations, retention preview, process health, a representative
 large upload, and a temporary PostgreSQL restore exercise complete Milestone 3.5's
-free hardening evidence.
+free hardening evidence. The signed-in acceptance proof additionally verifies the
+live embedding, promotion, active-generation retrieval, citation, and persistence path.
 
 ## Phase 4 — fine-grained authorization and governance
 
