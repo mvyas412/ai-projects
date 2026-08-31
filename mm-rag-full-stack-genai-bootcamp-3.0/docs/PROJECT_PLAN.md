@@ -44,8 +44,9 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 3 completed and accepted; branch review/merge is next |
+| Active milestone | Phase 3 completed, accepted, and merged; Phase 4 decision kickoff awaits approval |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
+| Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 quality gate | 110 deterministic tests pass with four opt-in integration skips; all 114 tests pass in the free live-service gate; CI-equivalent coverage is 81.39% against the 70% threshold; one explicitly approved signed-in real-OpenAI async promotion/retrieval proof passed |
 | Phases 4–9 | Planned |
 
@@ -674,7 +675,7 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Review and merge the Phase 3 pull request when approved | Published reviewable history, passing checks, and no secrets/private context staged |
+| 1 | Decide whether to create the immutable `mm-rag-v3.0.0` release tag | Explicit approval and a tag pointing to the accepted Phase 3 mainline commit |
 | 2 | Approve the Phase 4 decision kickoff when ready | Governance scope, alternatives, and ADR sequence reviewed before implementation |
 
 ## Update protocol

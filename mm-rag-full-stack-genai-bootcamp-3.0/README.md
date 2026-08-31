@@ -417,7 +417,7 @@ product story, suggested prompts, failure-safe talking points, and visual accept
 └── tests/                    # Unit, integration, environment, and smoke tests
 ```
 
-Phase 2 is merged and recoverable at `mm-rag-v2.0.0`. Phase 3 is implemented and
-accepted on its review branch after the explicitly authorized real-OpenAI
-asynchronous browser proof. Production providers and deployment remain future
-Phase 8 decisions.
+Phase 2 is merged and recoverable at `mm-rag-v2.0.0`. Phase 3 is implemented,
+accepted, and merged into `main` through PR #2 at `228ce63` after the explicitly
+authorized real-OpenAI asynchronous browser proof. Production providers and
+deployment remain future Phase 8 decisions.
