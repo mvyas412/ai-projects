@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
   <title id="title">MM-RAG Platform — Current Workflow and DEV Architecture</title>
-  <desc id="desc">Phase 3 Milestone 3.1 checkpoint showing the implemented product, durable job foundation, S3-compatible adapter and SeaweedFS service, plus approved but not yet implemented RabbitMQ, outbox, worker, and asynchronous API components.</desc>
+  <desc id="desc">Phase 3 Milestone 3.2 checkpoint showing the implemented product, durable job and transactional-outbox foundations, S3-compatible adapter and SeaweedFS service, plus approved but not yet implemented RabbitMQ, dispatcher, worker, and asynchronous API components.</desc>
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#193b68"/>
@@ -27,7 +27,7 @@
 
   <rect width="1600" height="900" fill="#f8fafc"/>
   <text x="800" y="40" text-anchor="middle" class="title">MM-RAG Platform — Current Workflow &amp; DEV Architecture</text>
-  <text x="800" y="68" text-anchor="middle" class="subtitle">Phase 3 · Milestone 3.1 implementation checkpoint · Status as August 30, 2026</text>
+  <text x="800" y="68" text-anchor="middle" class="subtitle">Phase 3 · Milestone 3.2 implementation checkpoint · Status as August 30, 2026</text>
 
   <text x="22" y="101" class="small" font-weight="700">Status snapshot</text>
   <rect x="116" y="84" width="116" height="26" rx="13" fill="#e8f7ef" stroke="#47a477"/>
@@ -126,11 +126,11 @@
   <rect x="842" y="200" width="73" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="878" y="215" text-anchor="middle" class="tiny" fill="#26805a">HEALTHY</text>
   <line x1="672" y1="229" x2="916" y2="229" class="divider"/>
   <text x="675" y="250" class="dot" fill="#25855e">•</text><text x="689" y="250" class="body">Users, workspaces, documents, chat, audit</text>
-  <text x="675" y="272" class="dot" fill="#25855e">•</text><text x="689" y="272" class="body">Jobs and attempts at migration 0006</text>
+  <text x="675" y="272" class="dot" fill="#25855e">•</text><text x="689" y="272" class="body">Jobs, attempts, outbox at migration 0007</text>
   <text x="675" y="294" class="dot" fill="#25855e">•</text><text x="689" y="294" class="body">Authoritative state; queue is only a wake-up</text>
 
   <rect x="660" y="336" width="268" height="143" class="card" stroke="#25855e"/>
-  <text x="677" y="362" class="card-title">Durable jobs &amp; attempts</text>
+  <text x="677" y="362" class="card-title">Durable job state</text>
   <rect x="830" y="346" width="85" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="872" y="361" text-anchor="middle" class="tiny" fill="#26805a">IMPLEMENTED</text>
   <line x1="672" y1="375" x2="916" y2="375" class="divider"/>
   <text x="675" y="397" class="dot" fill="#25855e">•</text><text x="689" y="397" class="body">Pending, queued, running, retry, terminal</text>
@@ -138,12 +138,12 @@
   <text x="675" y="441" class="dot" fill="#25855e">•</text><text x="689" y="441" class="body">Authorized cancellation/retry and safe progress</text>
   <text x="675" y="463" class="dot" fill="#25855e">•</text><text x="689" y="463" class="body">Not wired to product indexing yet</text>
 
-  <rect x="660" y="497" width="268" height="102" class="card" stroke="#d79a25"/>
-  <text x="677" y="523" class="card-title">Transactional outbox · ADR 0009</text>
-  <rect x="830" y="507" width="85" height="22" rx="11" fill="#fff4d6" stroke="#d79a25"/><text x="872" y="522" text-anchor="middle" class="tiny" fill="#966611">ACCEPTED</text>
+  <rect x="660" y="497" width="268" height="102" class="card" stroke="#25855e"/>
+  <text x="677" y="523" class="card-title">Transactional outbox</text>
+  <rect x="830" y="507" width="85" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="872" y="522" text-anchor="middle" class="tiny" fill="#26805a">IMPLEMENTED</text>
   <line x1="672" y1="536" x2="916" y2="536" class="divider"/>
-  <text x="675" y="558" class="dot" fill="#d79a25">•</text><text x="689" y="558" class="body">Atomic job + dispatch intent; implementation next</text>
-  <text x="675" y="580" class="dot" fill="#d79a25">•</text><text x="689" y="580" class="body">At-least-once publication, 30-day evidence</text>
+  <text x="675" y="558" class="dot" fill="#25855e">•</text><text x="689" y="558" class="body">Atomic initial + retry dispatch intent</text>
+  <text x="675" y="580" class="dot" fill="#25855e">•</text><text x="689" y="580" class="body">Ordered leases, backoff, ack/discard state</text>
 
   <rect x="660" y="617" width="268" height="111" class="card" stroke="#d79a25"/>
   <text x="677" y="643" class="card-title">RabbitMQ · ADR 0010</text>
@@ -168,7 +168,7 @@
   <text x="987" y="294" class="dot" fill="#26805a">•</text><text x="1001" y="294" class="body">Restart persists; AWS S3 remains later option</text>
 
   <rect x="972" y="342" width="268" height="158" class="card" stroke="#d79a25"/>
-  <text x="989" y="368" class="card-title">Python dispatcher + worker</text>
+  <text x="989" y="368" class="card-title">Dispatcher + worker</text>
   <rect x="1142" y="352" width="85" height="22" rx="11" fill="#fff4d6" stroke="#d79a25"/><text x="1184" y="367" text-anchor="middle" class="tiny" fill="#966611">APPROVED</text>
   <line x1="984" y1="381" x2="1228" y2="381" class="divider"/>
   <text x="987" y="403" class="dot" fill="#d79a25">•</text><text x="1001" y="403" class="body">Separate dispatcher and worker processes</text>
@@ -222,14 +222,14 @@
   <text x="1301" y="646" class="card-title">Quality and release gate</text>
   <rect x="1478" y="630" width="73" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="1514" y="645" text-anchor="middle" class="tiny" fill="#26805a">PASSING</text>
   <line x1="1296" y1="659" x2="1552" y2="659" class="divider"/>
-  <text x="1299" y="681" class="dot" fill="#198789">•</text><text x="1313" y="681" class="body">97 deterministic + 2 skips; 99 live pass</text>
+  <text x="1299" y="681" class="dot" fill="#198789">•</text><text x="1313" y="681" class="body">100 deterministic + 3 skips; 103 live pass</text>
   <text x="1299" y="703" class="dot" fill="#198789">•</text><text x="1313" y="703" class="body">Lint, types, migrations, schema drift clean</text>
 
   <!-- Primary and planned flow arrows -->
   <path d="M304 260 H348" class="flow"/>
   <path d="M616 260 H660" class="flow"/>
   <path d="M794 318 V336" class="flow"/>
-  <path d="M794 479 V497" class="planned-flow"/>
+  <path d="M794 479 V497" class="flow"/>
   <path d="M794 599 V617" class="planned-flow"/>
   <path d="M928 672 H950 V421 H972" class="planned-flow"/>
   <path d="M1106 500 V518" class="planned-flow"/>
@@ -250,10 +250,10 @@
   <rect x="634" y="814" width="286" height="50" rx="9" fill="#e8f7ef" stroke="#47a477"/>
   <text x="648" y="836" class="card-title" fill="#26805a">Phase 3.1 · implemented</text>
   <text x="648" y="854" class="small">S3 adapter + immutable keys + SeaweedFS live</text>
-  <rect x="932" y="814" width="286" height="50" rx="9" fill="#fff4d6" stroke="#d79a25"/>
-  <text x="946" y="836" class="card-title" fill="#966611">Phases 3.2–3.3 · next</text>
-  <text x="946" y="854" class="small">Outbox, RabbitMQ dispatcher, worker runtime</text>
-  <rect x="1230" y="814" width="332" height="50" rx="9" fill="#eef2f6" stroke="#8291a3"/>
-  <text x="1244" y="836" class="card-title">Phases 3.4–3.5</text>
-  <text x="1244" y="854" class="small">Async API/UX, failure recovery, load, operations</text>
+  <rect x="932" y="814" width="286" height="50" rx="9" fill="#e8f7ef" stroke="#47a477"/>
+  <text x="946" y="836" class="card-title" fill="#26805a">Phase 3.2 · implemented</text>
+  <text x="946" y="854" class="small">Transactional outbox + atomic retry intents</text>
+  <rect x="1230" y="814" width="332" height="50" rx="9" fill="#fff4d6" stroke="#d79a25"/>
+  <text x="1244" y="836" class="card-title" fill="#966611">Phases 3.3–3.5 · next</text>
+  <text x="1244" y="854" class="small">Broker/worker, async API/UX, hardening</text>
 </svg>

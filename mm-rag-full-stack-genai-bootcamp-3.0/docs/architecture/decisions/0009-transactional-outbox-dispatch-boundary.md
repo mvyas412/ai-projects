@@ -263,3 +263,33 @@ ordering, payload, authorization, or acknowledgement contracts.
   credentials, raw provider errors, or secret-bearing configuration.
 - Published/discarded retention cannot remove pending events or authoritative job history.
 - Alembic upgrade/downgrade, model-drift, deterministic, and live-service gates pass.
+
+## Implementation evidence on 2026-08-30
+
+- Alembic revision `20260830_0007` adds tenant-constrained outbox events with stable
+  event and job identity, unique per-job dispatch sequence, minimal versioned JSON,
+  due time, recorded publication attempts, expiring leases, acknowledgement,
+  discard, safe failure, and operational timestamps.
+- A new job and dispatch sequence `1` are inserted in one caller-owned transaction.
+  Retryable attempt failure and expired-lease recovery insert the next sequence in
+  the same transaction as `retry_scheduled` and use `next_attempt_at` as availability.
+- Repository claims use bounded `FOR UPDATE SKIP LOCKED`, reject overlapping active
+  leases, and block a later event while an earlier sequence for that job remains
+  unpublished and undiscarded.
+- Publication start is recorded explicitly under the active lease immediately before
+  the future broker call. A positive acknowledgement marks the event published and
+  conditionally moves the matching `pending` or due `retry_scheduled` job to `queued`.
+  Safe failure recording applies a future retry time without consuming a job attempt.
+- Cancellation and terminal job transitions discard only unpublished events and
+  clear their leases. Published evidence remains immutable, and stale in-flight
+  delivery remains safe through PostgreSQL job reload and fencing.
+- Payload fixtures contain only event ID, event type, schema version, job ID, and
+  server timestamp. Workspace claims, filenames, object keys, document content,
+  credentials, and raw dependency errors are absent.
+- Deterministic tests prove transaction rollback, idempotent replay, ordered retry
+  events, lease fencing, backoff, acknowledgement, and discard behavior. A live
+  PostgreSQL test proves concurrent same-key requests create one job and one event
+  and concurrent dispatchers cannot lease the same event.
+- The migration upgrade, empty-table downgrade/upgrade cycle, model-drift check,
+  100-test deterministic gate, and 103-test live gate pass. RabbitMQ publication,
+  a long-running dispatcher, and workers remain outside this milestone.

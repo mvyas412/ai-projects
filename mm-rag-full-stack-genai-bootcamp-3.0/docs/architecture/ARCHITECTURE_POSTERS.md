@@ -6,8 +6,9 @@
 
 ## Current Phase 3 workflow and DEV architecture
 
-This Milestone 3.1 checkpoint distinguishes verified behavior—including the S3
-adapter and SeaweedFS provider—from accepted-but-pending Phase 3 components.
+This Milestone 3.2 checkpoint distinguishes verified behavior—including the S3
+adapter, SeaweedFS provider, and transactional outbox—from accepted-but-pending
+Phase 3 components.
 
 ![MM-RAG current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 

@@ -44,22 +44,28 @@ The Phase 3 baseline currently contains:
 - Provider-neutral durable ingestion jobs and fenced execution attempts in
   PostgreSQL, with idempotent creation, workspace-scoped control, three-attempt
   budgets, leases, progress, cancellation, retry, and expired-lease recovery.
+- A PostgreSQL transactional outbox at migration `20260830_0007`, with atomic
+  initial/retry dispatch intents, minimal versioned payloads, strict per-job
+  ordering, expiring dispatcher leases, safe backoff metadata, and acknowledgement
+  or discard transitions.
 - GitHub Actions quality, typing, migration, live-service, test, and coverage gates.
 - Automated environment, backend, tenant-isolation, storage, and Streamlit tests.
 - An isolated real-OpenAI acceptance command covering text and image indexing,
   scoped retrieval, grounded citations, persistence, audit, and tenant isolation.
 
-This directory starts from the accepted V2 tree. Phase 3 has completed Milestone 3.1
-and is entering Milestone 3.2.
+This directory starts from the accepted V2 tree. Phase 3 has completed Milestone 3.2
+and is entering Milestone 3.3.
 Accepted ADRs 0007 and 0008 define the durable job/attempt and idempotent output-
 promotion contracts. The provider-neutral job/attempt persistence and state-machine
 foundation is implemented but is not connected to the synchronous indexing API.
-ADR 0009 accepts the provider-neutral transactional-outbox boundary. ADRs 0010–0012
+ADR 0009's provider-neutral transactional-outbox boundary is now implemented.
+ADRs 0010–0012
 select free self-hosted RabbitMQ, an S3-compatible adapter with open-source SeaweedFS
 for local/CI, and separate purpose-built Python dispatcher/worker processes. The S3
-adapter, immutable key contract, SeaweedFS Compose service, and provider contract
-tests are implemented. The outbox, RabbitMQ, dispatcher/worker, asynchronous API,
-and progress UX remain unimplemented, so no asynchronous behavior is claimed yet.
+adapter, immutable key contract, SeaweedFS Compose service, provider contract tests,
+and outbox persistence/recovery contract are implemented. RabbitMQ topology,
+dispatcher/worker processes, asynchronous API, and progress UX remain unimplemented,
+so no asynchronous behavior is claimed yet.
 
 ## Architecture and roadmap
 
@@ -76,7 +82,7 @@ future capabilities have already been implemented.
 The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
-shows the exact pre-implementation Phase 3 checkpoint and distinguishes live,
+shows the exact Milestone 3.2 checkpoint and distinguishes live,
 accepted/pending, and planned components.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
@@ -104,7 +110,7 @@ Accepted decisions are recorded as ADRs:
 - Python 3.12, installed directly or managed by uv
 - Tesseract OCR with the English language data
 - Docker Desktop or another Compose-compatible container runtime for local
-  PostgreSQL, Qdrant, RabbitMQ, and SeaweedFS
+  PostgreSQL, Qdrant, and SeaweedFS. RabbitMQ joins the stack in Milestone 3.3.
 
 ## Create the dedicated environment
 
@@ -213,8 +219,8 @@ Qdrant, and SeaweedFS data volumes.
 ## Apply database migrations
 
 The migration history contains the infrastructure baseline plus identity,
-document-library, conversation, immutable activity, and durable ingestion-job
-schemas through `20260830_0006`:
+document-library, conversation, immutable activity, durable ingestion-job, and
+transactional-outbox schemas through `20260830_0007`:
 
 ```bash
 uv run alembic upgrade head
@@ -312,8 +318,8 @@ uv run mypy backend frontend tests/backend
 The tests verify Python 3.12, the Phase 3 interpreter path, required imports,
 Streamlit startup, configuration, transactions, migrations, liveness,
 readiness-success behavior, safe dependency-failure behavior, and the durable
-ingestion transition, authorization, idempotency, lease, retry, and cancellation
-invariants.
+ingestion transition, authorization, idempotency, lease, retry, cancellation,
+atomic outbox, ordering, and dispatcher-lease invariants.
 
 With PostgreSQL and Qdrant running, include the live integration check:
 
@@ -378,6 +384,7 @@ product story, suggested prompts, failure-safe talking points, and visual accept
 └── tests/                    # Unit, integration, environment, and smoke tests
 ```
 
-Phase 2 is merged and recoverable at `mm-rag-v2.0.0`. The active next step is to
-decide the queue/broker, object-storage implementation, and worker runtime before
-connecting the durable job foundation to the synchronous ingestion path.
+Phase 2 is merged and recoverable at `mm-rag-v2.0.0`. The active next step is
+Milestone 3.3: add the accepted RabbitMQ topology and confirmed outbox dispatcher,
+then the fenced ingestion-worker runtime. The synchronous product path remains active
+until the later asynchronous API and UX milestone passes its acceptance gate.

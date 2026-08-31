@@ -44,9 +44,9 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | 3.1 object-storage boundary complete; Milestone 3.2 transactional outbox is next |
-| Phase 3 | In progress — ADRs 0007–0012 and S3/SeaweedFS foundation implemented; no asynchronous execution yet |
-| Phase 3 quality gate | 97 deterministic tests plus two integration skips; 99 live tests and service readiness pass |
+| Active milestone | Milestone 3.2 transactional outbox complete; Milestone 3.3 broker/worker runtime is next |
+| Phase 3 | In progress — ADRs 0007–0012, S3/SeaweedFS, and transactional outbox implemented; no asynchronous execution yet |
+| Phase 3 quality gate | 100 deterministic tests plus three integration skips; 103 live tests and service readiness pass |
 | Phases 4–9 | Planned |
 
 ## Delivery sequence and gates
@@ -256,13 +256,13 @@ Completed:
 established and its local/live quality gate passes. Accepted ADRs 0007 and 0008
 define the durable job/attempt and idempotent output-promotion contracts. Alembic
 revision `20260830_0006` and the backend state machine implement the provider-neutral
-job/attempt foundation. ADR 0009 accepts a PostgreSQL transactional-outbox and
-at-least-once dispatch/recovery boundary. ADRs 0010–0012 accept open-source
+job/attempt foundation. Revision `20260830_0007` implements ADR 0009's PostgreSQL
+transactional-outbox and at-least-once dispatch/recovery boundary. ADRs 0010–0012 accept open-source
 RabbitMQ, an S3-compatible adapter with open-source SeaweedFS for local/CI, and
 separate purpose-built Python dispatcher/worker processes. The S3 adapter, immutable
-key contract, and SeaweedFS local/CI provider are implemented and live-tested. The
-outbox, RabbitMQ, dispatcher/worker, async API, and progress UX remain unimplemented,
-and the synchronous product path remains active.
+key contract, SeaweedFS local/CI provider, and outbox repository/state transitions
+are implemented and live-tested. RabbitMQ, dispatcher/worker, async API, and progress
+UX remain unimplemented, and the synchronous product path remains active.
 
 ### Objective
 
@@ -315,8 +315,8 @@ Accepted decisions:
 
 Not yet implemented:
 
-- async upload/status endpoints, dispatch/outbox, a broker, worker process,
-  immutable output generations, or promotion;
+- async upload/status endpoints, RabbitMQ topology and publication, dispatcher and
+  worker processes, immutable output generations, or promotion;
 - the existing synchronous indexing and retrieval behavior remains active.
 
 ### Milestone 3.1 implementation status
@@ -346,6 +346,40 @@ Deferred from this slice:
   required before raising the application limit into provider multipart territory.
 - The artifacts bucket and promotion keys are defined but remain unused until the
   worker/output-promotion milestone.
+
+### Milestone 3.2 implementation status
+
+Implemented and validated:
+
+- Added migration `20260830_0007` and a provider-neutral outbox model containing
+  stable event/job identity, per-job dispatch sequence, minimal versioned JSON,
+  due time, publication-attempt evidence, expiring leases, acknowledgement,
+  discard, safe failure, and audit timestamps.
+- New jobs atomically create dispatch sequence `1`. Retryable attempt failure and
+  expired-lease recovery atomically create exactly one later sequence at
+  `next_attempt_at`; transaction rollback removes both the job mutation and event.
+- Added bounded `FOR UPDATE SKIP LOCKED` claims with strict per-job ordering,
+  lease ownership/expiry checks, explicit publication-start recording, safe
+  backoff metadata, idempotent acknowledgement, and conditional job transition
+  from `pending` or due `retry_scheduled` to `queued`.
+- Cancellation and terminal transitions discard only unpublished events while
+  leaving already published evidence immutable. Messages remain minimal wake-up
+  hints and contain no workspace claims, filenames, object keys, content, or secrets.
+- Deterministic tests prove rollback atomicity, replay uniqueness, ordered retry
+  events, lease fencing, backoff, acknowledgement, and cancellation. A real
+  PostgreSQL concurrency test proves concurrent same-key requests create one job
+  and one initial event and two dispatchers cannot lease the same event.
+- The local migration upgraded, downgraded while all durable-ingestion tables were
+  empty, and returned to head without schema drift. The deterministic gate passes
+  100 tests with three integration skips; the live gate passes all 103 tests.
+
+Deferred from this slice:
+
+- No RabbitMQ connection, topology, broker publication, long-running dispatcher,
+  worker process, asynchronous endpoint, or UI behavior is implemented.
+- Retention deletion and alerting remain operational Milestone 3.5 work; the schema
+  retains terminal rows and the future dispatcher can expose the accepted age and
+  failure thresholds without changing the event contract.
 
 ### Completion gate
 
@@ -582,9 +616,9 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Implement the transactional outbox schema and repository contract | Every eligible job mutation commits exactly one durable dispatch intent |
-| 2 | Add RabbitMQ topology and confirmed dispatcher publication | Outbox rows publish at least once with safe duplicate recovery |
-| 3 | Add the fenced Python worker process foundation | Worker claims, heartbeats, shutdown, and acknowledgements satisfy ADRs 0007 and 0012 |
+| 1 | Add RabbitMQ topology and confirmed dispatcher publication | Outbox rows publish at least once with safe duplicate recovery |
+| 2 | Add the fenced Python worker process foundation | Worker claims, heartbeats, shutdown, and acknowledgements satisfy ADRs 0007 and 0012 |
+| 3 | Connect the asynchronous upload/status API and progress UX | Authorized upload returns a stable job ID and exposes safe durable progress |
 
 ## Update protocol
 
