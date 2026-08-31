@@ -419,5 +419,6 @@ product story, suggested prompts, failure-safe talking points, and visual accept
 
 Phase 2 is merged and recoverable at `mm-rag-v2.0.0`. Phase 3 is implemented,
 accepted, and merged into `main` through PR #2 at `228ce63` after the explicitly
-authorized real-OpenAI asynchronous browser proof. Production providers and
-deployment remain future Phase 8 decisions.
+authorized real-OpenAI asynchronous browser proof. The immutable accepted release
+is tagged `mm-rag-v3.0.0` at `9ebe767`. Production providers and deployment remain
+future Phase 8 decisions.
