@@ -18,9 +18,9 @@ roadmap view, and one diagram for each phase. The Mermaid diagrams in this
 handbook remain the editable source of truth.
 
 The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
-is the active Milestone 3.2 checkpoint. It distinguishes verified product,
-object-storage, and transactional-outbox behavior from accepted-but-pending and
-later planned components.
+is the active Milestone 3.5 implementation checkpoint. It distinguishes the
+implemented asynchronous product/runtime from the final paid live-model acceptance
+proof and later planned phases.
 
 ## Status legend
 
@@ -59,9 +59,9 @@ flowchart LR
     subgraph ingestion["Asynchronous ingestion"]
         intake["Upload / connector intake"]
         jobs["Durable job orchestration"]
-        outbox["Transactional outbox implemented<br/>Dispatcher planned under ADR 0012"]
-        queue["RabbitMQ<br/>Accepted ADR 0010; planned"]
-        workers["Python ingestion workers<br/>Accepted ADR 0012; planned"]
+        outbox["PostgreSQL outbox + confirmed dispatcher<br/>Implemented ADRs 0009/0012"]
+        queue["RabbitMQ quorum queue + DLQ<br/>Implemented ADR 0010"]
+        workers["Fenced Python ingestion workers<br/>Implemented ADR 0012"]
         parse["PyMuPDF + pdfplumber<br/>Tesseract + Pillow"]
         enrich["Text, table, and visual enrichment"]
         indexer["Embedding and index writer"]
@@ -178,7 +178,7 @@ flowchart LR
 | --- | --- | --- | --- | --- |
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
 | 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
-| 3 | Durable asynchronous processing | Durable job/attempt and outbox state implemented; RabbitMQ/dispatcher/worker and async API planned; S3-compatible SeaweedFS live | PostgreSQL and object storage now; generation-scoped Qdrant planned | In progress; migration `20260830_0007`, ADRs 0007–0012 accepted |
+| 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Implementation complete at `20260830_0008`; final paid live-model acceptance pending |
 | 4 | Fine-grained isolation and governance | JWT validation, RBAC/ACL, RLS defense, audit | PostgreSQL, Qdrant, object storage | Planned |
 | 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
@@ -250,47 +250,44 @@ demo hardening.
 
 ## Phase 3 — asynchronous ingestion and object storage
 
-**Status:** In progress. The isolated Phase 3 baseline is established. Durable
-job/attempt and idempotent output-promotion contracts are accepted in ADRs 0007
-and 0008. PostgreSQL migrations through `20260830_0007` and provider-neutral backend
-state machines implement jobs, fenced attempts, retries, progress, cancellation,
-lease recovery, and the transactional outbox dispatch/recovery contract from ADR 0009.
-They are not yet connected to the synchronous product path. ADRs 0010–0012 accept
-open-source RabbitMQ, an S3-compatible adapter with open-source SeaweedFS for free
-local/CI use, and separate purpose-built Python dispatcher/worker processes. The S3
-adapter, immutable key builders, SeaweedFS local service, and outbox repository are
-implemented and live-tested. RabbitMQ, dispatcher/worker, async API, and progress UX
-remain unimplemented.
+**Status:** Implementation complete; final paid live-model acceptance pending.
+Migrations through `20260830_0008` implement durable jobs, fenced attempts,
+transactional outbox events, immutable generations, and the active-generation
+pointer. The streamed HTTP 202 intake, status/cancel/successor-retry API and UX,
+confirmed RabbitMQ dispatcher, quorum queue/DLQ, fenced worker, heartbeat/recovery,
+generation-aware Qdrant writes/retrieval, and SeaweedFS artifacts are connected.
+The free deterministic and local-service evidence is complete; the real-OpenAI
+asynchronous browser proof remains deliberately unrun without explicit paid-test approval.
 
 ```mermaid
 flowchart LR
-    client["Authorized client"] -->|"upload · planned async API"| api["Document API"]
+    client["Authorized client"] -->|"streamed upload + Idempotency-Key"| api["Async document API"]
     api --> policy["Workspace policy<br/>implemented"]
-    policy -->|"immutable original · async wiring planned"| objects[("S3 adapter + SeaweedFS local/CI<br/>Implemented and live-tested ADR 0011")]
-    policy -->|"document version + job · planned wiring"| pg[("PostgreSQL jobs/attempts/outbox<br/>implemented at 20260830_0007")]
-    api -->|"202 + job ID · planned"| client
-    pg --> outbox["Transactional outbox repository<br/>Implemented ADR 0009"]
-    outbox --> queue["RabbitMQ quorum queue<br/>Accepted ADR 0010; not implemented"]
-    queue --> worker["Python ingestion worker<br/>Accepted ADR 0012; not implemented"]
+    policy -->|"verified immutable original"| objects[("S3 adapter + SeaweedFS local/CI<br/>Implemented and live-tested ADR 0011")]
+    policy -->|"document version + job + event"| pg[("PostgreSQL authority<br/>implemented at 20260830_0008")]
+    api -->|"HTTP 202 + stable job ID"| client
+    pg --> outbox["Transactional outbox + dispatcher<br/>Implemented ADR 0009"]
+    outbox --> queue["RabbitMQ quorum queue + DLQ<br/>Implemented ADR 0010"]
+    queue --> worker["Fenced Python ingestion worker<br/>Implemented ADR 0012"]
     worker --> objects
     worker --> parse["Parse, OCR, extract"]
     parse --> enrich["Chunk, enrich, embed"]
-    enrich --> qdrant[("Qdrant")]
-    enrich --> objects
-    worker -->|"progress, heartbeat, result<br/>state contract implemented"| pg
-    worker -->|"retry"| queue
+    enrich -->|"attempt-scoped generation"| qdrant[("Qdrant")]
+    enrich -->|"immutable manifest/artifacts"| objects
+    worker -->|"progress, heartbeat, fenced promotion"| pg
+    pg -->|"retry outbox event"| outbox
     queue -->|"attempts exhausted"| dead["Failed/dead-letter state"]
     client -->|"authorized status request"| api
     api --> pg
 ```
 
-The API acknowledges quickly; the original is durable before dispatch; jobs use
-idempotency keys, explicit state, retries/backoff, cancellation, safe errors, and
-versioned outputs. The implemented ADR 0009 boundary atomically records dispatch
-intent with each eligible job; the next dispatcher slice publishes it at least once
-outside the API request. Exit:
-processing survives API/worker failure, scales independently, and every job is
-traceable and safely retryable.
+The API acknowledges quickly after the original and database transaction are durable.
+The dispatcher publishes outside the request; workers treat messages as untrusted
+wake-ups and reload/fence PostgreSQL state. A validated immutable generation becomes
+visible through one active pointer, so failure or cancellation cannot expose partial
+vectors. Aggregate operations, retention preview, process health, a representative
+large upload, and a temporary PostgreSQL restore exercise complete Milestone 3.5's
+free hardening evidence.
 
 ## Phase 4 — fine-grained authorization and governance
 
@@ -517,10 +514,10 @@ reconcile commercial usage.
 | --- | --- |
 | Phase 2 UI | Streamlit multipage application |
 | Dedicated Phase 8 UI | Candidate only; framework not selected |
-| Queue / broker | Open-source RabbitMQ accepted in ADR 0010; not implemented |
+| Queue / broker | Open-source RabbitMQ quorum queue/DLQ implemented under ADR 0010; production hosting deferred |
 | Object storage | S3-compatible adapter plus open-source SeaweedFS local/CI implemented under ADR 0011; production provider deferred |
-| Transactional outbox | PostgreSQL schema, repository, atomic job/retry events, leases, and acknowledgement state implemented under ADR 0009 |
-| Worker runtime | Purpose-built Python dispatcher/worker accepted in ADR 0012; not implemented |
+| Transactional outbox | PostgreSQL events plus confirmed leased dispatcher, retry/alert/retention operations implemented under ADR 0009 |
+| Worker runtime | Purpose-built Python dispatcher/worker implemented under ADR 0012; one in-flight job per process |
 | Sparse search | Required in Phase 5; engine not selected |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |

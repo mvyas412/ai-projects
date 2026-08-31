@@ -48,13 +48,22 @@ The Phase 3 baseline currently contains:
   initial/retry dispatch intents, minimal versioned payloads, strict per-job
   ordering, expiring dispatcher leases, safe backoff metadata, and acknowledgement
   or discard transitions.
+- Migration `20260830_0008`, immutable attempt-scoped output generations, verified
+  manifests, and a fenced PostgreSQL active-generation promotion boundary.
+- A free local RabbitMQ quorum queue and dead-letter queue, confirmed transactional-
+  outbox dispatcher, manual-ack/prefetch-1 worker, heartbeats, lease recovery,
+  retry/backoff, cancellation checkpoints, process health, and graceful shutdown.
+- Streamed asynchronous upload returning HTTP 202 and a stable job ID, authorized
+  status/list/cancel/successor-retry APIs, and Streamlit progress/control UX.
+- Aggregate non-disclosing operations, safe 30-day terminal-outbox retention,
+  representative large-upload coverage, and an exercised PostgreSQL backup/restore.
 - GitHub Actions quality, typing, migration, live-service, test, and coverage gates.
 - Automated environment, backend, tenant-isolation, storage, and Streamlit tests.
 - An isolated real-OpenAI acceptance command covering text and image indexing,
   scoped retrieval, grounded citations, persistence, audit, and tenant isolation.
 
-This directory starts from the accepted V2 tree. Phase 3 has completed Milestone 3.2
-and is entering Milestone 3.3.
+This directory starts from the accepted V2 tree. Phase 3 Milestones 3.0–3.5 are
+implemented; final paid live-model asynchronous acceptance remains pending.
 Accepted ADRs 0007 and 0008 define the durable job/attempt and idempotent output-
 promotion contracts. The provider-neutral job/attempt persistence and state-machine
 foundation is implemented but is not connected to the synchronous indexing API.
@@ -63,9 +72,10 @@ ADRs 0010–0012
 select free self-hosted RabbitMQ, an S3-compatible adapter with open-source SeaweedFS
 for local/CI, and separate purpose-built Python dispatcher/worker processes. The S3
 adapter, immutable key contract, SeaweedFS Compose service, provider contract tests,
-and outbox persistence/recovery contract are implemented. RabbitMQ topology,
-dispatcher/worker processes, asynchronous API, and progress UX remain unimplemented,
-so no asynchronous behavior is claimed yet.
+outbox persistence/recovery contract, RabbitMQ topology, dispatcher/worker runtime,
+immutable generation promotion, asynchronous API, and progress UX are implemented.
+The deterministic and free live-service gates cover these boundaries; paid OpenAI
+acceptance is never run implicitly.
 
 ## Architecture and roadmap
 
@@ -82,12 +92,14 @@ future capabilities have already been implemented.
 The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
-shows the exact Milestone 3.2 checkpoint and distinguishes live,
-accepted/pending, and planned components.
+shows the exact Milestone 3.5 implementation checkpoint and distinguishes implemented,
+acceptance-pending, and later planned components.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
 and current next actions. Update it with evidence whenever progress or scope changes.
+Use the [Phase 3 operations runbook](docs/PHASE3_OPERATIONS.md) for runtime health,
+alerts, lease recovery, retention, and backup/restore exercises.
 
 Accepted decisions are recorded as ADRs:
 
@@ -110,7 +122,7 @@ Accepted decisions are recorded as ADRs:
 - Python 3.12, installed directly or managed by uv
 - Tesseract OCR with the English language data
 - Docker Desktop or another Compose-compatible container runtime for local
-  PostgreSQL, Qdrant, and SeaweedFS. RabbitMQ joins the stack in Milestone 3.3.
+  PostgreSQL, Qdrant, SeaweedFS, and RabbitMQ.
 
 ## Create the dedicated environment
 
@@ -170,7 +182,7 @@ token `iss` claim exactly, including its trailing slash. The frontend requests
 the configured audience so Auth0 returns an API access token rather than an
 opaque user-session token.
 
-## Start PostgreSQL, Qdrant, and SeaweedFS
+## Start PostgreSQL, Qdrant, SeaweedFS, and RabbitMQ
 
 After configuring `.env` and installing a container runtime:
 
@@ -190,7 +202,10 @@ Local endpoints are intentionally separated from V1:
 | Qdrant gRPC | `127.0.0.1:6338` |
 | SeaweedFS S3 | `http://127.0.0.1:8333` |
 
-PostgreSQL, Qdrant, and SeaweedFS use Compose-managed Phase 3 volumes. Do not mount
+| RabbitMQ AMQP | `127.0.0.1:5673` |
+| RabbitMQ management | `http://127.0.0.1:15673` |
+
+PostgreSQL, Qdrant, SeaweedFS, and RabbitMQ use Compose-managed Phase 3 volumes. Do not mount
 or reuse V1 or V2 runtime data. The example SeaweedFS credentials are localhost-only
 development values, not production secrets. Override them in ignored configuration
 for any shared environment.
@@ -204,8 +219,19 @@ Readiness checks:
 ```bash
 docker compose exec postgres pg_isready -U mm_rag -d mm_rag_phase3
 curl --fail http://127.0.0.1:6337/readyz
-docker compose ps seaweedfs
+docker compose ps seaweedfs rabbitmq
 ```
+
+Start or stop the independently packaged execution processes explicitly:
+
+```bash
+make runtime
+make operations-status
+make runtime-stop
+```
+
+`make services` does not start the runtime profile, preventing accidental model
+work during dependency-only development.
 
 Stop services without deleting their volumes:
 
@@ -214,13 +240,13 @@ docker compose down
 ```
 
 Do not add `-v` unless you explicitly intend to delete the Phase 3 PostgreSQL,
-Qdrant, and SeaweedFS data volumes.
+Qdrant, SeaweedFS, and RabbitMQ data volumes.
 
 ## Apply database migrations
 
 The migration history contains the infrastructure baseline plus identity,
-document-library, conversation, immutable activity, durable ingestion-job, and
-transactional-outbox schemas through `20260830_0007`:
+document-library, conversation, immutable activity, durable ingestion-job,
+transactional-outbox, and immutable-generation schemas through `20260830_0008`:
 
 ```bash
 uv run alembic upgrade head
@@ -252,6 +278,11 @@ API documentation is available at `http://127.0.0.1:8003/docs`.
 | `GET/DELETE /api/v1/workspaces/{id}/documents/{document_id}` | Inspect or archive one document | Unauthorized resources remain hidden with HTTP 404 |
 | `POST /api/v1/workspaces/{id}/documents/{document_id}/versions` | Add an immutable document version | Duplicate content/config returns HTTP 409 |
 | `POST /api/v1/workspaces/{id}/documents/{document_id}/versions/{version_id}/index` | Extract, embed, and index an authorized immutable version | Returns chunk count; safe 503 when model services are unavailable |
+| `POST /api/v1/workspaces/{id}/ingestion/uploads` | Stream an immutable original and create a durable job/outbox event | Requires `Idempotency-Key`; returns HTTP 202 and a stable job ID |
+| `GET /api/v1/workspaces/{id}/ingestion/jobs` | List authorized durable ingestion status | Bounded, workspace-scoped safe progress |
+| `GET /api/v1/workspaces/{id}/ingestion/jobs/{job_id}` | Read one job and latest attempt progress | Unauthorized jobs remain hidden with HTTP 404 |
+| `POST /api/v1/workspaces/{id}/ingestion/jobs/{job_id}/cancel` | Cooperatively cancel the member's job | Never promotes output after cancellation wins |
+| `POST /api/v1/workspaces/{id}/ingestion/jobs/{job_id}/retry` | Create a successor for a terminal job | Requires a new idempotency key; predecessor stays immutable |
 | `GET/POST /api/v1/workspaces/{id}/collections` | List or create collections | Collection names are unique per workspace |
 | `PUT/DELETE /api/v1/workspaces/{id}/collections/{collection_id}/documents/{document_id}` | Add or remove a collection document | Both resources must belong to the authorized workspace |
 | `GET/POST /api/v1/workspaces/{id}/conversations` | List or create scoped persistent conversations | Targets a workspace, collection, or explicit documents |
@@ -259,11 +290,11 @@ API documentation is available at `http://127.0.0.1:8003/docs`.
 | `POST /api/v1/workspaces/{id}/conversations/{conversation_id}/messages` | Ask the backend-mediated RAG assistant | Only READY versions in the trusted target scope can be cited |
 | `GET /api/v1/workspaces/{id}/activity` | List recent security-relevant workspace actions | Membership-scoped, bounded, newest-first results |
 
-Uploads are bounded by `MAX_UPLOAD_BYTES` (25 MiB by default), stored through the
+Uploads are bounded by `MAX_UPLOAD_BYTES` (25 MiB by default), streamed through the
 path-safe object-storage adapter, and identified by content and ingestion
 fingerprints. Vector payloads reserve keyword-indexed `tenant_id`, `workspace_id`,
-`document_id`, and `document_version_id` fields; trusted backend helpers construct
-all retrieval filters.
+`document_id`, `document_version_id`, and `generation_id` fields; trusted backend
+helpers construct all retrieval filters and resolve the active generation from PostgreSQL.
 
 Verify from another terminal:
 
@@ -297,7 +328,8 @@ Session State, and routes product operations through protected FastAPI APIs.
 
 - **Overview** summarizes documents, indexed readiness, collections, and recent chat;
   an empty workspace links directly to the expanded Library upload form.
-- **Library** uploads/downloads sources, starts indexing, and manages collections.
+- **Library** streams uploads, follows durable stage/unit progress, cancels or creates
+  successor retries, downloads sources, and manages collections.
 - **Ask** explains each retrieval scope, creates persistent conversations, and
   opens citation evidence.
 - **Activity** presents authorized workspace actions without raw internal IDs.
@@ -372,7 +404,7 @@ product story, suggested prompts, failure-safe talking points, and visual accept
 ├── .streamlit/               # Shareable settings and safe OIDC secrets template
 ├── alembic.ini               # Migration runner configuration
 ├── backend/app/              # FastAPI, auth, models, repositories, services, storage
-├── compose.yaml              # Isolated Phase 3 PostgreSQL, Qdrant, and SeaweedFS
+├── compose.yaml              # Dependencies plus explicit dispatcher/worker runtime profile
 ├── docs/                     # Living project plan, architecture, and ADRs
 ├── frontend/                 # Authenticated Phase 3 Streamlit shell
 ├── migrations/               # Versioned PostgreSQL schema changes
@@ -384,7 +416,7 @@ product story, suggested prompts, failure-safe talking points, and visual accept
 └── tests/                    # Unit, integration, environment, and smoke tests
 ```
 
-Phase 2 is merged and recoverable at `mm-rag-v2.0.0`. The active next step is
-Milestone 3.3: add the accepted RabbitMQ topology and confirmed outbox dispatcher,
-then the fenced ingestion-worker runtime. The synchronous product path remains active
-until the later asynchronous API and UX milestone passes its acceptance gate.
+Phase 2 is merged and recoverable at `mm-rag-v2.0.0`. Phase 3 implementation is
+complete. The remaining acceptance action is an explicitly authorized paid
+real-OpenAI asynchronous browser proof; production providers and deployment remain
+future Phase 8 decisions.

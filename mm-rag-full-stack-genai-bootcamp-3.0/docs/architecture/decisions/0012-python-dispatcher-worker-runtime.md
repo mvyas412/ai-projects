@@ -197,3 +197,19 @@ health, and PostgreSQL job state are reported separately.
 - Graceful shutdown drains or leaves unacknowledged work recoverable within the stated bound.
 - Scale-out preserves tenant scope, bounded prefetch, and one in-flight job per process.
 - Public status, logs, metrics, and broker messages contain no secrets or sensitive payloads.
+
+## Implementation evidence on 2026-08-30
+
+- Separate dispatcher and worker modules own independent database/broker lifecycles,
+  signal handling, process health, and safe shutdown. A locked non-root container image
+  runs each through an explicit Compose `runtime` profile.
+- The worker reloads the job, claims one fenced attempt, creates an attempt generation,
+  heartbeats every 15 seconds against a 60-second lease, checkpoints stage/unit
+  progress, and checks shutdown, cancellation, and ownership before promotion.
+- Retryable and terminal failures commit safe state before acknowledgement; duplicate
+  and stale delivery reload to an acknowledged no-op. A recovery loop turns expired
+  leases into the next durable outbox intent without exceeding three attempts.
+- Deterministic tests cover success/promotion, duplicate delivery, dependency retry,
+  cancellation before promotion, dispatcher confirmation/failure, and retention.
+  Both runtime containers built and reported healthy with an empty local queue and
+  therefore made no paid model requests.

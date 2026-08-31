@@ -293,3 +293,13 @@ ordering, payload, authorization, or acknowledgement contracts.
 - The migration upgrade, empty-table downgrade/upgrade cycle, model-drift check,
   100-test deterministic gate, and 103-test live gate pass. RabbitMQ publication,
   a long-running dispatcher, and workers remain outside this milestone.
+
+## Runtime evidence on 2026-08-30
+
+- The separate dispatcher now leases bounded batches, validates the strict ADR 0009
+  payload, publishes the stable event identity through RabbitMQ confirms, and marks
+  the job queued only after confirmation.
+- Unconfirmed publication releases the event with capped safe backoff and does not
+  consume a worker attempt. Aggregate operations alert at 10 attempts or 15 minutes.
+- Preview-first retention deletes only published/discarded rows older than 30 days
+  whose jobs are terminal. Tests prove pending events and job history remain intact.

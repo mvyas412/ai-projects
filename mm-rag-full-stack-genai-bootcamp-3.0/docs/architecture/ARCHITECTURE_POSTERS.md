@@ -6,9 +6,9 @@
 
 ## Current Phase 3 workflow and DEV architecture
 
-This Milestone 3.2 checkpoint distinguishes verified behavior—including the S3
-adapter, SeaweedFS provider, and transactional outbox—from accepted-but-pending
-Phase 3 components.
+This Milestone 3.5 implementation checkpoint shows streamed intake, durable jobs
+and outbox, SeaweedFS, RabbitMQ, dispatcher/worker execution, immutable promotion,
+active-generation retrieval, progress/control UX, and the remaining paid acceptance proof.
 
 ![MM-RAG current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 

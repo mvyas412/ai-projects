@@ -150,3 +150,15 @@ Only PostgreSQL attempt rows count toward the ADR 0007 limit.
 - Prefetch remains bounded and worker shutdown does not lose an unacknowledged event.
 - Malformed messages reach the dead-letter queue without exposing sensitive payloads.
 - Broker outage/recovery does not consume job attempts or strand committed outbox rows.
+
+## Implementation evidence on 2026-08-30
+
+- The local/CI stack runs free self-hosted RabbitMQ `4.2.3` with a localhost-only
+  management port and isolated virtual host. The runtime declares durable direct
+  exchanges, a quorum main queue, a quorum dead-letter queue, and a delivery limit.
+- The dispatcher publishes persistent minimal messages with mandatory routing,
+  stable message/correlation IDs, and publisher confirms. The consumer uses prefetch
+  `1`, strict parsing, manual acknowledgements, safe requeue, and malformed-message DLQ.
+- A real local integration test creates uniquely named temporary topology, confirms
+  publication, validates and manually acknowledges the delivery, then removes only
+  those temporary queues/exchanges. Unit tests cover unconfirmed retry and job state.

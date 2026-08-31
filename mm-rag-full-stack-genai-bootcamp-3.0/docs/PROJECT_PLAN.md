@@ -44,9 +44,9 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Milestone 3.2 transactional outbox complete; Milestone 3.3 broker/worker runtime is next |
-| Phase 3 | In progress — ADRs 0007–0012, S3/SeaweedFS, and transactional outbox implemented; no asynchronous execution yet |
-| Phase 3 quality gate | 100 deterministic tests plus three integration skips; 103 live tests and service readiness pass |
+| Active milestone | Milestone 3.5 implementation complete; final live async-model acceptance pending |
+| Phase 3 | In progress — Milestones 3.0–3.5 implemented under ADRs 0007–0012 |
+| Phase 3 quality gate | 110 deterministic tests pass with four opt-in integration skips; all 114 tests pass in the free live-service gate; CI-equivalent coverage is 81.39% against the 70% threshold; paid real-OpenAI async acceptance not run implicitly |
 | Phases 4–9 | Planned |
 
 ## Delivery sequence and gates
@@ -252,17 +252,12 @@ Completed:
 
 ## Phase 3 — asynchronous ingestion and object storage
 
-**Status:** In progress. The isolated `3.0` baseline and development worktree are
-established and its local/live quality gate passes. Accepted ADRs 0007 and 0008
-define the durable job/attempt and idempotent output-promotion contracts. Alembic
-revision `20260830_0006` and the backend state machine implement the provider-neutral
-job/attempt foundation. Revision `20260830_0007` implements ADR 0009's PostgreSQL
-transactional-outbox and at-least-once dispatch/recovery boundary. ADRs 0010–0012 accept open-source
-RabbitMQ, an S3-compatible adapter with open-source SeaweedFS for local/CI, and
-separate purpose-built Python dispatcher/worker processes. The S3 adapter, immutable
-key contract, SeaweedFS local/CI provider, and outbox repository/state transitions
-are implemented and live-tested. RabbitMQ, dispatcher/worker, async API, and progress
-UX remain unimplemented, and the synchronous product path remains active.
+**Status:** Implementation complete; final paid live-model acceptance pending. The
+isolated `3.0` tree now connects the accepted ADR 0007–0012 contracts end to end:
+streamed immutable upload, job/outbox commit, confirmed RabbitMQ publication, fenced
+worker execution, immutable generation promotion, active-generation retrieval, safe
+status/control UX, and operational recovery. Alembic revision `20260830_0008` is the
+current head. Production hosting/provider choices remain deferred to Phase 8.
 
 ### Objective
 
@@ -271,14 +266,14 @@ scalable while moving original and derived binaries to object storage.
 
 ### Proposed milestones
 
-| Milestone | Deliverable | Dependency |
+| Milestone | Deliverable | Status |
 | --- | --- | --- |
-| 3.0 | Job/attempt and idempotency contracts; outbox, queue/broker, object-storage, and worker-runtime ADRs | Phase 2 document/version model |
-| 3.1 | S3-compatible object-storage adapter and immutable object keys | Storage protocol from Phase 2.1 |
-| 3.2 | Transactional outbox schema/repository and atomic job dispatch intent | PostgreSQL/Alembic and job foundation |
-| 3.3 | Worker process, retry/backoff, heartbeat, cancellation, dead-letter handling | Accepted queue technology |
-| 3.4 | Upload/status API and progress UX | Job and worker contracts |
-| 3.5 | Failure, recovery, load, and operations hardening | End-to-end async flow |
+| 3.0 | Job/attempt and idempotency contracts; outbox, queue/broker, object-storage, and worker-runtime ADRs | Completed |
+| 3.1 | S3-compatible object-storage adapter and immutable object keys | Completed |
+| 3.2 | Transactional outbox schema/repository and atomic job dispatch intent | Completed |
+| 3.3 | Worker process, retry/backoff, heartbeat, cancellation, dead-letter handling | Implemented and free-live validated |
+| 3.4 | Upload/status API and progress UX | Implemented; authenticated UI verification pending final gate |
+| 3.5 | Failure, recovery, load, and operations hardening | Implemented and free-live validated |
 
 ### Milestone 3.0 implementation status
 
@@ -380,6 +375,62 @@ Deferred from this slice:
 - Retention deletion and alerting remain operational Milestone 3.5 work; the schema
   retains terminal rows and the future dispatcher can expose the accepted age and
   failure thresholds without changing the event contract.
+
+### Milestone 3.3 implementation status
+
+Implemented and validated:
+
+- Added the accepted durable direct exchange, quorum main queue, dead-letter exchange
+  and quorum DLQ, persistent minimal messages, mandatory confirmed publication,
+  manual acknowledgement, and prefetch `1`.
+- Added a leased outbox dispatcher with stable event identity, safe publication
+  backoff, confirm-before-queued semantics, duplicate recovery, and process health.
+- Added a separately packaged worker with fenced claims, one in-flight job, 60-second
+  leases, 15-second heartbeat, cooperative cancellation, three-attempt retry,
+  expired-lease recovery, safe failure classes, and graceful shutdown.
+- Added migration `20260830_0008`, attempt-scoped immutable generation manifests,
+  generation-aware deterministic Qdrant points, validation, and one fenced
+  PostgreSQL active-generation promotion transaction.
+- Real local RabbitMQ tests verify the quorum topology, publisher confirmation,
+  strict message contract, and manual acknowledgement. Dispatcher and worker
+  containers build independently and report healthy through the explicit runtime profile.
+
+### Milestone 3.4 implementation status
+
+Implemented:
+
+- Added streamed asynchronous upload with required `Idempotency-Key`; the immutable
+  original is verified before the document/version/job/outbox transaction commits,
+  and successful intake returns HTTP 202 with a stable job ID.
+- Added membership-scoped list/status, cooperative cancel, and terminal successor-
+  retry APIs with non-enumerating 404 behavior and safe stage/unit/error responses.
+- Updated Library to display durable state, attempt progress, retry time, safe error,
+  refresh, cancellation, and successor retry while retaining the idempotency key
+  across an ambiguous client failure.
+- Retrieval now resolves and requires the authorized document version's active
+  generation, preventing invisible or abandoned vectors from entering evidence.
+
+Final acceptance still required:
+
+- Exercise one real asynchronous document to `succeeded` through the signed-in
+  browser and paid OpenAI embedding boundary. This is not run without explicit
+  paid-test authorization.
+
+### Milestone 3.5 implementation status
+
+Implemented and validated:
+
+- Added aggregate non-disclosing backlog health and alert thresholds for a 15-minute
+  oldest due event, 10 publication attempts, expired leases, and inactive generations.
+- Added preview-first 30-day cleanup for published/discarded outbox rows belonging to
+  terminal jobs; pending events and authoritative job/attempt/audit history are protected.
+- Kept destructive inactive-generation cleanup disabled because ADR 0008 requires a
+  separate retention-window approval. The aggregate count remains inspectable.
+- Added deterministic worker/dispatcher fault, duplicate, cancellation, retry,
+  immutable-promotion, operations-retention, and 10 MiB streamed-upload coverage.
+- Added an operations runbook and private logical PostgreSQL backup; restore into a
+  generated temporary database verified migration `20260830_0008` and durable tables,
+  then removed only the temporary database.
 
 ### Completion gate
 
@@ -616,9 +667,8 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Add RabbitMQ topology and confirmed dispatcher publication | Outbox rows publish at least once with safe duplicate recovery |
-| 2 | Add the fenced Python worker process foundation | Worker claims, heartbeats, shutdown, and acknowledgements satisfy ADRs 0007 and 0012 |
-| 3 | Connect the asynchronous upload/status API and progress UX | Authorized upload returns a stable job ID and exposes safe durable progress |
+| 1 | Review the small Phase 3 commits and PR checks | Reviewable published history with no secrets/private context staged |
+| 2 | Obtain explicit approval for one paid async-model browser proof | Signed-in upload reaches promoted `succeeded`; retrieval sees only that generation |
 
 ## Update protocol
 

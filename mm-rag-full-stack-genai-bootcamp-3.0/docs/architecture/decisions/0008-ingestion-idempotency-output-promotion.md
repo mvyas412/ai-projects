@@ -204,3 +204,20 @@ idempotent success. Request and worker paths never perform delete-before-replace
 - Retrieval tests require workspace, document version, and active generation filters.
 - Garbage-collection tests cannot delete active or live-attempt outputs.
 - No object key, manifest, error, or audit record contains a secret or untrusted path.
+
+## Implementation evidence on 2026-08-30
+
+- Alembic revision `20260830_0008` adds attempt-owned immutable generations and a
+  tenant-constrained active-generation pointer on each document version.
+- The canonical pipeline manifest and fingerprint cover parser, chunking, model,
+  vector, citation, and schema versions. Attempt and final manifest objects use
+  trusted opaque keys and verified SHA-256/byte identities.
+- Async vector point IDs and payloads include the generation. Retrieval resolves the
+  authorized active pointer from PostgreSQL and requires it in the Qdrant filter.
+- One fenced transaction validates ownership and manifest counts, promotes the
+  generation, updates document readiness, and completes the attempt/job. Duplicate
+  terminal delivery is a no-op; cancellation before promotion abandons the generation.
+- Tests prove idempotent API replay/conflict, duplicate delivery, retry isolation,
+  cancellation precedence, one visible promoted generation, and mandatory generation
+  scope. Inactive-generation deletion remains disabled pending the separately required
+  retention-window decision recorded above.

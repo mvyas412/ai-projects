@@ -1,73 +1,69 @@
-# Phase 2 demonstration runbook
+# Phase 3 demonstration runbook
 
-This runbook produces a repeatable, presentation-ready walkthrough without
-changing or depending on the immutable V1 checkout.
+This runbook presents the durable asynchronous workflow while keeping the accepted
+V1 and V2 releases immutable.
 
 ## Before the session
 
-1. From `mm-rag-full-stack-genai-bootcamp-2.0`, run `make setup` once.
+1. From the `3.0` directory, run `make setup` once.
 2. Confirm ignored `.env` and `.streamlit/secrets.toml` contain the local Auth0,
-   PostgreSQL, Qdrant, and OpenAI settings. Never screen-share those files.
-3. Run `make services`, then `make migrate`.
+   PostgreSQL, Qdrant, SeaweedFS, RabbitMQ, and OpenAI settings. Never display them.
+3. Run `make services`, `make migrate`, and `make runtime`.
 4. In separate terminals run `make api` and `make ui`.
-5. Run `make check-acceptance`; all deterministic release checks and the isolated
-   real-OpenAI multimodal acceptance must pass before presenting. This command
-   makes paid OpenAI requests and removes its temporary SQL, file, and Qdrant data.
-6. Open `http://127.0.0.1:8502`, sign in, and confirm the expected workspace.
+5. Run `make check-live`. This validates free dependencies and does not make paid
+   OpenAI requests.
+6. Open `http://localhost:8503`, sign in, and confirm the personal workspace,
+   authenticated email, and Settings readiness.
+
+Run `make check-acceptance` only with explicit authorization: it makes paid OpenAI
+requests and is separate from the normal Phase 3 release gate.
 
 ## Five-minute product story
 
-1. **Overview:** establish the workspace, indexed-readiness, collections, and
-   persistent-conversation metrics. In a new workspace, **Add your first document**
-   opens Library with the upload form expanded.
-2. **Library:** upload a representative PDF or DOCX, explain immutable versions,
-   click **Index**, and wait for the READY badge. Show authorized source download.
-3. **Collections:** create a focused collection and add the indexed document.
-4. **Ask:** explain workspace, collection, and selected-document scope, then start
-   a collection-scoped conversation. Ask one factual question and
-   one comparison question. Open **Inspect evidence** to show source, page, excerpt,
-   retrieval score, and original download.
-5. **Persistence:** refresh the page or sign out/in and reopen the conversation.
-6. **Activity:** show the signed-in user's Auth0 display name and the human-readable
-   upload, index, organization, and answer history—without secrets, raw internal
-   identifiers, or model prompts being treated as audit details.
-7. **Settings:** finish with Auth0 display name/email, workspace role, PostgreSQL/Qdrant
-   readiness, and the backend-enforced authorization explanation.
-
-## Suggested prompts
-
-- “Summarize the three most important findings and cite each one.”
-- “Compare the key figures across the available sources.”
-- “Which parts of this question cannot be answered from the indexed evidence?”
+1. **Architecture:** show the current workflow/DEV poster and explain PostgreSQL
+   job truth, RabbitMQ wake-ups, immutable object/generation writes, and fenced promotion.
+2. **Library:** upload a representative PDF, DOCX, image, Markdown, or text source.
+   Point out the immediate durable job response and queued/running stage progress.
+3. **Control:** demonstrate refresh and explain cooperative cancellation and immutable
+   successor retry. Do not cancel the primary golden-path job.
+4. **Ready state:** after promotion, show the READY document and authorized source download.
+5. **Ask:** run a document- or collection-scoped question and inspect source/page evidence.
+6. **Persistence:** refresh or sign out/in; reopen the job/document/conversation state.
+7. **Operations:** show aggregate `make operations-status` output and explain the
+   separate dispatcher/worker health, safe alerts, retention preview, and restore proof.
+8. **Logout:** sign out and verify the protected workspace is no longer visible.
 
 ## Failure-safe talking points
 
-- An unauthorized workspace/resource is hidden with HTTP 404.
-- Missing indexed evidence returns a clear conflict instead of hallucinating.
-- Model/vector dependency failures return a safe 503 and do not persist a partial chat.
-- Every retrieval is constrained by tenant, workspace, document, and version IDs.
-- V1 remains recoverable from `mm-rag-v1.0.0`; Phase 2 is isolated on its own branch.
+- The original is verified before the document/version/job/outbox commit and HTTP 202.
+- Broker downtime delays dispatch but cannot erase a committed job.
+- Duplicate delivery cannot create overlapping fenced attempts or duplicate visibility.
+- Cancellation before promotion leaves the prior active generation unchanged.
+- Three failed execution attempts produce an inspectable terminal state; broker retries
+  do not consume that budget.
+- Public status uses stable codes and correlation IDs without provider errors, keys,
+  object paths, document content, or tokens.
+- Every retrieval requires tenant, workspace, document/version, and active generation.
 
 ## Visual acceptance checklist
 
-- Review Overview, Library, Ask, Activity, and Settings at desktop width.
-- Narrow the browser and verify cards, forms, navigation, and chat remain usable.
-- Check light and dark themes for readable text, badges, buttons, and focus states.
-- Exercise empty, loading, success, validation, 409, and 503 states.
-- Confirm evidence excerpts wrap cleanly and original downloads work.
-- Confirm the sidebar and Settings show the expected Auth0 display name/email.
-- Confirm Ask explains all three scopes and Activity contains no `None` or raw UUID details.
-- Confirm no token, key, database URL, internal exception, or private context appears.
+- Review Overview, Library, Ask, Activity, and Settings at desktop and narrow widths.
+- Confirm Library renders pending, queued, running, retry-scheduled, succeeded, failed,
+  and cancelled states without layout breakage.
+- Confirm stage/unit progress, retry timing, cancel, and successor retry are understandable.
+- Check light/dark contrast, keyboard focus, loading, empty, validation, conflict, and
+  dependency-error states.
+- Confirm the sidebar and Settings show authenticated identity and role, while no token,
+  secret, database URL, raw UUID detail, internal exception, or private context appears.
 
-## Acceptance record
+## Current acceptance record
 
-Phase 2 visual acceptance completed on 2026-08-30. Authenticated screenshots verify:
-
-- The Overview remains coherent at the supplied narrow viewport and presents its
-  metrics, current work, readiness, and evidence lifecycle clearly.
-- Light and dark themes retain readable contrast, hierarchy, borders, links, and badges.
-- The sidebar and Settings consistently present the Auth0 identity and workspace role.
-- Activity presents the current actor and readable action details without null values,
-  raw UUIDs, secrets, or internal implementation fields.
-- The empty-workspace first-document CTA remains covered by automated regression tests;
-  it is intentionally absent from the reviewed workspace because a document exists.
+- Auth0 login, authenticated email, personal workspace, PostgreSQL/Qdrant readiness,
+  and logout were previously verified at Phase 3 port `8503`.
+- Deterministic async API, worker, dispatcher, generation, tenant, large-upload,
+  operations, and retention tests pass.
+- PostgreSQL migration `20260830_0008`, RabbitMQ live topology/confirm/manual-ack,
+  SeaweedFS provider behavior, independent runtime health, and temporary database
+  restore are verified.
+- The final signed-in real-OpenAI asynchronous success/promotion browser proof remains
+  pending explicit paid-test authorization.
