@@ -7,6 +7,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from backend.app.db.rls import DatabasePurpose, set_rls_context
 from backend.app.models.access import ResourceVisibility
 from backend.app.models.user import User
 from backend.app.models.workspace import WorkspaceRole
@@ -163,6 +164,7 @@ class PolicyService:
     """Evaluate the accepted Phase 4 role ceiling and resource visibility contract."""
 
     def __init__(self, session: Session) -> None:
+        self._session = session
         self._workspaces = WorkspaceRepository(session)
         self._grants = ResourceACLRepository(session)
 
@@ -232,6 +234,12 @@ class PolicyService:
             requester_user_id=requester_user_id,
         )
         if decision.allowed:
+            set_rls_context(
+                self._session,
+                purpose=DatabasePurpose.API,
+                workspace_id=workspace_id,
+                principal_id=user.id,
+            )
             return decision
         if decision.discoverable:
             raise PolicyDeniedError

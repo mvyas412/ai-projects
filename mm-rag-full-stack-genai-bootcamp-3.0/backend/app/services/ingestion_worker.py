@@ -10,6 +10,7 @@ from uuid import UUID
 
 from backend.app.broker.messages import IngestionEventMessage
 from backend.app.core.config import Settings
+from backend.app.db.rls import DatabasePurpose, set_rls_context
 from backend.app.db.session import SessionFactory
 from backend.app.ingestion.pipeline import pipeline_manifest
 from backend.app.models.document import Document, DocumentVersion
@@ -161,6 +162,7 @@ class IngestionWorkerService:
 
     def recover_expired(self) -> list[UUID]:
         with self._session_factory.begin() as session:
+            set_rls_context(session, purpose=DatabasePurpose.OPERATIONS)
             return IngestionJobStateMachine(session).recover_expired_jobs(
                 now=datetime.now(UTC),
                 limit=25,
@@ -169,6 +171,11 @@ class IngestionWorkerService:
     def _claim(self, job_id: UUID) -> ClaimedWork:
         now = datetime.now(UTC)
         with self._session_factory.begin() as session:
+            workspace_id = set_rls_context(
+                session, purpose=DatabasePurpose.WORKER, job_id=job_id
+            )
+            if workspace_id is None:
+                raise IngestionJobNotFoundError
             state = IngestionJobStateMachine(session)
             job, attempt = state.claim_job(
                 job_id=job_id,
@@ -205,6 +212,12 @@ class IngestionWorkerService:
                 return
             try:
                 with self._session_factory.begin() as session:
+                    set_rls_context(
+                        session,
+                        purpose=DatabasePurpose.WORKER,
+                        workspace_id=work.job.workspace_id,
+                        job_id=work.job.id,
+                    )
                     cancel = IngestionJobStateMachine(session).heartbeat(
                         job_id=work.job.id,
                         attempt_id=work.attempt.id,
@@ -233,6 +246,12 @@ class IngestionWorkerService:
         unit: str | None = None,
     ) -> None:
         with self._session_factory.begin() as session:
+            set_rls_context(
+                session,
+                purpose=DatabasePurpose.WORKER,
+                workspace_id=work.job.workspace_id,
+                job_id=work.job.id,
+            )
             cancelled = IngestionJobStateMachine(session).heartbeat(
                 job_id=work.job.id,
                 attempt_id=work.attempt.id,
@@ -305,6 +324,12 @@ class IngestionWorkerService:
         if stored.content_sha256 != checksum or stored.byte_size != len(content):
             raise ObjectIntegrityError("Generation manifest identity mismatch")
         with self._session_factory.begin() as session:
+            set_rls_context(
+                session,
+                purpose=DatabasePurpose.WORKER,
+                workspace_id=work.job.workspace_id,
+                job_id=work.job.id,
+            )
             IngestionJobStateMachine(session).complete_success(
                 job_id=work.job.id,
                 attempt_id=work.attempt.id,
@@ -322,6 +347,12 @@ class IngestionWorkerService:
     def _finish_cancellation(self, work: ClaimedWork) -> DeliveryDisposition:
         try:
             with self._session_factory.begin() as session:
+                set_rls_context(
+                    session,
+                    purpose=DatabasePurpose.WORKER,
+                    workspace_id=work.job.workspace_id,
+                    job_id=work.job.id,
+                )
                 IngestionJobStateMachine(session).finish_cancellation(
                     job_id=work.job.id,
                     attempt_id=work.attempt.id,
@@ -341,6 +372,12 @@ class IngestionWorkerService:
         now = datetime.now(UTC)
         try:
             with self._session_factory.begin() as session:
+                set_rls_context(
+                    session,
+                    purpose=DatabasePurpose.WORKER,
+                    workspace_id=work.job.workspace_id,
+                    job_id=work.job.id,
+                )
                 IngestionJobStateMachine(session).record_failure(
                     job_id=work.job.id,
                     attempt_id=work.attempt.id,

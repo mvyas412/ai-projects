@@ -89,3 +89,12 @@ implementation until measured need and later ADRs.
 - Tombstone/cancellation races cannot promote deleted or cancelled content.
 - Cross-workspace object and vector attempts fail in deterministic and live-provider tests.
 - No public error, link, log, or audit event discloses credentials or unrestricted object coordinates.
+
+## Milestone 4.2 implementation evidence
+
+Qdrant retrieval now rejects empty, incomplete, oversized, or generation-less scope
+before provider access and intersects mandatory tenant, workspace, document, version,
+generation, and vector-kind predicates. Returned payloads are independently checked
+against that trusted scope before citation use. Deterministic negative tests and a
+live two-tenant Qdrant test pass. The object-access and future connector-envelope
+parts of this ADR remain the Milestone 4.3 delivery slice.

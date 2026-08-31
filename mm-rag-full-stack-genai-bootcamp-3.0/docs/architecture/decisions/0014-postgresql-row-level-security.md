@@ -78,3 +78,13 @@ dispatcher, and controlled-operation database roles, with no general runtime
 - Dispatcher privileges cannot read document, conversation, object-reference, or message content.
 - Alembic upgrade/downgrade and policy/schema drift checks pass.
 - Live PostgreSQL tests cover read, insert, update, delete, role downgrade, and concurrent tenants.
+
+## Implementation evidence
+
+Milestone 4.2 implements this decision in migration `20260831_0010`. Transaction-
+local API, worker, dispatcher, and operations contexts use non-owner effective roles
+without `BYPASSRLS`; fixed-search-path security-definer helpers avoid recursive
+policy evaluation. Live tests prove an unscoped query and a reused pooled connection
+cannot cross workspaces, the API role cannot disable RLS, the dispatcher cannot read
+documents, and the outbox/job paths remain operational. Upgrade, downgrade, and
+Alembic no-drift checks pass.

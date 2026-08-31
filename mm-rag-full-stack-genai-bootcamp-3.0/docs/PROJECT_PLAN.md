@@ -44,12 +44,12 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 4.1 complete; Milestone 4.2 PostgreSQL RLS and mandatory Qdrant enforcement is next |
+| Active milestone | Phase 4.2 complete; Milestone 4.3 authorized object access and permission propagation is next |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
 | Phase 3 quality gate | 110 deterministic tests pass with four opt-in integration skips; all 114 tests pass in the free live-service gate; CI-equivalent coverage is 81.39% against the 70% threshold; one explicitly approved signed-in real-OpenAI async promotion/retrieval proof passed |
-| Phase 4 | In progress — Milestones 4.0–4.1 complete |
+| Phase 4 | In progress — Milestones 4.0–4.2 complete |
 | Phases 5–9 | Planned |
 
 ## Delivery sequence and gates
@@ -454,9 +454,10 @@ Implemented and validated:
 
 ## Phase 4 — fine-grained authorization and governance
 
-**Status:** In progress — Milestones 4.0 and 4.1 are complete. The accepted policy
-matrix now has a central default-deny service and tenant-constrained ACL persistence;
-RLS and remaining provider, audit, and lifecycle controls follow.
+**Status:** In progress — Milestones 4.0–4.2 are complete. The accepted policy
+matrix now has a central default-deny service, tenant-constrained ACL persistence,
+PostgreSQL RLS defense, and mandatory Qdrant scope enforcement. Remaining object,
+permission-propagation, audit, and lifecycle controls follow.
 
 ### Objective
 
@@ -469,8 +470,8 @@ depth, auditable administration, and lifecycle governance.
 | --- | --- | --- |
 | 4.0 | Action/resource policy matrix, threat-model update, and ADR sequence | Completed — ADRs 0013–0017 accepted |
 | 4.1 | Central role/ACL policy service and reusable authorization dependencies | Completed at `20260831_0009` |
-| 4.2 | PostgreSQL row-level-security defense and mandatory Qdrant scope enforcement | Ready for implementation |
-| 4.3 | Authorized object access and connector permission propagation contract | Planned after 4.2 |
+| 4.2 | PostgreSQL row-level-security defense and mandatory Qdrant scope enforcement | Completed at `20260831_0010` |
+| 4.3 | Authorized object access and connector permission propagation contract | Ready for implementation |
 | 4.4 | Append-only audit events, activity views, and compliance export | Planned after 4.3 |
 | 4.5 | Retention, deletion, encryption/key, and incident-response controls | Planned after 4.4 |
 
@@ -497,6 +498,23 @@ Milestone 4.0 review material:
 - Focused policy and compatibility evidence passes 35 tests. The full deterministic
   gate passes 119 tests with four opt-in skips, clean Ruff/Mypy, migration head
   `20260831_0009`, and no schema drift.
+
+### Milestone 4.2 implementation status
+
+- Added migration `20260831_0010` with non-owner API, worker, dispatcher, and
+  controlled-operations effective roles, reviewed RLS policies, fixed-search-path
+  security-definer helpers, and least-privilege table grants.
+- Added transaction-local purpose, principal, workspace, and job context. API policy
+  decisions set tenant context; workers reload trusted job scope; dispatcher and
+  operations paths use their distinct effective roles.
+- Mandatory Qdrant filters now require bounded document/version/generation identities,
+  and every returned point is revalidated before it can become a citation.
+- Live PostgreSQL evidence proves unscoped and pooled queries remain tenant-isolated,
+  the API role cannot disable RLS, and the dispatcher cannot read documents. Live
+  Qdrant evidence proves cross-tenant vectors are excluded.
+- A full free live gate passes 127 tests with migration downgrade/upgrade, Alembic
+  no-drift, PostgreSQL, Qdrant, SeaweedFS, RabbitMQ, FastAPI, and Streamlit checks.
+  No paid OpenAI acceptance run was invoked because model behavior did not change.
 
 ### Completion gate
 
@@ -707,8 +725,8 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Implement Milestone 4.2 PostgreSQL RLS and Qdrant authorization defense | Runtime roles, transaction-local context, fail-closed provider scope, and live cross-tenant evidence |
-| 2 | Open and maintain the Phase 4 draft pull request | Reviewable commits, green CI, and squash-and-merge only after explicit approval |
+| 1 | Implement Milestone 4.3 authorized object access and permission propagation | Backend-mediated object checks, future connector envelope, and revocation/worker evidence |
+| 2 | Maintain draft PR #3 | Reviewable commits, green CI, and squash-and-merge only after explicit approval |
 
 ## Update protocol
 

@@ -91,7 +91,9 @@ class QdrantOpenAIRAGEngine:
             ).points
         except Exception as exc:
             raise RAGUnavailableError("The retrieval service is temporarily unavailable") from exc
-        citations = tuple(_citation(point) for point in points if point.payload)
+        citations = tuple(
+            _authorized_citation(point, request) for point in points if point.payload
+        )
         if not citations:
             return RAGAnswer(
                 content="I could not find authorized evidence to answer that question.",
@@ -144,6 +146,16 @@ def build_rag_engine(settings: Settings, qdrant: QdrantClient) -> RAGEngine:
 
 
 def _retrieval_filter(request: RAGRequest) -> models.Filter:
+    if not request.documents or len(request.documents) > 100:
+        raise RAGUnavailableError("Authorized retrieval scope is invalid")
+    if any(scope.generation_id is None for scope in request.documents):
+        raise RAGUnavailableError("Authorized retrieval scope is incomplete")
+    identities = {
+        (scope.document_id, scope.document_version_id, scope.generation_id)
+        for scope in request.documents
+    }
+    if len(identities) != len(request.documents):
+        raise RAGUnavailableError("Authorized retrieval scope is invalid")
     base = workspace_filter(request.workspace_id)
     document_conditions: list[models.Filter | models.FieldCondition] = [
         models.Filter(
@@ -155,15 +167,9 @@ def _retrieval_filter(request: RAGRequest) -> models.Filter:
                     key="document_version_id",
                     match=models.MatchValue(value=str(scope.document_version_id)),
                 ),
-                *(
-                    [
-                        models.FieldCondition(
-                            key="generation_id",
-                            match=models.MatchValue(value=str(scope.generation_id)),
-                        )
-                    ]
-                    if scope.generation_id is not None
-                    else []
+                models.FieldCondition(
+                    key="generation_id",
+                    match=models.MatchValue(value=str(scope.generation_id)),
                 ),
             ]
         )
@@ -177,11 +183,29 @@ def _retrieval_filter(request: RAGRequest) -> models.Filter:
     )
 
 
-def _citation(point: Any) -> RAGCitation:
+def _authorized_citation(point: Any, request: RAGRequest) -> RAGCitation:
     payload = point.payload or {}
+    try:
+        workspace_id = UUID(str(payload["workspace_id"]))
+        tenant_id = UUID(str(payload["tenant_id"]))
+        document_id = UUID(str(payload["document_id"]))
+        version_id = UUID(str(payload["document_version_id"]))
+        generation_id = UUID(str(payload["generation_id"]))
+    except (KeyError, TypeError, ValueError) as exc:
+        raise RAGUnavailableError("Retrieved evidence failed authorization validation") from exc
+    allowed = {
+        (scope.document_id, scope.document_version_id, scope.generation_id)
+        for scope in request.documents
+    }
+    if (
+        workspace_id != request.workspace_id
+        or tenant_id != request.workspace_id
+        or (document_id, version_id, generation_id) not in allowed
+    ):
+        raise RAGUnavailableError("Retrieved evidence failed authorization validation")
     return RAGCitation(
-        document_id=UUID(str(payload["document_id"])),
-        document_version_id=UUID(str(payload["document_version_id"])),
+        document_id=document_id,
+        document_version_id=version_id,
         document_title=str(payload.get("document_title", "Document")),
         page_number=(int(payload["page_number"]) if payload.get("page_number") else None),
         content_type=str(payload.get("content_type", "text")),

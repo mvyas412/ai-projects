@@ -16,6 +16,7 @@ from backend.app.broker.messages import IngestionEventMessage
 from backend.app.broker.rabbitmq import BrokerPublishError, RabbitMQPublisher
 from backend.app.core.config import Settings, get_settings
 from backend.app.core.logging import configure_logging
+from backend.app.db.rls import DatabasePurpose, set_rls_context
 from backend.app.db.session import (
     SessionFactory,
     create_database_engine,
@@ -54,6 +55,7 @@ class OutboxDispatcher:
     async def run_once(self) -> int:
         now = datetime.now(UTC)
         with self._session_factory.begin() as session:
+            set_rls_context(session, purpose=DatabasePurpose.DISPATCHER)
             events = IngestionOutboxStateMachine(session).claim_due_events(
                 lease_owner=self._dispatcher_id,
                 now=now,
@@ -69,6 +71,7 @@ class OutboxDispatcher:
     async def _publish_event(self, event_id: UUID) -> None:
         try:
             with self._session_factory.begin() as session:
+                set_rls_context(session, purpose=DatabasePurpose.DISPATCHER)
                 event = IngestionOutboxStateMachine(session).start_publication(
                     event_id=event_id,
                     lease_owner=self._dispatcher_id,
@@ -78,6 +81,7 @@ class OutboxDispatcher:
                 attempt_count = event.publication_attempt_count
             await self._publisher.publish(message)
             with self._session_factory.begin() as session:
+                set_rls_context(session, purpose=DatabasePurpose.DISPATCHER)
                 IngestionOutboxStateMachine(session).mark_published(
                     event_id=event_id,
                     lease_owner=self._dispatcher_id,
@@ -97,6 +101,7 @@ class OutboxDispatcher:
             delay = _publication_backoff(attempt_count if "attempt_count" in locals() else 1, event_id)
             try:
                 with self._session_factory.begin() as session:
+                    set_rls_context(session, purpose=DatabasePurpose.DISPATCHER)
                     IngestionOutboxStateMachine(session).record_publication_failure(
                         event_id=event_id,
                         lease_owner=self._dispatcher_id,

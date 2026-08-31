@@ -5,6 +5,7 @@ import json
 from datetime import UTC, datetime
 
 from backend.app.core.config import get_settings
+from backend.app.db.rls import DatabasePurpose, set_rls_context
 from backend.app.db.session import create_database_engine, create_session_factory
 from backend.app.services.ingestion_jobs import IngestionJobStateMachine
 from backend.app.services.ingestion_operations import IngestionOperationsService
@@ -23,9 +24,11 @@ def main() -> None:
     try:
         if args.command == "status":
             with factory() as session:
+                set_rls_context(session, purpose=DatabasePurpose.OPERATIONS)
                 payload = IngestionOperationsService(session, settings).report().safe_dict()
         elif args.command == "recover-expired":
             with factory.begin() as session:
+                set_rls_context(session, purpose=DatabasePurpose.OPERATIONS)
                 recovered = IngestionJobStateMachine(session).recover_expired_jobs(
                     now=datetime.now(UTC),
                     limit=25,
@@ -33,12 +36,14 @@ def main() -> None:
             payload = {"recovered_expired_jobs": len(recovered)}
         elif args.command == "retention-preview":
             with factory() as session:
+                set_rls_context(session, purpose=DatabasePurpose.OPERATIONS)
                 count = IngestionOperationsService(
                     session, settings
                 ).terminal_outbox_retention_candidates()
             payload = {"retention_candidates": count, "applied": False}
         else:
             with factory.begin() as session:
+                set_rls_context(session, purpose=DatabasePurpose.OPERATIONS)
                 count = IngestionOperationsService(
                     session, settings
                 ).apply_terminal_outbox_retention()
