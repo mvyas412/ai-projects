@@ -17,6 +17,8 @@ class DocumentVersionSummary(BaseModel):
     byte_size: int
     status: DocumentVersionStatus
     failure_reason: str | None
+    active_generation_id: UUID | None = None
+    active_generation_promoted_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
 

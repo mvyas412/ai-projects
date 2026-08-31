@@ -6,11 +6,14 @@ import unicodedata
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import PurePath
+from typing import BinaryIO, TypeVar
 from uuid import UUID, uuid4
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from backend.app.core.config import Settings
+from backend.app.ingestion.pipeline import pipeline_fingerprint
 from backend.app.models.document import Collection, Document, DocumentVersion
 from backend.app.models.user import User
 from backend.app.models.workspace import WorkspaceRole
@@ -32,8 +35,7 @@ ALLOWED_MEDIA_TYPES = frozenset(
 )
 WRITE_ROLES = frozenset({WorkspaceRole.OWNER, WorkspaceRole.ADMIN, WorkspaceRole.MEMBER})
 ADMIN_ROLES = frozenset({WorkspaceRole.OWNER, WorkspaceRole.ADMIN})
-# Keep the accepted V2 fingerprint until Phase 3 changes ingestion behavior.
-INGESTION_PROFILE = "phase2-sync-v1"
+T = TypeVar("T")
 
 
 class DocumentLibraryError(Exception):
@@ -61,12 +63,18 @@ class DuplicateCollectionError(DocumentLibraryError):
 
 
 class DocumentLibraryService:
-    def __init__(self, session: Session, storage: ObjectStorage) -> None:
+    def __init__(
+        self,
+        session: Session,
+        storage: ObjectStorage,
+        settings: Settings | None = None,
+    ) -> None:
         self._session = session
         self._storage = storage
         self._documents = DocumentRepository(session)
         self._collections = CollectionRepository(session)
         self._workspaces = WorkspaceRepository(session)
+        self._settings = settings or Settings.model_construct()
 
     def list_documents(self, *, user: User, workspace_id: UUID) -> list[Document]:
         self._require_workspace(user, workspace_id)
@@ -107,6 +115,30 @@ class DocumentLibraryService:
         title: str | None,
         max_upload_bytes: int,
     ) -> tuple[Document, DocumentVersion]:
+        document, version, _ = self.create_document_with_callback(
+            user=user,
+            workspace_id=workspace_id,
+            filename=filename,
+            media_type=media_type,
+            content=content,
+            title=title,
+            max_upload_bytes=max_upload_bytes,
+            after_original=lambda _document, _version: None,
+        )
+        return document, version
+
+    def create_document_with_callback(
+        self,
+        *,
+        user: User,
+        workspace_id: UUID,
+        filename: str,
+        media_type: str,
+        content: bytes,
+        title: str | None,
+        max_upload_bytes: int,
+        after_original: Callable[[Document, DocumentVersion], T],
+    ) -> tuple[Document, DocumentVersion, T]:
         safe_filename, normalized_media_type = self._validate_upload(
             filename=filename,
             media_type=media_type,
@@ -130,15 +162,74 @@ class DocumentLibraryService:
             version_number=1,
             content=content,
         )
-        self._write_with_storage(
+        result = self._write_with_storage(
             version.object_key,
             content,
             document.media_type,
             document,
             version,
             lambda: self._add_initial_document(user, workspace_id, document, version),
+            lambda: after_original(document, version),
         )
-        return document, version
+        return document, version, result
+
+    def create_document_stream_with_callback(
+        self,
+        *,
+        user: User,
+        workspace_id: UUID,
+        filename: str,
+        media_type: str,
+        stream: BinaryIO,
+        byte_size: int,
+        content_sha256: str,
+        title: str | None,
+        max_upload_bytes: int,
+        after_original: Callable[[Document, DocumentVersion], T],
+    ) -> tuple[Document, DocumentVersion, T]:
+        safe_filename, normalized_media_type = self._validate_upload_identity(
+            filename=filename,
+            media_type=media_type,
+            byte_size=byte_size,
+            content_sha256=content_sha256,
+            max_upload_bytes=max_upload_bytes,
+        )
+        document = Document(
+            id=uuid4(),
+            workspace_id=workspace_id,
+            created_by_user_id=user.id,
+            title=self._normalize_title(title, safe_filename),
+            original_filename=safe_filename,
+            media_type=normalized_media_type,
+        )
+        version = self._new_version_from_identity(
+            version_id=uuid4(),
+            document=document,
+            user=user,
+            version_number=1,
+            byte_size=byte_size,
+            content_sha256=content_sha256,
+        )
+        stored = False
+        try:
+            with self._session.begin():
+                self._add_initial_document(user, workspace_id, document, version)
+                stream.seek(0)
+                self._storage.put_stream(
+                    version.object_key,
+                    stream,
+                    byte_size=byte_size,
+                    content_sha256=content_sha256,
+                    media_type=document.media_type,
+                    metadata=self._object_metadata(document, version),
+                )
+                stored = True
+                result = after_original(document, version)
+            return document, version, result
+        except Exception:
+            if stored:
+                self._storage.delete(version.object_key)
+            raise
 
     def add_version(
         self,
@@ -353,7 +444,8 @@ class DocumentLibraryService:
         document: Document,
         version: DocumentVersion,
         database_write: Callable[[], None],
-    ) -> None:
+        after_original: Callable[[], T],
+    ) -> T:
         stored = False
         try:
             with self._session.begin():
@@ -365,6 +457,8 @@ class DocumentLibraryService:
                     metadata=self._object_metadata(document, version),
                 )
                 stored = True
+                result = after_original()
+            return result
         except Exception:
             if stored:
                 self._storage.delete(object_key)
@@ -417,12 +511,33 @@ class DocumentLibraryService:
         return safe_filename, normalized_media_type
 
     @staticmethod
-    def _ingestion_fingerprint(media_type: str) -> str:
-        return hashlib.sha256(f"{INGESTION_PROFILE}:{media_type}".encode()).hexdigest()
+    def _validate_upload_identity(
+        *,
+        filename: str,
+        media_type: str,
+        byte_size: int,
+        content_sha256: str,
+        max_upload_bytes: int,
+    ) -> tuple[str, str]:
+        safe_filename = _safe_filename(filename)
+        normalized_media_type = media_type.split(";", 1)[0].strip().lower()
+        if normalized_media_type not in ALLOWED_MEDIA_TYPES:
+            raise InvalidUploadError("Unsupported document type")
+        if byte_size <= 0:
+            raise InvalidUploadError("The uploaded document is empty")
+        if byte_size > max_upload_bytes:
+            raise InvalidUploadError("The uploaded document exceeds the size limit")
+        if len(content_sha256) != 64 or any(
+            character not in "0123456789abcdef" for character in content_sha256
+        ):
+            raise InvalidUploadError("The uploaded document identity is invalid")
+        return safe_filename, normalized_media_type
 
-    @classmethod
+    def _ingestion_fingerprint(self, media_type: str) -> str:
+        return pipeline_fingerprint(self._settings, media_type)
+
     def _new_version(
-        cls,
+        self,
         *,
         version_id: UUID,
         document: Document,
@@ -430,20 +545,39 @@ class DocumentLibraryService:
         version_number: int,
         content: bytes,
     ) -> DocumentVersion:
+        return self._new_version_from_identity(
+            version_id=version_id,
+            document=document,
+            user=user,
+            version_number=version_number,
+            byte_size=len(content),
+            content_sha256=hashlib.sha256(content).hexdigest(),
+        )
+
+    def _new_version_from_identity(
+        self,
+        *,
+        version_id: UUID,
+        document: Document,
+        user: User,
+        version_number: int,
+        byte_size: int,
+        content_sha256: str,
+    ) -> DocumentVersion:
         return DocumentVersion(
             id=version_id,
             document_id=document.id,
             workspace_id=document.workspace_id,
             created_by_user_id=user.id,
             version_number=version_number,
-            content_sha256=hashlib.sha256(content).hexdigest(),
-            ingestion_fingerprint=cls._ingestion_fingerprint(document.media_type),
+            content_sha256=content_sha256,
+            ingestion_fingerprint=self._ingestion_fingerprint(document.media_type),
             object_key=original_object_key(
                 workspace_id=document.workspace_id,
                 document_id=document.id,
                 version_id=version_id,
             ),
-            byte_size=len(content),
+            byte_size=byte_size,
         )
 
 

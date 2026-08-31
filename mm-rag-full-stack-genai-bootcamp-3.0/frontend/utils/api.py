@@ -48,6 +48,82 @@ class BackendAPIClient:
             timeout=45.0,
         )
 
+    def upload_document_async(
+        self,
+        workspace_id: str,
+        *,
+        filename: str,
+        media_type: str,
+        content: bytes,
+        title: str | None,
+        idempotency_key: str,
+    ) -> dict[str, Any]:
+        data = {"title": title} if title else None
+        return self._json(
+            "POST",
+            f"/api/v1/workspaces/{workspace_id}/ingestion/uploads",
+            data=data,
+            files={"file": (filename, content, media_type)},
+            headers={**self._headers, "Idempotency-Key": idempotency_key},
+            timeout=45.0,
+        )
+
+    def ingestion_jobs(
+        self, workspace_id: str, *, document_version_id: str | None = None
+    ) -> list[dict[str, Any]]:
+        params = (
+            {"document_version_id": document_version_id}
+            if document_version_id is not None
+            else None
+        )
+        return self._json(
+            "GET",
+            f"/api/v1/workspaces/{workspace_id}/ingestion/jobs",
+            params=params,
+        )
+
+    def ingestion_job(self, workspace_id: str, job_id: str) -> dict[str, Any]:
+        return self._json(
+            "GET",
+            f"/api/v1/workspaces/{workspace_id}/ingestion/jobs/{job_id}",
+        )
+
+    def enqueue_version(
+        self,
+        workspace_id: str,
+        document_id: str,
+        version_id: str,
+        *,
+        idempotency_key: str,
+    ) -> dict[str, Any]:
+        return self._json(
+            "POST",
+            f"/api/v1/workspaces/{workspace_id}/documents/{document_id}/versions/"
+            f"{version_id}/ingestion-jobs",
+            headers={**self._headers, "Idempotency-Key": idempotency_key},
+        )
+
+    def cancel_ingestion_job(
+        self, workspace_id: str, job_id: str
+    ) -> dict[str, Any]:
+        return self._json(
+            "POST",
+            f"/api/v1/workspaces/{workspace_id}/ingestion/jobs/{job_id}/cancel",
+        )
+
+    def retry_ingestion_job(
+        self,
+        workspace_id: str,
+        job_id: str,
+        *,
+        idempotency_key: str,
+    ) -> dict[str, Any]:
+        return self._json(
+            "POST",
+            f"/api/v1/workspaces/{workspace_id}/ingestion/jobs/{job_id}/retry",
+            headers={**self._headers, "Idempotency-Key": idempotency_key},
+        )
+
     def index_version(
         self, workspace_id: str, document_id: str, version_id: str
     ) -> dict[str, Any]:
@@ -159,10 +235,12 @@ class BackendAPIClient:
         **kwargs: Any,
     ) -> httpx.Response:
         try:
+            request_headers = dict(self._headers) if authenticated else {}
+            request_headers.update(kwargs.pop("headers", {}) or {})
             response = httpx.request(
                 method,
                 f"{self._base_url}{path}",
-                headers=self._headers if authenticated else None,
+                headers=request_headers or None,
                 timeout=timeout,
                 **kwargs,
             )

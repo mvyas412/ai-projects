@@ -140,7 +140,7 @@ def upload_document(
     title: Annotated[str | None, Form()] = None,
 ) -> DocumentDetail:
     content = file.file.read(request.app.state.settings.max_upload_bytes + 1)
-    service = DocumentLibraryService(session, storage)
+    service = DocumentLibraryService(session, storage, request.app.state.settings)
     try:
         document, version = service.create_document(
             user=user,
@@ -196,7 +196,9 @@ def upload_document_version(
 ) -> DocumentVersionSummary:
     content = file.file.read(request.app.state.settings.max_upload_bytes + 1)
     try:
-        version = DocumentLibraryService(session, storage).add_version(
+        version = DocumentLibraryService(
+            session, storage, request.app.state.settings
+        ).add_version(
             user=user,
             workspace_id=workspace_id,
             document_id=document_id,

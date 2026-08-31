@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Literal, cast
+from uuid import uuid4
 
 import streamlit as st
 from utils.api import BackendAPIError
@@ -44,26 +45,35 @@ if documents_tab.open:
                     else:
                         try:
                             with st.status("Uploading document…", expanded=True) as status:
-                                created = client.upload_document(
+                                key = st.session_state.setdefault(
+                                    "library_upload_idempotency_key", str(uuid4())
+                                )
+                                submission = client.upload_document_async(
                                     workspace_id,
                                     filename=uploaded.name,
                                     media_type=uploaded.type or "application/octet-stream",
                                     content=uploaded.getvalue(),
                                     title=title or None,
+                                    idempotency_key=key,
                                 )
                                 status.update(
-                                    label="Document uploaded",
+                                    label="Document queued for processing",
                                     state="complete",
                                     expanded=False,
                                 )
-                            st.session_state["library_document_id"] = created["id"]
-                            st.toast("Document added to the workspace", icon=":material/check:")
+                            st.session_state.pop("library_upload_idempotency_key", None)
+                            st.session_state["library_document_id"] = submission["document"]["id"]
+                            st.toast(
+                                "Document is durable and processing asynchronously",
+                                icon=":material/check:",
+                            )
                             st.rerun()
                         except BackendAPIError as exc:
                             st.error(str(exc), icon=":material/error:")
 
         try:
             documents = client.documents(workspace_id)
+            ingestion_jobs = client.ingestion_jobs(workspace_id)
         except BackendAPIError as exc:
             st.error(str(exc), icon=":material/error:")
             st.stop()
@@ -74,6 +84,12 @@ if documents_tab.open:
                 icon=":material/library_add:",
             )
         else:
+            if st.button(
+                "Refresh processing status",
+                icon=":material/refresh:",
+                key="refresh_ingestion_jobs",
+            ):
+                st.rerun()
             ready = sum(item["latest_version"]["status"] == "ready" for item in documents)
             with st.container(horizontal=True):
                 st.badge(f"{len(documents)} documents", color="blue")
@@ -87,6 +103,9 @@ if documents_tab.open:
                 key="library_document_id",
             )
             selected = client.document(workspace_id, selected_id)
+            latest_job_by_version: dict[str, dict] = {}
+            for job in ingestion_jobs:
+                latest_job_by_version.setdefault(job["document_version_id"], job)
             status_value = selected["latest_version"]["status"]
             badge_color = cast(
                 Literal["green", "blue", "red", "orange"],
@@ -118,28 +137,81 @@ if documents_tab.open:
                         )
                         if version.get("failure_reason"):
                             details.error(version["failure_reason"])
+                        job = latest_job_by_version.get(version["id"])
+                        if job is not None:
+                            progress = job["progress"]
+                            details.caption(
+                                f"Job {job['state'].replace('_', ' ')} · "
+                                f"Attempt {progress['attempt_number']} of {job['max_attempts']}"
+                            )
+                            if progress.get("stage"):
+                                details.write(
+                                    f":material/progress_activity: "
+                                    f"{progress['stage'].replace('_', ' ').capitalize()}"
+                                )
+                            if progress.get("percentage") is not None:
+                                details.progress(
+                                    progress["percentage"],
+                                    text=f"{progress['percentage']}%",
+                                )
+                            if job.get("error"):
+                                details.warning(job["error"]["summary"])
                         with actions.container(horizontal=True, horizontal_alignment="right"):
-                            if can_write and version["status"] != "processing":
+                            if can_write and job is None and version["status"] != "ready":
                                 if st.button(
-                                    "Index" if version["status"] != "ready" else "Re-index",
+                                    "Queue indexing",
                                     icon=":material/database_upload:",
                                     key=f"index_{version['id']}",
                                 ):
                                     try:
-                                        with st.status(
-                                            "Building retrieval index…", expanded=True
-                                        ) as progress:
-                                            result = client.index_version(
-                                                workspace_id, selected_id, version["id"]
-                                            )
-                                            progress.write(
-                                                f"Stored {result['chunk_count']} searchable chunks."
-                                            )
-                                            progress.update(
-                                                label="Index ready",
-                                                state="complete",
-                                                expanded=False,
-                                            )
+                                        key_name = f"enqueue_key_{version['id']}"
+                                        key = st.session_state.setdefault(
+                                            key_name, str(uuid4())
+                                        )
+                                        client.enqueue_version(
+                                            workspace_id,
+                                            selected_id,
+                                            version["id"],
+                                            idempotency_key=key,
+                                        )
+                                        st.session_state.pop(key_name, None)
+                                        st.toast("Indexing job queued", icon=":material/check:")
+                                        st.rerun()
+                                    except BackendAPIError as exc:
+                                        st.error(str(exc), icon=":material/error:")
+                            if job is not None and job["state"] in {
+                                "pending",
+                                "queued",
+                                "running",
+                                "retry_scheduled",
+                            }:
+                                if st.button(
+                                    "Cancel",
+                                    icon=":material/cancel:",
+                                    key=f"cancel_{job['id']}",
+                                ):
+                                    try:
+                                        client.cancel_ingestion_job(workspace_id, job["id"])
+                                        st.rerun()
+                                    except BackendAPIError as exc:
+                                        st.error(str(exc), icon=":material/error:")
+                            if job is not None and job["state"] in {"failed", "cancelled"}:
+                                if st.button(
+                                    "Retry",
+                                    icon=":material/replay:",
+                                    key=f"retry_{job['id']}",
+                                ):
+                                    try:
+                                        key_name = f"retry_key_{job['id']}"
+                                        key = st.session_state.setdefault(
+                                            key_name, str(uuid4())
+                                        )
+                                        client.retry_ingestion_job(
+                                            workspace_id,
+                                            job["id"],
+                                            idempotency_key=key,
+                                        )
+                                        st.session_state.pop(key_name, None)
                                         st.rerun()
                                     except BackendAPIError as exc:
                                         st.error(str(exc), icon=":material/error:")
