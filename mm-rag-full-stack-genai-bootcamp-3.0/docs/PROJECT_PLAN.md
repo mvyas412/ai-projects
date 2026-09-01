@@ -35,7 +35,7 @@ Rules:
 
 | Item | Status |
 | --- | --- |
-| Active branch | `phase-4/mm-rag-governance` |
+| Phase 4 source branch | `phase-4/mm-rag-governance` — preserved |
 | Phase 1 | Completed and frozen at `mm-rag-v1.0.0` |
 | Phase 2 | Completed and accepted — implementation, live-model, security, and visual gates pass |
 | Phase 2 release | Squash-merged at `52d4cfa`; tagged `mm-rag-v2.0.0` |
@@ -44,12 +44,14 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 4 implementation complete; PR #3 review and acceptance are next |
+| Active milestone | Phase 4 completed and accepted; Phase 5 decision kickoff is next |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
 | Phase 3 quality gate | 110 deterministic tests pass with four opt-in integration skips; all 114 tests pass in the free live-service gate; CI-equivalent coverage is 81.39% against the 70% threshold; one explicitly approved signed-in real-OpenAI async promotion/retrieval proof passed |
-| Phase 4 | Implemented and validated — Milestones 4.0–4.5 complete; PR acceptance pending |
+| Phase 4 | Completed and accepted — Milestones 4.0–4.5 squash-merged through PR #3 |
+| Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
+| Phase 4 release | No release tag requested or created |
 | Phases 5–9 | Planned |
 
 ## Delivery sequence and gates
@@ -76,7 +78,7 @@ security and data-integrity gates on which it depends.
 | 1 | Working multimodal RAG proof | Reproducible parse-index-retrieve-answer flow | Completed |
 | 2 | Secure, persistent multi-document product | Authenticated tenant-safe product demonstration | Completed and accepted |
 | 3 | Durable asynchronous ingestion | Retryable jobs survive service failure | Completed and accepted |
-| 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Implemented and validated — PR acceptance pending |
+| 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Completed and accepted |
 | 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Planned |
 | 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Planned |
 | 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Planned |
@@ -454,12 +456,13 @@ Implemented and validated:
 
 ## Phase 4 — fine-grained authorization and governance
 
-**Status:** Implemented and validated — Milestones 4.0–4.5 are complete. The accepted policy
+**Status:** Completed and accepted — Milestones 4.0–4.5 are published through the
+PR #3 squash commit `57ee453`. The accepted policy
 matrix now has a central default-deny service, tenant-constrained ACL persistence,
 PostgreSQL RLS defense, mandatory Qdrant scope enforcement, backend-mediated object
 resolution, a future connector permission-envelope contract, safe append-only
 security review, checksummed compliance export, and durable lifecycle controls.
-PR #3 review and acceptance remain before a Phase 4 release claim.
+The approved source tree matches the squash commit; no Phase 4 release tag exists.
 
 ### Objective
 
@@ -788,9 +791,8 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Complete PR #3 review and Phase 4 acceptance | Green remote gates and review of the documented completion evidence |
-| 2 | Preserve the Phase 4 branch until explicit merge approval | Squash-and-merge PR #3 only after approval; do not move or create a release tag implicitly |
-| 3 | Start Phase 5 decision kickoff after Phase 4 acceptance | Evaluation dataset/baseline scope and sparse-engine ADR approval before implementation |
+| 1 | Decide whether Phase 4 should receive an annotated `mm-rag-v4.0.0` release tag | Explicit approval and a tag pointing to the accepted closure commit; no implicit tag creation |
+| 2 | Start Phase 5 decision kickoff after the release decision | Evaluation dataset/baseline scope, quality metrics, sparse-engine alternatives, and ADR sequence reviewed before implementation |
 
 ## Update protocol
 

@@ -179,7 +179,7 @@ flowchart LR
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
 | 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
-| 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Implemented and validated — PR acceptance pending |
+| 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and accepted at `57ee453` |
 | 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
@@ -293,8 +293,9 @@ live embedding, promotion, active-generation retrieval, citation, and persistenc
 
 ## Phase 4 — fine-grained authorization and governance
 
-**Status:** Implemented and validated. Milestones 4.0–4.5 are complete; PR acceptance
-is pending. Phase 2 starts isolation and this phase deepens it with central policy,
+**Status:** Completed and accepted. Milestones 4.0–4.5 were squash-merged through
+PR #3 at `57ee453`; no Phase 4 release tag has been created. Phase 2 starts isolation
+and this phase deepens it with central policy,
 ACL persistence, PostgreSQL RLS, mandatory Qdrant scope, canonical backend-mediated
 object access, a fail-closed future connector permission contract, safe append-only
 security review, checksummed compliance export, and tombstone-first lifecycle.
