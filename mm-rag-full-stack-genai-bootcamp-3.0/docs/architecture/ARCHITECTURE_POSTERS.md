@@ -39,7 +39,7 @@ This is the target production system without phase or roadmap labels.
 The poster is the Phase 4 target-state companion. The editable
 [Phase 4 policy matrix and threat model](PHASE4_POLICY_THREAT_MODEL.md) is implemented
 through migration `20260831_0013`; Milestones 4.0–4.5 pass deterministic and free
-live-service evidence, with PR acceptance pending.
+live-service evidence and are accepted in PR #3's squash commit `57ee453`.
 
 ![Phase 4 fine-grained authorization and governance](images/04-phase-4-governance.png)
 

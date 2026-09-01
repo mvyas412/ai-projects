@@ -7,13 +7,16 @@ remain unchanged at the immutable `mm-rag-v1.0.0` and `mm-rag-v2.0.0` Git tags.
 ## Current status
 
 Phase 3 is accepted and preserved at `mm-rag-v3.0.0`. Phase 4 Milestones 4.0–4.5
-are implemented and validated on `phase-4/mm-rag-governance`: ADRs 0013–0017 are
-accepted and migrations through `20260831_0013` add central default-deny policy,
+are completed and accepted: PR #3 was squash-merged into `main` at `57ee453`, its
+tree matches the approved source head, and the source branch remains preserved.
+ADRs 0013–0017 are accepted and migrations through `20260831_0013` add central
+default-deny policy,
 tenant-constrained ACLs, PostgreSQL RLS, cross-store authorization, safe append-only
 security review, checksummed compliance export, and durable tombstone-first lifecycle
 plans. Qdrant access requires bounded trusted scope, object access is backend-mediated
 and integrity-checked, and retention apply fails closed unless an exact owner-approved
 preview remains current. No automatic destructive retention schedule is enabled.
+No Phase 4 release tag has been requested or created.
 
 The current `3.0` lineage contains:
 
@@ -449,5 +452,6 @@ product story, suggested prompts, failure-safe talking points, and visual accept
 Phase 2 is merged and recoverable at `mm-rag-v2.0.0`. Phase 3 is implemented,
 accepted, and merged into `main` through PR #2 at `228ce63` after the explicitly
 authorized real-OpenAI asynchronous browser proof. The immutable accepted release
-is tagged `mm-rag-v3.0.0` at `9ebe767`. Production providers and deployment remain
-future Phase 8 decisions.
+is tagged `mm-rag-v3.0.0` at `9ebe767`. Phase 4 is completed, accepted, and
+squash-merged through PR #3 at `57ee453`; no Phase 4 release tag has been created.
+Production providers and deployment remain future Phase 8 decisions.
