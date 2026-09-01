@@ -1,11 +1,12 @@
-# Phase 3 demonstration runbook
+# Current MM-RAG demonstration runbook
 
-This runbook presents the durable asynchronous workflow while keeping the accepted
-V1 and V2 releases immutable.
+This runbook presents the accepted durable/governed foundation and the Phase 5
+hybrid-retrieval implementation while keeping all release tags immutable.
 
 ## Before the session
 
-1. From the `3.0` directory, run `make setup` once.
+1. From the `3.0` directory, run `make setup` once. This provisions and verifies
+   the pinned free BM25 and reranker artifacts outside request handling.
 2. Confirm ignored `.env` and `.streamlit/secrets.toml` contain the local Auth0,
    PostgreSQL, Qdrant, SeaweedFS, RabbitMQ, and OpenAI settings. Never display them.
 3. Run `make services`, `make migrate`, and `make runtime`.
@@ -15,19 +16,21 @@ V1 and V2 releases immutable.
 6. Open `http://localhost:8503`, sign in, and confirm the personal workspace,
    authenticated email, and Settings readiness.
 
-Run `make check-acceptance` only with explicit authorization: it makes paid OpenAI
-requests and is separate from the normal Phase 3 release gate.
+Run `make check-acceptance PHASE5_EMBEDDING_COST_USD_PER_MILLION_TOKENS=<current-rate>`
+only with explicit authorization. It makes paid OpenAI requests and is separate
+from every free gate.
 
 ## Five-minute product story
 
 1. **Architecture:** show the current workflow/DEV poster and explain PostgreSQL
-   job truth, RabbitMQ wake-ups, immutable object/generation writes, and fenced promotion.
+   job truth, RabbitMQ wake-ups, immutable dense/sparse generations, and fenced promotion.
 2. **Library:** upload a representative PDF, DOCX, image, Markdown, or text source.
    Point out the immediate durable job response and queued/running stage progress.
 3. **Control:** demonstrate refresh and explain cooperative cancellation and immutable
    successor retry. Do not cancel the primary golden-path job.
 4. **Ready state:** after promotion, show the READY document and authorized source download.
-5. **Ask:** run a document- or collection-scoped question and inspect source/page evidence.
+5. **Ask:** run semantic and exact-identifier questions, then inspect source/page evidence.
+   Explain identical dense/sparse authorization filters, deterministic RRF, and dense fallback.
 6. **Persistence:** refresh or sign out/in; reopen the job/document/conversation state.
 7. **Operations:** show aggregate `make operations-status` output and explain the
    separate dispatcher/worker health, safe alerts, retention preview, and restore proof.
@@ -44,6 +47,9 @@ requests and is separate from the normal Phase 3 release gate.
 - Public status uses stable codes and correlation IDs without provider errors, keys,
   object paths, document content, or tokens.
 - Every retrieval requires tenant, workspace, document/version, and active generation.
+- Sparse or reranker failure cannot broaden scope; retrieval falls back to the already
+  authorized dense or fused order.
+- Models are pinned and checksum-verified before startup; request paths do not download them.
 
 ## Visual acceptance checklist
 
@@ -72,3 +78,7 @@ requests and is separate from the normal Phase 3 release gate.
   as its citation; the conversation, answer, and citation persisted after navigation.
   No authentication token or secret value was displayed or added to tracked files,
   and no second paid run was made.
+- Phase 5 free implementation evidence now covers the hashed 50-query contract,
+  immutable successor reindex, real-Qdrant filter parity, deterministic RRF,
+  sparse/reranker fallback, pinned offline model checks, and healthy rebuilt runtime
+  containers. The paid dense/hybrid comparison and updated end-to-end proof remain pending.

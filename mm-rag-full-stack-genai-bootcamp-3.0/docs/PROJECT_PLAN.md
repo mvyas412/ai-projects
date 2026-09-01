@@ -1,6 +1,6 @@
 # Multimodal RAG production project plan
 
-> Living delivery plan — updated 2026-08-31
+> Living delivery plan — updated 2026-09-01
 
 This is the version-controlled planning source of truth for the journey from the
 preserved prototype through the enterprise platform. It defines sequence, scope,
@@ -45,7 +45,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 5.0 evaluation harness and dense baseline implementation |
+| Active milestone | Phase 5.5 measured benchmark and release acceptance |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -53,7 +53,7 @@ Rules:
 | Phase 4 | Completed and accepted — Milestones 4.0–4.5 squash-merged through PR #3 |
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
-| Phase 5 | In progress; ADRs 0018–0021 accepted, implementation pending |
+| Phase 5 | Implementation complete; paid quality/acceptance evidence pending |
 | Phases 6–9 | Planned |
 
 ## Delivery sequence and gates
@@ -594,8 +594,8 @@ Milestone 4.0 review material:
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** In progress. ADRs 0018–0021 are accepted; the accepted Phase 4 dense
-runtime remains unchanged while implementation begins.
+**Status:** Implementation complete; final measured quality and paid end-to-end
+acceptance evidence remain pending.
 
 ### Objective
 
@@ -606,12 +606,12 @@ then reranking a bounded candidate set.
 
 | Milestone | Deliverable | Status |
 | --- | --- | --- |
-| 5.0 | Versioned retrieval evaluation dataset and dense-only baseline | In progress — ADR 0018 accepted |
-| 5.1 | Sparse-engine evaluation and ADR | Decision accepted — ADR 0019 |
-| 5.2 | Parallel dense/sparse retrieval with identical authorization filters | Approved; implementation pending |
-| 5.3 | Deterministic RRF/fusion, deduplication, and source diversification | Decision accepted — ADR 0020 |
-| 5.4 | Bounded reranker selection and token-budgeted evidence assembly | Decision accepted — ADR 0021 |
-| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | Awaiting measured evidence |
+| 5.0 | Versioned retrieval evaluation dataset and dense-only baseline | Harness complete; paid baseline result pending |
+| 5.1 | Sparse-engine evaluation and ADR | Completed — ADR 0019 implemented |
+| 5.2 | Parallel dense/sparse retrieval with identical authorization filters | Completed and live-tested |
+| 5.3 | Deterministic RRF/fusion, deduplication, and source diversification | Completed and deterministic |
+| 5.4 | Bounded reranker selection and token-budgeted evidence assembly | Completed; reranker remains opt-in |
+| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | Free gates pass; paid evidence pending |
 
 ### Accepted implementation contract
 
@@ -624,6 +624,28 @@ then reranking a bounded candidate set.
   cross-encoder reranking; every stage revalidates tenant/document/version/generation.
 - Preserve dense-only fallback and use versioned rollout configuration. Do not make
   a provider score, reranker score, or client input an authorization signal.
+
+### Implementation evidence
+
+- Reviewable implementation commit `5ab4837` contains the Phase 5 runtime, fixtures,
+  tests, model lifecycle, rollout controls, and acceptance tooling.
+- A hashed synthetic benchmark contains 24 stable chunks and 50 balanced judged
+  queries with a frozen 60/20/20 split and workspace/narrow-scope negatives.
+- New immutable generations write dense and `sparse-bm25-v1` vectors together;
+  owner/admin successor reindexing preserves the prior active generation until
+  checksum and count validation complete.
+- Dense and sparse searches reuse the same backend-built tenant/workspace/document/
+  version/generation filter, then revalidate candidates before deterministic RRF,
+  deduplication, diversification, optional reranking, and citation assembly.
+- Pinned FastEmbed model revisions and tree checksums are provisioned before runtime.
+  Missing sparse/reranker artifacts fail to dense/fused order without downloading.
+- `dense-v1`, `hybrid-v1`, and `hybrid-rerank-v1` are explicit rollout profiles;
+  `hybrid-v1` is the default and reranking remains disabled pending measured benefit.
+- The deterministic gate passes 166 tests with 11 expected opt-in skips, migration
+  head `20260831_0013`, no schema drift, and no paid model call. The complete free
+  live gate passes all 177 tests with PostgreSQL, Qdrant, SeaweedFS, RabbitMQ,
+  FastAPI, and Streamlit ready. Rebuilt dispatcher and worker containers load pinned
+  models and report healthy.
 
 ### Completion gate
 
@@ -808,10 +830,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Implement Milestone 5.0 deterministic fixtures, schema, and evaluation harness | Free reproducible tests and versioned manifests |
-| 2 | Freeze the dense-only baseline profile | Deterministic baseline plus one separately approved paid real-provider run |
-| 3 | Add successor-generation sparse indexing and authorized dual-leg retrieval | Real-Qdrant tests prove scope parity, fallback, and immutable promotion |
-| 4 | Add deterministic fusion, optional local reranking, rollout profiles, and acceptance gates | Validation and holdout evidence satisfy ADRs 0018–0021 |
+| 1 | Obtain explicit approval immediately before one paid Phase 5 acceptance run | Approval is recorded; no implicit provider call |
+| 2 | Run the frozen dense/hybrid/rerank comparison and async product proof | Validation and holdout metrics plus grounded citation evidence |
+| 3 | If the ADR 0018 gate passes, publish the implementation/evidence commits for review | Clean branch, successful CI, and reviewable Phase 5 PR |
+| 4 | After explicit PR approval, squash-merge and create the immutable Phase 5 release checkpoint | Accepted squash commit and annotated release tag |
 
 ## Update protocol
 

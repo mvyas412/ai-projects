@@ -17,10 +17,11 @@ security review, checksummed compliance export, and durable tombstone-first life
 plans. Qdrant access requires bounded trusted scope, object access is backend-mediated
 and integrity-checked, and retention apply fails closed unless an exact owner-approved
 preview remains current. No automatic destructive retention schedule is enabled.
-Phase 5 is in progress. ADRs 0018–0021 are accepted and define a versioned dense
-baseline, Qdrant-native BM25 sparse vectors generated locally, application-owned
-deterministic RRF, and a bounded local cross-encoder reranker. Implementation has
-not changed production retrieval behavior yet.
+Phase 5 implementation is complete and its final release gate is pending one
+separately approved paid benchmark/acceptance run. The default `hybrid-v1` profile
+combines authorized dense and Qdrant-native BM25 legs through deterministic RRF;
+`dense-v1` remains the rollback path, and `hybrid-rerank-v1` remains opt-in until
+measured evidence proves the bounded local cross-encoder improves quality.
 
 The current `3.0` lineage contains:
 
@@ -49,6 +50,13 @@ The current `3.0` lineage contains:
   document-indexer boundary, with mandatory workspace/document/version vector scope.
 - Persistent workspace-, collection-, or document-scoped conversations with
   backend-mediated retrieval, answer generation, and structured citations.
+- Immutable dense-and-sparse successor generations, identical trusted Qdrant filters
+  on both retrieval legs, deterministic RRF/deduplication/diversification, and
+  content-free candidate traces with safe dense fallback.
+- A pinned, checksum-verified offline FastEmbed BM25 model and optional local ONNX
+  cross-encoder, provisioned at setup/image-build time and never in a request path.
+- A hashed 50-query benchmark, frozen dense profile, deterministic metrics/gates,
+  and an explicit paid comparison runner that stores raw results only in Git-ignored data.
 - A presentation-focused native Streamlit experience with top navigation,
   workspace switching, document/collection management, persistent chat,
   evidence inspection, first-document guidance, downloads, settings, and
@@ -113,8 +121,8 @@ future capabilities have already been implemented.
 The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
-shows the verified Phase 4 development checkpoint and distinguishes implemented
-governance/lifecycle controls from later production-provider decisions.
+shows the Phase 5 implementation checkpoint, including hybrid retrieval and the
+remaining paid quality gate.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
@@ -407,12 +415,15 @@ The same gates are available through stable commands:
 ```bash
 make check       # locked dependencies, lint, types, tests, migration head, diff hygiene
 make check-live  # also checks live services and the SeaweedFS provider contract
-make check-acceptance  # also makes paid OpenAI calls in isolated temporary data
+make phase5-evaluation  # validates the free hashed 50-query benchmark contract
+make check-acceptance PHASE5_EMBEDDING_COST_USD_PER_MILLION_TOKENS=<current-rate>
 ```
 
-`make check-acceptance` exercises text and generated-image ingestion, embeddings,
-scoped Qdrant retrieval, grounded generation, citations, persistence, audit, and
-cross-tenant denial. It removes its temporary SQL, files, and vector collection.
+Run `make check-acceptance` only after explicit approval. It compares dense, hybrid,
+and hybrid-rerank profiles with one batched paid embedding request, then exercises
+async text/image ingestion, scoped hybrid retrieval, grounded generation, citations,
+persistence, audit, and cross-tenant denial. Temporary collections are removed and
+raw benchmark identities remain ignored.
 
 GitHub Actions runs deterministic and PostgreSQL/Qdrant integration gates on pushes
 to the Phase 3, Phase 4, and Phase 5 branches and relevant pull requests. The

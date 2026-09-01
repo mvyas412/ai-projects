@@ -1,6 +1,6 @@
 # Multimodal RAG architecture handbook
 
-> Living architecture baseline — updated 2026-08-31
+> Living architecture baseline — updated 2026-09-01
 
 This document is the version-controlled architecture source of truth for the
 complete system and Phases 1–9. Update it whenever a component, boundary, data
@@ -18,8 +18,9 @@ roadmap view, and one diagram for each phase. The Mermaid diagrams in this
 handbook remain the editable source of truth.
 
 The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
-is the verified Phase 4 development checkpoint. It includes the accepted Phase 3
-runtime plus implemented authorization, audit, and lifecycle boundaries.
+is the Phase 5 implementation checkpoint. It includes the accepted Phase 3/4
+runtime and governance boundaries plus hybrid retrieval; paid quality acceptance
+remains outstanding.
 
 ## Status legend
 
@@ -167,7 +168,7 @@ flowchart LR
     p2["Phase 2<br/>Product foundation<br/>Completed"] -->
     p3["Phase 3<br/>Async ingestion<br/>Completed"] -->
     p4["Phase 4<br/>Governance foundation<br/>Completed / v4.0.0"] -->
-    p5["Phase 5<br/>Hybrid retrieval<br/>In progress"] -->
+    p5["Phase 5<br/>Hybrid retrieval<br/>Implemented / acceptance pending"] -->
     p6["Phase 6<br/>Visual/table intelligence<br/>Planned"] -->
     p7["Phase 7<br/>Evaluation/observability<br/>Planned"] -->
     p8["Phase 8<br/>Scalable platform<br/>Planned"] -->
@@ -180,7 +181,7 @@ flowchart LR
 | 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
 | 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and preserved at `mm-rag-v4.0.0` |
-| 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus accepted local inference profile | In progress; ADRs 0018–0021 accepted |
+| 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | Implemented; paid quality gate pending |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
 | 8 | Independently scalable deployment | Gateway, API/workers, dedicated frontend TBD, managed services | Managed PostgreSQL, Qdrant, object storage | Planned |
@@ -337,21 +338,21 @@ partial progress, honor holds/live work, and retain a content-free completion re
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** In progress. ADRs 0018–0021 are accepted; sparse, fusion, and reranking
-behavior remains unimplemented while the evaluation-first delivery begins.
+**Status:** Implemented under accepted ADRs 0018–0021; final paid benchmark and
+end-to-end acceptance evidence remain pending.
 
 ```mermaid
 flowchart LR
     question["Authorized question + scope"] --> prep["Normalize query / intent"]
     prep --> filter["Trusted authorization filter"]
     filter --> dense["Dense semantic retrieval"]
-    filter --> sparse["Sparse lexical retrieval<br/>Qdrant BM25 accepted"]
+    filter --> sparse["Sparse lexical retrieval<br/>Qdrant BM25 implemented"]
     dense --> qdrant[("Qdrant")]
-    sparse --> sindex[("Qdrant sparse vector<br/>accepted")]
-    qdrant --> fusion["Application-owned RRF<br/>accepted"]
+    sparse --> sindex[("Qdrant sparse vector<br/>implemented")]
+    qdrant --> fusion["Application-owned RRF<br/>implemented"]
     sindex --> fusion
     fusion --> dedupe["Deduplicate + diversify"]
-    dedupe --> rerank["Bounded local cross-encoder<br/>accepted"]
+    dedupe --> rerank["Bounded local cross-encoder<br/>optional profile"]
     rerank --> context["Token-budgeted evidence"]
     context --> generation["Grounded generation"]
     generation --> answer["Answer + ranked citations"]
@@ -364,11 +365,14 @@ Authorization applies before every search. Evaluate Recall@k, MRR/nDCG,
 groundedness, citation correctness, latency, and cost. Exit: the hybrid pipeline
 measurably beats dense-only retrieval without weakening isolation or citations.
 
-The kickoff recommends a versioned 50-query benchmark, the existing Qdrant 1.19
-service with a named IDF-enabled BM25 sparse vector generated by local FastEmbed,
-application-owned RRF over bounded dense/sparse legs, and an optional local
-cross-encoder over at most 20 authorized candidates. Dense-only remains the safe
-fallback. These are review recommendations, not accepted implementation choices.
+The implementation provides a hashed 50-query benchmark and frozen dense profile,
+the existing Qdrant 1.19 service with an IDF-enabled named BM25 sparse vector,
+application-owned RRF over 30 candidates per authorized leg, a three-per-document
+multi-source cap, and an optional local cross-encoder over at most 20 candidates.
+Eight evidence items proceed to generation. Models are pinned and checksum-verified
+before runtime; request handling never downloads artifacts. `dense-v1` is the safe
+rollback, `hybrid-v1` is the default, and `hybrid-rerank-v1` remains opt-in until
+the accepted benchmark proves a quality benefit.
 
 ## Phase 6 — visual and table intelligence
 
@@ -547,10 +551,10 @@ reconcile commercial usage.
 | Vector/object/async policy | Bounded Qdrant scope, returned-point validation, canonical object resolution, membership-removal behavior, and future connector permission snapshots implemented under ADR 0015 through `20260831_0011` |
 | Security audit/export | Versioned safe events, runtime append-only enforcement, owner/admin review, and private checksummed export implemented under ADR 0016 at `20260831_0012` |
 | Retention/deletion | Tombstone/restore, holds, exact preview/apply, checkpointed cross-store purge, and orphan reconciliation implemented under ADR 0017 at `20260831_0013`; automatic scheduling remains disabled |
-| Retrieval evaluation | Accepted versioned fixture/private-corpus contract and dense baseline in ADR 0018; implementation pending |
-| Sparse search | Accepted Qdrant named BM25 sparse vector with local FastEmbed in ADR 0019; implementation pending |
-| Fusion | Accepted deterministic application-owned RRF in ADR 0020; implementation pending |
-| Reranker | Accepted bounded local FastEmbed cross-encoder in ADR 0021; implementation pending |
+| Retrieval evaluation | Hashed 50-query fixture, frozen dense profile, metrics, split gate, and explicit paid runner implemented under ADR 0018; paid result pending |
+| Sparse search | Qdrant named IDF-enabled BM25 vector with pinned local FastEmbed implemented under ADR 0019 |
+| Fusion | Deterministic application-owned RRF, deduplication, diversification, and content-free traces implemented under ADR 0020 |
+| Reranker | Pinned bounded local FastEmbed cross-encoder implemented as an opt-in profile with fused-order fallback under ADR 0021 |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
 
