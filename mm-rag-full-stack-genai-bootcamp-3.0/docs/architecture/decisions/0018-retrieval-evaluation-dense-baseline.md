@@ -1,7 +1,8 @@
 # ADR 0018: Versioned retrieval evaluation and dense baseline
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-08-31
+- Accepted: 2026-09-01
 - Milestone: 5.0
 
 ## Context
@@ -25,7 +26,7 @@ quality baseline.
 | Versioned public fixtures plus an ignored representative corpus | Reproducible contract plus realistic local evidence | Requires dataset governance, judgments, hashing, and separate result handling |
 | LLM-as-judge as the required gate | Scores answers with little manual labeling | Nondeterministic, potentially paid, prompt-sensitive, and unsuitable as the sole release gate |
 
-## Proposed decision
+## Decision
 
 Create a repository-owned retrieval evaluation contract with two corpus tiers:
 
@@ -91,6 +92,12 @@ The holdout set is evaluated only for a release candidate, not during tuning.
 3. Approve the quality and latency thresholds above?
 4. Approve deterministic judgments as the release authority, with LLM judging only
    optional supplementary evidence?
+
+## Acceptance resolution
+
+All four recommendations were explicitly approved on 2026-09-01. The versioned
+50-query contract, split, query classes, deterministic judgment authority, quality
+thresholds, latency bound, and paid-run opt-in boundary are accepted.
 
 ## Acceptance evidence required
 

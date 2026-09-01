@@ -1,7 +1,8 @@
 # ADR 0020: Deterministic reciprocal-rank fusion
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-08-31
+- Accepted: 2026-09-01
 - Milestone: 5.3
 
 ## Context
@@ -23,7 +24,7 @@ also fuse separately retrieved authorized candidate lists itself.
 | Qdrant-native RRF | One provider request and optimized execution | Provider-owned trace/tie semantics and less visibility into each leg |
 | Application-owned RRF | Provider-neutral, deterministic, fully testable, and preserves leg ranks | Returns two bounded lists and adds application fusion work |
 
-## Proposed decision
+## Decision
 
 Retrieve at most 30 authorized candidates from each dense and sparse leg, then apply
 application-owned reciprocal-rank fusion using stable point identity:
@@ -66,6 +67,12 @@ Official reference:
 2. Approve the initial `k=60`, equal weights, and 30-per-leg bounds?
 3. Approve the multi-document diversity cap and final 20/8 candidate bounds?
 4. Approve dense fallback for sparse failure and fail-closed behavior for dense failure?
+
+## Acceptance resolution
+
+All four recommendations were explicitly approved on 2026-09-01. Application-owned
+RRF, the initial ranking parameters and bounds, multi-document diversification,
+stable tie-breaking, dense fallback, and fail-closed dense behavior are accepted.
 
 ## Acceptance evidence required
 

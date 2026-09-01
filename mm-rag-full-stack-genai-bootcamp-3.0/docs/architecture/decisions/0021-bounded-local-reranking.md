@@ -1,7 +1,8 @@
 # ADR 0021: Bounded local cross-encoder reranking
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-08-31
+- Accepted: 2026-09-01
 - Milestone: 5.4–5.5
 
 ## Context
@@ -24,7 +25,7 @@ FastEmbed provides lightweight ONNX cross-encoders and lists the Apache-2.0
 | Local FastEmbed ONNX cross-encoder | Free, compact, no source text leaves the deployment | Adds CPU/memory use, model artifact lifecycle, and timeout behavior |
 | Qdrant late-interaction/ColBERT vectors | Efficient provider-side second stage | Adds another indexed representation and more ingestion/storage complexity |
 
-## Proposed decision
+## Decision
 
 Define a provider-neutral reranker protocol and evaluate a local FastEmbed ONNX
 implementation using `Xenova/ms-marco-MiniLM-L-6-v2`. Rerank at most the top 20
@@ -61,6 +62,12 @@ Official references:
 2. Approve `Xenova/ms-marco-MiniLM-L-6-v2` as the first evaluated model?
 3. Approve the 20-candidate input and eight-item output bounds?
 4. Approve fused-order fallback on reranker failure or timeout?
+
+## Acceptance resolution
+
+All four recommendations were explicitly approved on 2026-09-01. The provider-neutral
+boundary, free local FastEmbed model, 20/8 candidate bounds, disabled-by-default
+rollout, artifact pinning, and deterministic fused-order fallback are accepted.
 
 ## Acceptance evidence required
 

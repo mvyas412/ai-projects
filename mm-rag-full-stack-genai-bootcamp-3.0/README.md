@@ -1,4 +1,4 @@
-# Multimodal RAG Production — Phase 4 release with Phase 5 decision kickoff
+# Multimodal RAG Production — Phase 4 release with Phase 5 implementation
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
@@ -17,10 +17,10 @@ security review, checksummed compliance export, and durable tombstone-first life
 plans. Qdrant access requires bounded trusted scope, object access is backend-mediated
 and integrity-checked, and retention apply fails closed unless an exact owner-approved
 preview remains current. No automatic destructive retention schedule is enabled.
-Phase 5 is in decision kickoff only. ADRs 0018–0021 are Proposed and recommend a
-versioned dense baseline, Qdrant-native BM25 sparse vectors generated locally,
-application-owned deterministic RRF, and a bounded local cross-encoder reranker.
-No hybrid-retrieval implementation is approved yet.
+Phase 5 is in progress. ADRs 0018–0021 are accepted and define a versioned dense
+baseline, Qdrant-native BM25 sparse vectors generated locally, application-owned
+deterministic RRF, and a bounded local cross-encoder reranker. Implementation has
+not changed production retrieval behavior yet.
 
 The current `3.0` lineage contains:
 

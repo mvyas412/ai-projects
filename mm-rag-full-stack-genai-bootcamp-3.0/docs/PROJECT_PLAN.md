@@ -45,7 +45,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 5.0 decision kickoff — implementation not approved |
+| Active milestone | Phase 5.0 evaluation harness and dense baseline implementation |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -53,7 +53,7 @@ Rules:
 | Phase 4 | Completed and accepted — Milestones 4.0–4.5 squash-merged through PR #3 |
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
-| Phase 5 | Decision kickoff in progress; ADRs 0018–0021 Proposed |
+| Phase 5 | In progress; ADRs 0018–0021 accepted, implementation pending |
 | Phases 6–9 | Planned |
 
 ## Delivery sequence and gates
@@ -81,7 +81,7 @@ security and data-integrity gates on which it depends.
 | 2 | Secure, persistent multi-document product | Authenticated tenant-safe product demonstration | Completed and accepted |
 | 3 | Durable asynchronous ingestion | Retryable jobs survive service failure | Completed and accepted |
 | 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Completed and accepted |
-| 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Proposed decision kickoff |
+| 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | In progress |
 | 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Planned |
 | 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Planned |
 | 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Planned |
@@ -594,26 +594,26 @@ Milestone 4.0 review material:
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** Decision kickoff in progress. ADRs 0018–0021 are Proposed; no retrieval
-implementation or dependency selection is accepted yet.
+**Status:** In progress. ADRs 0018–0021 are accepted; the accepted Phase 4 dense
+runtime remains unchanged while implementation begins.
 
 ### Objective
 
 Improve retrieval quality measurably by combining semantic and lexical evidence,
 then reranking a bounded candidate set.
 
-### Proposed milestones
+### Milestones
 
 | Milestone | Deliverable | Status |
 | --- | --- | --- |
-| 5.0 | Versioned retrieval evaluation dataset and dense-only baseline | Proposed — ADR 0018 |
-| 5.1 | Sparse-engine evaluation and ADR | Proposed — ADR 0019 |
-| 5.2 | Parallel dense/sparse retrieval with identical authorization filters | Awaiting ADR approval |
-| 5.3 | Deterministic RRF/fusion, deduplication, and source diversification | Proposed — ADR 0020 |
-| 5.4 | Bounded reranker selection and token-budgeted evidence assembly | Proposed — ADR 0021 |
+| 5.0 | Versioned retrieval evaluation dataset and dense-only baseline | In progress — ADR 0018 accepted |
+| 5.1 | Sparse-engine evaluation and ADR | Decision accepted — ADR 0019 |
+| 5.2 | Parallel dense/sparse retrieval with identical authorization filters | Approved; implementation pending |
+| 5.3 | Deterministic RRF/fusion, deduplication, and source diversification | Decision accepted — ADR 0020 |
+| 5.4 | Bounded reranker selection and token-budgeted evidence assembly | Decision accepted — ADR 0021 |
 | 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | Awaiting measured evidence |
 
-### Decision-kickoff recommendation
+### Accepted implementation contract
 
 - Establish a versioned 50-query benchmark before changing retrieval behavior.
 - Keep required gates deterministic; any paid embedding/generation baseline run
@@ -793,10 +793,10 @@ commercial accounting, and compliance-grade administration.
 | Vector/object/async authorization | 4.0–4.3 | Accepted — trusted PostgreSQL scope compilation in ADR 0015 |
 | Security audit and compliance export | 4.0–4.4 | Accepted — append-only PostgreSQL contract in ADR 0016 |
 | Retention and deletion policy | 4.0–4.5 | Accepted — tombstone-first durable lifecycle in ADR 0017 |
-| Retrieval evaluation dataset and dense baseline | 5.0 | Proposed — ADR 0018 |
-| Sparse-search engine | 5.1 | Proposed — Qdrant sparse BM25 in ADR 0019 |
-| Fusion, deduplication, and diversification | 5.3 | Proposed — application-owned RRF in ADR 0020 |
-| Reranker | 5.4 | Proposed — bounded local FastEmbed cross-encoder in ADR 0021 |
+| Retrieval evaluation dataset and dense baseline | 5.0 | Accepted — ADR 0018 |
+| Sparse-search engine | 5.1 | Accepted — Qdrant sparse BM25 in ADR 0019 |
+| Fusion, deduplication, and diversification | 5.3 | Accepted — application-owned RRF in ADR 0020 |
+| Reranker | 5.4 | Accepted — bounded local FastEmbed cross-encoder in ADR 0021 |
 | Vision embedding/enrichment models | 6.1–6.2 | TBD |
 | Structured-table execution approach | 6.3–6.4 | TBD |
 | Observability/evaluation backend | 7.0 | TBD |
@@ -808,10 +808,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Review ADR 0018 evaluation corpus, metrics, and improvement thresholds | Explicit approval before any baseline run or retrieval change |
-| 2 | Review ADR 0019 sparse-engine recommendation | Explicit approval of free local Qdrant BM25 or a selected alternative |
-| 3 | Review ADRs 0020–0021 fusion and reranker contracts | Explicit approval of deterministic ranking, degradation, latency, and rollout boundaries |
-| 4 | Implement Milestone 5.0 only after decisions are accepted | Versioned fixtures, harness, dense baseline, and no production retrieval change |
+| 1 | Implement Milestone 5.0 deterministic fixtures, schema, and evaluation harness | Free reproducible tests and versioned manifests |
+| 2 | Freeze the dense-only baseline profile | Deterministic baseline plus one separately approved paid real-provider run |
+| 3 | Add successor-generation sparse indexing and authorized dual-leg retrieval | Real-Qdrant tests prove scope parity, fallback, and immutable promotion |
+| 4 | Add deterministic fusion, optional local reranking, rollout profiles, and acceptance gates | Validation and holdout evidence satisfy ADRs 0018–0021 |
 
 ## Update protocol
 

@@ -1,7 +1,8 @@
 # ADR 0019: Qdrant-native sparse BM25 retrieval
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-08-31
+- Accepted: 2026-09-01
 - Milestone: 5.1–5.2
 
 ## Context
@@ -25,7 +26,7 @@ client-side inference through FastEmbed for self-hosted deployments.
 | Qdrant named sparse vectors with local FastEmbed BM25 | Same point identity/filter, one existing free service, native IDF and hybrid support | Requires sparse generation, schema/backfill, model pinning, and benchmark evidence |
 | Managed sparse/reranking API | Minimal local compute | Recurring cost, external content transmission, availability, and provider lock-in |
 
-## Proposed decision
+## Decision
 
 Use a named Qdrant sparse vector, `sparse-bm25-v1`, on each new immutable chunk point
 alongside its dense vector. Generate document and query vectors locally with the
@@ -73,6 +74,13 @@ Official references:
 2. Approve local `Qdrant/bm25` FastEmbed inference and its Apache-2.0 model?
 3. Approve trusted workspace-scoped IDF with stricter retrieval filtering?
 4. Approve dense-only fallback when sparse data or inference is unavailable?
+
+## Acceptance resolution
+
+All four recommendations were explicitly approved on 2026-09-01. The free local
+Qdrant BM25 sparse-vector profile, trusted IDF boundary, stricter authorized search
+filter, immutable successor-generation reindexing, and dense-only fallback are
+accepted.
 
 ## Acceptance evidence required
 
