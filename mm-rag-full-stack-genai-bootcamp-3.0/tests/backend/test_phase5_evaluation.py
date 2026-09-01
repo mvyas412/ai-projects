@@ -30,6 +30,9 @@ def test_phase5_dataset_is_hashed_balanced_and_split() -> None:
         "negative",
     }
     assert len(queries[0].allowed_document_ids) == 12
+    negatives = [query for query in queries if query.query_class == "negative"]
+    assert sum(query.negative_kind == "unanswerable" for query in negatives) == 6
+    assert sum(query.negative_kind == "unauthorized_scope" for query in negatives) == 6
 
 
 def test_phase5_metrics_validate_identity_scope_and_negatives() -> None:

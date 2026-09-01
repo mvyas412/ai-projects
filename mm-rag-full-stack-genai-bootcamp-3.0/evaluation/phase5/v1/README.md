@@ -4,7 +4,9 @@ This committed dataset contains synthetic, redistributable evidence only. It def
 24 stable chunks and 50 judged queries across semantic, exact-identifier,
 multi-document, and negative classes with a frozen 60/20/20 split.
 Answerable queries use the `@workspace` scope alias so all 12 fixture documents
-compete during ranking; negative queries retain narrower explicit scopes.
+compete during ranking. Negative judgments contain six genuinely unanswerable and
+six unauthorized-scope cases; the latter identify relevant chunks that must remain
+excluded by their narrower trusted scope.
 
 Validate the contract without model or service calls:
 

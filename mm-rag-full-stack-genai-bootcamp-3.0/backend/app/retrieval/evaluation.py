@@ -39,6 +39,8 @@ class EvaluationQuery:
     allowed_document_ids: frozenset[str]
     answerable: bool
     relevance: dict[str, int]
+    negative_kind: Literal["unanswerable", "unauthorized_scope"] | None = None
+    excluded_relevant_chunk_ids: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True, slots=True)
@@ -95,9 +97,7 @@ def load_results(path: Path) -> list[EvaluationResult]:
                 ranked_chunk_ids=tuple(ranked),
                 latency_ms=_nonnegative_number(row, "latency_ms"),
                 provider_calls=int(_nonnegative_number(row, "provider_calls", default=0)),
-                estimated_cost_usd=_nonnegative_number(
-                    row, "estimated_cost_usd", default=0
-                ),
+                estimated_cost_usd=_nonnegative_number(row, "estimated_cost_usd", default=0),
             )
         )
     return results
@@ -111,9 +111,7 @@ def evaluate(
     split: str | None = None,
 ) -> EvaluationMetrics:
     query_list = list(queries)
-    selected = {
-        query.query_id: query for query in query_list if split in {None, query.split}
-    }
+    selected = {query.query_id: query for query in query_list if split in {None, query.split}}
     known_query_ids = {query.query_id for query in query_list}
     supplied = {result.query_id: result for result in results}
     by_query = {query_id: supplied[query_id] for query_id in selected if query_id in supplied}
@@ -147,7 +145,11 @@ def evaluate(
             hits = [chunk_id for chunk_id in known_ranked if chunk_id in relevant]
             recall.append(len(set(hits)) / len(relevant))
             first = next(
-                (rank for rank, chunk_id in enumerate(known_ranked, start=1) if chunk_id in relevant),
+                (
+                    rank
+                    for rank, chunk_id in enumerate(known_ranked, start=1)
+                    if chunk_id in relevant
+                ),
                 None,
             )
             reciprocal_ranks.append(0.0 if first is None else 1.0 / first)
@@ -155,9 +157,7 @@ def evaluate(
             ideal = sorted(relevant.values(), reverse=True)[:10]
             ndcg.append(_dcg(gains) / _dcg(ideal))
             relevant_sources = {documents[chunk_id].document_id for chunk_id in relevant}
-            retrieved_sources = {
-                documents[chunk_id].document_id for chunk_id in hits
-            }
+            retrieved_sources = {documents[chunk_id].document_id for chunk_id in hits}
             source_coverage.append(len(retrieved_sources) / len(relevant_sources))
         else:
             negative_correct.append(1.0 if not known_ranked else 0.0)
@@ -241,9 +241,7 @@ def _parse_queries(
 ) -> list[EvaluationQuery]:
     queries: list[EvaluationQuery] = []
     seen: set[str] = set()
-    workspace_documents = frozenset(
-        document.document_id for document in documents.values()
-    )
+    workspace_documents = frozenset(document.document_id for document in documents.values())
     for row in rows:
         if row.get("dataset_revision") != DATASET_REVISION:
             raise EvaluationContractError("Judgment dataset revision is invalid")
@@ -257,15 +255,15 @@ def _parse_queries(
             raise EvaluationContractError(f"Invalid classification for {query_id}")
         allowed = row.get("allowed_document_ids")
         relevance_rows = row.get("relevance")
-        if not isinstance(allowed, list) or not allowed or not all(
-            isinstance(item, str) for item in allowed
+        if (
+            not isinstance(allowed, list)
+            or not allowed
+            or not all(isinstance(item, str) for item in allowed)
         ):
             raise EvaluationContractError(f"Invalid allowed scope for {query_id}")
         if "@workspace" in allowed:
             if allowed != ["@workspace"]:
-                raise EvaluationContractError(
-                    f"Workspace scope cannot be combined for {query_id}"
-                )
+                raise EvaluationContractError(f"Workspace scope cannot be combined for {query_id}")
             allowed_scope = workspace_documents
         else:
             allowed_scope = frozenset(allowed)
@@ -279,15 +277,15 @@ def _parse_queries(
             grade = item.get("grade")
             if chunk_id not in documents or not isinstance(grade, int) or grade not in {1, 2, 3}:
                 raise EvaluationContractError(f"Invalid relevance identity for {query_id}")
-            if (
-                documents[chunk_id].document_id not in allowed_scope
-                or chunk_id in relevance
-            ):
+            if documents[chunk_id].document_id not in allowed_scope or chunk_id in relevance:
                 raise EvaluationContractError(f"Out-of-scope relevance for {query_id}")
             relevance[chunk_id] = grade
         answerable = row.get("answerable")
         if not isinstance(answerable, bool) or answerable != bool(relevance):
             raise EvaluationContractError(f"Answerability mismatch for {query_id}")
+        negative_kind, excluded_relevance = _negative_contract(
+            row, query_id, query_class, documents, allowed_scope
+        )
         queries.append(
             EvaluationQuery(
                 query_id=query_id,
@@ -297,9 +295,41 @@ def _parse_queries(
                 allowed_document_ids=allowed_scope,
                 answerable=answerable,
                 relevance=relevance,
+                negative_kind=negative_kind,
+                excluded_relevant_chunk_ids=excluded_relevance,
             )
         )
     return queries
+
+
+def _negative_contract(
+    row: dict[str, Any],
+    query_id: str,
+    query_class: str,
+    documents: dict[str, EvaluationDocument],
+    allowed_scope: frozenset[str],
+) -> tuple[Literal["unanswerable", "unauthorized_scope"] | None, frozenset[str]]:
+    negative_kind = row.get("negative_kind")
+    excluded = row.get("excluded_relevant_chunk_ids", [])
+    if query_class != "negative":
+        if negative_kind is not None or excluded:
+            raise EvaluationContractError(f"Unexpected negative contract for {query_id}")
+        return None, frozenset()
+    if negative_kind not in {"unanswerable", "unauthorized_scope"}:
+        raise EvaluationContractError(f"Invalid negative kind for {query_id}")
+    if not isinstance(excluded, list) or any(not isinstance(item, str) for item in excluded):
+        raise EvaluationContractError(f"Invalid excluded relevance for {query_id}")
+    excluded_ids = frozenset(excluded)
+    if negative_kind == "unanswerable" and excluded_ids:
+        raise EvaluationContractError(f"Unanswerable query has excluded relevance: {query_id}")
+    if negative_kind == "unauthorized_scope" and not excluded_ids:
+        raise EvaluationContractError(f"Unauthorized query lacks excluded relevance: {query_id}")
+    if any(
+        chunk_id not in documents or documents[chunk_id].document_id in allowed_scope
+        for chunk_id in excluded_ids
+    ):
+        raise EvaluationContractError(f"Excluded relevance is not out of scope: {query_id}")
+    return negative_kind, excluded_ids
 
 
 def _validate_distribution(queries: list[EvaluationQuery]) -> None:
@@ -309,9 +339,10 @@ def _validate_distribution(queries: list[EvaluationQuery]) -> None:
     if split_counts != SPLIT_COUNTS:
         raise EvaluationContractError(f"Invalid dataset split: {dict(split_counts)}")
     class_counts = Counter(query.query_class for query in queries)
-    if set(class_counts) != QUERY_CLASSES or max(class_counts.values()) - min(
-        class_counts.values()
-    ) > 1:
+    if (
+        set(class_counts) != QUERY_CLASSES
+        or max(class_counts.values()) - min(class_counts.values()) > 1
+    ):
         raise EvaluationContractError("Query classes are not balanced")
 
 
