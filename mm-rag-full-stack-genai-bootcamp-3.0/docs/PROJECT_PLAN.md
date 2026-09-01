@@ -36,6 +36,7 @@ Rules:
 | Item | Status |
 | --- | --- |
 | Phase 4 source branch | `phase-4/mm-rag-governance` — preserved |
+| Phase 5 decision branch | `codex/phase5-hybrid-retrieval` from accepted Phase 4 release |
 | Phase 1 | Completed and frozen at `mm-rag-v1.0.0` |
 | Phase 2 | Completed and accepted — implementation, live-model, security, and visual gates pass |
 | Phase 2 release | Squash-merged at `52d4cfa`; tagged `mm-rag-v2.0.0` |
@@ -44,15 +45,16 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 4 completed and accepted; Phase 5 decision kickoff is next |
+| Active milestone | Phase 5.0 decision kickoff — implementation not approved |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
 | Phase 3 quality gate | 110 deterministic tests pass with four opt-in integration skips; all 114 tests pass in the free live-service gate; CI-equivalent coverage is 81.39% against the 70% threshold; one explicitly approved signed-in real-OpenAI async promotion/retrieval proof passed |
 | Phase 4 | Completed and accepted — Milestones 4.0–4.5 squash-merged through PR #3 |
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
-| Phase 4 release | No release tag requested or created |
-| Phases 5–9 | Planned |
+| Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
+| Phase 5 | Decision kickoff in progress; ADRs 0018–0021 Proposed |
+| Phases 6–9 | Planned |
 
 ## Delivery sequence and gates
 
@@ -79,7 +81,7 @@ security and data-integrity gates on which it depends.
 | 2 | Secure, persistent multi-document product | Authenticated tenant-safe product demonstration | Completed and accepted |
 | 3 | Durable asynchronous ingestion | Retryable jobs survive service failure | Completed and accepted |
 | 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Completed and accepted |
-| 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Planned |
+| 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Proposed decision kickoff |
 | 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Planned |
 | 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Planned |
 | 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Planned |
@@ -592,7 +594,8 @@ Milestone 4.0 review material:
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** Planned.
+**Status:** Decision kickoff in progress. ADRs 0018–0021 are Proposed; no retrieval
+implementation or dependency selection is accepted yet.
 
 ### Objective
 
@@ -601,14 +604,26 @@ then reranking a bounded candidate set.
 
 ### Proposed milestones
 
-| Milestone | Deliverable |
-| --- | --- |
-| 5.0 | Versioned retrieval evaluation dataset and dense-only baseline |
-| 5.1 | Sparse-engine evaluation and ADR |
-| 5.2 | Parallel dense/sparse retrieval with identical authorization filters |
-| 5.3 | Deterministic RRF/fusion, deduplication, and source diversification |
-| 5.4 | Bounded reranker selection and token-budgeted evidence assembly |
-| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates |
+| Milestone | Deliverable | Status |
+| --- | --- | --- |
+| 5.0 | Versioned retrieval evaluation dataset and dense-only baseline | Proposed — ADR 0018 |
+| 5.1 | Sparse-engine evaluation and ADR | Proposed — ADR 0019 |
+| 5.2 | Parallel dense/sparse retrieval with identical authorization filters | Awaiting ADR approval |
+| 5.3 | Deterministic RRF/fusion, deduplication, and source diversification | Proposed — ADR 0020 |
+| 5.4 | Bounded reranker selection and token-budgeted evidence assembly | Proposed — ADR 0021 |
+| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | Awaiting measured evidence |
+
+### Decision-kickoff recommendation
+
+- Establish a versioned 50-query benchmark before changing retrieval behavior.
+- Keep required gates deterministic; any paid embedding/generation baseline run
+  remains explicit and opt-in.
+- Add free, locally generated `Qdrant/bm25` sparse vectors to the existing Qdrant
+  point identity so dense and sparse legs share the exact authorization filter.
+- Fuse bounded candidate lists with application-owned RRF before optional local
+  cross-encoder reranking; every stage revalidates tenant/document/version/generation.
+- Preserve dense-only fallback and use versioned rollout configuration. Do not make
+  a provider score, reranker score, or client input an authorization signal.
 
 ### Completion gate
 
@@ -778,8 +793,10 @@ commercial accounting, and compliance-grade administration.
 | Vector/object/async authorization | 4.0–4.3 | Accepted — trusted PostgreSQL scope compilation in ADR 0015 |
 | Security audit and compliance export | 4.0–4.4 | Accepted — append-only PostgreSQL contract in ADR 0016 |
 | Retention and deletion policy | 4.0–4.5 | Accepted — tombstone-first durable lifecycle in ADR 0017 |
-| Sparse-search engine | 5.1 | TBD |
-| Reranker | 5.4 | TBD |
+| Retrieval evaluation dataset and dense baseline | 5.0 | Proposed — ADR 0018 |
+| Sparse-search engine | 5.1 | Proposed — Qdrant sparse BM25 in ADR 0019 |
+| Fusion, deduplication, and diversification | 5.3 | Proposed — application-owned RRF in ADR 0020 |
+| Reranker | 5.4 | Proposed — bounded local FastEmbed cross-encoder in ADR 0021 |
 | Vision embedding/enrichment models | 6.1–6.2 | TBD |
 | Structured-table execution approach | 6.3–6.4 | TBD |
 | Observability/evaluation backend | 7.0 | TBD |
@@ -791,8 +808,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Decide whether Phase 4 should receive an annotated `mm-rag-v4.0.0` release tag | Explicit approval and a tag pointing to the accepted closure commit; no implicit tag creation |
-| 2 | Start Phase 5 decision kickoff after the release decision | Evaluation dataset/baseline scope, quality metrics, sparse-engine alternatives, and ADR sequence reviewed before implementation |
+| 1 | Review ADR 0018 evaluation corpus, metrics, and improvement thresholds | Explicit approval before any baseline run or retrieval change |
+| 2 | Review ADR 0019 sparse-engine recommendation | Explicit approval of free local Qdrant BM25 or a selected alternative |
+| 3 | Review ADRs 0020–0021 fusion and reranker contracts | Explicit approval of deterministic ranking, degradation, latency, and rollout boundaries |
+| 4 | Implement Milestone 5.0 only after decisions are accepted | Versioned fixtures, harness, dense baseline, and no production retrieval change |
 
 ## Update protocol
 

@@ -1,4 +1,4 @@
-# Multimodal RAG Production — Phase 3 baseline with Phase 4 governance
+# Multimodal RAG Production — Phase 4 release with Phase 5 decision kickoff
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
@@ -7,8 +7,9 @@ remain unchanged at the immutable `mm-rag-v1.0.0` and `mm-rag-v2.0.0` Git tags.
 ## Current status
 
 Phase 3 is accepted and preserved at `mm-rag-v3.0.0`. Phase 4 Milestones 4.0–4.5
-are completed and accepted: PR #3 was squash-merged into `main` at `57ee453`, its
-tree matches the approved source head, and the source branch remains preserved.
+are completed and accepted: implementation PR #3 and closure PR #4 were
+squash-merged, and the accepted lineage is preserved by annotated tag
+`mm-rag-v4.0.0` at `996898e`.
 ADRs 0013–0017 are accepted and migrations through `20260831_0013` add central
 default-deny policy,
 tenant-constrained ACLs, PostgreSQL RLS, cross-store authorization, safe append-only
@@ -16,7 +17,10 @@ security review, checksummed compliance export, and durable tombstone-first life
 plans. Qdrant access requires bounded trusted scope, object access is backend-mediated
 and integrity-checked, and retention apply fails closed unless an exact owner-approved
 preview remains current. No automatic destructive retention schedule is enabled.
-No Phase 4 release tag has been requested or created.
+Phase 5 is in decision kickoff only. ADRs 0018–0021 are Proposed and recommend a
+versioned dense baseline, Qdrant-native BM25 sparse vectors generated locally,
+application-owned deterministic RRF, and a bounded local cross-encoder reranker.
+No hybrid-retrieval implementation is approved yet.
 
 The current `3.0` lineage contains:
 
@@ -411,8 +415,9 @@ scoped Qdrant retrieval, grounded generation, citations, persistence, audit, and
 cross-tenant denial. It removes its temporary SQL, files, and vector collection.
 
 GitHub Actions runs deterministic and PostgreSQL/Qdrant integration gates on pushes
-to the Phase 3 and Phase 4 branches and relevant pull requests. The SeaweedFS contract
-remains in the local live gate until CI provisions that command-based service explicitly.
+to the Phase 3, Phase 4, and Phase 5 branches and relevant pull requests. The
+SeaweedFS contract remains in the local live gate until CI provisions that
+command-based service explicitly.
 Coverage must remain at or above 70%.
 
 Use the [demonstration runbook](docs/DEMO_RUNBOOK.md) for preflight, the five-minute

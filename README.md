@@ -9,10 +9,11 @@ planned in isolated branches and worktrees.
   tagged `mm-rag-v2.0.0`.
 - `mm-rag-full-stack-genai-bootcamp-3.0/` — accepted durable asynchronous-ingestion
   release tagged `mm-rag-v3.0.0`, plus completed Phase 4 authorization, governance,
-  audit, and lifecycle controls squash-merged through PR #3 at `57ee453`.
+  audit, and lifecycle controls preserved at the annotated `mm-rag-v4.0.0` tag.
 
-No Phase 4 release tag has been created. The next planned work is a Phase 5
-decision kickoff; implementation must wait for its evaluation and ADR approvals.
+Phase 5 decision work is active on `codex/phase5-hybrid-retrieval`. Proposed ADRs
+cover the evaluation baseline, sparse retrieval, fusion, and bounded reranking;
+hybrid-retrieval implementation must wait for explicit approval.
 
 See the latest application's tracked project plan and architecture handbook for
 scope and status. Secrets, local context, environments, and generated data remain
