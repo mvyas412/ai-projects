@@ -5,8 +5,10 @@ import json
 from importlib.metadata import version
 
 from backend.app.core.config import Settings
+from backend.app.retrieval.artifacts import SPARSE_MODEL
+from backend.app.retrieval.sparse import SPARSE_VECTOR_NAME
 
-PIPELINE_PROFILE = "phase3-async-v1"
+PIPELINE_PROFILE = "phase5-hybrid-v1"
 
 
 def pipeline_manifest(settings: Settings, media_type: str) -> dict[str, object]:
@@ -40,9 +42,21 @@ def pipeline_manifest(settings: Settings, media_type: str) -> dict[str, object]:
             "normalization": "provider-default",
             "vector_kind": "dense-text",
         },
+        "sparse_embedding": {
+            "enabled": settings.rag_sparse_indexing_enabled,
+            "provider": "fastembed",
+            "library_version": version("fastembed"),
+            "model": SPARSE_MODEL.name,
+            "model_revision": SPARSE_MODEL.revision,
+            "model_tree_sha256": SPARSE_MODEL.tree_sha256,
+            "license": SPARSE_MODEL.license,
+            "language": "english",
+            "vector_name": SPARSE_VECTOR_NAME,
+            "qdrant_modifier": "idf",
+        },
         "index": {
             "provider": "qdrant",
-            "payload_schema_revision": 2,
+            "payload_schema_revision": 3,
             "generation_filter_required": True,
         },
         "citation_schema_revision": 1,
@@ -57,3 +71,22 @@ def pipeline_fingerprint(settings: Settings, media_type: str) -> str:
         ensure_ascii=True,
     ).encode("utf-8")
     return hashlib.sha256(canonical).hexdigest()
+
+
+def manifest_supports_sparse(manifest: dict[str, object] | None) -> bool:
+    if not manifest:
+        return False
+    pipeline = manifest.get("pipeline")
+    if not isinstance(pipeline, dict):
+        return False
+    sparse = pipeline.get("sparse_embedding")
+    return bool(
+        pipeline.get("profile") == PIPELINE_PROFILE
+        and isinstance(sparse, dict)
+        and sparse.get("enabled") is True
+        and sparse.get("vector_name") == SPARSE_VECTOR_NAME
+        and sparse.get("model_revision") == SPARSE_MODEL.revision
+        and sparse.get("model_tree_sha256") == SPARSE_MODEL.tree_sha256
+        and sparse.get("qdrant_modifier") == "idf"
+        and manifest.get("sparse_vector_count") == manifest.get("chunk_count")
+    )

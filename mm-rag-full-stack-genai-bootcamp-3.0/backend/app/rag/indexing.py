@@ -18,6 +18,11 @@ from qdrant_client import QdrantClient, models
 
 from backend.app.core.config import Settings
 from backend.app.retrieval.scope import VectorScope, ensure_scope_payload_indexes
+from backend.app.retrieval.sparse import (
+    SPARSE_VECTOR_NAME,
+    FastEmbedBM25Encoder,
+    SparseEncoder,
+)
 
 POINT_NAMESPACE = UUID("21ea46fc-d41b-49eb-b30a-3724c21befab")
 
@@ -45,6 +50,7 @@ class IndexingRequest:
 class IndexingResult:
     chunk_count: int
     vector_count: int | None = None
+    sparse_vector_count: int = 0
 
 
 IndexingProgress = Callable[[str, int | None, int | None, str | None], None]
@@ -64,9 +70,15 @@ class UnavailableDocumentIndexer:
 
 
 class QdrantOpenAIDocumentIndexer:
-    def __init__(self, settings: Settings, qdrant: QdrantClient) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+        qdrant: QdrantClient,
+        sparse_encoder: SparseEncoder | None = None,
+    ) -> None:
         self._settings = settings
         self._qdrant = qdrant
+        self._sparse_encoder = sparse_encoder
 
     def index(
         self, request: IndexingRequest, *, progress: IndexingProgress | None = None
@@ -86,7 +98,14 @@ class QdrantOpenAIDocumentIndexer:
                 api_key=api_key,
                 model=self._settings.openai_embedding_model,
             ).embed_documents([content for content, _ in chunks])
-            self._ensure_collection(len(embeddings[0]))
+            sparse_vectors = (
+                self._sparse_encoder.embed_documents([content for content, _ in chunks])
+                if self._sparse_encoder is not None
+                else ()
+            )
+            if sparse_vectors and len(sparse_vectors) != len(chunks):
+                raise RuntimeError("Sparse encoder returned an invalid result count")
+            self._ensure_collection(len(embeddings[0]), sparse_enabled=bool(sparse_vectors))
             scope = VectorScope(
                 request.workspace_id,
                 request.document_id,
@@ -110,7 +129,14 @@ class QdrantOpenAIDocumentIndexer:
                             _point_identity(request, content, page_number, index),
                         )
                     ),
-                    vector=vector,
+                    vector=(
+                        {
+                            "": vector,
+                            SPARSE_VECTOR_NAME: sparse_vectors[index],
+                        }
+                        if sparse_vectors
+                        else vector
+                    ),
                     payload={
                         **scope.payload(),
                         "document_title": request.document_title,
@@ -118,6 +144,9 @@ class QdrantOpenAIDocumentIndexer:
                         "content": content,
                         "page_number": page_number,
                         "chunk_index": index,
+                        "sparse_profile": (
+                            SPARSE_VECTOR_NAME if sparse_vectors else None
+                        ),
                     },
                 )
                 for index, ((content, page_number), vector) in enumerate(
@@ -130,7 +159,11 @@ class QdrantOpenAIDocumentIndexer:
                 wait=True,
             )
             _notify(progress, "validating", len(points), len(points), "vectors")
-            return IndexingResult(chunk_count=len(points), vector_count=len(points))
+            return IndexingResult(
+                chunk_count=len(points),
+                vector_count=len(points),
+                sparse_vector_count=len(sparse_vectors),
+            )
         except EmptyDocumentError:
             raise
         except Exception as exc:
@@ -138,7 +171,7 @@ class QdrantOpenAIDocumentIndexer:
                 "The document indexing service is temporarily unavailable"
             ) from exc
 
-    def _ensure_collection(self, vector_size: int) -> None:
+    def _ensure_collection(self, vector_size: int, *, sparse_enabled: bool) -> None:
         name = self._settings.qdrant_collection_name
         if not self._qdrant.collection_exists(name):
             self._qdrant.create_collection(
@@ -146,7 +179,30 @@ class QdrantOpenAIDocumentIndexer:
                 vectors_config=models.VectorParams(
                     size=vector_size, distance=models.Distance.COSINE
                 ),
+                sparse_vectors_config=(
+                    {
+                        SPARSE_VECTOR_NAME: models.SparseVectorParams(
+                            modifier=models.Modifier.IDF
+                        )
+                    }
+                    if sparse_enabled
+                    else None
+                ),
             )
+        elif sparse_enabled:
+            info = self._qdrant.get_collection(name)
+            sparse_vectors = info.config.params.sparse_vectors or {}
+            if SPARSE_VECTOR_NAME not in sparse_vectors:
+                # Existing promoted points stay immutable; only the collection schema
+                # changes before successor generations publish sparse vectors.
+                self._qdrant.update_collection(
+                    collection_name=name,
+                    sparse_vectors_config={
+                        SPARSE_VECTOR_NAME: models.SparseVectorParams(
+                            modifier=models.Modifier.IDF
+                        )
+                    },
+                )
         ensure_scope_payload_indexes(self._qdrant, name)
 
 
@@ -155,7 +211,15 @@ def build_document_indexer(
 ) -> DocumentIndexer:
     if settings.openai_api_key is None:
         return UnavailableDocumentIndexer()
-    return QdrantOpenAIDocumentIndexer(settings, qdrant)
+    try:
+        sparse_encoder = (
+            FastEmbedBM25Encoder(settings.phase5_model_cache_dir)
+            if settings.rag_sparse_indexing_enabled
+            else None
+        )
+    except Exception:
+        return UnavailableDocumentIndexer()
+    return QdrantOpenAIDocumentIndexer(settings, qdrant, sparse_encoder)
 
 
 def _extract_pages(

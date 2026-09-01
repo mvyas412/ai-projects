@@ -253,9 +253,12 @@ class IngestionAPIService:
             raise IngestionJobNotFoundError
         self._require_document_action(user, document, PolicyAction.DOCUMENT_INDEX)
         current_fingerprint = pipeline_fingerprint(self._settings, document.media_type)
-        if version.ingestion_fingerprint != current_fingerprint:
+        if (
+            version.ingestion_fingerprint != current_fingerprint
+            and predecessor_job_id is None
+        ):
             raise IngestionJobValidationError(
-                "Upload a new immutable version to use asynchronous ingestion"
+                "Use an owner-approved successor job to upgrade this immutable version"
             )
         request_hash = _job_request_hash(
             document_id=document_id,

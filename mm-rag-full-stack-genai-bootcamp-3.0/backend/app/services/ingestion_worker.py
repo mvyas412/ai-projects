@@ -275,6 +275,11 @@ class IngestionWorkerService:
     ) -> DeliveryDisposition:
         self._checkpoint(work, IngestionProgressStage.PROMOTING)
         vector_count = result.vector_count or result.chunk_count
+        if (
+            self._settings.rag_sparse_indexing_enabled
+            and result.sparse_vector_count != result.chunk_count
+        ):
+            raise ObjectIntegrityError("Sparse generation output is incomplete")
         manifest: dict[str, object] = {
             "schema_version": 1,
             "generation_id": str(work.generation_id),
@@ -286,6 +291,7 @@ class IngestionWorkerService:
             "pipeline": pipeline_manifest(self._settings, work.document.media_type),
             "chunk_count": result.chunk_count,
             "vector_count": vector_count,
+            "sparse_vector_count": result.sparse_vector_count,
         }
         content = json.dumps(
             manifest,

@@ -10,24 +10,37 @@ from uuid import uuid4
 from PIL import Image, ImageDraw
 from pydantic import SecretStr
 from qdrant_client import QdrantClient
+from sqlalchemy import select
 
+from backend.app.broker.messages import IngestionEventMessage
 from backend.app.core.config import Settings
 from backend.app.core.security import AuthenticatedIdentity
 from backend.app.db.base import Base
 from backend.app.db.session import create_database_engine, create_session_factory
-from backend.app.models import ConversationTargetType, DocumentVersionStatus
+from backend.app.ingestion.pipeline import manifest_supports_sparse
+from backend.app.models import (
+    ConversationTargetType,
+    DocumentVersion,
+    DocumentVersionStatus,
+    IngestionOutboxEvent,
+)
 from backend.app.rag.engine import QdrantOpenAIRAGEngine
 from backend.app.rag.indexing import QdrantOpenAIDocumentIndexer
+from backend.app.repositories.documents import DocumentRepository
 from backend.app.repositories.workspaces import WorkspaceRepository
+from backend.app.retrieval.sparse import FastEmbedBM25Encoder
 from backend.app.schemas.conversations import ConversationCreate
 from backend.app.services.audit import AuditService
 from backend.app.services.conversations import (
     ConversationNotFoundError,
     ConversationService,
 )
-from backend.app.services.documents import DocumentLibraryService
 from backend.app.services.identity import IdentityProvisioningService
-from backend.app.services.indexing import DocumentIndexingService
+from backend.app.services.ingestion_api import IngestionAPIService
+from backend.app.services.ingestion_worker import (
+    DeliveryDisposition,
+    IngestionWorkerService,
+)
 from backend.app.storage.local import LocalFileStorage
 
 TEXT_EVIDENCE = (
@@ -85,8 +98,21 @@ def run() -> None:
         try:
             Base.metadata.create_all(database_engine)
             storage = LocalFileStorage(settings.local_storage_root)
-            indexer = QdrantOpenAIDocumentIndexer(settings, qdrant)
-            rag_engine = QdrantOpenAIRAGEngine(settings, qdrant)
+            sparse_encoder = FastEmbedBM25Encoder(settings.phase5_model_cache_dir)
+            indexer = QdrantOpenAIDocumentIndexer(
+                settings, qdrant, sparse_encoder=sparse_encoder
+            )
+            rag_engine = QdrantOpenAIRAGEngine(
+                settings, qdrant, sparse_encoder=sparse_encoder
+            )
+            worker = IngestionWorkerService(
+                settings,
+                session_factory,
+                storage,
+                storage,
+                indexer,
+                worker_id="acceptance-worker",
+            )
 
             with session_factory() as session:
                 user = IdentityProvisioningService(session).provision(
@@ -100,43 +126,54 @@ def run() -> None:
                 # End the repository read transaction before services open their
                 # explicit write transactions on the same acceptance session.
                 session.commit()
-                library = DocumentLibraryService(session, storage)
-
-                text_document, text_version = library.create_document(
+                ingestion = IngestionAPIService(session, storage, settings)
+                text_document, text_version, text_job, _ = ingestion.upload_and_enqueue(
                     user=user,
                     workspace_id=workspace.id,
                     filename="aurora-summary.txt",
                     media_type="text/plain",
                     content=TEXT_EVIDENCE,
                     title="Aurora summary",
-                    max_upload_bytes=settings.max_upload_bytes,
+                    idempotency_key=f"acceptance-text-{uuid4()}",
                 )
-                image_document, image_version = library.create_document(
+                image_document, image_version, image_job, _ = ingestion.upload_and_enqueue(
                     user=user,
                     workspace_id=workspace.id,
                     filename="aurora-risk-card.png",
                     media_type="image/png",
                     content=_risk_card(),
                     title="Aurora risk card",
-                    max_upload_bytes=settings.max_upload_bytes,
+                    idempotency_key=f"acceptance-image-{uuid4()}",
                 )
 
-                indexing = DocumentIndexingService(session, storage, indexer)
-                indexed_text, text_result = indexing.index_version(
-                    user=user,
-                    workspace_id=workspace.id,
-                    document_id=text_document.id,
-                    version_id=text_version.id,
-                )
-                indexed_image, image_result = indexing.index_version(
-                    user=user,
-                    workspace_id=workspace.id,
-                    document_id=image_document.id,
-                    version_id=image_version.id,
-                )
+                ingestion_messages: list[IngestionEventMessage] = []
+                for job in (text_job, image_job):
+                    event = session.scalar(
+                        select(IngestionOutboxEvent).where(
+                            IngestionOutboxEvent.job_id == job.id
+                        )
+                    )
+                    assert event is not None
+                    ingestion_messages.append(
+                        IngestionEventMessage.model_validate(event.payload)
+                    )
+                session.commit()
+                for message in ingestion_messages:
+                    assert worker.process(message) == DeliveryDisposition.ACK
+
+                session.expire_all()
+                indexed_text = session.get(DocumentVersion, text_version.id)
+                indexed_image = session.get(DocumentVersion, image_version.id)
+                assert indexed_text is not None and indexed_image is not None
                 assert indexed_text.status == DocumentVersionStatus.READY.value
                 assert indexed_image.status == DocumentVersionStatus.READY.value
-                assert text_result.chunk_count > 0 and image_result.chunk_count > 0
+                documents = DocumentRepository(session)
+                assert manifest_supports_sparse(
+                    documents.generation_manifest(workspace.id, indexed_text)
+                )
+                assert manifest_supports_sparse(
+                    documents.generation_manifest(workspace.id, indexed_image)
+                )
 
                 conversations = ConversationService(session, rag_engine)
                 conversation, _ = conversations.create_conversation(
@@ -196,7 +233,7 @@ def run() -> None:
                 actions = {event.action for event, _ in events}
                 assert {
                     "document.created",
-                    "document.version_indexed",
+                    "ingestion.job_succeeded",
                     "conversation.created",
                     "conversation.message_created",
                 }.issubset(actions)
@@ -207,7 +244,7 @@ def run() -> None:
             database_engine.dispose()
 
     print(
-        "OpenAI acceptance passed: text + image indexing, scoped retrieval, "
+        "OpenAI acceptance passed: async text + image hybrid indexing, scoped retrieval, "
         "grounded citations, persistence, audit, and tenant isolation."
     )
 

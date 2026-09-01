@@ -1,0 +1,90 @@
+import time
+from uuid import UUID
+
+import pytest
+
+from backend.app.retrieval.ranking import (
+    RankingInvariantError,
+    RetrievalCandidate,
+    diversify_candidates,
+    reciprocal_rank_fusion,
+    rerank_with_timeout,
+)
+
+
+def _candidate(point_id: str, document: int, score: float = 1.0) -> RetrievalCandidate:
+    return RetrievalCandidate(
+        point_id=point_id,
+        document_id=UUID(int=document),
+        document_version_id=UUID(int=document + 100),
+        generation_id=UUID(int=document + 200),
+        document_title=f"Document {document}",
+        content_type="text/plain",
+        content=f"Evidence {point_id}",
+        page_number=1,
+        chunk_index=document,
+        score=score,
+    )
+
+
+def test_rrf_is_deterministic_deduplicated_and_score_scale_independent() -> None:
+    dense = [_candidate("b", 1, 999), _candidate("a", 2, 100)]
+    sparse = [_candidate("a", 2, 0.01), _candidate("c", 3, 0.001)]
+
+    fused = reciprocal_rank_fusion(dense, sparse, k=60)
+
+    assert [item.point_id for item in fused] == ["a", "b", "c"]
+    assert fused[0].score == pytest.approx(1 / 62 + 1 / 61)
+    assert fused[1].score == pytest.approx(1 / 61)
+
+
+def test_rrf_rejects_duplicate_or_conflicting_identity() -> None:
+    duplicate = _candidate("a", 1)
+    with pytest.raises(RankingInvariantError, match="duplicate"):
+        reciprocal_rank_fusion([duplicate, duplicate], [], k=60)
+
+    with pytest.raises(RankingInvariantError, match="disagreed"):
+        reciprocal_rank_fusion([duplicate], [_candidate("a", 2)], k=60)
+
+
+def test_multi_document_diversification_is_bounded_but_single_document_is_not() -> None:
+    candidates = [
+        _candidate("a", 1),
+        _candidate("b", 1),
+        _candidate("c", 1),
+        _candidate("d", 2),
+    ]
+
+    diversified = diversify_candidates(
+        candidates, document_count=2, max_per_document=2, limit=4
+    )
+
+    assert [item.point_id for item in diversified] == ["a", "b", "d"]
+    assert diversify_candidates(
+        candidates, document_count=1, max_per_document=2, limit=4
+    ) == candidates
+
+
+class ReverseReranker:
+    def scores(self, query, candidates):
+        return tuple(float(index) for index, _ in enumerate(candidates))
+
+
+class SlowReranker:
+    def scores(self, query, candidates):
+        time.sleep(0.02)
+        return tuple(1.0 for _ in candidates)
+
+
+def test_reranker_is_bounded_by_identity_and_falls_back_on_timeout() -> None:
+    candidates = [_candidate("a", 1), _candidate("b", 2)]
+
+    reranked = rerank_with_timeout(
+        ReverseReranker(), "query", candidates, timeout_seconds=1
+    )
+    fallback = rerank_with_timeout(
+        SlowReranker(), "query", candidates, timeout_seconds=0.001
+    )
+
+    assert [item.point_id for item in reranked] == ["b", "a"]
+    assert fallback == candidates

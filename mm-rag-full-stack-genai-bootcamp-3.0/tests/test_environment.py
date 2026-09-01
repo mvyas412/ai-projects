@@ -15,6 +15,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
         "alembic",
         "boto3",
         "fastapi",
+        "fastembed",
         "langchain_core",
         "langchain_openai",
         "langchain_qdrant",

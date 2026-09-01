@@ -32,6 +32,8 @@ dependencies = [
     "uvicorn[standard]>=0.35,<1",
     "boto3>=1.40,<2",
     "aio-pika>=9.5,<10",
+    "fastembed==0.8.0",
+    "tiktoken==0.14.0",
 ]
 
 [dependency-groups]

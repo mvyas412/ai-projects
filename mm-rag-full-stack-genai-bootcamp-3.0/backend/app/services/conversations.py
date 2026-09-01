@@ -5,6 +5,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from backend.app.ingestion.pipeline import manifest_supports_sparse
 from backend.app.models.conversation import (
     Conversation,
     ConversationMessage,
@@ -174,6 +175,9 @@ class ConversationService:
                         document.id,
                         version.id,
                         version.active_generation_id,
+                        manifest_supports_sparse(
+                            self._documents.generation_manifest(workspace_id, version)
+                        ),
                     )
                     for document, version in resolved
                 ),

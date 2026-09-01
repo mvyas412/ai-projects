@@ -9,6 +9,7 @@ from utils.runtime import api_client, selected_workspace
 workspace_id, workspace = selected_workspace()
 client = api_client()
 can_write = workspace["role"] in {"owner", "admin", "member"}
+can_reindex = workspace["role"] in {"owner", "admin"}
 st.caption(
     "Upload immutable versions, build the retrieval index, and organize shared knowledge."
 )
@@ -219,6 +220,34 @@ if documents_tab.open:
                                             idempotency_key=key,
                                         )
                                         st.session_state.pop(key_name, None)
+                                        st.rerun()
+                                    except BackendAPIError as exc:
+                                        st.error(str(exc), icon=":material/error:")
+                            if can_reindex and job is not None and job["state"] == "succeeded":
+                                if st.button(
+                                    "Rebuild index",
+                                    icon=":material/sync:",
+                                    key=f"reindex_{job['id']}",
+                                    help=(
+                                        "Build and verify a successor generation before "
+                                        "replacing the active retrieval index."
+                                    ),
+                                ):
+                                    try:
+                                        key_name = f"reindex_key_{job['id']}"
+                                        key = st.session_state.setdefault(
+                                            key_name, str(uuid4())
+                                        )
+                                        client.retry_ingestion_job(
+                                            workspace_id,
+                                            job["id"],
+                                            idempotency_key=key,
+                                        )
+                                        st.session_state.pop(key_name, None)
+                                        st.toast(
+                                            "Successor index queued",
+                                            icon=":material/check:",
+                                        )
                                         st.rerun()
                                     except BackendAPIError as exc:
                                         st.error(str(exc), icon=":material/error:")

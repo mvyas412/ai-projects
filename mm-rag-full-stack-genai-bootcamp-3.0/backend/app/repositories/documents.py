@@ -10,6 +10,7 @@ from backend.app.models.document import (
     DocumentVersion,
     DocumentVersionStatus,
 )
+from backend.app.models.generation import IngestionGeneration
 
 
 class DocumentRepository:
@@ -112,6 +113,19 @@ class DocumentRepository:
             )
             .order_by(DocumentVersion.version_number.desc())
             .limit(1)
+        )
+
+    def generation_manifest(
+        self, workspace_id: UUID, version: DocumentVersion
+    ) -> dict[str, object] | None:
+        if version.active_generation_id is None:
+            return None
+        return self._session.scalar(
+            select(IngestionGeneration.manifest).where(
+                IngestionGeneration.id == version.active_generation_id,
+                IngestionGeneration.workspace_id == workspace_id,
+                IngestionGeneration.document_version_id == version.id,
+            )
         )
 
     def next_version_number(self, workspace_id: UUID, document_id: UUID) -> int:

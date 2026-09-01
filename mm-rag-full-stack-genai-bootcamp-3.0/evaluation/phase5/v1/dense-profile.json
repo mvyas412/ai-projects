@@ -1,0 +1,15 @@
+{
+  "dataset_revision": "phase5-retrieval-v1",
+  "baseline": "dense-v1",
+  "source_release": "mm-rag-v4.0.0",
+  "source_commit": "996898e6d0d15c00bc04b6bc994e41431cf329a4",
+  "pipeline_profile": "phase3-async-v1",
+  "embedding_provider": "openai",
+  "embedding_model": "text-embedding-3-small",
+  "qdrant_collection_schema": "unnamed-dense-cosine-with-payload-schema-2",
+  "authorization_scope_revision": "adr-0015-v1",
+  "retrieval_limit": 8,
+  "evaluation_depth": 10,
+  "metric_revision": "phase5-evaluation-v1",
+  "paid_run": "explicit-opt-in"
+}

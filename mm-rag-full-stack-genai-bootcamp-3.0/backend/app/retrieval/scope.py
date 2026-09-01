@@ -20,7 +20,7 @@ class PayloadIndexClient(Protocol):
         self,
         collection_name: str,
         field_name: str,
-        field_schema: models.PayloadSchemaType,
+        field_schema: models.PayloadSchemaType | models.KeywordIndexParams,
         *,
         wait: bool,
     ) -> object: ...
@@ -72,7 +72,14 @@ def ensure_scope_payload_indexes(client: PayloadIndexClient, collection_name: st
         client.create_payload_index(
             collection_name=collection_name,
             field_name=field,
-            field_schema=models.PayloadSchemaType.KEYWORD,
+            field_schema=(
+                models.KeywordIndexParams(
+                    type=models.KeywordIndexType.KEYWORD,
+                    is_tenant=True,
+                )
+                if field == "tenant_id"
+                else models.PayloadSchemaType.KEYWORD
+            ),
             wait=True,
         )
     return True

@@ -1,0 +1,14 @@
+{
+  "dataset_revision": "phase5-retrieval-v1",
+  "files": {
+    "dense-profile.json": "527fbbf3d88a27f4d16807866e9cf4832ae0350da2b341fcbea9923095be1718",
+    "documents.jsonl": "5be23bf03b89008ff1b71eef0c223f42ba14f42c71971747a01af38e209b13df",
+    "judgments.jsonl": "c08d30ccf9d4f57d0238f7fa71716bc989d60eddd9544258459e860eaa396d37"
+  },
+  "query_count": 50,
+  "split": {
+    "tune": 30,
+    "validation": 10,
+    "holdout": 10
+  }
+}
