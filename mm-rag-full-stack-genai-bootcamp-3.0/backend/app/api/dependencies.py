@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends, Request
+from qdrant_client import QdrantClient
 from sqlalchemy.orm import Session
 
 from backend.app.core.security import AuthenticatedIdentity, get_current_identity
@@ -23,9 +24,17 @@ def get_object_storage(request: Request) -> ObjectStorage:
     return request.app.state.object_storage
 
 
+def get_artifact_storage(request: Request) -> ObjectStorage:
+    return request.app.state.artifact_storage
+
+
 def get_rag_engine(request: Request) -> RAGEngine:
     return request.app.state.rag_engine
 
 
 def get_document_indexer(request: Request) -> DocumentIndexer:
     return request.app.state.document_indexer
+
+
+def get_qdrant_client(request: Request) -> QdrantClient:
+    return request.app.state.qdrant_client

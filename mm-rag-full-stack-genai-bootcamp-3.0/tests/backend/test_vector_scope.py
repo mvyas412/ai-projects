@@ -1,7 +1,16 @@
+from types import SimpleNamespace
 from uuid import uuid4
 
+import pytest
 from qdrant_client import models
 
+from backend.app.rag.engine import (
+    RAGDocumentScope,
+    RAGRequest,
+    RAGUnavailableError,
+    _authorized_citation,
+    _retrieval_filter,
+)
 from backend.app.retrieval.scope import (
     INDEXED_SCOPE_PAYLOAD_FIELDS,
     SCOPE_PAYLOAD_FIELDS,
@@ -73,3 +82,47 @@ def test_scope_payload_indexes_wait_until_collection_exists() -> None:
 
     assert ensure_scope_payload_indexes(client, "documents") is False
     assert client.calls == []
+
+
+def test_retrieval_filter_requires_bounded_active_generation_scope() -> None:
+    request = RAGRequest(
+        workspace_id=uuid4(),
+        documents=(RAGDocumentScope(uuid4(), uuid4(), None),),
+        query="question",
+        history=(),
+    )
+
+    with pytest.raises(RAGUnavailableError, match="incomplete"):
+        _retrieval_filter(request)
+
+
+def test_returned_vector_must_match_every_authorized_scope_dimension() -> None:
+    workspace_id = uuid4()
+    document_id = uuid4()
+    version_id = uuid4()
+    generation_id = uuid4()
+    request = RAGRequest(
+        workspace_id=workspace_id,
+        documents=(RAGDocumentScope(document_id, version_id, generation_id),),
+        query="question",
+        history=(),
+    )
+    payload = {
+        "tenant_id": str(workspace_id),
+        "workspace_id": str(workspace_id),
+        "document_id": str(document_id),
+        "document_version_id": str(version_id),
+        "generation_id": str(generation_id),
+        "document_title": "Authorized",
+        "content_type": "text/plain",
+        "content": "Safe evidence",
+    }
+
+    citation = _authorized_citation(
+        SimpleNamespace(payload=payload, score=0.9), request
+    )
+    assert citation.document_id == document_id
+
+    payload["generation_id"] = str(uuid4())
+    with pytest.raises(RAGUnavailableError, match="authorization"):
+        _authorized_citation(SimpleNamespace(payload=payload, score=0.9), request)

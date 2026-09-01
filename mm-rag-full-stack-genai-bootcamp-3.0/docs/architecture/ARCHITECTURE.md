@@ -1,6 +1,6 @@
 # Multimodal RAG architecture handbook
 
-> Living architecture baseline — updated 2026-08-30
+> Living architecture baseline — updated 2026-08-31
 
 This document is the version-controlled architecture source of truth for the
 complete system and Phases 1–9. Update it whenever a component, boundary, data
@@ -18,14 +18,15 @@ roadmap view, and one diagram for each phase. The Mermaid diagrams in this
 handbook remain the editable source of truth.
 
 The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
-is the accepted Phase 3 checkpoint. It distinguishes the verified asynchronous
-product/runtime and signed-in live-model proof from later planned phases.
+is the verified Phase 4 development checkpoint. It includes the accepted Phase 3
+runtime plus implemented authorization, audit, and lifecycle boundaries.
 
 ## Status legend
 
 | Status | Meaning |
 | --- | --- |
-| Implemented | Present and verified in V1, accepted V2, or accepted Phase 3 |
+| Implemented | Present and verified in the current application lineage |
+| In progress | Approved decision or implementation work has started but its phase gate has not passed |
 | Planned | Intended capability or boundary that is not implemented yet |
 | Proposed / TBD | Candidate design or technology requiring a decision |
 
@@ -165,7 +166,7 @@ flowchart LR
     p1["Phase 1<br/>Prototype<br/>Implemented"] -->
     p2["Phase 2<br/>Product foundation<br/>Completed"] -->
     p3["Phase 3<br/>Async ingestion<br/>Completed"] -->
-    p4["Phase 4<br/>Governance<br/>Planned"] -->
+    p4["Phase 4<br/>Governance foundation<br/>Implemented"] -->
     p5["Phase 5<br/>Hybrid retrieval<br/>Planned"] -->
     p6["Phase 6<br/>Visual/table intelligence<br/>Planned"] -->
     p7["Phase 7<br/>Evaluation/observability<br/>Planned"] -->
@@ -178,7 +179,7 @@ flowchart LR
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
 | 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
-| 4 | Fine-grained isolation and governance | JWT validation, RBAC/ACL, RLS defense, audit | PostgreSQL, Qdrant, object storage | Planned |
+| 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Implemented and validated — PR acceptance pending |
 | 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
@@ -292,32 +293,46 @@ live embedding, promotion, active-generation retrieval, citation, and persistenc
 
 ## Phase 4 — fine-grained authorization and governance
 
-**Status:** Planned. Phase 2 starts isolation; this phase deepens it.
+**Status:** Implemented and validated. Milestones 4.0–4.5 are complete; PR acceptance
+is pending. Phase 2 starts isolation and this phase deepens it with central policy,
+ACL persistence, PostgreSQL RLS, mandatory Qdrant scope, canonical backend-mediated
+object access, a fail-closed future connector permission contract, safe append-only
+security review, checksummed compliance export, and tombstone-first lifecycle.
+
+The review source is the
+[Phase 4 policy matrix and threat model](PHASE4_POLICY_THREAT_MODEL.md). ADRs
+0013–0017 are Accepted and implemented through migration `20260831_0013`.
 
 ```mermaid
 flowchart LR
     client["Authenticated client"] --> api["FastAPI"]
     api --> jwt["JWT validation"]
     jwt --> identity["Internal identity"]
-    identity --> policy["Workspace RBAC + resource ACL"]
+    identity --> policy["Workspace RBAC + resource ACL<br/>implemented at 20260831_0009"]
     policy <-->|"membership, ownership, sharing"| pg[("PostgreSQL")]
     policy -->|"allow + trusted scope"| service["Application service"]
     policy -->|"deny"| denied["403 + audit"]
-    service -->|"tenant-scoped SQL"| rls["PostgreSQL RLS<br/>defense in depth"]
+    service -->|"transaction-local trusted context"| rls["PostgreSQL RLS<br/>implemented at 20260831_0010"]
     rls --> pg
     service -->|"mandatory scope filter"| qdrant[("Qdrant")]
-    service -->|"short-lived signed access"| objects[("Object storage")]
+    service -->|"canonical backend stream + integrity check"| objects[("Object storage")]
     jwt --> audit["Audit event"]
     policy --> audit
     service --> audit
     audit --> pg
-    pg --> compliance["Review, retention, export"]
+    pg --> compliance["Security review + checksummed export"]
+    pg --> lifecycle["Tombstones + holds + durable purge plans<br/>implemented at 20260831_0013"]
+    lifecycle -->|"bounded trusted scope"| qdrant
+    lifecycle -->|"verified object references"| objects
 ```
 
 Backend-resolved identity and policy govern SQL, vectors, objects, citations,
 conversations, and jobs. Negative tests must prove cross-tenant access fails.
 Audit events record actor, action, resource, workspace, result, correlation ID,
 and time without storing secrets or sensitive content.
+Recoverable tombstones deny product access immediately. Owner-approved retention
+plans remove vectors and verified object references before SQL metadata, checkpoint
+partial progress, honor holds/live work, and retain a content-free completion record.
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
@@ -519,6 +534,11 @@ reconcile commercial usage.
 | Object storage | S3-compatible adapter plus open-source SeaweedFS local/CI implemented under ADR 0011; production provider deferred |
 | Transactional outbox | PostgreSQL events plus confirmed leased dispatcher, retry/alert/retention operations implemented under ADR 0009 |
 | Worker runtime | Purpose-built Python dispatcher/worker implemented under ADR 0012; one in-flight job per process |
+| Fine-grained authorization | Central RBAC ceiling plus positive in-workspace user ACLs implemented under ADR 0013 at `20260831_0009` |
+| PostgreSQL tenant defense | RLS beneath application policy implemented under ADR 0014 at `20260831_0010`; live role and pooled-tenant tests pass |
+| Vector/object/async policy | Bounded Qdrant scope, returned-point validation, canonical object resolution, membership-removal behavior, and future connector permission snapshots implemented under ADR 0015 through `20260831_0011` |
+| Security audit/export | Versioned safe events, runtime append-only enforcement, owner/admin review, and private checksummed export implemented under ADR 0016 at `20260831_0012` |
+| Retention/deletion | Tombstone/restore, holds, exact preview/apply, checkpointed cross-store purge, and orphan reconciliation implemented under ADR 0017 at `20260831_0013`; automatic scheduling remains disabled |
 | Sparse search | Required in Phase 5; engine not selected |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
@@ -542,12 +562,20 @@ Accepted Phase 3 decisions are:
 - [ADR 0011 — S3-compatible object storage with SeaweedFS for local development](decisions/0011-s3-compatible-object-storage-seaweedfs.md)
 - [ADR 0012 — Purpose-built Python dispatcher and ingestion worker runtime](decisions/0012-python-dispatcher-worker-runtime.md)
 
+Accepted Phase 4 decisions are:
+
+- [ADR 0013 — Central RBAC and resource ACL policy](decisions/0013-central-rbac-resource-acl-policy.md)
+- [ADR 0014 — PostgreSQL row-level-security defense](decisions/0014-postgresql-row-level-security.md)
+- [ADR 0015 — Authorized vector, object, and asynchronous access](decisions/0015-authorized-vector-object-async-access.md)
+- [ADR 0016 — Security audit and compliance export](decisions/0016-security-audit-compliance-export.md)
+- [ADR 0017 — Governed retention, deletion, encryption, and incident controls](decisions/0017-governed-retention-deletion-incident-controls.md)
+
 ## Maintenance checklist
 
 1. Update the affected phase, diagram, status, and technology table.
 2. Update the whole-system diagram when a cross-phase boundary or flow changes.
-3. Record consequential Phase 3 decisions and rationale in the ignored
-   `Phase3_context.md` active context document.
+3. Record consequential Phase 4 decisions and rationale in the ignored
+   `Phase4_context.md` active context document; keep `Phase3_context.md` historical.
 4. Keep unapproved technologies labeled **Proposed / TBD**.
 5. Verify Mermaid fences and links before committing.
 6. Never place credentials, tokens, private URLs, customer data, or other secrets

@@ -13,8 +13,10 @@ from backend.app.storage.s3 import S3ObjectStorage
 class FakeS3Client:
     def __init__(self) -> None:
         self.objects: dict[tuple[str, str], dict[str, Any]] = {}
+        self.last_put_request: dict[str, Any] | None = None
 
     def put_object(self, **request: Any) -> dict[str, str]:
+        self.last_put_request = request
         identity = (request["Bucket"], request["Key"])
         if request.get("IfNoneMatch") == "*" and identity in self.objects:
             raise ClientError(
@@ -46,6 +48,15 @@ class FakeS3Client:
 
     def head_bucket(self, **request: Any) -> None:
         return None
+
+    def list_objects_v2(self, **request: Any) -> dict[str, Any]:
+        prefix = request.get("Prefix", "")
+        contents = [
+            {"Key": key}
+            for bucket, key in self.objects
+            if bucket == request["Bucket"] and key.startswith(prefix)
+        ]
+        return {"Contents": contents, "IsTruncated": False}
 
 
 def test_s3_storage_round_trip_and_idempotent_replay() -> None:
@@ -95,3 +106,23 @@ def test_s3_storage_rejects_missing_integrity_metadata() -> None:
 
     with pytest.raises(ObjectIntegrityError):
         storage.head(key)
+
+
+def test_s3_storage_lists_bounded_objects_and_sends_encryption_headers() -> None:
+    client = FakeS3Client()
+    storage = S3ObjectStorage(
+        client,
+        "mm-rag-phase3-originals",
+        server_side_encryption="aws:kms",
+        kms_key_id="test-key",
+    )
+    stored = storage.put(
+        "workspaces/one/documents/two/versions/three/original",
+        b"content",
+        media_type="text/plain",
+    )
+
+    assert storage.list_objects("workspaces/one") == [stored]
+    assert client.last_put_request is not None
+    assert client.last_put_request["ServerSideEncryption"] == "aws:kms"
+    assert client.last_put_request["SSEKMSKeyId"] == "test-key"

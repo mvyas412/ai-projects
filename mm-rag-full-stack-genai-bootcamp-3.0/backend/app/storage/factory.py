@@ -41,4 +41,13 @@ def _create_s3_storage(settings: Settings, bucket: str) -> ObjectStorage:
             response_checksum_validation="when_required",
         ),
     )
-    return S3ObjectStorage(client, bucket)
+    return S3ObjectStorage(
+        client,
+        bucket,
+        server_side_encryption=settings.s3_server_side_encryption,
+        kms_key_id=(
+            settings.s3_kms_key_id.get_secret_value()
+            if settings.s3_kms_key_id is not None
+            else None
+        ),
+    )

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
   <title id="title">MM-RAG Platform — Current Workflow and DEV Architecture</title>
-  <desc id="desc">Accepted Phase 3 workflow showing the authenticated product, streamed asynchronous intake, PostgreSQL job and outbox authority, RabbitMQ dispatcher and fenced worker, immutable S3-compatible output generations, active-generation retrieval, operational hardening, and the verified signed-in paid acceptance proof.</desc>
+  <desc id="desc">Verified Phase 4 development workflow showing the accepted asynchronous product, central default-deny policy, PostgreSQL row security, scoped vectors and objects, security audit and export, and tombstone-first durable lifecycle reconciliation.</desc>
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#193b68"/>
@@ -27,15 +27,15 @@
 
   <rect width="1600" height="900" fill="#f8fafc"/>
   <text x="800" y="40" text-anchor="middle" class="title">MM-RAG Platform — Current Workflow &amp; DEV Architecture</text>
-  <text x="800" y="68" text-anchor="middle" class="subtitle">Phase 3 · Accepted workflow checkpoint · Status as August 30, 2026</text>
+  <text x="800" y="68" text-anchor="middle" class="subtitle">Phase 4 · Governance implementation checkpoint · Status as August 31, 2026</text>
 
   <text x="22" y="101" class="small" font-weight="700">Status snapshot</text>
   <rect x="116" y="84" width="116" height="26" rx="13" fill="#e8f7ef" stroke="#47a477"/>
   <text x="174" y="101" text-anchor="middle" class="tiny" fill="#26805a">IMPLEMENTED / LIVE</text>
   <rect x="241" y="84" width="139" height="26" rx="13" fill="#e8f7ef" stroke="#47a477"/>
-  <text x="310" y="101" text-anchor="middle" class="tiny" fill="#26805a">ACCEPTANCE VERIFIED</text>
+  <text x="310" y="101" text-anchor="middle" class="tiny" fill="#26805a">FREE LIVE VERIFIED</text>
   <rect x="389" y="84" width="91" height="26" rx="13" fill="#eef2f6" stroke="#8291a3"/>
-  <text x="434" y="101" text-anchor="middle" class="tiny" fill="#5c6c7e">PLANNED</text>
+  <text x="434" y="101" text-anchor="middle" class="tiny" fill="#5c6c7e">PR REVIEW</text>
   <rect x="1262" y="82" width="126" height="28" rx="14" fill="#eaf4ff" stroke="#3d83c5"/>
   <text x="1325" y="100" text-anchor="middle" class="tiny" fill="#276aa9">FREE LOCAL DEV</text>
   <text x="1398" y="100" class="small">SeaweedFS · RabbitMQ · workers healthy</text>
@@ -73,9 +73,9 @@
   <text x="51" y="609" class="dot" fill="#347bbd">4</text><text x="69" y="609" class="body">Ask, inspect citations, download source</text>
 
   <rect x="36" y="651" width="268" height="77" rx="10" fill="#e8f7ef" stroke="#47a477"/>
-  <text x="53" y="677" class="card-title">Phase 3 user change</text>
-  <text x="53" y="699" class="body">Implemented: upload returns HTTP 202 + job ID;</text>
-  <text x="53" y="717" class="body">status polling replaces the long request.</text>
+  <text x="53" y="677" class="card-title">Phase 4 user and admin change</text>
+  <text x="53" y="699" class="body">Fine-grained sharing, governed activity/export,</text>
+  <text x="53" y="717" class="body">recoverable deletion, holds, and exact retention.</text>
 
   <!-- Lane 2 -->
   <rect x="332" y="125" width="300" height="630" rx="13" fill="#f2f1ff" stroke="#5268b5" stroke-width="1.5"/>
@@ -97,12 +97,12 @@
   <text x="365" y="379" class="card-title">Authorization &amp; product services</text>
   <rect x="530" y="363" width="73" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="566" y="378" text-anchor="middle" class="tiny" fill="#26805a">ENFORCED</text>
   <line x1="360" y1="392" x2="604" y2="392" class="divider"/>
-  <text x="363" y="414" class="dot" fill="#5268b5">•</text><text x="377" y="414" class="body">Workspace roles and non-enumerating access</text>
-  <text x="363" y="436" class="dot" fill="#5268b5">•</text><text x="377" y="436" class="body">Documents, versions, collections, conversations</text>
-  <text x="363" y="458" class="dot" fill="#5268b5">•</text><text x="377" y="458" class="body">Immutable activity records</text>
+  <text x="363" y="414" class="dot" fill="#5268b5">•</text><text x="377" y="414" class="body">Central default-deny roles + positive user ACLs</text>
+  <text x="363" y="436" class="dot" fill="#5268b5">•</text><text x="377" y="436" class="body">Non-enumerating access with PostgreSQL RLS</text>
+  <text x="363" y="458" class="dot" fill="#5268b5">•</text><text x="377" y="458" class="body">Trusted scope reused across every product store</text>
 
   <rect x="348" y="496" width="268" height="132" class="card" stroke="#5268b5"/>
-  <text x="365" y="522" class="card-title">Async intake boundary</text>
+  <text x="365" y="522" class="card-title">Async intake</text>
   <rect x="518" y="506" width="85" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="560" y="521" text-anchor="middle" class="tiny" fill="#26805a">IMPLEMENTED</text>
   <line x1="360" y1="535" x2="604" y2="535" class="divider"/>
   <text x="363" y="557" class="dot" fill="#5268b5">•</text><text x="377" y="557" class="body">Original verified before job/outbox commit</text>
@@ -110,9 +110,9 @@
   <text x="363" y="601" class="dot" fill="#5268b5">•</text><text x="377" y="601" class="body">Broker availability never controls API success</text>
 
   <rect x="348" y="651" width="268" height="77" rx="10" fill="#e8f7ef" stroke="#47a477"/>
-  <text x="365" y="677" class="card-title">Durable API boundary</text>
-  <text x="365" y="699" class="body">Durable original → job/outbox transaction →</text>
-  <text x="365" y="717" class="body">HTTP 202 with replay-safe idempotency key.</text>
+  <text x="365" y="677" class="card-title">Governed API boundary</text>
+  <text x="365" y="699" class="body">Identity → current policy → bounded trusted scope;</text>
+  <text x="365" y="717" class="body">client keys and provider coordinates are rejected.</text>
 
   <!-- Lane 3 -->
   <rect x="644" y="125" width="300" height="630" rx="13" fill="#eef9f2" stroke="#25855e" stroke-width="1.5"/>
@@ -126,8 +126,8 @@
   <rect x="842" y="200" width="73" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="878" y="215" text-anchor="middle" class="tiny" fill="#26805a">HEALTHY</text>
   <line x1="672" y1="229" x2="916" y2="229" class="divider"/>
   <text x="675" y="250" class="dot" fill="#25855e">•</text><text x="689" y="250" class="body">Users, workspaces, documents, chat, audit</text>
-  <text x="675" y="272" class="dot" fill="#25855e">•</text><text x="689" y="272" class="body">Jobs, outbox, generations at migration 0008</text>
-  <text x="675" y="294" class="dot" fill="#25855e">•</text><text x="689" y="294" class="body">Authoritative state; queue is only a wake-up</text>
+  <text x="675" y="272" class="dot" fill="#25855e">•</text><text x="689" y="272" class="body">RLS, audit, exports, lifecycle at migration 0013</text>
+  <text x="675" y="294" class="dot" fill="#25855e">•</text><text x="689" y="294" class="body">Authoritative policy/state; queue is a wake-up</text>
 
   <rect x="660" y="336" width="268" height="143" class="card" stroke="#25855e"/>
   <text x="677" y="362" class="card-title">Durable job state</text>
@@ -165,7 +165,7 @@
   <line x1="984" y1="229" x2="1228" y2="229" class="divider"/>
   <text x="987" y="250" class="dot" fill="#26805a">•</text><text x="1001" y="250" class="body">Streamed create/read/head + SHA-256</text>
   <text x="987" y="272" class="dot" fill="#26805a">•</text><text x="1001" y="272" class="body">Conditional immutable replay tested live</text>
-  <text x="987" y="294" class="dot" fill="#26805a">•</text><text x="1001" y="294" class="body">Restart persists; AWS S3 remains later option</text>
+  <text x="987" y="294" class="dot" fill="#26805a">•</text><text x="1001" y="294" class="body">Bounded inventory + optional SSE; provider later</text>
 
   <rect x="972" y="342" width="268" height="158" class="card" stroke="#47a477"/>
   <text x="989" y="368" class="card-title">Dispatcher + worker</text>
@@ -174,7 +174,7 @@
   <text x="987" y="403" class="dot" fill="#26805a">•</text><text x="1001" y="403" class="body">Separate dispatcher and worker processes</text>
   <text x="987" y="425" class="dot" fill="#26805a">•</text><text x="1001" y="425" class="body">One in-flight job per process; scale out</text>
   <text x="987" y="447" class="dot" fill="#26805a">•</text><text x="1001" y="447" class="body">15s heartbeat, 60s lease, safe shutdown</text>
-  <text x="987" y="469" class="dot" fill="#26805a">•</text><text x="1001" y="469" class="body">Retries, cancellation, recovery, health active</text>
+  <text x="987" y="469" class="dot" fill="#26805a">•</text><text x="1001" y="469" class="body">Retries plus claim/promotion tombstone fences</text>
 
   <rect x="972" y="518" width="268" height="142" class="card" stroke="#e08713"/>
   <text x="989" y="544" class="card-title">Parsing and enrichment pipeline</text>
@@ -203,27 +203,27 @@
   <text x="1299" y="272" class="dot" fill="#198789">•</text><text x="1313" y="272" class="body">Generation-scoped points and visibility active</text>
 
   <rect x="1284" y="318" width="280" height="134" class="card" stroke="#198789"/>
-  <text x="1301" y="344" class="card-title">Authorized retrieval and chat</text>
+  <text x="1301" y="344" class="card-title">Authorized retrieval &amp; downloads</text>
   <rect x="1478" y="328" width="73" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="1514" y="343" text-anchor="middle" class="tiny" fill="#26805a">ACTIVE</text>
   <line x1="1296" y1="357" x2="1552" y2="357" class="divider"/>
-  <text x="1299" y="379" class="dot" fill="#198789">•</text><text x="1313" y="379" class="body">Backend constructs every retrieval filter</text>
-  <text x="1299" y="401" class="dot" fill="#198789">•</text><text x="1313" y="401" class="body">Grounded answers and validated citations</text>
-  <text x="1299" y="423" class="dot" fill="#198789">•</text><text x="1313" y="423" class="body">Prior READY result stays visible on reindex</text>
+  <text x="1299" y="379" class="dot" fill="#198789">•</text><text x="1313" y="379" class="body">Bounded document/version/generation filters</text>
+  <text x="1299" y="401" class="dot" fill="#198789">•</text><text x="1313" y="401" class="body">Returned points and citations revalidated</text>
+  <text x="1299" y="423" class="dot" fill="#198789">•</text><text x="1313" y="423" class="body">Canonical object identity checked before stream</text>
 
   <rect x="1284" y="470" width="280" height="132" class="card" stroke="#198789"/>
-  <text x="1301" y="496" class="card-title">Async job status UX</text>
+  <text x="1301" y="496" class="card-title">Audit &amp; lifecycle</text>
   <rect x="1478" y="480" width="73" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="1514" y="495" text-anchor="middle" class="tiny" fill="#26805a">ACTIVE</text>
   <line x1="1296" y1="509" x2="1552" y2="509" class="divider"/>
-  <text x="1299" y="531" class="dot" fill="#198789">•</text><text x="1313" y="531" class="body">Pending, queued, running, retry, terminal</text>
-  <text x="1299" y="553" class="dot" fill="#198789">•</text><text x="1313" y="553" class="body">Stage/unit progress with safe error codes</text>
-  <text x="1299" y="575" class="dot" fill="#198789">•</text><text x="1313" y="575" class="body">Authorized cancellation and successor retry</text>
+  <text x="1299" y="531" class="dot" fill="#198789">•</text><text x="1313" y="531" class="body">Append-only safe events + checksummed export</text>
+  <text x="1299" y="553" class="dot" fill="#198789">•</text><text x="1313" y="553" class="body">Tombstone/restore, holds, exact preview/apply</text>
+  <text x="1299" y="575" class="dot" fill="#198789">•</text><text x="1313" y="575" class="body">Checkpointed vector → object → SQL purge</text>
 
   <rect x="1284" y="620" width="280" height="108" class="card" stroke="#198789"/>
   <text x="1301" y="646" class="card-title">Quality and release gate</text>
   <rect x="1478" y="630" width="73" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="1514" y="645" text-anchor="middle" class="tiny" fill="#26805a">PASSING</text>
   <line x1="1296" y1="659" x2="1552" y2="659" class="divider"/>
-  <text x="1299" y="681" class="dot" fill="#198789">•</text><text x="1313" y="681" class="body">Large upload + backup/restore exercises pass</text>
-  <text x="1299" y="703" class="dot" fill="#198789">•</text><text x="1313" y="703" class="body">114 free-live pass; paid proof verified</text>
+  <text x="1299" y="681" class="dot" fill="#198789">•</text><text x="1313" y="681" class="body">Cross-store deletion + backup/restore pass</text>
+  <text x="1299" y="703" class="dot" fill="#198789">•</text><text x="1313" y="703" class="body">157 free-live pass; no new paid model run</text>
 
   <!-- Primary and planned flow arrows -->
   <path d="M304 260 H348" class="flow"/>
@@ -245,15 +245,15 @@
   <text x="52" y="836" class="card-title" fill="#26805a">Phase 2 · accepted</text>
   <text x="52" y="854" class="small">Authenticated, persistent, tenant-safe product</text>
   <rect x="336" y="814" width="286" height="50" rx="9" fill="#e8f7ef" stroke="#47a477"/>
-  <text x="350" y="836" class="card-title" fill="#26805a">Phase 3.0–3.2 · complete</text>
-  <text x="350" y="854" class="small">Contracts, objects, durable outbox</text>
+  <text x="350" y="836" class="card-title" fill="#26805a">Phase 3 · accepted</text>
+  <text x="350" y="854" class="small">Durable async ingestion and paid proof</text>
   <rect x="634" y="814" width="286" height="50" rx="9" fill="#e8f7ef" stroke="#47a477"/>
-  <text x="648" y="836" class="card-title" fill="#26805a">Phase 3.3 · implemented</text>
-  <text x="648" y="854" class="small">RabbitMQ + dispatcher + fenced worker</text>
+  <text x="648" y="836" class="card-title" fill="#26805a">Phase 4.0–4.2 · complete</text>
+  <text x="648" y="854" class="small">Policy, ACLs, RLS, Qdrant enforcement</text>
   <rect x="932" y="814" width="286" height="50" rx="9" fill="#e8f7ef" stroke="#47a477"/>
-  <text x="946" y="836" class="card-title" fill="#26805a">Phase 3.4 · implemented</text>
-  <text x="946" y="854" class="small">Async API + progress/cancel/retry UX</text>
+  <text x="946" y="836" class="card-title" fill="#26805a">Phase 4.3–4.4 · complete</text>
+  <text x="946" y="854" class="small">Objects, permissions, audit, export</text>
   <rect x="1230" y="814" width="332" height="50" rx="9" fill="#e8f7ef" stroke="#47a477"/>
-  <text x="1244" y="836" class="card-title" fill="#26805a">Phase 3.5 · completed and accepted</text>
-  <text x="1244" y="854" class="small">Signed-in async promotion + retrieval verified</text>
+  <text x="1244" y="836" class="card-title" fill="#26805a">Phase 4.5 · implemented / PR review</text>
+  <text x="1244" y="854" class="small">Lifecycle, retention, recovery verified</text>
 </svg>

@@ -1,4 +1,5 @@
-from typing import Annotated
+from collections.abc import Iterator
+from typing import Annotated, BinaryIO, ContextManager
 from uuid import UUID
 
 from fastapi import (
@@ -8,10 +9,10 @@ from fastapi import (
     Form,
     HTTPException,
     Request,
-    Response,
     UploadFile,
     status,
 )
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from backend.app.api.dependencies import (
@@ -20,6 +21,7 @@ from backend.app.api.dependencies import (
     get_object_storage,
 )
 from backend.app.db.session import get_db_session
+from backend.app.models.access import ResourceVisibility
 from backend.app.models.document import Collection, Document, DocumentVersion
 from backend.app.models.user import User
 from backend.app.rag.indexing import (
@@ -70,6 +72,7 @@ def _document_summary(
         title=document.title,
         original_filename=document.original_filename,
         media_type=document.media_type,
+        visibility=ResourceVisibility(document.visibility),
         archived_at=document.archived_at,
         latest_version=_version_summary(latest_version),
         created_at=document.created_at,
@@ -83,6 +86,7 @@ def _collection_summary(collection: Collection, document_count: int) -> Collecti
         workspace_id=collection.workspace_id,
         name=collection.name,
         description=collection.description,
+        visibility=ResourceVisibility(collection.visibility),
         document_count=document_count,
         archived_at=collection.archived_at,
         created_at=collection.created_at,
@@ -261,11 +265,11 @@ def download_document_version(
     user: Annotated[User, Depends(get_current_user)],
     session: Annotated[Session, Depends(get_db_session)],
     storage: Annotated[ObjectStorage, Depends(get_object_storage)],
-) -> Response:
+) -> StreamingResponse:
     try:
-        document, _, content = DocumentLibraryService(
+        document, version, stream = DocumentLibraryService(
             session, storage
-        ).read_version_content(
+        ).open_version_content(
             user=user,
             workspace_id=workspace_id,
             document_id=document_id,
@@ -274,11 +278,23 @@ def download_document_version(
     except DocumentLibraryError as exc:
         raise _translate_error(exc) from exc
     safe_name = document.original_filename.replace('"', "")
-    return Response(
-        content=content,
+    return StreamingResponse(
+        _stream_chunks(stream),
         media_type=document.media_type,
-        headers={"Content-Disposition": f'inline; filename="{safe_name}"'},
+        headers={
+            "Content-Disposition": f'inline; filename="{safe_name}"',
+            "Content-Length": str(version.byte_size),
+            "X-Content-Type-Options": "nosniff",
+        },
     )
+
+
+def _stream_chunks(
+    stream: ContextManager[BinaryIO], chunk_size: int = 1024 * 1024
+) -> Iterator[bytes]:
+    with stream as file:
+        while chunk := file.read(chunk_size):
+            yield chunk
 
 
 @router.delete(

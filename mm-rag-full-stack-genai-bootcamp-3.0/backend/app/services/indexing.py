@@ -12,10 +12,16 @@ from backend.app.rag.indexing import (
     IndexingUnavailableError,
 )
 from backend.app.repositories.documents import DocumentRepository
-from backend.app.repositories.workspaces import WorkspaceRepository
 from backend.app.services.audit import record_audit_event
-from backend.app.services.documents import WRITE_ROLES
-from backend.app.storage.base import ObjectStorage
+from backend.app.services.policy import (
+    PolicyAction,
+    PolicyDeniedError,
+    PolicyNotFoundError,
+    PolicyService,
+    resource_context,
+)
+from backend.app.storage.authorized import resolve_original_object
+from backend.app.storage.base import ObjectStorage, ObjectStorageError
 
 
 class IndexingNotFoundError(Exception):
@@ -41,7 +47,7 @@ class DocumentIndexingService:
         self._storage = storage
         self._indexer = indexer
         self._documents = DocumentRepository(session)
-        self._workspaces = WorkspaceRepository(session)
+        self._policy = PolicyService(session)
 
     def index_version(
         self,
@@ -51,18 +57,27 @@ class DocumentIndexingService:
         document_id: UUID,
         version_id: UUID,
     ) -> tuple[DocumentVersion, IndexingResult]:
-        membership = self._workspaces.get_for_user(workspace_id, user.id)
-        if membership is None:
-            raise IndexingNotFoundError
-        role = membership[1]
-        if role not in WRITE_ROLES:
-            raise IndexingPermissionError
         document = self._documents.get_document(workspace_id, document_id)
         version = self._documents.get_version(workspace_id, document_id, version_id)
         if document is None or version is None:
             raise IndexingNotFoundError
+        try:
+            self._policy.require(
+                user=user,
+                workspace_id=workspace_id,
+                action=PolicyAction.DOCUMENT_INDEX,
+                resource=resource_context(document),
+            )
+        except PolicyNotFoundError as exc:
+            raise IndexingNotFoundError from exc
+        except PolicyDeniedError as exc:
+            raise IndexingPermissionError from exc
         if version.status == DocumentVersionStatus.PROCESSING.value:
             raise IndexingInProgressError("This document version is already being indexed")
+        try:
+            stored = resolve_original_object(self._storage, document, version)
+        except ObjectStorageError as exc:
+            raise IndexingUnavailableError("Document content is unavailable") from exc
 
         # Commit PROCESSING before the external OpenAI/Qdrant work so concurrent
         # requests see the in-flight state and cannot start a duplicate index run.
@@ -77,7 +92,7 @@ class DocumentIndexingService:
                     document_version_id=version_id,
                     document_title=document.title,
                     media_type=document.media_type,
-                    content=self._storage.read(version.object_key),
+                    content=self._storage.read(stored.key),
                 )
             )
         except IndexingUnavailableError:

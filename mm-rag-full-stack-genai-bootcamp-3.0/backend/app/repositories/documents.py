@@ -27,15 +27,26 @@ class DocumentRepository:
         self._session.flush()
 
     def list_documents(
-        self, workspace_id: UUID, *, include_archived: bool = False
+        self,
+        workspace_id: UUID,
+        *,
+        include_archived: bool = False,
+        include_tombstoned: bool = False,
     ) -> list[Document]:
         statement = select(Document).where(Document.workspace_id == workspace_id)
         if not include_archived:
             statement = statement.where(Document.archived_at.is_(None))
+        if not include_tombstoned:
+            statement = statement.where(Document.tombstoned_at.is_(None))
         return list(self._session.scalars(statement.order_by(Document.created_at, Document.id)))
 
     def get_document(
-        self, workspace_id: UUID, document_id: UUID, *, include_archived: bool = False
+        self,
+        workspace_id: UUID,
+        document_id: UUID,
+        *,
+        include_archived: bool = False,
+        include_tombstoned: bool = False,
     ) -> Document | None:
         statement = select(Document).where(
             Document.workspace_id == workspace_id,
@@ -43,6 +54,8 @@ class DocumentRepository:
         )
         if not include_archived:
             statement = statement.where(Document.archived_at.is_(None))
+        if not include_tombstoned:
+            statement = statement.where(Document.tombstoned_at.is_(None))
         return self._session.scalar(statement)
 
     def list_versions(self, workspace_id: UUID, document_id: UUID) -> list[DocumentVersion]:
@@ -187,6 +200,7 @@ class CollectionRepository:
                 CollectionDocument.workspace_id == workspace_id,
                 CollectionDocument.collection_id == collection_id,
                 Document.archived_at.is_(None),
+                Document.tombstoned_at.is_(None),
             )
             .order_by(Document.created_at, Document.id)
         )

@@ -37,19 +37,29 @@ class ConversationRepository:
             .where(
                 Conversation.workspace_id == workspace_id,
                 Conversation.archived_at.is_(None),
+                Conversation.tombstoned_at.is_(None),
             )
             .group_by(Conversation.id)
             .order_by(Conversation.updated_at.desc(), Conversation.id)
         )
         return [(row[0], row[1]) for row in self._session.execute(statement).all()]
 
-    def get(self, workspace_id: UUID, conversation_id: UUID) -> Conversation | None:
+    def get(
+        self,
+        workspace_id: UUID,
+        conversation_id: UUID,
+        *,
+        include_tombstoned: bool = False,
+    ) -> Conversation | None:
+        conditions = [
+            Conversation.workspace_id == workspace_id,
+            Conversation.id == conversation_id,
+            Conversation.archived_at.is_(None),
+        ]
+        if not include_tombstoned:
+            conditions.append(Conversation.tombstoned_at.is_(None))
         return self._session.scalar(
-            select(Conversation).where(
-                Conversation.workspace_id == workspace_id,
-                Conversation.id == conversation_id,
-                Conversation.archived_at.is_(None),
-            )
+            select(Conversation).where(*conditions)
         )
 
     def document_ids(self, workspace_id: UUID, conversation_id: UUID) -> list[UUID]:

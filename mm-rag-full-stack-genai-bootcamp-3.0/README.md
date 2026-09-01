@@ -1,4 +1,4 @@
-# Multimodal RAG Production — Phase 3
+# Multimodal RAG Production — Phase 3 baseline with Phase 4 governance
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
@@ -6,7 +6,16 @@ remain unchanged at the immutable `mm-rag-v1.0.0` and `mm-rag-v2.0.0` Git tags.
 
 ## Current status
 
-The Phase 3 baseline currently contains:
+Phase 3 is accepted and preserved at `mm-rag-v3.0.0`. Phase 4 Milestones 4.0–4.5
+are implemented and validated on `phase-4/mm-rag-governance`: ADRs 0013–0017 are
+accepted and migrations through `20260831_0013` add central default-deny policy,
+tenant-constrained ACLs, PostgreSQL RLS, cross-store authorization, safe append-only
+security review, checksummed compliance export, and durable tombstone-first lifecycle
+plans. Qdrant access requires bounded trusted scope, object access is backend-mediated
+and integrity-checked, and retention apply fails closed unless an exact owner-approved
+preview remains current. No automatic destructive retention schedule is enabled.
+
+The current `3.0` lineage contains:
 
 - The verified V1 parsing, ingestion, retrieval, generation, and Streamlit flow.
 - A dedicated Python 3.12 environment managed by uv.
@@ -87,20 +96,26 @@ The living [architecture handbook](docs/architecture/ARCHITECTURE.md) contains:
 - Current implementation status, architecture invariants, open technology
   decisions, and documentation-maintenance rules.
 
+The accepted [Phase 4 policy matrix and threat model](docs/architecture/PHASE4_POLICY_THREAT_MODEL.md)
+defines the implemented contract for roles, resource visibility, ACL inheritance,
+trust boundaries, cross-store authorization, audit, and lifecycle safety.
+
 Planned components are explicitly labeled so the diagrams do not imply that
 future capabilities have already been implemented.
 
 The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
-shows the accepted Phase 3 checkpoint and distinguishes verified current components
-from later planned phases.
+shows the verified Phase 4 development checkpoint and distinguishes implemented
+governance/lifecycle controls from later production-provider decisions.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
 and current next actions. Update it with evidence whenever progress or scope changes.
-Use the [Phase 3 operations runbook](docs/PHASE3_OPERATIONS.md) for runtime health,
-alerts, lease recovery, retention, and backup/restore exercises.
+Use the [Phase 3 operations runbook](docs/PHASE3_OPERATIONS.md) for ingestion runtime
+health, alerts, and lease recovery. Use the [Phase 4 governance operations runbook](docs/PHASE4_GOVERNANCE_OPERATIONS.md)
+for retention preview/apply, blocked-plan recovery, encryption posture, incident
+response, and backup/restore exercises.
 
 Accepted decisions are recorded as ADRs:
 
@@ -116,6 +131,14 @@ Accepted decisions are recorded as ADRs:
 - [RabbitMQ ingestion broker](docs/architecture/decisions/0010-rabbitmq-ingestion-broker.md)
 - [S3-compatible object storage with SeaweedFS for local development](docs/architecture/decisions/0011-s3-compatible-object-storage-seaweedfs.md)
 - [Purpose-built Python dispatcher and ingestion worker runtime](docs/architecture/decisions/0012-python-dispatcher-worker-runtime.md)
+
+Accepted Phase 4 decisions are:
+
+- [Central RBAC and resource ACL policy](docs/architecture/decisions/0013-central-rbac-resource-acl-policy.md)
+- [PostgreSQL row-level-security defense](docs/architecture/decisions/0014-postgresql-row-level-security.md)
+- [Authorized vector, object, and asynchronous access](docs/architecture/decisions/0015-authorized-vector-object-async-access.md)
+- [Security audit and compliance export](docs/architecture/decisions/0016-security-audit-compliance-export.md)
+- [Governed retention, deletion, encryption, and incident controls](docs/architecture/decisions/0017-governed-retention-deletion-incident-controls.md)
 
 ## Prerequisites
 
@@ -247,7 +270,8 @@ Qdrant, SeaweedFS, and RabbitMQ data volumes.
 
 The migration history contains the infrastructure baseline plus identity,
 document-library, conversation, immutable activity, durable ingestion-job,
-transactional-outbox, and immutable-generation schemas through `20260830_0008`:
+transactional-outbox, immutable-generation, Phase 4 authorization/audit, and governed
+lifecycle schemas through `20260831_0013`:
 
 ```bash
 uv run alembic upgrade head
@@ -290,6 +314,11 @@ API documentation is available at `http://127.0.0.1:8003/docs`.
 | `GET /api/v1/workspaces/{id}/conversations/{conversation_id}` | Resume a conversation with citations | Unauthorized resources remain hidden with HTTP 404 |
 | `POST /api/v1/workspaces/{id}/conversations/{conversation_id}/messages` | Ask the backend-mediated RAG assistant | Only READY versions in the trusted target scope can be cited |
 | `GET /api/v1/workspaces/{id}/activity` | List recent security-relevant workspace actions | Membership-scoped, bounded, newest-first results |
+| `POST /api/v1/workspaces/{id}/governance/{documents\|conversations}/{resource_id}/deletion` | Tombstone a document or conversation and create a recoverable plan | Document purge is owner-only; tombstoned content is hidden immediately |
+| `POST /api/v1/workspaces/{id}/governance/{documents\|conversations}/{resource_id}/restore` | Restore a resource during its recoverable window | Held, expired, purging, or terminal plans fail closed |
+| `PUT/DELETE /api/v1/workspaces/{id}/governance/holds/{type}/{resource_id}` | Place or remove a retention hold | Owner/admin only; every change is audited |
+| `GET /api/v1/workspaces/{id}/governance/retention/preview` | Produce bounded eligible counts and an exact scope token | Read-only and owner-authorized; no deletion occurs |
+| `POST /api/v1/workspaces/{id}/governance/retention/apply` | Recompute and apply the exact previewed scope | Owner-only; scope drift, live work, holds, or provider uncertainty block cleanup |
 
 Uploads are bounded by `MAX_UPLOAD_BYTES` (25 MiB by default), streamed through the
 path-safe object-storage adapter, and identified by content and ingestion
@@ -316,7 +345,7 @@ uv run streamlit run ui/app.py
 The committed `.streamlit/config.toml` assigns Phase 3 port `8503` and disables
 usage-statistics collection.
 
-## Run the authenticated Phase 3 application
+## Run the authenticated application
 
 After completing the Auth0 configuration and starting FastAPI:
 
@@ -379,8 +408,8 @@ scoped Qdrant retrieval, grounded generation, citations, persistence, audit, and
 cross-tenant denial. It removes its temporary SQL, files, and vector collection.
 
 GitHub Actions runs deterministic and PostgreSQL/Qdrant integration gates on pushes
-to the Phase 3 branch and relevant pull requests. The SeaweedFS contract remains in
-the local live gate until CI provisions that command-based service explicitly.
+to the Phase 3 and Phase 4 branches and relevant pull requests. The SeaweedFS contract
+remains in the local live gate until CI provisions that command-based service explicitly.
 Coverage must remain at or above 70%.
 
 Use the [demonstration runbook](docs/DEMO_RUNBOOK.md) for preflight, the five-minute

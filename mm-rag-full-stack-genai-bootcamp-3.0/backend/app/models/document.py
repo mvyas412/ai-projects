@@ -19,6 +19,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.app.db.base import Base
+from backend.app.models.access import ResourceVisibility
 from backend.app.models.mixins import TimestampMixin
 
 
@@ -32,6 +33,16 @@ class DocumentVersionStatus(StrEnum):
 class Document(TimestampMixin, Base):
     __tablename__ = "documents"
     __table_args__ = (
+        CheckConstraint(
+            "visibility IN ('workspace', 'restricted')",
+            name="ck_documents_visibility",
+        ),
+        CheckConstraint(
+            "(tombstoned_at IS NULL AND tombstone_expires_at IS NULL AND "
+            "tombstoned_by_user_id IS NULL) OR (tombstoned_at IS NOT NULL AND "
+            "tombstone_expires_at > tombstoned_at AND tombstoned_by_user_id IS NOT NULL)",
+            name="ck_documents_tombstone_contract",
+        ),
         UniqueConstraint("id", "workspace_id", name="uq_documents_id_workspace_id"),
     )
 
@@ -50,7 +61,24 @@ class Document(TimestampMixin, Base):
     title: Mapped[str] = mapped_column(String(240), nullable=False)
     original_filename: Mapped[str] = mapped_column(String(255), nullable=False)
     media_type: Mapped[str] = mapped_column(String(120), nullable=False)
+    visibility: Mapped[str] = mapped_column(
+        String(16),
+        nullable=False,
+        default=ResourceVisibility.WORKSPACE.value,
+        server_default=ResourceVisibility.WORKSPACE.value,
+    )
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    tombstoned_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
+    tombstone_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    tombstoned_by_user_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        nullable=True,
+    )
 
 
 class DocumentVersion(TimestampMixin, Base):
@@ -127,6 +155,10 @@ class DocumentVersion(TimestampMixin, Base):
 class Collection(TimestampMixin, Base):
     __tablename__ = "collections"
     __table_args__ = (
+        CheckConstraint(
+            "visibility IN ('workspace', 'restricted')",
+            name="ck_collections_visibility",
+        ),
         UniqueConstraint("id", "workspace_id", name="uq_collections_id_workspace_id"),
         UniqueConstraint("workspace_id", "name", name="uq_collections_workspace_name"),
     )
@@ -145,6 +177,12 @@ class Collection(TimestampMixin, Base):
     )
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     description: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    visibility: Mapped[str] = mapped_column(
+        String(16),
+        nullable=False,
+        default=ResourceVisibility.WORKSPACE.value,
+        server_default=ResourceVisibility.WORKSPACE.value,
+    )
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 

@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from backend.app.models.access import ResourceVisibility
 from backend.app.models.conversation import ConversationTargetType, MessageRole
 
 
@@ -62,6 +63,7 @@ class ConversationSummary(BaseModel):
     target_type: ConversationTargetType
     collection_id: UUID | None
     document_ids: list[UUID]
+    visibility: ResourceVisibility
     message_count: int
     created_at: datetime
     updated_at: datetime

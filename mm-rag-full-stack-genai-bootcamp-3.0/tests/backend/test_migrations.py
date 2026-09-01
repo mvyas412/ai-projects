@@ -6,11 +6,11 @@ from alembic.script import ScriptDirectory
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_migration_history_has_ingestion_outbox_head() -> None:
+def test_migration_history_has_phase4_lifecycle_head() -> None:
     config = Config(PROJECT_ROOT / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260830_0008"]
+    assert scripts.get_heads() == ["20260831_0013"]
     baseline = scripts.get_revision("20260829_0001")
     assert baseline is not None
     assert baseline.down_revision is None
@@ -34,3 +34,18 @@ def test_migration_history_has_ingestion_outbox_head() -> None:
     assert ingestion_outbox is not None
     assert ingestion_outbox.down_revision == "20260830_0006"
     assert ingestion_generations.down_revision == "20260830_0007"
+    phase4_policy = scripts.get_revision("20260831_0009")
+    assert phase4_policy is not None
+    assert phase4_policy.down_revision == "20260830_0008"
+    phase4_rls = scripts.get_revision("20260831_0010")
+    assert phase4_rls is not None
+    assert phase4_rls.down_revision == "20260831_0009"
+    phase4_permissions = scripts.get_revision("20260831_0011")
+    assert phase4_permissions is not None
+    assert phase4_permissions.down_revision == "20260831_0010"
+    phase4_audit = scripts.get_revision("20260831_0012")
+    assert phase4_audit is not None
+    assert phase4_audit.down_revision == "20260831_0011"
+    phase4_lifecycle = scripts.get_revision("20260831_0013")
+    assert phase4_lifecycle is not None
+    assert phase4_lifecycle.down_revision == "20260831_0012"

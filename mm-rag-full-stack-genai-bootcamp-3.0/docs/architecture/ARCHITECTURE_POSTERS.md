@@ -4,11 +4,11 @@
 > The handbook remains the editable source of truth; regenerate these posters
 > whenever architecture, data flow, technology, or phase status changes.
 
-## Current Phase 3 workflow and DEV architecture
+## Current Phase 4 workflow and DEV architecture
 
-This Milestone 3.5 implementation checkpoint shows streamed intake, durable jobs
-and outbox, SeaweedFS, RabbitMQ, dispatcher/worker execution, immutable promotion,
-active-generation retrieval, progress/control UX, and the remaining paid acceptance proof.
+This implementation checkpoint shows the accepted Phase 3 asynchronous runtime plus
+Phase 4 central policy, RLS, scoped cross-store access, audit/export, recoverable
+tombstones, holds, and durable lifecycle reconciliation.
 
 ![MM-RAG current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 
@@ -35,6 +35,11 @@ This is the target production system without phase or roadmap labels.
 ![Phase 3 durable asynchronous ingestion](images/03-phase-3-async-ingestion.png)
 
 ## Phase 4 — Fine-grained authorization and governance
+
+The poster is the Phase 4 target-state companion. The editable
+[Phase 4 policy matrix and threat model](PHASE4_POLICY_THREAT_MODEL.md) is implemented
+through migration `20260831_0013`; Milestones 4.0–4.5 pass deterministic and free
+live-service evidence, with PR acceptance pending.
 
 ![Phase 4 fine-grained authorization and governance](images/04-phase-4-governance.png)
 

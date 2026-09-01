@@ -29,7 +29,7 @@ docker compose exec -T postgres pg_restore \
 revision="$(docker compose exec -T postgres psql --tuples-only --no-align \
   --username="${POSTGRES_USER:-mm_rag}" --dbname="${target}" \
   --command='SELECT version_num FROM alembic_version;')"
-if [[ "${revision}" != "20260830_0008" ]]; then
+if [[ "${revision}" != "20260831_0013" ]]; then
   echo "Restored database is not at the expected migration head." >&2
   exit 1
 fi
@@ -37,4 +37,13 @@ fi
 docker compose exec -T postgres psql --tuples-only --no-align \
   --username="${POSTGRES_USER:-mm_rag}" --dbname="${target}" \
   --command='SELECT count(*) >= 0 FROM ingestion_jobs;' | grep -qx 't'
-printf 'Phase 3 PostgreSQL restore verification passed.\n'
+docker compose exec -T postgres psql --tuples-only --no-align \
+  --username="${POSTGRES_USER:-mm_rag}" --dbname="${target}" \
+  --command='SELECT count(*) >= 0 FROM lifecycle_deletion_plans;' | grep -qx 't'
+docker compose exec -T postgres psql --tuples-only --no-align \
+  --username="${POSTGRES_USER:-mm_rag}" --dbname="${target}" \
+  --command='SELECT count(*) >= 0 FROM retention_holds;' | grep -qx 't'
+docker compose exec -T postgres psql --tuples-only --no-align \
+  --username="${POSTGRES_USER:-mm_rag}" --dbname="${target}" \
+  --command='SELECT count(*) >= 0 FROM orphan_object_evidence;' | grep -qx 't'
+printf 'Phase 4 PostgreSQL restore verification passed.\n'

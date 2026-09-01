@@ -7,7 +7,8 @@ only a wake-up channel; Qdrant vectors and object artifacts are generation-scope
 ## Start, stop, and inspect
 
 1. Run `make services` to start PostgreSQL, Qdrant, SeaweedFS, and RabbitMQ.
-2. Run `make migrate` and confirm Alembic revision `20260830_0008`.
+2. Run `make migrate` and confirm the current Alembic head. On the completed
+   Phase 4 branch this is `20260831_0013`.
 3. Run `make runtime` to start the dispatcher and one worker independently.
 4. Run `make operations-status` for aggregate, non-disclosing backlog health.
 5. Run `make runtime-stop` to drain and stop only the execution processes.
@@ -42,10 +43,10 @@ The explicit command `python -m backend.app.workers.operations retention-apply`
 deletes only published or discarded outbox rows older than 30 days whose jobs are
 already terminal. It cannot delete pending events or job/attempt/audit history.
 
-Inactive generation cleanup remains disabled. ADR 0008 requires a separately
-approved retention window before vectors or objects from inactive generations may
-be deleted. Until that decision is accepted, inspect the aggregate inactive count
-and retain the data.
+Phase 4 ADR 0017 now governs inactive-generation, orphan-object, terminal-job,
+audit, document, and conversation lifecycle. Use the owner-reviewed preview/apply
+flow in [the Phase 4 governance runbook](PHASE4_GOVERNANCE_OPERATIONS.md). No
+destructive lifecycle batch runs automatically.
 
 ## PostgreSQL backup and restore exercise
 
@@ -65,8 +66,8 @@ Exercise restore safety against a newly created temporary database:
 ```
 
 The verifier checks the digest, restores without changing the live database,
-verifies migration head and durable-ingestion tables, then drops only its generated
-temporary restore database.
+verifies migration head plus durable ingestion and Phase 4 lifecycle tables, then
+drops only its generated temporary restore database.
 
 SeaweedFS data must be protected with a consistent provider/volume snapshot in the
 same recovery set as PostgreSQL. Qdrant generations are derived from immutable

@@ -16,7 +16,7 @@ from backend.app.db.session import create_database_engine, create_session_factor
 from backend.app.rag.engine import build_rag_engine
 from backend.app.rag.indexing import build_document_indexer
 from backend.app.services.readiness import Probe, ReadinessService, probe_postgres, probe_qdrant
-from backend.app.storage.factory import create_object_storage
+from backend.app.storage.factory import create_artifact_storage, create_object_storage
 from backend.app.storage.s3 import S3ObjectStorage
 
 
@@ -41,6 +41,7 @@ def _lifespan(settings: Settings):
             check_compatibility=False,
         )
         object_storage = create_object_storage(settings)
+        artifact_storage = create_artifact_storage(settings)
         readiness_probes: dict[str, Probe] = {
             "postgres": partial(probe_postgres, engine),
             "qdrant": partial(probe_qdrant, qdrant_client),
@@ -55,6 +56,7 @@ def _lifespan(settings: Settings):
         app.state.qdrant_client = qdrant_client
         app.state.access_token_verifier = build_access_token_verifier(settings)
         app.state.object_storage = object_storage
+        app.state.artifact_storage = artifact_storage
         app.state.rag_engine = build_rag_engine(settings, qdrant_client)
         app.state.document_indexer = build_document_indexer(settings, qdrant_client)
         app.state.readiness_service = ReadinessService(
@@ -75,6 +77,8 @@ def _lifespan(settings: Settings):
         finally:
             if isinstance(object_storage, S3ObjectStorage):
                 object_storage.close()
+            if isinstance(artifact_storage, S3ObjectStorage):
+                artifact_storage.close()
             qdrant_client.close()
             engine.dispose()
             logger.info("application_stopped", app_name=settings.app_name)

@@ -21,10 +21,15 @@ from backend.app.models.user import User
 from backend.app.models.workspace import WorkspaceRole
 from backend.app.repositories.documents import DocumentRepository
 from backend.app.repositories.ingestion_jobs import IngestionJobRepository
-from backend.app.repositories.workspaces import WorkspaceRepository
 from backend.app.services.audit import record_audit_event
-from backend.app.services.documents import ADMIN_ROLES, WRITE_ROLES
 from backend.app.services.ingestion_outbox import IngestionOutboxStateMachine
+from backend.app.services.policy import (
+    PolicyAction,
+    PolicyDeniedError,
+    PolicyNotFoundError,
+    PolicyService,
+    resource_context,
+)
 
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
 _ERROR_CODE = re.compile(r"^[a-z0-9][a-z0-9_.-]{0,79}$")
@@ -80,7 +85,7 @@ class IngestionJobStateMachine:
         self._documents = DocumentRepository(session)
         self._jobs = IngestionJobRepository(session)
         self._outbox = IngestionOutboxStateMachine(session)
-        self._workspaces = WorkspaceRepository(session)
+        self._policy = PolicyService(session)
 
     def create_job(
         self,
@@ -100,12 +105,15 @@ class IngestionJobStateMachine:
         normalized_key = self._validate_idempotency_key(idempotency_key)
         self._validate_hash("request_hash", request_hash)
         self._validate_hash("pipeline_fingerprint", pipeline_fingerprint)
-        role = self._require_write_role(user, workspace_id)
+        document = self._documents.get_document(workspace_id, document_id)
         version = self._documents.get_version(
             workspace_id, document_id, document_version_id
         )
-        if version is None:
+        if document is None or version is None:
             raise IngestionJobNotFoundError
+        role = self._require_document_action(
+            user, document, PolicyAction.DOCUMENT_INDEX
+        )
         if version.ingestion_fingerprint != pipeline_fingerprint:
             raise IngestionJobValidationError(
                 "pipeline_fingerprint does not match the document version"
@@ -218,6 +226,18 @@ class IngestionJobStateMachine:
             raise IngestionJobNotFoundError
         if job.state not in _RUNNABLE_STATES:
             raise IngestionInvalidTransitionError("Job is not runnable")
+        document = self._documents.get_document(
+            job.workspace_id,
+            job.document_id,
+            include_archived=True,
+            include_tombstoned=True,
+        )
+        if document is None:
+            raise IngestionJobNotFoundError
+        if document.tombstoned_at is not None and job.cancel_requested_at is None:
+            job.cancel_requested_at = now
+            job.cancel_requested_by_user_id = document.tombstoned_by_user_id
+
         if job.cancel_requested_at is not None:
             raise IngestionInvalidTransitionError("Job cancellation was requested")
         if (
@@ -355,7 +375,7 @@ class IngestionJobStateMachine:
         self._require_transaction()
         now = self._utc(now)
         job = self._get_workspace_job(workspace_id, job_id, for_update=True)
-        self._require_control_role(user, job)
+        self._require_job_action(user, job, PolicyAction.JOB_CANCEL)
         if job.state == IngestionJobState.CANCELLED.value:
             return job
         if job.state in {IngestionJobState.SUCCEEDED.value, IngestionJobState.FAILED.value}:
@@ -458,6 +478,18 @@ class IngestionJobStateMachine:
         if chunk_count <= 0 or vector_count <= 0:
             raise IngestionJobValidationError("A promoted generation must contain vectors")
 
+        document = self._documents.get_document(
+            job.workspace_id,
+            job.document_id,
+            include_archived=True,
+            include_tombstoned=True,
+        )
+        if document is None:
+            raise IngestionJobNotFoundError
+        if document.tombstoned_at is not None and job.cancel_requested_at is None:
+            job.cancel_requested_at = now
+            job.cancel_requested_by_user_id = document.tombstoned_by_user_id
+
         if job.cancel_requested_at is not None:
             self._finish_attempt(attempt, IngestionAttemptState.CANCELLED, now)
             generation.state = IngestionGenerationState.ABANDONED.value
@@ -498,10 +530,11 @@ class IngestionJobStateMachine:
         record_audit_event(
             self._session,
             workspace_id=job.workspace_id,
-            actor_user_id=job.requested_by_user_id,
+            service_actor="ingestion-worker",
             action="ingestion.job_succeeded",
             resource_type="document",
             resource_id=job.document_id,
+            correlation_id=str(job.id),
             details={
                 "job_id": str(job.id),
                 "version_id": str(job.document_version_id),
@@ -725,31 +758,53 @@ class IngestionJobStateMachine:
             or predecessor.pipeline_fingerprint != pipeline_fingerprint
         ):
             raise IngestionJobValidationError("Predecessor does not match the document version")
-        if role not in ADMIN_ROLES and predecessor.requested_by_user_id != user.id:
-            raise IngestionJobPermissionError
-        if predecessor.state == IngestionJobState.SUCCEEDED.value and role not in ADMIN_ROLES:
+        document = self._documents.get_document(workspace_id, predecessor.document_id)
+        if document is None:
+            raise IngestionJobNotFoundError
+        self._require_job_action(user, predecessor, PolicyAction.JOB_RETRY)
+        if (
+            predecessor.state == IngestionJobState.SUCCEEDED.value
+            and role not in {WorkspaceRole.OWNER, WorkspaceRole.ADMIN}
+        ):
             raise IngestionJobPermissionError
         return predecessor
 
-    def _require_write_role(self, user: User, workspace_id: UUID) -> WorkspaceRole:
-        membership = self._workspaces.get_for_user(workspace_id, user.id)
-        if membership is None:
-            raise IngestionJobNotFoundError
-        role = membership[1]
-        if role not in WRITE_ROLES:
+    def _require_document_action(
+        self, user: User, document, action: PolicyAction
+    ) -> WorkspaceRole:
+        try:
+            decision = self._policy.require(
+                user=user,
+                workspace_id=document.workspace_id,
+                action=action,
+                resource=resource_context(document),
+            )
+        except PolicyNotFoundError as exc:
+            raise IngestionJobNotFoundError from exc
+        except PolicyDeniedError as exc:
+            raise IngestionJobPermissionError from exc
+        if decision.role is None:
             raise IngestionJobPermissionError
-        return role
+        return decision.role
 
-    def _require_control_role(self, user: User, job: IngestionJob) -> None:
-        membership = self._workspaces.get_for_user(job.workspace_id, user.id)
-        if membership is None:
+    def _require_job_action(
+        self, user: User, job: IngestionJob, action: PolicyAction
+    ) -> None:
+        document = self._documents.get_document(job.workspace_id, job.document_id)
+        if document is None:
             raise IngestionJobNotFoundError
-        role = membership[1]
-        if role in ADMIN_ROLES:
-            return
-        if role == WorkspaceRole.MEMBER and job.requested_by_user_id == user.id:
-            return
-        raise IngestionJobPermissionError
+        try:
+            self._policy.require(
+                user=user,
+                workspace_id=job.workspace_id,
+                action=action,
+                resource=resource_context(document),
+                requester_user_id=job.requested_by_user_id,
+            )
+        except PolicyNotFoundError as exc:
+            raise IngestionJobNotFoundError from exc
+        except PolicyDeniedError as exc:
+            raise IngestionJobPermissionError from exc
 
     def _get_workspace_job(
         self, workspace_id: UUID, job_id: UUID, *, for_update: bool

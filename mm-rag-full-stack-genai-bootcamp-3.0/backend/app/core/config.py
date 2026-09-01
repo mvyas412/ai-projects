@@ -4,6 +4,7 @@ import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal, Self
+from urllib.parse import parse_qs, urlparse
 
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -45,6 +46,8 @@ class Settings(BaseSettings):
     s3_originals_bucket: str = "mm-rag-phase3-originals"
     s3_artifacts_bucket: str = "mm-rag-phase3-artifacts"
     s3_path_style: bool = True
+    s3_server_side_encryption: Literal["AES256", "aws:kms"] | None = None
+    s3_kms_key_id: SecretStr | None = None
     s3_connect_timeout_seconds: int = Field(default=3, ge=1, le=30)
     s3_read_timeout_seconds: int = Field(default=30, ge=1, le=300)
 
@@ -76,6 +79,13 @@ class Settings(BaseSettings):
     outbox_terminal_retention_days: int = Field(default=30, ge=1, le=365)
     outbox_alert_attempts: int = Field(default=10, ge=1, le=1000)
     outbox_alert_age_seconds: int = Field(default=900, ge=60, le=86400)
+    lifecycle_policy_revision: str = "phase4-retention-v1"
+    document_tombstone_retention_days: int = Field(default=30, ge=1, le=365)
+    conversation_tombstone_retention_days: int = Field(default=30, ge=1, le=365)
+    inactive_generation_retention_days: int = Field(default=30, ge=1, le=365)
+    orphan_object_retention_days: int = Field(default=7, ge=1, le=90)
+    terminal_job_retention_days: int = Field(default=90, ge=1, le=730)
+    security_audit_retention_days: int = Field(default=365, ge=30, le=3650)
 
     qdrant_url: str = "http://127.0.0.1:6337"
     qdrant_api_key: SecretStr | None = None
@@ -115,6 +125,11 @@ class Settings(BaseSettings):
     @field_validator("s3_endpoint_url", mode="before")
     @classmethod
     def blank_s3_endpoint_is_none(cls, value: object) -> object:
+        return None if value == "" else value
+
+    @field_validator("s3_server_side_encryption", mode="before")
+    @classmethod
+    def blank_s3_encryption_is_none(cls, value: object) -> object:
         return None if value == "" else value
 
     @field_validator("s3_endpoint_url")
@@ -172,6 +187,7 @@ class Settings(BaseSettings):
         "openai_api_key",
         "s3_access_key_id",
         "s3_secret_access_key",
+        "s3_kms_key_id",
         "rabbitmq_url",
         mode="before",
     )
@@ -193,6 +209,27 @@ class Settings(BaseSettings):
             )
         if self.object_storage_backend == "s3" and not all(credentials):
             raise ValueError("S3 credentials are required when OBJECT_STORAGE_BACKEND=s3")
+        if self.s3_server_side_encryption == "aws:kms" and self.s3_kms_key_id is None:
+            raise ValueError("S3_KMS_KEY_ID is required when S3 encryption uses aws:kms")
+        if self.s3_kms_key_id is not None and self.s3_server_side_encryption != "aws:kms":
+            raise ValueError("S3_KMS_KEY_ID requires S3_SERVER_SIDE_ENCRYPTION=aws:kms")
+        return self
+
+    @model_validator(mode="after")
+    def validate_nonlocal_transport_and_encryption(self) -> Self:
+        if self.app_env != "production":
+            return self
+        if self.object_storage_backend == "s3":
+            if self.s3_server_side_encryption is None:
+                raise ValueError("Production S3 storage requires explicit server-side encryption")
+            _require_secure_nonlocal_url("S3_ENDPOINT_URL", self.s3_endpoint_url)
+        _require_secure_nonlocal_url("QDRANT_URL", self.qdrant_url)
+        if self.rabbitmq_url is not None:
+            _require_secure_nonlocal_url(
+                "RABBITMQ_URL", self.rabbitmq_url.get_secret_value()
+            )
+        if self.database_url is not None:
+            _require_secure_database_url(self.database_url.get_secret_value())
         return self
 
     @field_validator(
@@ -247,6 +284,30 @@ class Settings(BaseSettings):
     @property
     def auth0_is_configured(self) -> bool:
         return self.auth0_issuer is not None and self.auth0_audience is not None
+
+
+def _require_secure_nonlocal_url(name: str, value: str | None) -> None:
+    if value is None:
+        return
+    parsed = urlparse(value)
+    if parsed.hostname in {None, "localhost", "127.0.0.1", "::1"}:
+        return
+    secure_schemes = {
+        "S3_ENDPOINT_URL": {"https"},
+        "QDRANT_URL": {"https"},
+        "RABBITMQ_URL": {"amqps"},
+    }[name]
+    if parsed.scheme not in secure_schemes:
+        raise ValueError(f"{name} must use encrypted transport outside localhost")
+
+
+def _require_secure_database_url(value: str) -> None:
+    parsed = urlparse(value)
+    if parsed.hostname in {None, "localhost", "127.0.0.1", "::1"}:
+        return
+    sslmode = parse_qs(parsed.query).get("sslmode", [""])[0]
+    if sslmode not in {"require", "verify-ca", "verify-full"}:
+        raise ValueError("DATABASE_URL must require TLS outside localhost")
 
 
 @lru_cache(maxsize=1)
