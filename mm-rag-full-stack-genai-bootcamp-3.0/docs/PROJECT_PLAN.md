@@ -464,7 +464,8 @@ matrix now has a central default-deny service, tenant-constrained ACL persistenc
 PostgreSQL RLS defense, mandatory Qdrant scope enforcement, backend-mediated object
 resolution, a future connector permission-envelope contract, safe append-only
 security review, checksummed compliance export, and durable lifecycle controls.
-The approved source tree matches the squash commit; no Phase 4 release tag exists.
+The approved source tree matches the squash commit. Annotated tag `mm-rag-v4.0.0`
+preserves the documentation-closure commit `996898e` as the immutable V4 checkpoint.
 
 ### Objective
 
@@ -641,11 +642,12 @@ then reranking a bounded candidate set.
   Missing sparse/reranker artifacts fail to dense/fused order without downloading.
 - `dense-v1`, `hybrid-v1`, and `hybrid-rerank-v1` are explicit rollout profiles;
   `hybrid-v1` is the default and reranking remains disabled pending measured benefit.
-- The deterministic gate passes 166 tests with 11 expected opt-in skips, migration
+- The deterministic gate passes 167 tests with 11 expected opt-in skips, migration
   head `20260831_0013`, no schema drift, and no paid model call. The complete free
-  live gate passes all 177 tests with PostgreSQL, Qdrant, SeaweedFS, RabbitMQ,
+  live gate passes all 178 tests with PostgreSQL, Qdrant, SeaweedFS, RabbitMQ,
   FastAPI, and Streamlit ready. Rebuilt dispatcher and worker containers load pinned
-  models and report healthy.
+  models and report healthy. The idle lease-recovery cycle refreshes worker readiness
+  so an empty queue cannot age a healthy process out of Docker health.
 
 ### Completion gate
 

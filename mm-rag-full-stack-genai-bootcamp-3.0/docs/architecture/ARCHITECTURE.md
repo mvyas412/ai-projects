@@ -289,14 +289,16 @@ wake-ups and reload/fence PostgreSQL state. A validated immutable generation bec
 visible through one active pointer, so failure or cancellation cannot expose partial
 vectors. Aggregate operations, retention preview, process health, a representative
 large upload, and a temporary PostgreSQL restore exercise complete Milestone 3.5's
-free hardening evidence. The signed-in acceptance proof additionally verifies the
+free hardening evidence. The idle recovery loop refreshes readiness so heartbeat age
+continues to detect a stalled worker even when no deliveries are in flight. The
+signed-in acceptance proof additionally verifies the
 live embedding, promotion, active-generation retrieval, citation, and persistence path.
 
 ## Phase 4 — fine-grained authorization and governance
 
 **Status:** Completed and accepted. Milestones 4.0–4.5 were squash-merged through
-PR #3 at `57ee453`; no Phase 4 release tag has been created. Phase 2 starts isolation
-and this phase deepens it with central policy,
+PR #3 at `57ee453`; annotated tag `mm-rag-v4.0.0` preserves documentation closure
+commit `996898e`. Phase 2 starts isolation and this phase deepens it with central policy,
 ACL persistence, PostgreSQL RLS, mandatory Qdrant scope, canonical backend-mediated
 object access, a fail-closed future connector permission contract, safe append-only
 security review, checksummed compliance export, and tombstone-first lifecycle.

@@ -469,5 +469,6 @@ Phase 2 is merged and recoverable at `mm-rag-v2.0.0`. Phase 3 is implemented,
 accepted, and merged into `main` through PR #2 at `228ce63` after the explicitly
 authorized real-OpenAI asynchronous browser proof. The immutable accepted release
 is tagged `mm-rag-v3.0.0` at `9ebe767`. Phase 4 is completed, accepted, and
-squash-merged through PR #3 at `57ee453`; no Phase 4 release tag has been created.
+squash-merged through PR #3 at `57ee453`; its documentation closure is preserved by
+annotated tag `mm-rag-v4.0.0` at `996898e`.
 Production providers and deployment remain future Phase 8 decisions.

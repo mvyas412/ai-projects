@@ -18,6 +18,10 @@ work or invoke a model. Dispatcher and worker health files contain only process
 state, counters, and timestamps. They never contain credentials, object keys,
 filenames, document content, or raw provider errors.
 
+The worker refreshes readiness on every lease-recovery cycle, including while idle.
+An aging worker heartbeat therefore indicates a stalled process rather than an empty
+queue.
+
 ## Alerts and first response
 
 Treat the operations report as unhealthy when any of these are true:
