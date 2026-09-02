@@ -53,7 +53,7 @@ Rules:
 | Phase 4 | Completed and accepted — Milestones 4.0–4.5 squash-merged through PR #3 |
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
-| Phase 5 | Implementation complete; first paid candidate failed quality gate; ADR 0022 Proposed |
+| Phase 5 | Hybrid implementation complete; accepted ADR 0022 v2 remediation in progress |
 | Phases 6–9 | Planned |
 
 ## Delivery sequence and gates
@@ -595,9 +595,9 @@ Milestone 4.0 review material:
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** Implementation complete but not accepted. The first paid candidate failed
+**Status:** Hybrid implementation complete but not accepted. The first paid candidate failed
 the quality gate because the v1 corpus saturated dense Recall@10; benchmark remediation
-is Proposed in ADR 0022.
+is accepted in ADR 0022 and being implemented with free/local checks.
 
 ### Objective
 
@@ -608,12 +608,12 @@ then reranking a bounded candidate set.
 
 | Milestone | Deliverable | Status |
 | --- | --- | --- |
-| 5.0 | Versioned retrieval evaluation dataset and dense-only baseline | V1 measured but saturated; v2 remediation Proposed |
+| 5.0 | Versioned retrieval evaluation dataset and dense-only baseline | V1 measured but saturated; accepted v2 remediation in progress |
 | 5.1 | Sparse-engine evaluation and ADR | Completed — ADR 0019 implemented |
 | 5.2 | Parallel dense/sparse retrieval with identical authorization filters | Completed and live-tested |
 | 5.3 | Deterministic RRF/fusion, deduplication, and source diversification | Completed and deterministic |
 | 5.4 | Bounded reranker selection and token-budgeted evidence assembly | Completed; reranker remains opt-in |
-| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | Free gates pass; first paid candidate did not meet quality thresholds |
+| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | ADR 0022 free remediation in progress; fresh paid proof deferred |
 
 ### Accepted implementation contract
 
@@ -654,7 +654,7 @@ then reranking a bounded candidate set.
   Recall@10 were both `1.0000`; nDCG@10 moved from `0.9507` to `0.9516`, below the
   accepted relative gates. Authorization identities and latency passed. The command
   stopped before the paid end-to-end proof and no retry ran.
-- Proposed ADR 0022 recommends a larger confounder corpus, rotated validation/holdout,
+- Accepted ADR 0022 requires a larger confounder corpus, rotated validation/holdout,
   validation-before-holdout execution, and separate authorization/abstention metrics
   while preserving the accepted quality thresholds.
 
@@ -830,7 +830,7 @@ commercial accounting, and compliance-grade administration.
 | Sparse-search engine | 5.1 | Accepted — Qdrant sparse BM25 in ADR 0019 |
 | Fusion, deduplication, and diversification | 5.3 | Accepted — application-owned RRF in ADR 0020 |
 | Reranker | 5.4 | Accepted — bounded local FastEmbed cross-encoder in ADR 0021 |
-| Phase 5 benchmark remediation and negative-query contract | 5.0–5.5 | Proposed — ADR 0022 |
+| Phase 5 benchmark remediation and negative-query contract | 5.0–5.5 | Accepted — ADR 0022 |
 | Vision embedding/enrichment models | 6.1–6.2 | TBD |
 | Structured-table execution approach | 6.3–6.4 | TBD |
 | Observability/evaluation backend | 7.0 | TBD |
@@ -842,11 +842,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Review and approve or revise Proposed ADR 0022 | Explicit corrective benchmark and negative-query contract |
-| 2 | Implement and validate the v2 fixture and holdout sequencing without paid calls | Deterministic v2 evidence and clean free gates |
-| 3 | Obtain fresh approval for one v2 paid acceptance run | Prior approval remains consumed; no implicit retry |
-| 4 | If ADR 0018 passes on v2, publish a reviewable Phase 5 PR | Aggregate quality evidence, clean branch, and successful CI |
-| 5 | After explicit PR approval, squash-merge and create the immutable Phase 5 release checkpoint | Accepted squash commit and annotated release tag |
+| 1 | Implement and validate the accepted v2 fixture and holdout sequencing without paid calls | Deterministic v2 evidence and clean free gates |
+| 2 | Obtain fresh approval for one v2 paid acceptance run | Prior approval remains consumed; no implicit retry |
+| 3 | If ADR 0018 passes on v2, publish a reviewable Phase 5 PR | Aggregate quality evidence, clean branch, and successful CI |
+| 4 | After explicit PR approval, squash-merge and create the immutable Phase 5 release checkpoint | Accepted squash commit and annotated release tag |
 
 ## Update protocol
 

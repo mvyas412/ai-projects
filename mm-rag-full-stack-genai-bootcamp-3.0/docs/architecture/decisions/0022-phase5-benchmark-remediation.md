@@ -1,7 +1,8 @@
 # ADR 0022: Phase 5 benchmark remediation and negative-query contract
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-01
+- Accepted: 2026-09-01
 - Milestone: 5.0 and 5.5
 
 ## Context
@@ -84,6 +85,12 @@ quality improvement.
    unanswerable abstention?
 4. Approve keeping reranking disabled and requiring a fresh paid-run authorization
    only after all v2 free gates pass?
+
+## Acceptance resolution
+
+All four recommendations were explicitly approved on 2026-09-01. The v2 corpus,
+original quality thresholds, separated authorization/abstention metrics, disabled
+reranker, validation-before-holdout sequence, and fresh paid-run boundary are accepted.
 
 ## Acceptance evidence required
 

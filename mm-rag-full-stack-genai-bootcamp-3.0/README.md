@@ -19,8 +19,9 @@ and integrity-checked, and retention apply fails closed unless an exact owner-ap
 preview remains current. No automatic destructive retention schedule is enabled.
 Phase 5 implementation is complete but not yet accepted. The first separately
 approved paid candidate stopped at its quality gate because the v1 corpus saturated
-dense Recall@10. Proposed ADR 0022 recommends a harder v2 benchmark while preserving
-the approved thresholds. The default `hybrid-v1` profile
+dense Recall@10. Accepted ADR 0022 requires a harder v2 benchmark while preserving
+the approved thresholds; its free/local implementation is in progress. The default
+`hybrid-v1` profile
 combines authorized dense and Qdrant-native BM25 legs through deterministic RRF;
 `dense-v1` remains the rollback path, and `hybrid-rerank-v1` remains opt-in until
 measured evidence proves the bounded local cross-encoder improves quality.
