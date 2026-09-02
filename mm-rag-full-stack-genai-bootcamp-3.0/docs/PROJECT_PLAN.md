@@ -45,7 +45,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 5.5 measured benchmark and release acceptance |
+| Active milestone | Phase 5.5 benchmark remediation and release acceptance |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -53,7 +53,7 @@ Rules:
 | Phase 4 | Completed and accepted — Milestones 4.0–4.5 squash-merged through PR #3 |
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
-| Phase 5 | Implementation complete; paid quality/acceptance evidence pending |
+| Phase 5 | Implementation complete; first paid candidate failed quality gate; ADR 0022 Proposed |
 | Phases 6–9 | Planned |
 
 ## Delivery sequence and gates
@@ -595,8 +595,9 @@ Milestone 4.0 review material:
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** Implementation complete; final measured quality and paid end-to-end
-acceptance evidence remain pending.
+**Status:** Implementation complete but not accepted. The first paid candidate failed
+the quality gate because the v1 corpus saturated dense Recall@10; benchmark remediation
+is Proposed in ADR 0022.
 
 ### Objective
 
@@ -607,12 +608,12 @@ then reranking a bounded candidate set.
 
 | Milestone | Deliverable | Status |
 | --- | --- | --- |
-| 5.0 | Versioned retrieval evaluation dataset and dense-only baseline | Harness complete; paid baseline result pending |
+| 5.0 | Versioned retrieval evaluation dataset and dense-only baseline | V1 measured but saturated; v2 remediation Proposed |
 | 5.1 | Sparse-engine evaluation and ADR | Completed — ADR 0019 implemented |
 | 5.2 | Parallel dense/sparse retrieval with identical authorization filters | Completed and live-tested |
 | 5.3 | Deterministic RRF/fusion, deduplication, and source diversification | Completed and deterministic |
 | 5.4 | Bounded reranker selection and token-budgeted evidence assembly | Completed; reranker remains opt-in |
-| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | Free gates pass; paid evidence pending |
+| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | Free gates pass; first paid candidate did not meet quality thresholds |
 
 ### Accepted implementation contract
 
@@ -648,6 +649,14 @@ then reranking a bounded candidate set.
   FastAPI, and Streamlit ready. Rebuilt dispatcher and worker containers load pinned
   models and report healthy. The idle lease-recovery cycle refreshes worker readiness
   so an empty queue cannot age a healthy process out of Docker health.
+- The explicitly approved 2026-09-01 candidate used one batched embedding request
+  for 878 tokens at an estimated `$0.00001756`. Dense and hybrid validation
+  Recall@10 were both `1.0000`; nDCG@10 moved from `0.9507` to `0.9516`, below the
+  accepted relative gates. Authorization identities and latency passed. The command
+  stopped before the paid end-to-end proof and no retry ran.
+- Proposed ADR 0022 recommends a larger confounder corpus, rotated validation/holdout,
+  validation-before-holdout execution, and separate authorization/abstention metrics
+  while preserving the accepted quality thresholds.
 
 ### Completion gate
 
@@ -821,6 +830,7 @@ commercial accounting, and compliance-grade administration.
 | Sparse-search engine | 5.1 | Accepted — Qdrant sparse BM25 in ADR 0019 |
 | Fusion, deduplication, and diversification | 5.3 | Accepted — application-owned RRF in ADR 0020 |
 | Reranker | 5.4 | Accepted — bounded local FastEmbed cross-encoder in ADR 0021 |
+| Phase 5 benchmark remediation and negative-query contract | 5.0–5.5 | Proposed — ADR 0022 |
 | Vision embedding/enrichment models | 6.1–6.2 | TBD |
 | Structured-table execution approach | 6.3–6.4 | TBD |
 | Observability/evaluation backend | 7.0 | TBD |
@@ -832,10 +842,11 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Obtain explicit approval immediately before one paid Phase 5 acceptance run | Approval is recorded; no implicit provider call |
-| 2 | Run the frozen dense/hybrid/rerank comparison and async product proof | Validation and holdout metrics plus grounded citation evidence |
-| 3 | If the ADR 0018 gate passes, publish the implementation/evidence commits for review | Clean branch, successful CI, and reviewable Phase 5 PR |
-| 4 | After explicit PR approval, squash-merge and create the immutable Phase 5 release checkpoint | Accepted squash commit and annotated release tag |
+| 1 | Review and approve or revise Proposed ADR 0022 | Explicit corrective benchmark and negative-query contract |
+| 2 | Implement and validate the v2 fixture and holdout sequencing without paid calls | Deterministic v2 evidence and clean free gates |
+| 3 | Obtain fresh approval for one v2 paid acceptance run | Prior approval remains consumed; no implicit retry |
+| 4 | If ADR 0018 passes on v2, publish a reviewable Phase 5 PR | Aggregate quality evidence, clean branch, and successful CI |
+| 5 | After explicit PR approval, squash-merge and create the immutable Phase 5 release checkpoint | Accepted squash commit and annotated release tag |
 
 ## Update protocol
 

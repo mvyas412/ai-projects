@@ -17,8 +17,10 @@ security review, checksummed compliance export, and durable tombstone-first life
 plans. Qdrant access requires bounded trusted scope, object access is backend-mediated
 and integrity-checked, and retention apply fails closed unless an exact owner-approved
 preview remains current. No automatic destructive retention schedule is enabled.
-Phase 5 implementation is complete and its final release gate is pending one
-separately approved paid benchmark/acceptance run. The default `hybrid-v1` profile
+Phase 5 implementation is complete but not yet accepted. The first separately
+approved paid candidate stopped at its quality gate because the v1 corpus saturated
+dense Recall@10. Proposed ADR 0022 recommends a harder v2 benchmark while preserving
+the approved thresholds. The default `hybrid-v1` profile
 combines authorized dense and Qdrant-native BM25 legs through deterministic RRF;
 `dense-v1` remains the rollback path, and `hybrid-rerank-v1` remains opt-in until
 measured evidence proves the bounded local cross-encoder improves quality.
@@ -423,7 +425,8 @@ Run `make check-acceptance` only after explicit approval. It compares dense, hyb
 and hybrid-rerank profiles with one batched paid embedding request, then exercises
 async text/image ingestion, scoped hybrid retrieval, grounded generation, citations,
 persistence, audit, and cross-tenant denial. Temporary collections are removed and
-raw benchmark identities remain ignored.
+raw benchmark identities remain ignored. A failed benchmark gate stops before the
+end-to-end product proof and never authorizes an automatic retry.
 
 GitHub Actions runs deterministic and PostgreSQL/Qdrant integration gates on pushes
 to the Phase 3, Phase 4, and Phase 5 branches and relevant pull requests. The

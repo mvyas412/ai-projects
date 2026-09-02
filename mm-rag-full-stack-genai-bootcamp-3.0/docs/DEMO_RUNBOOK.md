@@ -81,4 +81,6 @@ from every free gate.
 - Phase 5 free implementation evidence now covers the hashed 50-query contract,
   immutable successor reindex, real-Qdrant filter parity, deterministic RRF,
   sparse/reranker fallback, pinned offline model checks, and healthy rebuilt runtime
-  containers. The paid dense/hybrid comparison and updated end-to-end proof remain pending.
+  containers. The first paid candidate stopped at the quality gate because dense
+  Recall@10 saturated the v1 corpus; no paid end-to-end proof or automatic retry ran.
+  Proposed ADR 0022 defines the recommended v2 correction.
