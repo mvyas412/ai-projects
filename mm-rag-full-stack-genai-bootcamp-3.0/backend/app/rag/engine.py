@@ -27,6 +27,8 @@ from backend.app.retrieval.sparse import (
 )
 
 logger = structlog.get_logger(__name__)
+INSUFFICIENT_EVIDENCE_MARKER = "INSUFFICIENT_EVIDENCE"
+INSUFFICIENT_EVIDENCE_MESSAGE = "I could not find authorized evidence to answer that question."
 
 
 class RAGUnavailableError(Exception):
@@ -207,7 +209,7 @@ class QdrantOpenAIRAGEngine:
         )
         if not citations:
             return RAGAnswer(
-                content="I could not find authorized evidence to answer that question.",
+                content=INSUFFICIENT_EVIDENCE_MESSAGE,
                 citations=(),
                 model_name=self._settings.openai_chat_model,
             )
@@ -223,13 +225,16 @@ class QdrantOpenAIRAGEngine:
             SystemMessage(
                 content=(
                     "Answer only from the authorized evidence. Cite supporting items using "
-                    "[1], [2], and so on. State clearly when evidence is insufficient.\n\n"
+                    "[1], [2], and so on. If the evidence is insufficient, respond with "
+                    f"exactly {INSUFFICIENT_EVIDENCE_MARKER} and no other text.\n\n"
                     f"Evidence:\n{evidence}"
                 )
             )
         ]
         for role, content in request.history[-10:]:
-            message = HumanMessage(content=content) if role == "user" else AIMessage(content=content)
+            message = (
+                HumanMessage(content=content) if role == "user" else AIMessage(content=content)
+            )
             messages.append(message)
         messages.append(HumanMessage(content=request.query))
         try:
@@ -241,8 +246,18 @@ class QdrantOpenAIRAGEngine:
         except Exception as exc:
             raise RAGUnavailableError("The generation service is temporarily unavailable") from exc
         usage = response.usage_metadata
+        content = str(response.content).strip()
+        if content == INSUFFICIENT_EVIDENCE_MARKER:
+            # An abstention cannot carry citations because none supports an answer.
+            return RAGAnswer(
+                content=INSUFFICIENT_EVIDENCE_MESSAGE,
+                citations=(),
+                model_name=self._settings.openai_chat_model,
+                prompt_tokens=usage.get("input_tokens") if usage else None,
+                completion_tokens=usage.get("output_tokens") if usage else None,
+            )
         return RAGAnswer(
-            content=str(response.content),
+            content=content,
             citations=citations,
             model_name=self._settings.openai_chat_model,
             prompt_tokens=usage.get("input_tokens") if usage else None,
@@ -349,9 +364,7 @@ def _authorized_candidate(point: Any, request: RAGRequest) -> RetrievalCandidate
     )
 
 
-def _authorized_payload(
-    point: Any, request: RAGRequest
-) -> tuple[dict[str, Any], UUID, UUID, UUID]:
+def _authorized_payload(point: Any, request: RAGRequest) -> tuple[dict[str, Any], UUID, UUID, UUID]:
     payload = point.payload or {}
     try:
         workspace_id = UUID(str(payload["workspace_id"]))

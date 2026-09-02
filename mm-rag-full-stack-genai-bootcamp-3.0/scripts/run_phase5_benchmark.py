@@ -7,7 +7,7 @@ from qdrant_client import QdrantClient
 
 from backend.app.core.config import PROJECT_ROOT, get_settings
 from backend.app.retrieval.benchmark import report_json, run_benchmark
-from backend.app.retrieval.evaluation import load_dataset, phase5_gate
+from backend.app.retrieval.evaluation import load_dataset
 
 
 def main() -> None:
@@ -15,12 +15,8 @@ def main() -> None:
         description="Run the paid Phase 5 dense/hybrid retrieval comparison"
     )
     parser.add_argument("--allow-paid-openai", action="store_true")
-    parser.add_argument(
-        "--embedding-cost-per-million-tokens", type=float, required=True
-    )
-    parser.add_argument(
-        "--dataset", type=Path, default=PROJECT_ROOT / "evaluation/phase5/v1"
-    )
+    parser.add_argument("--embedding-cost-per-million-tokens", type=float, required=True)
+    parser.add_argument("--dataset", type=Path, default=PROJECT_ROOT / "evaluation/phase5/v2")
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -54,13 +50,13 @@ def main() -> None:
     finally:
         qdrant.close()
     print(report_json(report))
-    for split in ("validation", "holdout"):
-        passed, failures = phase5_gate(
-            report.profiles["dense-v1"][split],
-            report.profiles["hybrid-v1"][split],
+    if not report.validation_passed:
+        raise SystemExit(
+            "Phase 5 validation gate failed; holdout was not evaluated: "
+            + "; ".join(report.validation_failures)
         )
-        if not passed:
-            raise SystemExit(f"Phase 5 {split} gate failed: {'; '.join(failures)}")
+    if report.holdout_passed is not True:
+        raise SystemExit("Phase 5 holdout gate failed: " + "; ".join(report.holdout_failures))
 
 
 if __name__ == "__main__":

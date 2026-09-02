@@ -19,8 +19,8 @@ and integrity-checked, and retention apply fails closed unless an exact owner-ap
 preview remains current. No automatic destructive retention schedule is enabled.
 Phase 5 implementation is complete but not yet accepted. The first separately
 approved paid candidate stopped at its quality gate because the v1 corpus saturated
-dense Recall@10. Accepted ADR 0022 requires a harder v2 benchmark while preserving
-the approved thresholds; its free/local implementation is in progress. The default
+dense Recall@10. ADR 0022's harder v2 benchmark and free/local gates are implemented
+while preserving the approved thresholds; a newly approved paid proof remains. The default
 `hybrid-v1` profile
 combines authorized dense and Qdrant-native BM25 legs through deterministic RRF;
 `dense-v1` remains the rollback path, and `hybrid-rerank-v1` remains opt-in until
@@ -58,8 +58,9 @@ The current `3.0` lineage contains:
   content-free candidate traces with safe dense fallback.
 - A pinned, checksum-verified offline FastEmbed BM25 model and optional local ONNX
   cross-encoder, provisioned at setup/image-build time and never in a request path.
-- A hashed 50-query benchmark, frozen dense profile, deterministic metrics/gates,
-  and an explicit paid comparison runner that stores raw results only in Git-ignored data.
+- A reproducible hashed v2 benchmark with 120 chunks and 50 balanced queries,
+  validation-before-holdout execution, separated scope/abstention metrics, a frozen
+  dense profile, and an explicit paid runner whose raw results remain Git-ignored.
 - A presentation-focused native Streamlit experience with top navigation,
   workspace switching, document/collection management, persistent chat,
   evidence inspection, first-document guidance, downloads, settings, and
@@ -422,8 +423,9 @@ make phase5-evaluation  # validates the free hashed 50-query benchmark contract
 make check-acceptance PHASE5_EMBEDDING_COST_USD_PER_MILLION_TOKENS=<current-rate>
 ```
 
-Run `make check-acceptance` only after explicit approval. It compares dense, hybrid,
-and hybrid-rerank profiles with one batched paid embedding request, then exercises
+Run `make check-acceptance` only after fresh explicit approval. It compares dense,
+hybrid, and hybrid-rerank profiles with one batched paid embedding request. Validation
+must pass before holdout retrieval/output and the end-to-end product proof can run. It then exercises
 async text/image ingestion, scoped hybrid retrieval, grounded generation, citations,
 persistence, audit, and cross-tenant denial. Temporary collections are removed and
 raw benchmark identities remain ignored. A failed benchmark gate stops before the

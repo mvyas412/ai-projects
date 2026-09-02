@@ -14,7 +14,7 @@ def main() -> None:
     parser.add_argument(
         "--dataset",
         type=Path,
-        default=PROJECT_ROOT / "evaluation/phase5/v1",
+        default=PROJECT_ROOT / "evaluation/phase5/v2",
     )
     parser.add_argument("--results", type=Path)
     parser.add_argument("--split", choices=("tune", "validation", "holdout"))

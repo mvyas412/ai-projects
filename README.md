@@ -17,9 +17,10 @@ dense/BM25 retrieval, deterministic RRF, optional local reranking, rollout profi
 and free regression gates are implemented. Final acceptance still requires one
 successful, separately approved paid benchmark/end-to-end run; no paid call runs
 implicitly. The first paid candidate on 2026-09-01 stopped at the quality gate
-because the v1 corpus saturated dense Recall@10. Accepted ADR 0022 defines the v2
-benchmark correction without weakening the approved thresholds; its free/local
-implementation is in progress.
+because the v1 corpus saturated dense Recall@10. ADR 0022's 120-chunk v2 benchmark,
+validation-before-holdout execution, and separated identity/abstention metrics are
+now implemented and pass all free gates without weakening the approved thresholds.
+A newly approved paid v2 proof remains required.
 
 See the latest application's tracked project plan and architecture handbook for
 scope and status. Secrets, local context, environments, and generated data remain

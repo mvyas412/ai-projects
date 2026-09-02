@@ -24,6 +24,7 @@ from backend.app.retrieval.evaluation import (
     EvaluationQuery,
     EvaluationResult,
     evaluate,
+    phase5_gate,
 )
 from backend.app.retrieval.ranking import (
     FastEmbedCandidateReranker,
@@ -47,6 +48,11 @@ class BenchmarkReport:
     embedding_input_tokens: int
     provider_calls: int
     estimated_cost_usd: float
+    validation_passed: bool
+    validation_failures: tuple[str, ...]
+    holdout_evaluated: bool
+    holdout_passed: bool | None
+    holdout_failures: tuple[str, ...]
 
 
 def run_benchmark(
@@ -84,13 +90,10 @@ def run_benchmark(
         threads=settings.rag_model_threads,
         max_characters=settings.rag_rerank_max_characters,
     )
-    sparse_documents = sparse_encoder.embed_documents(
-        [item.content for item in ordered_documents]
-    )
+    sparse_documents = sparse_encoder.embed_documents([item.content for item in ordered_documents])
     collection = f"phase5_benchmark_{uuid4().hex}"
     point_to_chunk = {
-        str(uuid5(BENCHMARK_NAMESPACE, item.chunk_id)): item.chunk_id
-        for item in ordered_documents
+        str(uuid5(BENCHMARK_NAMESPACE, item.chunk_id)): item.chunk_id for item in ordered_documents
     }
     try:
         _create_collection(qdrant, collection, len(document_vectors[0]))
@@ -101,17 +104,13 @@ def run_benchmark(
             document_vectors,
             sparse_documents,
         )
-        per_profile: dict[str, list[EvaluationResult]] = {
-            profile: [] for profile in PROFILE_NAMES
-        }
+        per_profile: dict[str, list[EvaluationResult]] = {profile: [] for profile in PROFILE_NAMES}
         embedding_share_ms = embedding_latency_ms / max(len(queries), 1)
-        for index, (query, dense_vector) in enumerate(
-            zip(queries, query_vectors, strict=True)
-        ):
+
+        def run_query(index: int, query: EvaluationQuery) -> None:
+            dense_vector = query_vectors[index]
             request = _request_for(query, ordered_documents)
-            dense, dense_ms = _search_dense(
-                qdrant, collection, request, dense_vector, settings
-            )
+            dense, dense_ms = _search_dense(qdrant, collection, request, dense_vector, settings)
             sparse, sparse_ms = _search_sparse(
                 qdrant,
                 collection,
@@ -135,8 +134,9 @@ def run_benchmark(
                 timeout_seconds=settings.rag_rerank_timeout_seconds,
             )
             rerank_ms = (time.perf_counter() - rerank_started) * 1000
-            provider_calls = 1 if index == 0 else 0
-            cost = estimated_cost if index == 0 else 0.0
+            first_result = not per_profile["dense-v1"]
+            provider_calls = 1 if first_result else 0
+            cost = estimated_cost if first_result else 0.0
             per_profile["dense-v1"].append(
                 _result(
                     query,
@@ -167,22 +167,53 @@ def run_benchmark(
                     cost,
                 )
             )
-        output_dir.mkdir(parents=True, exist_ok=True)
-        for profile, results in per_profile.items():
-            _write_results(output_dir / f"{profile}.jsonl", results)
+
+        # Tune and validation are scored first. Holdout retrieval is not executed until
+        # the accepted validation gate passes, preventing accidental holdout tuning.
+        for index, query in enumerate(queries):
+            if query.split != "holdout":
+                run_query(index, query)
+
         profiles = {
             profile: {
                 split: evaluate(documents, queries, results, split=split)
-                for split in ("tune", "validation", "holdout")
+                for split in ("tune", "validation")
             }
             for profile, results in per_profile.items()
         }
+        validation_passed, validation_failures = phase5_gate(
+            profiles["dense-v1"]["validation"],
+            profiles["hybrid-v1"]["validation"],
+        )
+        holdout_passed: bool | None = None
+        holdout_failures: list[str] = []
+        if validation_passed:
+            for index, query in enumerate(queries):
+                if query.split == "holdout":
+                    run_query(index, query)
+            for profile, results in per_profile.items():
+                profiles[profile]["holdout"] = evaluate(
+                    documents, queries, results, split="holdout"
+                )
+            holdout_passed, holdout_failures = phase5_gate(
+                profiles["dense-v1"]["holdout"],
+                profiles["hybrid-v1"]["holdout"],
+            )
+
+        output_dir.mkdir(parents=True, exist_ok=True)
+        for profile, results in per_profile.items():
+            _write_results(output_dir / f"{profile}.jsonl", results)
         return BenchmarkReport(
             profiles=profiles,
             embedding_model=settings.openai_embedding_model,
             embedding_input_tokens=input_tokens,
             provider_calls=1,
             estimated_cost_usd=estimated_cost,
+            validation_passed=validation_passed,
+            validation_failures=tuple(validation_failures),
+            holdout_evaluated=validation_passed,
+            holdout_passed=holdout_passed,
+            holdout_failures=tuple(holdout_failures),
         )
     finally:
         if qdrant.collection_exists(collection):
@@ -236,9 +267,7 @@ def _upsert_documents(
     qdrant.upsert(collection_name=collection, points=points, wait=True)
 
 
-def _request_for(
-    query: EvaluationQuery, documents: Sequence[EvaluationDocument]
-) -> RAGRequest:
+def _request_for(query: EvaluationQuery, documents: Sequence[EvaluationDocument]) -> RAGRequest:
     known = {document.document_id for document in documents}
     if not query.allowed_document_ids <= known:
         raise RuntimeError("Benchmark query contains an unknown document scope")

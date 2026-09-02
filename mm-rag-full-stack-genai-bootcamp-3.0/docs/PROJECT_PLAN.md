@@ -45,7 +45,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 5.5 benchmark remediation and release acceptance |
+| Active milestone | Phase 5.5 paid release acceptance |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -53,7 +53,7 @@ Rules:
 | Phase 4 | Completed and accepted — Milestones 4.0–4.5 squash-merged through PR #3 |
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
-| Phase 5 | Hybrid implementation complete; accepted ADR 0022 v2 remediation in progress |
+| Phase 5 | Hybrid implementation and ADR 0022 free v2 remediation complete; fresh paid proof pending |
 | Phases 6–9 | Planned |
 
 ## Delivery sequence and gates
@@ -595,9 +595,9 @@ Milestone 4.0 review material:
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** Hybrid implementation complete but not accepted. The first paid candidate failed
-the quality gate because the v1 corpus saturated dense Recall@10; benchmark remediation
-is accepted in ADR 0022 and being implemented with free/local checks.
+**Status:** Hybrid implementation and the accepted ADR 0022 free remediation are
+complete but not accepted. The first paid candidate failed because the v1 corpus
+saturated dense Recall@10; one newly approved v2 paid proof remains required.
 
 ### Objective
 
@@ -608,12 +608,12 @@ then reranking a bounded candidate set.
 
 | Milestone | Deliverable | Status |
 | --- | --- | --- |
-| 5.0 | Versioned retrieval evaluation dataset and dense-only baseline | V1 measured but saturated; accepted v2 remediation in progress |
+| 5.0 | Versioned retrieval evaluation dataset and dense-only baseline | V2 120-chunk/50-query contract implemented and free-validated; paid measurement pending |
 | 5.1 | Sparse-engine evaluation and ADR | Completed — ADR 0019 implemented |
 | 5.2 | Parallel dense/sparse retrieval with identical authorization filters | Completed and live-tested |
 | 5.3 | Deterministic RRF/fusion, deduplication, and source diversification | Completed and deterministic |
 | 5.4 | Bounded reranker selection and token-budgeted evidence assembly | Completed; reranker remains opt-in |
-| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | ADR 0022 free remediation in progress; fresh paid proof deferred |
+| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | ADR 0022 free remediation passes; fresh paid proof awaits approval |
 
 ### Accepted implementation contract
 
@@ -631,8 +631,10 @@ then reranking a bounded candidate set.
 
 - Reviewable implementation commit `5ab4837` contains the Phase 5 runtime, fixtures,
   tests, model lifecycle, rollout controls, and acceptance tooling.
-- A hashed synthetic benchmark contains 24 stable chunks and 50 balanced judged
-  queries with a frozen 60/20/20 split and workspace/narrow-scope negatives.
+- The v1 24-chunk corpus remains diagnostic history. The accepted reproducible v2
+  benchmark contains 120 hashed chunks and 50 balanced judged queries with a frozen
+  60/20/20 split, semantic/identifier/multi-document confounders, rotated protected
+  splits, and workspace/narrow-scope negatives.
 - New immutable generations write dense and `sparse-bm25-v1` vectors together;
   owner/admin successor reindexing preserves the prior active generation until
   checksum and count validation complete.
@@ -643,9 +645,9 @@ then reranking a bounded candidate set.
   Missing sparse/reranker artifacts fail to dense/fused order without downloading.
 - `dense-v1`, `hybrid-v1`, and `hybrid-rerank-v1` are explicit rollout profiles;
   `hybrid-v1` is the default and reranking remains disabled pending measured benefit.
-- The deterministic gate passes 167 tests with 11 expected opt-in skips, migration
+- The deterministic gate passes 171 tests with 11 expected opt-in skips, migration
   head `20260831_0013`, no schema drift, and no paid model call. The complete free
-  live gate passes all 178 tests with PostgreSQL, Qdrant, SeaweedFS, RabbitMQ,
+  live gate passes all 182 tests with PostgreSQL, Qdrant, SeaweedFS, RabbitMQ,
   FastAPI, and Streamlit ready. Rebuilt dispatcher and worker containers load pinned
   models and report healthy. The idle lease-recovery cycle refreshes worker readiness
   so an empty queue cannot age a healthy process out of Docker health.
@@ -654,9 +656,10 @@ then reranking a bounded candidate set.
   Recall@10 were both `1.0000`; nDCG@10 moved from `0.9507` to `0.9516`, below the
   accepted relative gates. Authorization identities and latency passed. The command
   stopped before the paid end-to-end proof and no retry ran.
-- Accepted ADR 0022 requires a larger confounder corpus, rotated validation/holdout,
-  validation-before-holdout execution, and separate authorization/abstention metrics
-  while preserving the accepted quality thresholds.
+- ADR 0022 is implemented: quality queries enforce a 50-candidate minimum; duplicate,
+  distribution, hash, and split-isolation checks are deterministic; validation failure
+  emits no holdout metrics or output; excluded/out-of-scope/unknown identities are hard
+  failures; retrieval emptiness is descriptive; and grounded abstention returns no citation.
 
 ### Completion gate
 
@@ -842,8 +845,8 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Implement and validate the accepted v2 fixture and holdout sequencing without paid calls | Deterministic v2 evidence and clean free gates |
-| 2 | Obtain fresh approval for one v2 paid acceptance run | Prior approval remains consumed; no implicit retry |
+| 1 | Obtain fresh approval for one v2 paid acceptance run | Prior approval remains consumed; no implicit retry |
+| 2 | Run validation first and unlock holdout/product proof only if it passes | One bounded paid attempt with aggregate evidence only |
 | 3 | If ADR 0018 passes on v2, publish a reviewable Phase 5 PR | Aggregate quality evidence, clean branch, and successful CI |
 | 4 | After explicit PR approval, squash-merge and create the immutable Phase 5 release checkpoint | Accepted squash commit and annotated release tag |
 

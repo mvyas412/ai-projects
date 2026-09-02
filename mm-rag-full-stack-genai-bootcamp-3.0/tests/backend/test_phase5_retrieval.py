@@ -9,6 +9,8 @@ from qdrant_client import QdrantClient, models
 from backend.app.core.config import Settings
 from backend.app.rag import engine as engine_module
 from backend.app.rag.engine import (
+    INSUFFICIENT_EVIDENCE_MARKER,
+    INSUFFICIENT_EVIDENCE_MESSAGE,
     QdrantOpenAIRAGEngine,
     RAGDocumentScope,
     RAGRequest,
@@ -30,6 +32,14 @@ class FakeChat:
 
     def invoke(self, messages):
         return SimpleNamespace(content="Grounded answer [1].", usage_metadata={})
+
+
+class FakeAbstainingChat:
+    def __init__(self, **kwargs):
+        pass
+
+    def invoke(self, messages):
+        return SimpleNamespace(content=INSUFFICIENT_EVIDENCE_MARKER, usage_metadata={})
 
 
 class FakeSparseEncoder:
@@ -120,9 +130,7 @@ def test_sparse_failure_returns_authorized_dense_order(monkeypatch) -> None:
     monkeypatch.setattr(engine_module, "ChatOpenAI", FakeChat)
     workspace, document, version, generation = uuid4(), uuid4(), uuid4(), uuid4()
     scope = (workspace, document, version, generation)
-    qdrant = FakeQdrant(
-        [_point("dense", scope, "dense fallback", 0.9)], [], sparse_error=True
-    )
+    qdrant = FakeQdrant([_point("dense", scope, "dense fallback", 0.9)], [], sparse_error=True)
     request = RAGRequest(
         workspace_id=workspace,
         documents=(RAGDocumentScope(document, version, generation, True),),
@@ -135,6 +143,27 @@ def test_sparse_failure_returns_authorized_dense_order(monkeypatch) -> None:
     ).answer(request)
 
     assert answer.citations[0].excerpt == "dense fallback"
+
+
+def test_grounded_answer_abstains_without_citations(monkeypatch) -> None:
+    monkeypatch.setattr(engine_module, "OpenAIEmbeddings", FakeEmbeddings)
+    monkeypatch.setattr(engine_module, "ChatOpenAI", FakeAbstainingChat)
+    workspace, document, version, generation = uuid4(), uuid4(), uuid4(), uuid4()
+    scope = (workspace, document, version, generation)
+    request = RAGRequest(
+        workspace_id=workspace,
+        documents=(RAGDocumentScope(document, version, generation, False),),
+        query="What is not stated in this evidence?",
+        history=(),
+    )
+
+    answer = QdrantOpenAIRAGEngine(
+        _settings("dense-v1"),
+        cast(QdrantClient, FakeQdrant([_point("dense", scope, "related", 0.9)], [])),
+    ).answer(request)
+
+    assert answer.content == INSUFFICIENT_EVIDENCE_MESSAGE
+    assert answer.citations == ()
 
 
 def test_mixed_generation_scope_uses_dense_only(monkeypatch) -> None:

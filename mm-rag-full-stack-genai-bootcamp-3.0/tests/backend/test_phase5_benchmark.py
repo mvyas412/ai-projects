@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import pytest
 from pydantic import SecretStr
 from qdrant_client import QdrantClient, models
 
@@ -23,8 +24,7 @@ class FakeSparseEncoder:
 
     def embed_documents(self, texts):
         return tuple(
-            models.SparseVector(indices=[index + 1], values=[1.0])
-            for index, _ in enumerate(texts)
+            models.SparseVector(indices=[index + 1], values=[1.0]) for index, _ in enumerate(texts)
         )
 
     def embed_query(self, query):
@@ -39,15 +39,22 @@ class FakeReranker:
         return tuple(float(-index) for index, _ in enumerate(candidates))
 
 
-def test_benchmark_executes_all_profiles_without_persisting_content(
-    monkeypatch, tmp_path: Path
+@pytest.mark.parametrize(
+    ("validation_passes", "expected_lines"),
+    ((False, 40), (True, 50)),
+)
+def test_benchmark_enforces_validation_before_holdout_without_persisting_content(
+    monkeypatch, tmp_path: Path, validation_passes: bool, expected_lines: int
 ) -> None:
     monkeypatch.setattr(benchmark_module, "OpenAIEmbeddings", FakeEmbeddings)
     monkeypatch.setattr(benchmark_module, "FastEmbedBM25Encoder", FakeSparseEncoder)
+    monkeypatch.setattr(benchmark_module, "FastEmbedCandidateReranker", FakeReranker)
     monkeypatch.setattr(
-        benchmark_module, "FastEmbedCandidateReranker", FakeReranker
+        benchmark_module,
+        "phase5_gate",
+        lambda dense, hybrid: (validation_passes, [] if validation_passes else ["failed"]),
     )
-    documents, queries = load_dataset(PROJECT_ROOT / "evaluation/phase5/v1")
+    documents, queries = load_dataset(PROJECT_ROOT / "evaluation/phase5/v2")
     settings = Settings(
         app_env="test",
         database_url=SecretStr("sqlite+pysqlite:///:memory:"),
@@ -72,8 +79,12 @@ def test_benchmark_executes_all_profiles_without_persisting_content(
         "hybrid-v1",
         "hybrid-rerank-v1",
     }
-    assert report.profiles["dense-v1"]["holdout"].query_count == 10
+    assert report.validation_passed is validation_passes
+    assert report.holdout_evaluated is validation_passes
+    assert ("holdout" in report.profiles["dense-v1"]) is validation_passes
+    if validation_passes:
+        assert report.profiles["dense-v1"]["holdout"].query_count == 10
     assert report.provider_calls == 1
     output = (tmp_path / "results/dense-v1.jsonl").read_text(encoding="utf-8")
     assert "When does" not in output
-    assert len(output.splitlines()) == 50
+    assert len(output.splitlines()) == expected_lines

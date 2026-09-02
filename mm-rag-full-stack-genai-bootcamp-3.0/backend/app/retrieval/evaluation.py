@@ -9,7 +9,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Literal
 
-DATASET_REVISION = "phase5-retrieval-v1"
+CURRENT_DATASET_REVISION = "phase5-retrieval-v2"
+SUPPORTED_DATASET_REVISIONS = {"phase5-retrieval-v1", CURRENT_DATASET_REVISION}
 QUERY_CLASSES = {
     "semantic_paraphrase",
     "exact_identifier",
@@ -28,6 +29,7 @@ class EvaluationDocument:
     chunk_id: str
     document_id: str
     content: str
+    fixture_role: Literal["evidence", "confounder"] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,7 +61,8 @@ class EvaluationMetrics:
     mrr_at_10: float
     ndcg_at_10: float
     source_coverage_at_10: float
-    negative_empty_accuracy: float
+    unanswerable_empty_accuracy: float
+    excluded_candidate_count: int
     unauthorized_candidate_count: int
     unknown_candidate_count: int
     p50_latency_ms: float
@@ -69,12 +72,15 @@ class EvaluationMetrics:
 
 
 def load_dataset(root: Path) -> tuple[dict[str, EvaluationDocument], list[EvaluationQuery]]:
-    verify_manifest(root)
+    manifest = verify_manifest(root)
+    revision = str(manifest["dataset_revision"])
     document_rows = _jsonl(root / "documents.jsonl")
     judgment_rows = _jsonl(root / "judgments.jsonl")
-    documents = _parse_documents(document_rows)
-    queries = _parse_queries(judgment_rows, documents)
+    documents = _parse_documents(document_rows, revision)
+    queries = _parse_queries(judgment_rows, documents, revision)
     _validate_distribution(queries)
+    if revision == CURRENT_DATASET_REVISION:
+        _validate_v2_contract(manifest, documents, queries)
     return documents, queries
 
 
@@ -124,7 +130,8 @@ def evaluate(
     reciprocal_ranks: list[float] = []
     ndcg: list[float] = []
     source_coverage: list[float] = []
-    negative_correct: list[float] = []
+    unanswerable_empty: list[float] = []
+    excluded = 0
     unauthorized = 0
     unknown = 0
     latencies: list[float] = []
@@ -140,6 +147,7 @@ def evaluate(
             documents[chunk_id].document_id not in query.allowed_document_ids
             for chunk_id in known_ranked
         )
+        excluded += sum(chunk_id in query.excluded_relevant_chunk_ids for chunk_id in ranked)
         relevant = query.relevance
         if query.answerable:
             hits = [chunk_id for chunk_id in known_ranked if chunk_id in relevant]
@@ -159,8 +167,9 @@ def evaluate(
             relevant_sources = {documents[chunk_id].document_id for chunk_id in relevant}
             retrieved_sources = {documents[chunk_id].document_id for chunk_id in hits}
             source_coverage.append(len(retrieved_sources) / len(relevant_sources))
-        else:
-            negative_correct.append(1.0 if not known_ranked else 0.0)
+        elif query.negative_kind == "unanswerable":
+            # Retrieval emptiness is diagnostic only; answer-level abstention is tested separately.
+            unanswerable_empty.append(1.0 if not known_ranked else 0.0)
         latencies.append(result.latency_ms)
         provider_calls += result.provider_calls
         cost += result.estimated_cost_usd
@@ -171,7 +180,8 @@ def evaluate(
         mrr_at_10=_mean(reciprocal_ranks),
         ndcg_at_10=_mean(ndcg),
         source_coverage_at_10=_mean(source_coverage),
-        negative_empty_accuracy=_mean(negative_correct),
+        unanswerable_empty_accuracy=_mean(unanswerable_empty),
+        excluded_candidate_count=excluded,
         unauthorized_candidate_count=unauthorized,
         unknown_candidate_count=unknown,
         p50_latency_ms=statistics.median(latencies),
@@ -189,10 +199,12 @@ def phase5_gate(dense: EvaluationMetrics, hybrid: EvaluationMetrics) -> tuple[bo
         failures.append("nDCG@10 did not improve by 5% relative")
     if hybrid.mrr_at_10 < dense.mrr_at_10 * 0.98:
         failures.append("MRR@10 regressed beyond 2%")
-    if hybrid.unauthorized_candidate_count or hybrid.unknown_candidate_count:
+    if (
+        hybrid.excluded_candidate_count
+        or hybrid.unauthorized_candidate_count
+        or hybrid.unknown_candidate_count
+    ):
         failures.append("Authorization or citation identity validation failed")
-    if hybrid.negative_empty_accuracy < dense.negative_empty_accuracy:
-        failures.append("Unanswerable-query false positives regressed")
     latency_limit = max(dense.p95_latency_ms * 1.5, dense.p95_latency_ms + 200)
     if hybrid.p95_latency_ms > latency_limit:
         failures.append("p95 retrieval latency exceeded the accepted bound")
@@ -201,12 +213,12 @@ def phase5_gate(dense: EvaluationMetrics, hybrid: EvaluationMetrics) -> tuple[bo
     return not failures, failures
 
 
-def verify_manifest(root: Path) -> None:
+def verify_manifest(root: Path) -> dict[str, Any]:
     try:
         manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise EvaluationContractError("Dataset manifest is unreadable") from exc
-    if manifest.get("dataset_revision") != DATASET_REVISION:
+    if manifest.get("dataset_revision") not in SUPPORTED_DATASET_REVISIONS:
         raise EvaluationContractError("Dataset revision is invalid")
     files = manifest.get("files")
     if not isinstance(files, dict):
@@ -216,20 +228,32 @@ def verify_manifest(root: Path) -> None:
             raise EvaluationContractError("Dataset file hash entry is invalid")
         if _file_sha256(root / relative_name) != expected_hash:
             raise EvaluationContractError(f"Dataset file hash mismatch: {relative_name}")
+    return manifest
 
 
-def _parse_documents(rows: list[dict[str, Any]]) -> dict[str, EvaluationDocument]:
+def _parse_documents(rows: list[dict[str, Any]], revision: str) -> dict[str, EvaluationDocument]:
     documents: dict[str, EvaluationDocument] = {}
     for row in rows:
-        if row.get("dataset_revision") != DATASET_REVISION:
+        if row.get("dataset_revision") != revision:
             raise EvaluationContractError("Document dataset revision is invalid")
         chunk_id = _required_text(row, "chunk_id")
         if chunk_id in documents:
             raise EvaluationContractError(f"Duplicate chunk_id: {chunk_id}")
+        raw_fixture_role = row.get("fixture_role")
+        if raw_fixture_role not in {None, "evidence", "confounder"}:
+            raise EvaluationContractError(f"Invalid fixture role for {chunk_id}")
+        fixture_role: Literal["evidence", "confounder"] | None
+        if raw_fixture_role == "evidence":
+            fixture_role = "evidence"
+        elif raw_fixture_role == "confounder":
+            fixture_role = "confounder"
+        else:
+            fixture_role = None
         documents[chunk_id] = EvaluationDocument(
             chunk_id=chunk_id,
             document_id=_required_text(row, "document_id"),
             content=_required_text(row, "content"),
+            fixture_role=fixture_role,
         )
     if not documents:
         raise EvaluationContractError("Evaluation corpus is empty")
@@ -237,13 +261,15 @@ def _parse_documents(rows: list[dict[str, Any]]) -> dict[str, EvaluationDocument
 
 
 def _parse_queries(
-    rows: list[dict[str, Any]], documents: dict[str, EvaluationDocument]
+    rows: list[dict[str, Any]],
+    documents: dict[str, EvaluationDocument],
+    revision: str,
 ) -> list[EvaluationQuery]:
     queries: list[EvaluationQuery] = []
     seen: set[str] = set()
     workspace_documents = frozenset(document.document_id for document in documents.values())
     for row in rows:
-        if row.get("dataset_revision") != DATASET_REVISION:
+        if row.get("dataset_revision") != revision:
             raise EvaluationContractError("Judgment dataset revision is invalid")
         query_id = _required_text(row, "query_id")
         if query_id in seen:
@@ -344,6 +370,48 @@ def _validate_distribution(queries: list[EvaluationQuery]) -> None:
         or max(class_counts.values()) - min(class_counts.values()) > 1
     ):
         raise EvaluationContractError("Query classes are not balanced")
+
+
+def _validate_v2_contract(
+    manifest: dict[str, Any],
+    documents: dict[str, EvaluationDocument],
+    queries: list[EvaluationQuery],
+) -> None:
+    if len(documents) < 120 or manifest.get("chunk_count") != len(documents):
+        raise EvaluationContractError("Phase 5 v2 requires at least 120 hashed chunks")
+    if manifest.get("query_count") != len(queries):
+        raise EvaluationContractError("Phase 5 v2 manifest query count is invalid")
+    if manifest.get("minimum_quality_candidate_pool") != 50:
+        raise EvaluationContractError("Phase 5 v2 candidate-pool floor is invalid")
+    if manifest.get("holdout_policy") != "validation-before-holdout":
+        raise EvaluationContractError("Phase 5 v2 holdout policy is invalid")
+
+    normalized_content = [_normalized(document.content) for document in documents.values()]
+    normalized_queries = [_normalized(query.query) for query in queries]
+    if len(normalized_content) != len(set(normalized_content)):
+        raise EvaluationContractError("Phase 5 v2 contains duplicate chunk content")
+    if len(normalized_queries) != len(set(normalized_queries)):
+        raise EvaluationContractError("Phase 5 v2 contains duplicate query text")
+
+    roles = Counter(document.fixture_role for document in documents.values())
+    if roles != {"evidence": 24, "confounder": 96}:
+        raise EvaluationContractError(f"Invalid Phase 5 v2 fixture roles: {dict(roles)}")
+    per_document = Counter(document.document_id for document in documents.values())
+    if len(per_document) != 12 or set(per_document.values()) != {10}:
+        raise EvaluationContractError("Phase 5 v2 requires twelve ten-chunk documents")
+
+    for query in queries:
+        candidate_pool = sum(
+            document.document_id in query.allowed_document_ids for document in documents.values()
+        )
+        if query.answerable and candidate_pool < 50:
+            raise EvaluationContractError(
+                f"Quality query {query.query_id} has an undersized candidate pool"
+            )
+
+
+def _normalized(value: str) -> str:
+    return " ".join(value.casefold().split())
 
 
 def _jsonl(path: Path) -> list[dict[str, Any]]:

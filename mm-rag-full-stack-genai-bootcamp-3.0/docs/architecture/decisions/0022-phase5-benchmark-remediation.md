@@ -102,3 +102,15 @@ reranker, validation-before-holdout sequence, and fresh paid-run boundary are ac
 - Unauthorized negatives return zero excluded/out-of-scope/unknown identities.
 - The grounded-answer negative case abstains without a citation.
 - A newly authorized paid candidate satisfies ADR 0018 on v2 before Phase 5 is accepted.
+
+## Implementation evidence
+
+The free remediation is implemented on 2026-09-01. The reproducible v2 fixture has
+120 unique hashed chunks, 50 balanced queries, explicit evidence/confounder roles,
+rotated validation/holdout text, and a minimum 50-candidate quality pool. The runner
+evaluates validation first and the deterministic regression proves a failure writes
+only the 40 tune/validation rows with no holdout metrics. Identity metrics separately
+count excluded, out-of-scope, and unknown candidates. Grounded generation maps an
+explicit insufficient-evidence result to a citation-free abstention. `make check`
+passes 171 tests with 11 expected opt-in skips, lint, typing, migration-head, and
+schema-drift checks. No paid request was made; the final paid acceptance item remains open.
