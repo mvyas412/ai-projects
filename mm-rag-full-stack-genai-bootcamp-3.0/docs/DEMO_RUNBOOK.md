@@ -87,3 +87,5 @@ from every free gate.
   and latency passed, but hybrid Recall@10 did not improve and ranking metrics
   regressed slightly. The runner withheld holdout and the product proof, wrote only
   ignored tune/validation results, removed its temporary collection, and did not retry.
+- Proposed ADR 0023 defines the next review boundary. No v3 fixture, gate change,
+  candidate selector, paid retry, or rollout is authorized until it is accepted.
