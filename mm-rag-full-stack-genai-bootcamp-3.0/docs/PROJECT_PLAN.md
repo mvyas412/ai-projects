@@ -45,7 +45,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 5.5 v3 paid acceptance pending |
+| Active milestone | Phase 5.5 post-v3 evidence review and remediation decision |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -53,7 +53,7 @@ Rules:
 | Phase 4 | Completed and accepted — Milestones 4.0–4.5 squash-merged through PR #3 |
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
-| Phase 5 | ADR 0023 free v3 remediation complete; paid acceptance pending |
+| Phase 5 | V3 paid validation missed the nDCG gate; holdout/proof withheld; remediation decision pending |
 | Phases 6–9 | Planned |
 
 ## Delivery sequence and gates
@@ -595,11 +595,12 @@ Milestone 4.0 review material:
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** Hybrid implementation and ADR 0023 free remediation are complete but not
-accepted. The approved v2 candidate failed validation on 2026-09-02; holdout and
-the end-to-end proof were correctly withheld. The ceiling-aware quality contract,
-protected v3 evaluation, class guardrails, and deterministic candidate selection are
-implemented and pass all free gates. No paid v3 run is authorized.
+**Status:** Hybrid implementation and ADR 0023 remediation are complete but not
+accepted. The single approved v3 candidate failed validation on 2026-09-02 because
+its 4.14% relative nDCG@10 gain missed the required 5%. Recall, MRR, class, identity,
+latency, and provider-call gates passed; holdout and the end-to-end proof were
+correctly withheld. The approval is consumed, `hybrid-v1` remains default, and a
+reviewed remediation decision is required before another versioned candidate.
 
 ### Objective
 
@@ -615,7 +616,7 @@ then reranking a bounded candidate set.
 | 5.2 | Parallel dense/sparse retrieval with identical authorization filters | Completed and live-tested |
 | 5.3 | Deterministic RRF/fusion, deduplication, and source diversification | Completed and deterministic |
 | 5.4 | Bounded reranker selection and token-budgeted evidence assembly | Completed; reranker remains opt-in |
-| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | Free ADR 0023 implementation complete; paid acceptance pending |
+| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | V3 validation failed only nDCG; remediation decision pending |
 
 ### Accepted implementation contract
 
@@ -683,6 +684,15 @@ then reranking a bounded candidate set.
   Streamlit ready. Fixture hashes/reproduction, lint, typing, migration head, schema
   drift, selector fingerprints, class gates, and holdout withholding pass without a
   paid provider call.
+- The single approved v3 attempt on 2026-09-02 ran after all 194 free live tests,
+  pinned-model checks, and fixture checks passed. One `text-embedding-3-small` batch
+  embedded 2,516 tokens at an estimated `$0.00005032`. Validation dense/`hybrid-v2`
+  Recall@10 was `0.9167`/`0.9583`, nDCG@10 was `0.8667`/`0.9026`, and MRR@10 was
+  `0.9167`/`0.9583`; hybrid p95 was `61.1 ms`. The candidate passed every evaluated
+  validation gate except the required 5% relative nDCG improvement, achieving 4.14%.
+  Identity counts stayed
+  zero. The runner wrote only 64 tune/validation rows per profile, removed its
+  temporary collection, and emitted no holdout metrics/output or product proof.
 
 ### Completion gate
 
@@ -858,6 +868,7 @@ commercial accounting, and compliance-grade administration.
 | Reranker | 5.4 | Accepted — bounded local FastEmbed cross-encoder in ADR 0021 |
 | Phase 5 benchmark remediation and negative-query contract | 5.0–5.5 | Accepted — ADR 0022 |
 | Phase 5 response to the failed v2 quality gate | 5.5 | Accepted — ADR 0023; free implementation complete |
+| Phase 5 response to the failed v3 nDCG gate | 5.5 | Decision required; no candidate or threshold change is authorized |
 | Vision embedding/enrichment models | 6.1–6.2 | TBD |
 | Structured-table execution approach | 6.3–6.4 | TBD |
 | Observability/evaluation backend | 7.0 | TBD |
@@ -869,10 +880,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Obtain fresh approval for exactly one paid v3 acceptance run | No implicit reuse of the consumed v2 approval |
-| 2 | Run validation, then holdout only if validation passes, then product proof only if both gates pass | Aggregate and per-class quality, identity, latency, cost, and signed-in product evidence |
-| 3 | Present the evidence and obtain explicit rollout/Phase 5 acceptance | `hybrid-v1` remains default until approval |
-| 4 | Publish and review the Phase 5 PR after accepted evidence | Clean branch and successful CI |
+| 1 | Review the failed v3 aggregate evidence and approve a remediation direction | Preserve the 5% gate with a new tune-only candidate, explicitly revise the claim, or stop Phase 5 without acceptance |
+| 2 | Record the approved direction in a new ADR and version every changed contract | Do not tune against observed v3 validation or inspect its holdout |
+| 3 | Implement and exhaust free deterministic/live evidence for the new version | `hybrid-v1` remains default and no paid call runs implicitly |
+| 4 | Seek separate approval for one paid run only after the new candidate is frozen | Validation must precede holdout and product proof |
 
 ## Update protocol
 

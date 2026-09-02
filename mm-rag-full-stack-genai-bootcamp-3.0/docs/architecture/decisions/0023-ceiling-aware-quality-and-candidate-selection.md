@@ -202,3 +202,21 @@ accepted for free/local implementation.
   produces no holdout retrieval, metrics, or output.
 - A newly authorized paid candidate passes validation and holdout under the same
   frozen profile before the end-to-end product proof and any rollout decision.
+
+## Implementation and paid-run evidence
+
+The free implementation passed the deterministic and live gates on 2026-09-02:
+the reproducible fixture contains 120 chunks and 80 queries, the selector is bound
+to fingerprint `91bc62b9ba956ff6e5e0561e8bf3728605c1fa4a8089c22327a86b80d7f3c74a`,
+and all 194 live tests plus pinned-model verification passed without a provider call.
+
+The user then authorized exactly one paid v3 attempt. One
+`text-embedding-3-small` batch embedded 2,516 tokens at an estimated
+`$0.00005032`. Validation dense/`hybrid-v2` Recall@10 was
+`0.9167`/`0.9583`, nDCG@10 was `0.8667`/`0.9026`, and MRR@10 was
+`0.9167`/`0.9583`; hybrid p95 latency was `61.1 ms`. Recall, MRR, class floors,
+identity safety, latency, and provider-call count passed. The 4.14% relative nDCG
+gain missed the required 5% target, so validation failed. In accordance with this
+ADR, the runner emitted only tune/validation rows, withheld holdout and the product
+proof, removed the temporary collection, and did not retry. The run satisfies the
+sequencing and safety contract but not the Phase 5 release-quality gate.

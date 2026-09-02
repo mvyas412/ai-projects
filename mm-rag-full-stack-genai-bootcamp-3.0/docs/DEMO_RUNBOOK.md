@@ -89,4 +89,10 @@ from every free gate.
   ignored tune/validation results, removed its temporary collection, and did not retry.
 - ADR 0023 free/local implementation is complete. The hashed 80-query v3 fixture,
   ceiling-aware/class gates, deterministic `hybrid-v2` fingerprint, and all 194 live
-  tests pass without provider calls. No paid v3 run or rollout is authorized.
+  tests pass without provider calls.
+- The single approved 2026-09-02 v3 attempt embedded 2,516 tokens for an estimated
+  `$0.00005032`. `hybrid-v2` passed Recall, MRR, class, identity, latency, and
+  provider-call gates, but its 4.14% relative nDCG@10 improvement missed the 5%
+  requirement. Validation therefore withheld holdout and product proof, removed the
+  temporary collection, and wrote only ignored tune/validation rows. No retry or
+  rollout is authorized; `hybrid-v1` remains default pending a new decision.

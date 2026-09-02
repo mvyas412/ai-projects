@@ -17,13 +17,15 @@ security review, checksummed compliance export, and durable tombstone-first life
 plans. Qdrant access requires bounded trusted scope, object access is backend-mediated
 and integrity-checked, and retention apply fails closed unless an exact owner-approved
 preview remains current. No automatic destructive retention schedule is enabled.
-Phase 5 implementation is complete but not yet accepted. The v1 candidate on
-2026-09-01 and v2 candidate on 2026-09-02 both stopped at validation. V2 correctly
-withheld holdout and the end-to-end proof; scope identity and latency passed, but
-the current hybrid profile did not beat dense quality. The accepted ADR 0023 free
-remediation is now implemented: a ceiling-aware quality gate, hashed 80-query v3
-evaluation, class guardrails, and fingerprinted deterministic `hybrid-v2` candidate.
-All free deterministic and live gates pass. No new paid run is authorized. The default
+Phase 5 implementation is complete but not yet accepted. The v1, v2, and v3 paid
+candidates all stopped at validation. The single approved v3 attempt on 2026-09-02
+passed the ceiling-aware Recall, MRR, class, identity, latency, and provider-call
+gates, but improved nDCG@10 by only 4.14% against the required 5%. The runner
+correctly withheld holdout and the end-to-end proof. The accepted ADR 0023 contract,
+hashed 80-query v3 evaluation, class guardrails, and fingerprinted deterministic
+`hybrid-v2` candidate remain implemented and reproducible. The paid approval is
+consumed and a new remediation decision is required before another candidate or
+run. The default
 `hybrid-v1` profile combines authorized dense and Qdrant-native BM25 legs through
 deterministic RRF;
 `dense-v1` remains the rollback path, and `hybrid-rerank-v1` remains opt-in until
@@ -130,7 +132,7 @@ The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
 shows the Phase 5 implementation checkpoint, including hybrid retrieval and the
-remaining paid quality gate.
+failed v3 paid quality gate that now requires an explicit remediation decision.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
@@ -427,9 +429,13 @@ make phase5-evaluation  # validates the free hashed 80-query v3 benchmark contra
 make check-acceptance PHASE5_EMBEDDING_COST_USD_PER_MILLION_TOKENS=<current-rate>
 ```
 
-Run `make check-acceptance` only after fresh explicit approval. The 2026-09-02
-authorization has been consumed and does not permit a retry. A fresh authorization is
-required for v3. The command compares dense, hybrid-v1, hybrid-v2, and hybrid-rerank
+Run `make check-acceptance` only after fresh explicit approval. The 2026-09-02 v3
+authorization has been consumed and does not permit a retry. The one paid batch
+embedded 2,516 tokens for an estimated `$0.00005032`; validation withheld holdout
+and product proof because `hybrid-v2` improved nDCG@10 by 4.14%, below the accepted
+5% gate. A reviewed remediation decision and a newly versioned candidate contract
+are required before seeking another authorization. The command compares dense,
+hybrid-v1, hybrid-v2, and hybrid-rerank
 profiles with one batched paid embedding request. Validation
 must pass before holdout retrieval/output and the end-to-end product proof can run. It then exercises
 async text/image ingestion, scoped hybrid retrieval, grounded generation, citations,
