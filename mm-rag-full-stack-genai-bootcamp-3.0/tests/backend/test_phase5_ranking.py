@@ -4,11 +4,16 @@ from uuid import UUID
 import pytest
 
 from backend.app.retrieval.ranking import (
+    HYBRID_V2_DENSE_POLICY,
+    HYBRID_V2_EXACT_POLICY,
+    HYBRID_V2_TUNING_GRID,
     RankingInvariantError,
     RetrievalCandidate,
     diversify_candidates,
+    hybrid_v2_profile_fingerprint,
     reciprocal_rank_fusion,
     rerank_with_timeout,
+    select_hybrid_v2_fusion,
 )
 
 
@@ -45,6 +50,43 @@ def test_rrf_rejects_duplicate_or_conflicting_identity() -> None:
 
     with pytest.raises(RankingInvariantError, match="disagreed"):
         reciprocal_rank_fusion([duplicate], [_candidate("a", 2)], k=60)
+
+
+def test_weighted_rrf_preserves_dense_preference() -> None:
+    dense = [_candidate("a", 1), _candidate("b", 2)]
+    sparse = [_candidate("b", 2), _candidate("a", 1)]
+
+    fused = reciprocal_rank_fusion(dense, sparse, k=60, dense_weight=2, sparse_weight=1)
+
+    assert [candidate.point_id for candidate in fused] == ["a", "b"]
+
+
+@pytest.mark.parametrize(
+    "query",
+    (
+        'find "written notice"',
+        "find ACME-774",
+        "show version 2.4",
+        "show SOC records",
+        "find phishing-resistant access",
+        "open handbook.pdf",
+    ),
+)
+def test_hybrid_v2_exact_signals_select_balanced_fusion(query: str) -> None:
+    assert select_hybrid_v2_fusion(query) == HYBRID_V2_EXACT_POLICY
+
+
+def test_hybrid_v2_ambiguous_query_uses_frozen_dense_policy() -> None:
+    assert select_hybrid_v2_fusion("how should administrators sign in") == HYBRID_V2_DENSE_POLICY
+    assert {(policy.k, policy.dense_weight, policy.sparse_weight) for policy in HYBRID_V2_TUNING_GRID} == {
+        (k, dense, sparse)
+        for k in (20, 40, 60)
+        for dense, sparse in ((1.0, 1.0), (2.0, 1.0), (3.0, 1.0), (1.0, 2.0))
+    }
+    assert (
+        hybrid_v2_profile_fingerprint()
+        == "91bc62b9ba956ff6e5e0561e8bf3728605c1fa4a8089c22327a86b80d7f3c74a"
+    )
 
 
 def test_multi_document_diversification_is_bounded_but_single_document_is_not() -> None:

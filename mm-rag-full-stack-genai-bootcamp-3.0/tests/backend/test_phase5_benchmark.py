@@ -41,7 +41,7 @@ class FakeReranker:
 
 @pytest.mark.parametrize(
     ("validation_passes", "expected_lines"),
-    ((False, 40), (True, 50)),
+    ((False, 64), (True, 80)),
 )
 def test_benchmark_enforces_validation_before_holdout_without_persisting_content(
     monkeypatch, tmp_path: Path, validation_passes: bool, expected_lines: int
@@ -52,9 +52,12 @@ def test_benchmark_enforces_validation_before_holdout_without_persisting_content
     monkeypatch.setattr(
         benchmark_module,
         "phase5_gate",
-        lambda dense, hybrid: (validation_passes, [] if validation_passes else ["failed"]),
+        lambda dense, hybrid, **kwargs: (
+            validation_passes,
+            [] if validation_passes else ["failed"],
+        ),
     )
-    documents, queries = load_dataset(PROJECT_ROOT / "evaluation/phase5/v2")
+    documents, queries = load_dataset(PROJECT_ROOT / "evaluation/phase5/v3")
     settings = Settings(
         app_env="test",
         database_url=SecretStr("sqlite+pysqlite:///:memory:"),
@@ -77,13 +80,22 @@ def test_benchmark_enforces_validation_before_holdout_without_persisting_content
     assert set(report.profiles) == {
         "dense-v1",
         "hybrid-v1",
+        "hybrid-v2",
         "hybrid-rerank-v1",
+    }
+    assert report.candidate_profile == "hybrid-v2"
+    assert report.quality_contract_revision == "phase5-quality-v2"
+    assert len(report.candidate_fingerprint) == 64
+    assert set(report.class_metrics["hybrid-v2"]["validation"]) == {
+        "semantic_paraphrase",
+        "exact_identifier",
+        "multi_document",
     }
     assert report.validation_passed is validation_passes
     assert report.holdout_evaluated is validation_passes
     assert ("holdout" in report.profiles["dense-v1"]) is validation_passes
     if validation_passes:
-        assert report.profiles["dense-v1"]["holdout"].query_count == 10
+        assert report.profiles["dense-v1"]["holdout"].query_count == 16
     assert report.provider_calls == 1
     output = (tmp_path / "results/dense-v1.jsonl").read_text(encoding="utf-8")
     assert "When does" not in output

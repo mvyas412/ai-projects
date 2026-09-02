@@ -18,6 +18,7 @@ from backend.app.retrieval.ranking import (
     diversify_candidates,
     reciprocal_rank_fusion,
     rerank_with_timeout,
+    select_hybrid_v2_fusion,
 )
 from backend.app.retrieval.scope import workspace_filter
 from backend.app.retrieval.sparse import (
@@ -137,6 +138,7 @@ class QdrantOpenAIRAGEngine:
         fusion_ms = 0.0
         rerank_ms = 0.0
         reranker_attempted = False
+        fusion_policy_revision: str | None = None
         if use_hybrid and self._sparse_encoder is not None:
             sparse_points: list[Any] = []
             sparse_started = perf_counter()
@@ -160,10 +162,20 @@ class QdrantOpenAIRAGEngine:
                 sparse = [_authorized_candidate(point, request) for point in sparse_points]
                 fusion_started = perf_counter()
                 try:
+                    fusion_policy = (
+                        select_hybrid_v2_fusion(request.query)
+                        if self._settings.rag_retrieval_profile == "hybrid-v2"
+                        else None
+                    )
                     fused = reciprocal_rank_fusion(
                         dense,
                         sparse,
-                        k=self._settings.rag_fusion_k,
+                        k=(fusion_policy.k if fusion_policy else self._settings.rag_fusion_k),
+                        dense_weight=(fusion_policy.dense_weight if fusion_policy else 1.0),
+                        sparse_weight=(fusion_policy.sparse_weight if fusion_policy else 1.0),
+                    )
+                    fusion_policy_revision = (
+                        fusion_policy.revision if fusion_policy else "hybrid-v1-equal-1-1"
                     )
                     ranked = diversify_candidates(
                         fused,
@@ -192,6 +204,7 @@ class QdrantOpenAIRAGEngine:
         logger.info(
             "retrieval_ranked",
             ranking_profile=self._settings.rag_retrieval_profile,
+            fusion_policy_revision=fusion_policy_revision,
             sparse_used=bool(sparse),
             reranker_attempted=reranker_attempted,
             dense_point_ids=[candidate.point_id for candidate in dense],

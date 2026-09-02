@@ -125,6 +125,44 @@ def test_hybrid_retrieval_uses_same_filter_and_rrf(monkeypatch) -> None:
     assert qdrant.filters[0].model_dump() == qdrant.filters[1].model_dump()
 
 
+@pytest.mark.parametrize(
+    ("query", "expected_weights"),
+    (("find ACME-774", (1.0, 1.0)), ("how does renewal work", (2.0, 1.0))),
+)
+def test_hybrid_v2_uses_only_frozen_query_signal_policy(
+    monkeypatch, query: str, expected_weights: tuple[float, float]
+) -> None:
+    monkeypatch.setattr(engine_module, "OpenAIEmbeddings", FakeEmbeddings)
+    monkeypatch.setattr(engine_module, "ChatOpenAI", FakeChat)
+    original_fusion = engine_module.reciprocal_rank_fusion
+    observed: dict[str, float] = {}
+
+    def capture_fusion(dense, sparse, **kwargs):
+        observed.update(kwargs)
+        return original_fusion(dense, sparse, **kwargs)
+
+    monkeypatch.setattr(engine_module, "reciprocal_rank_fusion", capture_fusion)
+    workspace, document, version, generation = uuid4(), uuid4(), uuid4(), uuid4()
+    scope = (workspace, document, version, generation)
+    point = _point("shared", scope, "authorized evidence", 1.0)
+    qdrant = FakeQdrant([point], [point])
+    request = RAGRequest(
+        workspace_id=workspace,
+        documents=(RAGDocumentScope(document, version, generation, True),),
+        query=query,
+        history=(),
+    )
+
+    QdrantOpenAIRAGEngine(
+        _settings("hybrid-v2"),
+        cast(QdrantClient, qdrant),
+        sparse_encoder=FakeSparseEncoder(),
+    ).answer(request)
+
+    assert (observed["dense_weight"], observed["sparse_weight"]) == expected_weights
+    assert qdrant.filters[0].model_dump() == qdrant.filters[1].model_dump()
+
+
 def test_sparse_failure_returns_authorized_dense_order(monkeypatch) -> None:
     monkeypatch.setattr(engine_module, "OpenAIEmbeddings", FakeEmbeddings)
     monkeypatch.setattr(engine_module, "ChatOpenAI", FakeChat)

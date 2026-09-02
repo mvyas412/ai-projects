@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import math
+import re
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass, replace
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Protocol, Sequence
 from uuid import UUID
@@ -14,6 +17,40 @@ from backend.app.retrieval.artifacts import RERANK_MODEL, resolve_local_model
 
 class RankingInvariantError(RuntimeError):
     """Raised when a provider returns candidates that violate ranking identity."""
+
+
+@dataclass(frozen=True, slots=True)
+class FusionPolicy:
+    revision: str
+    k: int
+    dense_weight: float
+    sparse_weight: float
+
+
+HYBRID_V2_DENSE_POLICY = FusionPolicy("hybrid-v2-dense-2-1-k60", 60, 2.0, 1.0)
+HYBRID_V2_EXACT_POLICY = FusionPolicy("hybrid-v2-exact-1-1-k60", 60, 1.0, 1.0)
+HYBRID_V2_PROFILE_REVISION = "hybrid-v2-selector-v1"
+HYBRID_V2_DIVERSITY_POLICY_REVISION = "multi-document-max-three-v1"
+HYBRID_V2_CANDIDATE_BOUNDS = (
+    ("dense_candidates", 30),
+    ("sparse_candidates", 30),
+    ("pre_rerank_candidates", 20),
+    ("final_evidence", 8),
+)
+HYBRID_V2_TUNING_GRID = tuple(
+    FusionPolicy(f"hybrid-v2-grid-{dense:g}-{sparse:g}-k{k}", k, dense, sparse)
+    for k in (20, 40, 60)
+    for dense, sparse in ((1.0, 1.0), (2.0, 1.0), (3.0, 1.0), (1.0, 2.0))
+)
+
+_EXACT_SIGNAL_PATTERNS = (
+    re.compile(r'["“][^"”]+["”]'),
+    re.compile(r"\b(?=\S*[A-Za-z])(?=\S*\d)[A-Za-z0-9][A-Za-z0-9._/-]*\b"),
+    re.compile(r"\b\d+(?:[.,]\d+)*(?:%|percent)?\b", re.IGNORECASE),
+    re.compile(r"\b[A-Z]{2,}(?:-[A-Z0-9]+)*\b"),
+    re.compile(r"\b[A-Za-z]{3,}(?:-[A-Za-z]{2,})+\b"),
+    re.compile(r"\b\S+\.(?:com|net|org|pdf|docx?|xlsx?|csv)\b", re.IGNORECASE),
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,6 +94,30 @@ class FastEmbedCandidateReranker:
     def scores(self, query: str, candidates: Sequence[RetrievalCandidate]) -> tuple[float, ...]:
         documents = [candidate.content[: self._max_characters] for candidate in candidates]
         return tuple(float(value) for value in self._model.rerank(query, documents))
+
+
+def select_hybrid_v2_fusion(query: str) -> FusionPolicy:
+    """Select a frozen fusion policy from query syntax, never benchmark labels."""
+
+    normalized = " ".join(query.split())
+    if any(pattern.search(normalized) for pattern in _EXACT_SIGNAL_PATTERNS):
+        return HYBRID_V2_EXACT_POLICY
+    return HYBRID_V2_DENSE_POLICY
+
+
+def hybrid_v2_profile_fingerprint() -> str:
+    payload = {
+        "profile_revision": HYBRID_V2_PROFILE_REVISION,
+        "diversity_policy_revision": HYBRID_V2_DIVERSITY_POLICY_REVISION,
+        "candidate_bounds": dict(HYBRID_V2_CANDIDATE_BOUNDS),
+        "dense_policy": asdict(HYBRID_V2_DENSE_POLICY),
+        "exact_policy": asdict(HYBRID_V2_EXACT_POLICY),
+        "exact_patterns": [pattern.pattern for pattern in _EXACT_SIGNAL_PATTERNS],
+        "normalization": "unicode-preserving-whitespace-collapse-v1",
+        "tuning_grid": [asdict(policy) for policy in HYBRID_V2_TUNING_GRID],
+    }
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def reciprocal_rank_fusion(

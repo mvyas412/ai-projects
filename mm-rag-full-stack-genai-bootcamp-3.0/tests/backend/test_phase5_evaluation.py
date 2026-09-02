@@ -5,28 +5,32 @@ import pytest
 
 from backend.app.core.config import PROJECT_ROOT
 from backend.app.retrieval.evaluation import (
+    ANSWERABLE_QUERY_CLASSES,
+    QUALITY_CONTRACT_V2,
     EvaluationContractError,
     EvaluationMetrics,
     EvaluationResult,
     _validate_v2_contract,
     evaluate,
+    evaluate_by_class,
     load_dataset,
     phase5_gate,
+    phase5_recall_target,
 )
-from scripts.build_phase5_v2_fixture import rendered_files
+from scripts.build_phase5_v3_fixture import rendered_files
 
-DATASET = PROJECT_ROOT / "evaluation/phase5/v2"
-V1_DATASET = PROJECT_ROOT / "evaluation/phase5/v1"
+DATASET = PROJECT_ROOT / "evaluation/phase5/v3"
+V2_DATASET = PROJECT_ROOT / "evaluation/phase5/v2"
 
 
 def test_phase5_dataset_is_hashed_balanced_and_split() -> None:
     documents, queries = load_dataset(DATASET)
 
     assert len(documents) == 120
-    assert len(queries) == 50
-    assert sum(query.split == "tune" for query in queries) == 30
-    assert sum(query.split == "validation" for query in queries) == 10
-    assert sum(query.split == "holdout" for query in queries) == 10
+    assert len(queries) == 80
+    assert sum(query.split == "tune" for query in queries) == 48
+    assert sum(query.split == "validation" for query in queries) == 16
+    assert sum(query.split == "holdout" for query in queries) == 16
     assert {query.query_class for query in queries} == {
         "semantic_paraphrase",
         "exact_identifier",
@@ -37,23 +41,37 @@ def test_phase5_dataset_is_hashed_balanced_and_split() -> None:
     assert sum(document.fixture_role == "evidence" for document in documents.values()) == 24
     assert sum(document.fixture_role == "confounder" for document in documents.values()) == 96
     negatives = [query for query in queries if query.query_class == "negative"]
-    assert sum(query.negative_kind == "unanswerable" for query in negatives) == 6
-    assert sum(query.negative_kind == "unauthorized_scope" for query in negatives) == 6
+    assert sum(query.negative_kind == "unanswerable" for query in negatives) == 10
+    assert sum(query.negative_kind == "unauthorized_scope" for query in negatives) == 10
+    for split in ("tune", "validation", "holdout"):
+        split_queries = [query for query in queries if query.split == split]
+        assert all(
+            sum(query.query_class == query_class for query in split_queries) >= 4
+            for query_class in ANSWERABLE_QUERY_CLASSES
+        )
+        split_negatives = [query for query in split_queries if query.query_class == "negative"]
+        assert {query.negative_kind for query in split_negatives} == {
+            "unanswerable",
+            "unauthorized_scope",
+        }
 
 
-def test_phase5_v2_fixture_is_reproducible_and_rotates_the_holdout() -> None:
+def test_phase5_v3_fixture_is_reproducible_and_rotates_protected_queries() -> None:
     for name, expected in rendered_files().items():
         assert (DATASET / name).read_bytes() == expected
 
-    _, v1_queries = load_dataset(V1_DATASET)
-    _, v2_queries = load_dataset(DATASET)
-    v1_protected = {
-        query.query.casefold() for query in v1_queries if query.split in {"validation", "holdout"}
-    }
+    _, v2_queries = load_dataset(V2_DATASET)
+    _, v3_queries = load_dataset(DATASET)
     v2_protected = {
         query.query.casefold() for query in v2_queries if query.split in {"validation", "holdout"}
     }
-    assert v1_protected.isdisjoint(v2_protected)
+    v3_protected = {
+        query.query.casefold() for query in v3_queries if query.split in {"validation", "holdout"}
+    }
+    assert v2_protected.isdisjoint(v3_protected)
+    assert {query.query_id for query in v2_queries}.isdisjoint(
+        query.query_id for query in v3_queries
+    )
 
 
 def test_phase5_metrics_validate_identity_scope_and_negatives() -> None:
@@ -82,7 +100,7 @@ def test_phase5_metrics_validate_identity_scope_and_negatives() -> None:
     assert metrics.excluded_candidate_count == 0
     assert metrics.unauthorized_candidate_count == 0
     assert metrics.unknown_candidate_count == 0
-    assert evaluate(documents, queries, results, split="holdout").query_count == 10
+    assert evaluate(documents, queries, results, split="holdout").query_count == 16
 
     unauthorized = next(query for query in queries if query.negative_kind == "unauthorized_scope")
     unsafe_results = [
@@ -97,8 +115,8 @@ def test_phase5_metrics_validate_identity_scope_and_negatives() -> None:
 
 
 def test_phase5_v2_preflight_rejects_an_undersized_quality_pool() -> None:
-    documents, queries = load_dataset(DATASET)
-    manifest = json.loads((DATASET / "manifest.json").read_text(encoding="utf-8"))
+    documents, queries = load_dataset(V2_DATASET)
+    manifest = json.loads((V2_DATASET / "manifest.json").read_text(encoding="utf-8"))
     first = queries[0]
     narrowed = replace(
         first,
@@ -142,7 +160,64 @@ def test_phase5_gate_enforces_quality_security_latency_and_cost() -> None:
     )
     failing = replace(passing, excluded_candidate_count=1)
 
-    assert phase5_gate(dense, passing) == (True, [])
-    passed, failures = phase5_gate(dense, failing)
+    dense_by_class = {query_class: dense for query_class in ANSWERABLE_QUERY_CLASSES}
+    passing_by_class = {query_class: passing for query_class in ANSWERABLE_QUERY_CLASSES}
+    assert phase5_gate(
+        dense,
+        passing,
+        quality_contract_revision=QUALITY_CONTRACT_V2,
+        dense_by_class=dense_by_class,
+        hybrid_by_class=passing_by_class,
+    ) == (True, [])
+    passed, failures = phase5_gate(
+        dense,
+        failing,
+        quality_contract_revision=QUALITY_CONTRACT_V2,
+        dense_by_class=dense_by_class,
+        hybrid_by_class=passing_by_class,
+    )
     assert passed is False
     assert "Authorization" in failures[0]
+
+
+def test_phase5_ceiling_aware_recall_targets_use_raw_values() -> None:
+    boundary = 10 / 11
+
+    assert phase5_recall_target(0.5, quality_contract_revision=QUALITY_CONTRACT_V2) == 0.55
+    assert phase5_recall_target(
+        boundary, quality_contract_revision=QUALITY_CONTRACT_V2
+    ) == pytest.approx(1.0)
+    assert phase5_recall_target(
+        0.9375, quality_contract_revision=QUALITY_CONTRACT_V2
+    ) == pytest.approx(0.94375)
+    assert phase5_recall_target(1.0, quality_contract_revision=QUALITY_CONTRACT_V2) == 1.0
+
+
+def test_phase5_class_metrics_and_guardrails_detect_hidden_regression() -> None:
+    documents, queries = load_dataset(DATASET)
+    results = [
+        EvaluationResult(
+            query_id=query.query_id,
+            ranked_chunk_ids=tuple(query.relevance),
+            latency_ms=1,
+        )
+        for query in queries
+    ]
+    class_metrics = evaluate_by_class(documents, queries, results, split="validation")
+
+    assert set(class_metrics) == set(ANSWERABLE_QUERY_CLASSES)
+    assert all(metrics.query_count == 4 for metrics in class_metrics.values())
+
+    dense = class_metrics["semantic_paraphrase"]
+    regressed = replace(dense, recall_at_10=dense.recall_at_10 - 0.01)
+    candidate_classes = dict(class_metrics)
+    candidate_classes["semantic_paraphrase"] = regressed
+    passed, failures = phase5_gate(
+        dense,
+        replace(dense, ndcg_at_10=dense.ndcg_at_10 * 1.05),
+        dense_by_class=class_metrics,
+        hybrid_by_class=candidate_classes,
+    )
+
+    assert passed is False
+    assert "semantic_paraphrase Recall@10 regressed" in failures

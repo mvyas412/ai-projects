@@ -9,15 +9,32 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Literal
 
-CURRENT_DATASET_REVISION = "phase5-retrieval-v2"
-SUPPORTED_DATASET_REVISIONS = {"phase5-retrieval-v1", CURRENT_DATASET_REVISION}
+from backend.app.retrieval.ranking import hybrid_v2_profile_fingerprint
+
+CURRENT_DATASET_REVISION = "phase5-retrieval-v3"
+SUPPORTED_DATASET_REVISIONS = {
+    "phase5-retrieval-v1",
+    "phase5-retrieval-v2",
+    CURRENT_DATASET_REVISION,
+}
+QUALITY_CONTRACT_V1 = "phase5-quality-v1"
+QUALITY_CONTRACT_V2 = "phase5-quality-v2"
 QUERY_CLASSES = {
     "semantic_paraphrase",
     "exact_identifier",
     "multi_document",
     "negative",
 }
-SPLIT_COUNTS = {"tune": 30, "validation": 10, "holdout": 10}
+ANSWERABLE_QUERY_CLASSES = (
+    "semantic_paraphrase",
+    "exact_identifier",
+    "multi_document",
+)
+SPLIT_COUNTS_BY_REVISION = {
+    "phase5-retrieval-v1": {"tune": 30, "validation": 10, "holdout": 10},
+    "phase5-retrieval-v2": {"tune": 30, "validation": 10, "holdout": 10},
+    CURRENT_DATASET_REVISION: {"tune": 48, "validation": 16, "holdout": 16},
+}
 
 
 class EvaluationContractError(ValueError):
@@ -43,6 +60,7 @@ class EvaluationQuery:
     relevance: dict[str, int]
     negative_kind: Literal["unanswerable", "unauthorized_scope"] | None = None
     excluded_relevant_chunk_ids: frozenset[str] = frozenset()
+    dataset_revision: str = "phase5-retrieval-v1"
 
 
 @dataclass(frozen=True, slots=True)
@@ -78,9 +96,11 @@ def load_dataset(root: Path) -> tuple[dict[str, EvaluationDocument], list[Evalua
     judgment_rows = _jsonl(root / "judgments.jsonl")
     documents = _parse_documents(document_rows, revision)
     queries = _parse_queries(judgment_rows, documents, revision)
-    _validate_distribution(queries)
-    if revision == CURRENT_DATASET_REVISION:
+    _validate_distribution(queries, revision)
+    if revision == "phase5-retrieval-v2":
         _validate_v2_contract(manifest, documents, queries)
+    elif revision == CURRENT_DATASET_REVISION:
+        _validate_v3_contract(manifest, documents, queries)
     return documents, queries
 
 
@@ -191,10 +211,57 @@ def evaluate(
     )
 
 
-def phase5_gate(dense: EvaluationMetrics, hybrid: EvaluationMetrics) -> tuple[bool, list[str]]:
+def evaluate_by_class(
+    documents: dict[str, EvaluationDocument],
+    queries: Iterable[EvaluationQuery],
+    results: Iterable[EvaluationResult],
+    *,
+    split: str,
+) -> dict[str, EvaluationMetrics]:
+    query_list = list(queries)
+    result_list = list(results)
+    by_class: dict[str, EvaluationMetrics] = {}
+    for query_class in ANSWERABLE_QUERY_CLASSES:
+        class_queries = [query for query in query_list if query.query_class == query_class]
+        class_ids = {query.query_id for query in class_queries}
+        class_results = [result for result in result_list if result.query_id in class_ids]
+        by_class[query_class] = evaluate(
+            documents,
+            class_queries,
+            class_results,
+            split=split,
+        )
+    return by_class
+
+
+def phase5_recall_target(dense_recall: float, *, quality_contract_revision: str) -> float:
+    if quality_contract_revision == QUALITY_CONTRACT_V1:
+        return dense_recall * 1.10
+    if quality_contract_revision != QUALITY_CONTRACT_V2:
+        raise EvaluationContractError("Unknown Phase 5 quality contract revision")
+    if dense_recall > 10 / 11:
+        return dense_recall + 0.10 * (1.0 - dense_recall)
+    return dense_recall * 1.10
+
+
+def phase5_gate(
+    dense: EvaluationMetrics,
+    hybrid: EvaluationMetrics,
+    *,
+    quality_contract_revision: str = QUALITY_CONTRACT_V2,
+    dense_by_class: dict[str, EvaluationMetrics] | None = None,
+    hybrid_by_class: dict[str, EvaluationMetrics] | None = None,
+) -> tuple[bool, list[str]]:
     failures: list[str] = []
-    if hybrid.recall_at_10 < dense.recall_at_10 * 1.10:
-        failures.append("Recall@10 did not improve by 10% relative")
+    recall_target = phase5_recall_target(
+        dense.recall_at_10,
+        quality_contract_revision=quality_contract_revision,
+    )
+    if hybrid.recall_at_10 < recall_target:
+        if quality_contract_revision == QUALITY_CONTRACT_V2 and dense.recall_at_10 > 10 / 11:
+            failures.append("Recall@10 did not reduce remaining error by 10%")
+        else:
+            failures.append("Recall@10 did not improve by 10% relative")
     if hybrid.ndcg_at_10 < dense.ndcg_at_10 * 1.05:
         failures.append("nDCG@10 did not improve by 5% relative")
     if hybrid.mrr_at_10 < dense.mrr_at_10 * 0.98:
@@ -210,7 +277,47 @@ def phase5_gate(dense: EvaluationMetrics, hybrid: EvaluationMetrics) -> tuple[bo
         failures.append("p95 retrieval latency exceeded the accepted bound")
     if hybrid.provider_calls > dense.provider_calls:
         failures.append("Hybrid retrieval added paid/provider calls")
+
+    if quality_contract_revision == QUALITY_CONTRACT_V2:
+        if dense_by_class is None or hybrid_by_class is None:
+            failures.append("Per-class quality metrics are missing")
+        else:
+            _apply_class_guardrails(dense_by_class, hybrid_by_class, failures)
     return not failures, failures
+
+
+def _apply_class_guardrails(
+    dense_by_class: dict[str, EvaluationMetrics],
+    hybrid_by_class: dict[str, EvaluationMetrics],
+    failures: list[str],
+) -> None:
+    if set(dense_by_class) != set(ANSWERABLE_QUERY_CLASSES) or set(hybrid_by_class) != set(
+        ANSWERABLE_QUERY_CLASSES
+    ):
+        failures.append("Per-class quality metrics are incomplete")
+        return
+
+    for query_class in ANSWERABLE_QUERY_CLASSES:
+        dense = dense_by_class[query_class]
+        hybrid = hybrid_by_class[query_class]
+        if hybrid.recall_at_10 < dense.recall_at_10:
+            failures.append(f"{query_class} Recall@10 regressed")
+        if hybrid.ndcg_at_10 < dense.ndcg_at_10 * 0.98:
+            failures.append(f"{query_class} nDCG@10 regressed beyond 2%")
+        if hybrid.mrr_at_10 < dense.mrr_at_10 * 0.98:
+            failures.append(f"{query_class} MRR@10 regressed beyond 2%")
+
+    lexical_gain = any(
+        hybrid_by_class[query_class].recall_at_10
+        > dense_by_class[query_class].recall_at_10
+        or hybrid_by_class[query_class].ndcg_at_10
+        > dense_by_class[query_class].ndcg_at_10
+        or hybrid_by_class[query_class].source_coverage_at_10
+        > dense_by_class[query_class].source_coverage_at_10
+        for query_class in ("exact_identifier", "multi_document")
+    )
+    if not lexical_gain:
+        failures.append("Exact-term and multi-document classes showed no measurable gain")
 
 
 def verify_manifest(root: Path) -> dict[str, Any]:
@@ -277,7 +384,7 @@ def _parse_queries(
         seen.add(query_id)
         split = row.get("split")
         query_class = row.get("query_class")
-        if split not in SPLIT_COUNTS or query_class not in QUERY_CLASSES:
+        if split not in SPLIT_COUNTS_BY_REVISION[revision] or query_class not in QUERY_CLASSES:
             raise EvaluationContractError(f"Invalid classification for {query_id}")
         allowed = row.get("allowed_document_ids")
         relevance_rows = row.get("relevance")
@@ -323,6 +430,7 @@ def _parse_queries(
                 relevance=relevance,
                 negative_kind=negative_kind,
                 excluded_relevant_chunk_ids=excluded_relevance,
+                dataset_revision=revision,
             )
         )
     return queries
@@ -358,11 +466,12 @@ def _negative_contract(
     return negative_kind, excluded_ids
 
 
-def _validate_distribution(queries: list[EvaluationQuery]) -> None:
-    if len(queries) < 50:
-        raise EvaluationContractError("The first Phase 5 dataset requires at least 50 queries")
+def _validate_distribution(queries: list[EvaluationQuery], revision: str) -> None:
+    expected_split_counts = SPLIT_COUNTS_BY_REVISION[revision]
+    if len(queries) != sum(expected_split_counts.values()):
+        raise EvaluationContractError("The Phase 5 query count does not match its revision")
     split_counts = Counter(query.split for query in queries)
-    if split_counts != SPLIT_COUNTS:
+    if split_counts != expected_split_counts:
         raise EvaluationContractError(f"Invalid dataset split: {dict(split_counts)}")
     class_counts = Counter(query.query_class for query in queries)
     if (
@@ -407,6 +516,35 @@ def _validate_v2_contract(
         if query.answerable and candidate_pool < 50:
             raise EvaluationContractError(
                 f"Quality query {query.query_id} has an undersized candidate pool"
+            )
+
+
+def _validate_v3_contract(
+    manifest: dict[str, Any],
+    documents: dict[str, EvaluationDocument],
+    queries: list[EvaluationQuery],
+) -> None:
+    _validate_v2_contract(manifest, documents, queries)
+    if manifest.get("quality_contract_revision") != QUALITY_CONTRACT_V2:
+        raise EvaluationContractError("Phase 5 v3 quality contract revision is invalid")
+    if manifest.get("candidate_profile") != "hybrid-v2":
+        raise EvaluationContractError("Phase 5 v3 candidate profile is invalid")
+    if manifest.get("candidate_profile_fingerprint") != hybrid_v2_profile_fingerprint():
+        raise EvaluationContractError("Phase 5 v3 candidate fingerprint is stale")
+    if manifest.get("predecessor_holdout_policy") != "sealed-not-reused":
+        raise EvaluationContractError("Phase 5 v3 predecessor holdout policy is invalid")
+
+    for split in SPLIT_COUNTS_BY_REVISION[CURRENT_DATASET_REVISION]:
+        split_queries = [query for query in queries if query.split == split]
+        class_counts = Counter(query.query_class for query in split_queries)
+        if any(class_counts[query_class] < 4 for query_class in QUERY_CLASSES):
+            raise EvaluationContractError(f"Phase 5 v3 {split} query classes are undersized")
+        negative_kinds = Counter(
+            query.negative_kind for query in split_queries if query.query_class == "negative"
+        )
+        if not {"unanswerable", "unauthorized_scope"} <= set(negative_kinds):
+            raise EvaluationContractError(
+                f"Phase 5 v3 {split} lacks both negative-query kinds"
             )
 
 

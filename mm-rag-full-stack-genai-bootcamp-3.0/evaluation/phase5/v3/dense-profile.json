@@ -1,0 +1,23 @@
+{
+  "authorization_scope_revision": "adr-0015-v1",
+  "baseline": "dense-v1",
+  "candidate": "hybrid-v2",
+  "candidate_limits": {
+    "final_evidence": 8,
+    "per_leg": 30,
+    "pre_rerank": 20
+  },
+  "candidate_profile_fingerprint": "91bc62b9ba956ff6e5e0561e8bf3728605c1fa4a8089c22327a86b80d7f3c74a",
+  "dataset_revision": "phase5-retrieval-v3",
+  "embedding_model": "text-embedding-3-small",
+  "embedding_provider": "openai",
+  "evaluation_depth": 10,
+  "holdout_policy": "validation-before-holdout",
+  "metric_revision": "phase5-quality-v2",
+  "minimum_quality_candidate_pool": 50,
+  "paid_run": "explicit-opt-in",
+  "pipeline_profile": "phase3-async-v1",
+  "predecessor_holdout_policy": "sealed-not-reused",
+  "qdrant_collection_schema": "unnamed-dense-cosine-with-payload-schema-2",
+  "source_release": "mm-rag-v4.0.0"
+}
