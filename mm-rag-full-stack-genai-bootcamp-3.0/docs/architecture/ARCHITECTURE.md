@@ -20,8 +20,9 @@ handbook remain the editable source of truth.
 The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 is the Phase 5 implementation checkpoint. It includes the accepted Phase 3/4
 runtime and governance boundaries plus hybrid retrieval. The v2 paid candidate
-failed validation on 2026-09-02; holdout and the product proof were withheld. ADR
-0023 is accepted for free/local quality and candidate remediation.
+failed validation on 2026-09-02; holdout and the product proof were withheld. The
+accepted ADR 0023 free v3 quality/candidate remediation is implemented and verified;
+a paid v3 acceptance run is not yet authorized.
 
 ## Status legend
 
@@ -343,7 +344,8 @@ partial progress, honor holds/live work, and retain a content-free completion re
 
 **Status:** Implemented under accepted ADRs 0018–0023 but not accepted. The v1 and
 v2 paid candidates both failed validation. V2 withheld holdout and product proof as
-designed. ADR 0023 authorizes free remediation; no paid retry is authorized.
+designed. ADR 0023 free remediation is implemented and verified; no paid v3 run is
+authorized.
 
 ```mermaid
 flowchart LR
@@ -369,7 +371,8 @@ Authorization applies before every search. Evaluate Recall@k, MRR/nDCG,
 groundedness, citation correctness, latency, and cost. Exit: the hybrid pipeline
 measurably beats dense-only retrieval without weakening isolation or citations.
 
-The implementation provides a reproducible 120-chunk/50-query v2 benchmark and frozen dense profile,
+The implementation retains the reproducible 120-chunk/50-query v2 diagnostic and
+adds a hashed 120-chunk/80-query v3 benchmark and frozen dense profile,
 the existing Qdrant 1.19 service with an IDF-enabled named BM25 sparse vector,
 application-owned RRF over 30 candidates per authorized leg, a three-per-document
 multi-source cap, and an optional local cross-encoder over at most 20 candidates.
@@ -395,12 +398,12 @@ above `0.9091`, a 10% relative improvement is mathematically unreachable at dept
 profile helps multi-document queries but loses semantic-paraphrase recall. The next
 step must be an explicit corpus/metric/candidate decision, not an automatic retry.
 
-Accepted ADR 0023 defines a ceiling-aware Recall@10 formula, per-query-class
-non-regression floors, a fresh protected v3 evaluation revision, and an
-evaluation-only deterministic `hybrid-v2` selector. The selector would use versioned
-query syntax and authorized scope metadata to choose dense-favoring or lexical-aware
-RRF profiles; it would never use judgment labels, an LLM router, or client ranking
-authority. Free/local implementation is authorized; paid execution remains separate.
+Accepted ADR 0023 is implemented with a ceiling-aware Recall@10 formula,
+per-query-class non-regression floors, a fresh protected v3 evaluation revision, and
+a deterministic `hybrid-v2` selector. The fingerprinted selector uses versioned query
+syntax to choose dense-favoring or balanced RRF; it never uses judgment labels, an
+LLM router, or client ranking authority. `hybrid-v1` remains the default while paid
+v3 execution and rollout approval remain separate.
 
 ## Phase 6 — visual and table intelligence
 
@@ -579,12 +582,12 @@ reconcile commercial usage.
 | Vector/object/async policy | Bounded Qdrant scope, returned-point validation, canonical object resolution, membership-removal behavior, and future connector permission snapshots implemented under ADR 0015 through `20260831_0011` |
 | Security audit/export | Versioned safe events, runtime append-only enforcement, owner/admin review, and private checksummed export implemented under ADR 0016 at `20260831_0012` |
 | Retention/deletion | Tombstone/restore, holds, exact preview/apply, checkpointed cross-store purge, and orphan reconciliation implemented under ADR 0017 at `20260831_0013`; automatic scheduling remains disabled |
-| Retrieval evaluation | Reproducible hashed v2 fixture with 120 chunks/50 queries, frozen dense profile, validation-before-holdout gate, separated safety metrics, and explicit paid runner; v2 validation failed and holdout was withheld |
+| Retrieval evaluation | V2 remains diagnostic after validation failure; reproducible hashed v3 has 120 chunks/80 queries, a frozen candidate fingerprint, ceiling-aware aggregate/class gates, strict validation-before-holdout, and an explicit paid runner |
 | Sparse search | Qdrant named IDF-enabled BM25 vector with pinned local FastEmbed implemented under ADR 0019 |
 | Fusion | Deterministic application-owned RRF, deduplication, diversification, and content-free traces implemented under ADR 0020 |
 | Reranker | Pinned bounded local FastEmbed cross-encoder implemented as an opt-in profile with fused-order fallback under ADR 0021 |
 | Phase 5 benchmark remediation | Larger v2 confounder corpus, rotated holdout, strict holdout sequencing, and clarified negative metrics implemented under ADR 0022; paid validation exposed a remaining quality/ceiling decision |
-| Phase 5 quality/candidate follow-up | Accepted ADR 0023 defines a ceiling-aware gate, protected v3 split, class floors, and deterministic profile selection; free implementation is authorized |
+| Phase 5 quality/candidate follow-up | ADR 0023 ceiling-aware gate, protected 80-query v3 split, class floors, and deterministic profile selection are implemented; paid acceptance pending |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
 

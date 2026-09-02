@@ -20,10 +20,10 @@ preview remains current. No automatic destructive retention schedule is enabled.
 Phase 5 implementation is complete but not yet accepted. The v1 candidate on
 2026-09-01 and v2 candidate on 2026-09-02 both stopped at validation. V2 correctly
 withheld holdout and the end-to-end proof; scope identity and latency passed, but
-the current hybrid profile did not beat dense quality. A reviewed tuning/metric
-decision is required before another paid attempt. ADR 0023 accepts free implementation
-of the ceiling-aware quality gate, protected v3 evaluation, class guardrails, and
-deterministic `hybrid-v2` candidate. It does not authorize a paid run. The default
+the current hybrid profile did not beat dense quality. The accepted ADR 0023 free
+remediation is now implemented: a ceiling-aware quality gate, hashed 80-query v3
+evaluation, class guardrails, and fingerprinted deterministic `hybrid-v2` candidate.
+All free deterministic and live gates pass. No new paid run is authorized. The default
 `hybrid-v1` profile combines authorized dense and Qdrant-native BM25 legs through
 deterministic RRF;
 `dense-v1` remains the rollback path, and `hybrid-rerank-v1` remains opt-in until
@@ -61,9 +61,10 @@ The current `3.0` lineage contains:
   content-free candidate traces with safe dense fallback.
 - A pinned, checksum-verified offline FastEmbed BM25 model and optional local ONNX
   cross-encoder, provisioned at setup/image-build time and never in a request path.
-- A reproducible hashed v2 benchmark with 120 chunks and 50 balanced queries,
-  validation-before-holdout execution, separated scope/abstention metrics, a frozen
-  dense profile, and an explicit paid runner whose raw results remain Git-ignored.
+- Reproducible hashed v2 diagnostic and v3 candidate benchmarks. V3 contains 120
+  chunks and 80 balanced queries with protected 48/16/16 splits, class-level gates,
+  validation-before-holdout execution, a frozen selector fingerprint, and an explicit
+  paid runner whose raw results remain Git-ignored.
 - A presentation-focused native Streamlit experience with top navigation,
   workspace switching, document/collection management, persistent chat,
   evidence inspection, first-document guidance, downloads, settings, and
@@ -422,13 +423,14 @@ The same gates are available through stable commands:
 ```bash
 make check       # locked dependencies, lint, types, tests, migration head, diff hygiene
 make check-live  # also checks live services and the SeaweedFS provider contract
-make phase5-evaluation  # validates the free hashed 50-query benchmark contract
+make phase5-evaluation  # validates the free hashed 80-query v3 benchmark contract
 make check-acceptance PHASE5_EMBEDDING_COST_USD_PER_MILLION_TOKENS=<current-rate>
 ```
 
 Run `make check-acceptance` only after fresh explicit approval. The 2026-09-02
-authorization has been consumed and does not permit a retry. The command compares dense,
-hybrid, and hybrid-rerank profiles with one batched paid embedding request. Validation
+authorization has been consumed and does not permit a retry. A fresh authorization is
+required for v3. The command compares dense, hybrid-v1, hybrid-v2, and hybrid-rerank
+profiles with one batched paid embedding request. Validation
 must pass before holdout retrieval/output and the end-to-end product proof can run. It then exercises
 async text/image ingestion, scoped hybrid retrieval, grounded generation, citations,
 persistence, audit, and cross-tenant denial. Temporary collections are removed and

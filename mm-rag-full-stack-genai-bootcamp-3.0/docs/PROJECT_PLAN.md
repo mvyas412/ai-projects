@@ -45,7 +45,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 5.5 ADR 0023 free remediation implementation |
+| Active milestone | Phase 5.5 v3 paid acceptance pending |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -53,7 +53,7 @@ Rules:
 | Phase 4 | Completed and accepted — Milestones 4.0–4.5 squash-merged through PR #3 |
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
-| Phase 5 | ADR 0023 accepted; v3 quality/candidate remediation in progress |
+| Phase 5 | ADR 0023 free v3 remediation complete; paid acceptance pending |
 | Phases 6–9 | Planned |
 
 ## Delivery sequence and gates
@@ -595,11 +595,11 @@ Milestone 4.0 review material:
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** Hybrid implementation and ADR 0022 remediation are complete but not
+**Status:** Hybrid implementation and ADR 0023 free remediation are complete but not
 accepted. The approved v2 candidate failed validation on 2026-09-02; holdout and
-the end-to-end proof were correctly withheld. ADR 0023 accepts a ceiling-aware
-quality contract, protected v3 evaluation, and deterministic candidate selection
-for free/local implementation. No paid retry is authorized.
+the end-to-end proof were correctly withheld. The ceiling-aware quality contract,
+protected v3 evaluation, class guardrails, and deterministic candidate selection are
+implemented and pass all free gates. No paid v3 run is authorized.
 
 ### Objective
 
@@ -615,17 +615,19 @@ then reranking a bounded candidate set.
 | 5.2 | Parallel dense/sparse retrieval with identical authorization filters | Completed and live-tested |
 | 5.3 | Deterministic RRF/fusion, deduplication, and source diversification | Completed and deterministic |
 | 5.4 | Bounded reranker selection and token-budgeted evidence assembly | Completed; reranker remains opt-in |
-| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | ADR 0023 accepted; free remediation in progress |
+| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | Free ADR 0023 implementation complete; paid acceptance pending |
 
 ### Accepted implementation contract
 
-- Establish a versioned 50-query benchmark before changing retrieval behavior.
+- Use the frozen hashed 80-query v3 benchmark with 48/16/16 splits and protected
+  semantic, identifier, multi-document, unanswerable, and unauthorized-scope cases.
 - Keep required gates deterministic; any paid embedding/generation baseline run
   remains explicit and opt-in.
 - Add free, locally generated `Qdrant/bm25` sparse vectors to the existing Qdrant
   point identity so dense and sparse legs share the exact authorization filter.
-- Fuse bounded candidate lists with application-owned RRF before optional local
-  cross-encoder reranking; every stage revalidates tenant/document/version/generation.
+- Preserve equal-weight `hybrid-v1`; evaluate fingerprinted `hybrid-v2` using
+  deterministic dense-favoring/balanced RRF selection before optional local
+  cross-encoder reranking. Every stage revalidates tenant/document/version/generation.
 - Preserve dense-only fallback and use versioned rollout configuration. Do not make
   a provider score, reranker score, or client input an authorization signal.
 
@@ -667,6 +669,20 @@ then reranking a bounded candidate set.
   `0.9375`/`0.9375`, nDCG@10 was `0.8585`/`0.8572`, and MRR@10 was
   `0.8750`/`0.8542`. Identity counts stayed zero and hybrid p95 was `38.6 ms`.
   Validation failed all three quality conditions; no holdout or product proof ran.
+- ADR 0023 remediation adds the frozen `phase5-quality-v2` ceiling-aware Recall@10
+  formula, answerable-class non-regression floors, and a reproducible v3 fixture with
+  120 chunks and 80 queries split 48/16/16. Each protected split includes four
+  semantic, four exact-identifier, four multi-document, and four negative queries;
+  both negative kinds are represented.
+- `hybrid-v2` selects a fingerprinted dense-favoring or balanced RRF policy only from
+  deterministic query syntax. It cannot consume labels, expected answers, client
+  ranking authority, or a model call. `hybrid-v1` remains the default and `dense-v1`
+  remains rollback until paid evidence is accepted.
+- The current deterministic gate passes 183 tests with 11 opt-in skips; the live gate
+  passes all 194 tests with PostgreSQL, Qdrant, SeaweedFS, RabbitMQ, FastAPI, and
+  Streamlit ready. Fixture hashes/reproduction, lint, typing, migration head, schema
+  drift, selector fingerprints, class gates, and holdout withholding pass without a
+  paid provider call.
 
 ### Completion gate
 
@@ -841,7 +857,7 @@ commercial accounting, and compliance-grade administration.
 | Fusion, deduplication, and diversification | 5.3 | Accepted — application-owned RRF in ADR 0020 |
 | Reranker | 5.4 | Accepted — bounded local FastEmbed cross-encoder in ADR 0021 |
 | Phase 5 benchmark remediation and negative-query contract | 5.0–5.5 | Accepted — ADR 0022 |
-| Phase 5 response to the failed v2 quality gate | 5.5 | Accepted — ADR 0023; free implementation authorized |
+| Phase 5 response to the failed v2 quality gate | 5.5 | Accepted — ADR 0023; free implementation complete |
 | Vision embedding/enrichment models | 6.1–6.2 | TBD |
 | Structured-table execution approach | 6.3–6.4 | TBD |
 | Observability/evaluation backend | 7.0 | TBD |
@@ -853,10 +869,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Implement the accepted v3 fixture, ceiling-aware gate, and deterministic `hybrid-v2` candidate using tune evidence only | Deterministic free regression evidence with protected validation/holdout |
-| 2 | Freeze the simplest passing candidate and run every free deterministic/live gate | Reproducible profile fingerprint and healthy services without paid calls |
-| 3 | Obtain new paid-run approval only after every selected free remediation passes | No implicit reuse of the consumed approval |
-| 4 | If the accepted gate passes, publish a reviewable Phase 5 PR | Aggregate evidence, clean branch, and successful CI |
+| 1 | Obtain fresh approval for exactly one paid v3 acceptance run | No implicit reuse of the consumed v2 approval |
+| 2 | Run validation, then holdout only if validation passes, then product proof only if both gates pass | Aggregate and per-class quality, identity, latency, cost, and signed-in product evidence |
+| 3 | Present the evidence and obtain explicit rollout/Phase 5 acceptance | `hybrid-v1` remains default until approval |
+| 4 | Publish and review the Phase 5 PR after accepted evidence | Clean branch and successful CI |
 
 ## Update protocol
 

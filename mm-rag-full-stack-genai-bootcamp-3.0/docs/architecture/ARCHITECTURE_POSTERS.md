@@ -8,7 +8,8 @@
 
 This implementation checkpoint shows the accepted Phase 3/4 runtime and governance
 boundaries plus immutable sparse indexing, authorized dense/BM25 retrieval,
-deterministic RRF, optional local reranking, and the remaining paid quality gate.
+deterministic RRF, the verified free v3 remediation, optional local reranking, and
+the remaining paid quality gate.
 
 ![MM-RAG current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 

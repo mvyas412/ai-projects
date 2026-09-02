@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
   <title id="title">MM-RAG Platform — Current Workflow and DEV Architecture</title>
-  <desc id="desc">Phase 5 development workflow showing the accepted asynchronous and governance foundations plus immutable sparse indexing, authorized dense and BM25 retrieval, deterministic fusion, optional local reranking, and the failed v2 validation gate that withheld holdout and product proof.</desc>
+  <desc id="desc">Phase 5 development workflow showing the accepted asynchronous and governance foundations plus immutable sparse indexing, authorized dense and BM25 retrieval, deterministic hybrid-v2 selection, optional local reranking, the verified free v3 contract, and the pending paid acceptance gate.</desc>
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#193b68"/>
@@ -35,7 +35,7 @@
   <rect x="241" y="84" width="139" height="26" rx="13" fill="#e8f7ef" stroke="#47a477"/>
   <text x="310" y="101" text-anchor="middle" class="tiny" fill="#26805a">FREE GATES PASS</text>
   <rect x="389" y="84" width="128" height="26" rx="13" fill="#fff4d6" stroke="#c58a18"/>
-  <text x="453" y="101" text-anchor="middle" class="tiny" fill="#95620d">QUALITY REVIEW</text>
+  <text x="453" y="101" text-anchor="middle" class="tiny" fill="#95620d">PAID PENDING</text>
   <rect x="1262" y="82" width="126" height="28" rx="14" fill="#eaf4ff" stroke="#3d83c5"/>
   <text x="1325" y="100" text-anchor="middle" class="tiny" fill="#276aa9">FREE LOCAL DEV</text>
   <text x="1398" y="100" class="small">Pinned local models · workers healthy</text>
@@ -215,15 +215,15 @@
   <rect x="1478" y="480" width="73" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="1514" y="495" text-anchor="middle" class="tiny" fill="#26805a">ACTIVE</text>
   <line x1="1296" y1="509" x2="1552" y2="509" class="divider"/>
   <text x="1299" y="531" class="dot" fill="#198789">•</text><text x="1313" y="531" class="body">dense-v1 rollback · hybrid-v1 default</text>
-  <text x="1299" y="553" class="dot" fill="#198789">•</text><text x="1313" y="553" class="body">Local cross-encoder remains opt-in</text>
+  <text x="1299" y="553" class="dot" fill="#198789">•</text><text x="1313" y="553" class="body">hybrid-v2 candidate · reranker opt-in</text>
   <text x="1299" y="575" class="dot" fill="#198789">•</text><text x="1313" y="575" class="body">Sparse/rerank failure preserves safe order</text>
 
   <rect x="1284" y="620" width="280" height="108" class="card" stroke="#198789"/>
   <text x="1301" y="646" class="card-title">Quality and release gate</text>
-  <rect x="1460" y="630" width="91" height="22" rx="11" fill="#fff4d6" stroke="#c58a18"/><text x="1505" y="645" text-anchor="middle" class="tiny" fill="#95620d">V2 FAILED</text>
+  <rect x="1460" y="630" width="91" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="1505" y="645" text-anchor="middle" class="tiny" fill="#26805a">FREE PASS</text>
   <line x1="1296" y1="659" x2="1552" y2="659" class="divider"/>
-  <text x="1299" y="681" class="dot" fill="#198789">•</text><text x="1313" y="681" class="body">V2 120-chunk / 50-query free gates pass</text>
-  <text x="1299" y="703" class="dot" fill="#198789">•</text><text x="1313" y="703" class="body">Holdout/proof withheld · no retry authorized</text>
+  <text x="1299" y="681" class="dot" fill="#198789">•</text><text x="1313" y="681" class="body">V3 120-chunk / 80-query contract passes</text>
+  <text x="1299" y="703" class="dot" fill="#198789">•</text><text x="1313" y="703" class="body">Paid validation / holdout / proof pending</text>
 
   <!-- Primary and planned flow arrows -->
   <path d="M304 260 H348" class="flow"/>
@@ -251,9 +251,9 @@
   <text x="648" y="836" class="card-title" fill="#26805a">Phase 4 · accepted</text>
   <text x="648" y="854" class="small">Policy, governance, audit, lifecycle</text>
   <rect x="932" y="814" width="286" height="50" rx="9" fill="#e8f7ef" stroke="#47a477"/>
-  <text x="946" y="836" class="card-title" fill="#26805a">Phase 5.0–5.4 · implemented</text>
-  <text x="946" y="854" class="small">Benchmark, sparse, RRF, local reranker</text>
+  <text x="946" y="836" class="card-title" fill="#26805a">Phase 5.0–5.5 · free gates pass</text>
+  <text x="946" y="854" class="small">V3 quality contract and candidate frozen</text>
   <rect x="1230" y="814" width="332" height="50" rx="9" fill="#fff4d6" stroke="#c58a18"/>
-  <text x="1244" y="836" class="card-title" fill="#95620d">Phase 5.5 · quality review required</text>
-  <text x="1244" y="854" class="small">Choose corpus, metric, or candidate remediation</text>
+  <text x="1244" y="836" class="card-title" fill="#95620d">Phase 5 · paid acceptance pending</text>
+  <text x="1244" y="854" class="small">Fresh approval → validation → holdout → proof</text>
 </svg>

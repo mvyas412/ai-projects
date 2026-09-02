@@ -78,7 +78,7 @@ from every free gate.
   as its citation; the conversation, answer, and citation persisted after navigation.
   No authentication token or secret value was displayed or added to tracked files,
   and no second paid run was made.
-- Phase 5 free implementation evidence now covers the hashed 50-query contract,
+- Initial Phase 5 free implementation evidence covered the hashed 50-query contract,
   immutable successor reindex, real-Qdrant filter parity, deterministic RRF,
   sparse/reranker fallback, pinned offline model checks, and healthy rebuilt runtime
   containers. The first paid candidate stopped at the quality gate because dense
@@ -87,5 +87,6 @@ from every free gate.
   and latency passed, but hybrid Recall@10 did not improve and ranking metrics
   regressed slightly. The runner withheld holdout and the product proof, wrote only
   ignored tune/validation results, removed its temporary collection, and did not retry.
-- ADR 0023 is accepted for free/local implementation. No paid retry or rollout is
-  authorized until the accepted free evidence passes and receives separate approval.
+- ADR 0023 free/local implementation is complete. The hashed 80-query v3 fixture,
+  ceiling-aware/class gates, deterministic `hybrid-v2` fingerprint, and all 194 live
+  tests pass without provider calls. No paid v3 run or rollout is authorized.
