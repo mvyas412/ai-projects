@@ -21,11 +21,14 @@ Phase 5 implementation is complete but not yet accepted. The v1, v2, and v3 paid
 candidates all stopped at validation. The single approved v3 attempt on 2026-09-02
 passed the ceiling-aware Recall, MRR, class, identity, latency, and provider-call
 gates, but improved nDCG@10 by only 4.14% against the required 5%. The runner
-correctly withheld holdout and the end-to-end proof. The accepted ADR 0023 contract,
-hashed 80-query v3 evaluation, class guardrails, and fingerprinted deterministic
-`hybrid-v2` candidate remain implemented and reproducible. The paid approval is
-consumed and a new remediation decision is required before another candidate or
-run. The default
+correctly withheld holdout and the end-to-end proof. Accepted ADR 0024 keeps that
+5% standard and adds the tune-only `hybrid-v3` candidate: ordinary queries retain
+dense order, while exact and multi-intent syntax selects balanced hybrid retrieval
+plus the pinned local reranker. The reproducible 80-query v4 fixture reuses only v3
+tuning evidence and rotates every protected query and identity. The prior approval
+is consumed; no v4 paid run or profile promotion is authorized. The free gate passes
+198 deterministic tests plus all 209 live tests, pinned model verification, and v4
+fixture reproduction without a provider call. The default
 `hybrid-v1` profile combines authorized dense and Qdrant-native BM25 legs through
 deterministic RRF;
 `dense-v1` remains the rollback path, and `hybrid-rerank-v1` remains opt-in until
@@ -425,17 +428,14 @@ The same gates are available through stable commands:
 ```bash
 make check       # locked dependencies, lint, types, tests, migration head, diff hygiene
 make check-live  # also checks live services and the SeaweedFS provider contract
-make phase5-evaluation  # validates the free hashed 80-query v3 benchmark contract
+make phase5-evaluation  # validates the free hashed 80-query v4 benchmark contract
 make check-acceptance PHASE5_EMBEDDING_COST_USD_PER_MILLION_TOKENS=<current-rate>
 ```
 
 Run `make check-acceptance` only after fresh explicit approval. The 2026-09-02 v3
-authorization has been consumed and does not permit a retry. The one paid batch
-embedded 2,516 tokens for an estimated `$0.00005032`; validation withheld holdout
-and product proof because `hybrid-v2` improved nDCG@10 by 4.14%, below the accepted
-5% gate. A reviewed remediation decision and a newly versioned candidate contract
-are required before seeking another authorization. The command compares dense,
-hybrid-v1, hybrid-v2, and hybrid-rerank
+authorization has been consumed and does not permit a retry. ADR 0024 records the
+approved remediation, but it authorizes only free/local implementation. The command
+compares dense-v1, hybrid-v1, hybrid-v2, hybrid-v3, and hybrid-rerank-v1
 profiles with one batched paid embedding request. Validation
 must pass before holdout retrieval/output and the end-to-end product proof can run. It then exercises
 async text/image ingestion, scoped hybrid retrieval, grounded generation, citations,

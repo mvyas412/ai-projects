@@ -7,13 +7,17 @@ from backend.app.retrieval.ranking import (
     HYBRID_V2_DENSE_POLICY,
     HYBRID_V2_EXACT_POLICY,
     HYBRID_V2_TUNING_GRID,
+    HYBRID_V3_DENSE_ROUTE,
+    HYBRID_V3_HYBRID_RERANK_ROUTE,
     RankingInvariantError,
     RetrievalCandidate,
     diversify_candidates,
     hybrid_v2_profile_fingerprint,
+    hybrid_v3_profile_fingerprint,
     reciprocal_rank_fusion,
     rerank_with_timeout,
     select_hybrid_v2_fusion,
+    select_hybrid_v3_route,
 )
 
 
@@ -78,7 +82,9 @@ def test_hybrid_v2_exact_signals_select_balanced_fusion(query: str) -> None:
 
 def test_hybrid_v2_ambiguous_query_uses_frozen_dense_policy() -> None:
     assert select_hybrid_v2_fusion("how should administrators sign in") == HYBRID_V2_DENSE_POLICY
-    assert {(policy.k, policy.dense_weight, policy.sparse_weight) for policy in HYBRID_V2_TUNING_GRID} == {
+    assert {
+        (policy.k, policy.dense_weight, policy.sparse_weight) for policy in HYBRID_V2_TUNING_GRID
+    } == {
         (k, dense, sparse)
         for k in (20, 40, 60)
         for dense, sparse in ((1.0, 1.0), (2.0, 1.0), (3.0, 1.0), (1.0, 2.0))
@@ -86,6 +92,35 @@ def test_hybrid_v2_ambiguous_query_uses_frozen_dense_policy() -> None:
     assert (
         hybrid_v2_profile_fingerprint()
         == "91bc62b9ba956ff6e5e0561e8bf3728605c1fa4a8089c22327a86b80d7f3c74a"
+    )
+
+
+@pytest.mark.parametrize(
+    "query",
+    (
+        'find "written notice"',
+        "find ACME-774",
+        "show version 2.4",
+        "show SOC records",
+        "find phishing-resistant access",
+        "open handbook.pdf",
+        "compare renewal periods",
+        "CONTRAST retention rules",
+        "combine both safeguards",
+        "pair invoices versus budgets",
+        "policy and notice requirements",
+        "compare\n  renewal periods",
+    ),
+)
+def test_hybrid_v3_signals_select_local_hybrid_rerank(query: str) -> None:
+    assert select_hybrid_v3_route(query) == HYBRID_V3_HYBRID_RERANK_ROUTE
+
+
+def test_hybrid_v3_ambiguous_query_stays_dense_and_fingerprint_is_frozen() -> None:
+    assert select_hybrid_v3_route("how should administrators sign in") == HYBRID_V3_DENSE_ROUTE
+    assert (
+        hybrid_v3_profile_fingerprint()
+        == "ed6930d3e84d50aefea6a5914af55a87c3f4bcc6f6bec54f49c7f8dfaebcdd9e"
     )
 
 
@@ -97,14 +132,13 @@ def test_multi_document_diversification_is_bounded_but_single_document_is_not() 
         _candidate("d", 2),
     ]
 
-    diversified = diversify_candidates(
-        candidates, document_count=2, max_per_document=2, limit=4
-    )
+    diversified = diversify_candidates(candidates, document_count=2, max_per_document=2, limit=4)
 
     assert [item.point_id for item in diversified] == ["a", "b", "d"]
-    assert diversify_candidates(
-        candidates, document_count=1, max_per_document=2, limit=4
-    ) == candidates
+    assert (
+        diversify_candidates(candidates, document_count=1, max_per_document=2, limit=4)
+        == candidates
+    )
 
 
 class ReverseReranker:
@@ -121,12 +155,8 @@ class SlowReranker:
 def test_reranker_is_bounded_by_identity_and_falls_back_on_timeout() -> None:
     candidates = [_candidate("a", 1), _candidate("b", 2)]
 
-    reranked = rerank_with_timeout(
-        ReverseReranker(), "query", candidates, timeout_seconds=1
-    )
-    fallback = rerank_with_timeout(
-        SlowReranker(), "query", candidates, timeout_seconds=0.001
-    )
+    reranked = rerank_with_timeout(ReverseReranker(), "query", candidates, timeout_seconds=1)
+    fallback = rerank_with_timeout(SlowReranker(), "query", candidates, timeout_seconds=0.001)
 
     assert [item.point_id for item in reranked] == ["b", "a"]
     assert fallback == candidates

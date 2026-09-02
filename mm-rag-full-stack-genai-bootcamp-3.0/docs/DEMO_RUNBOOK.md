@@ -95,4 +95,10 @@ from every free gate.
   provider-call gates, but its 4.14% relative nDCG@10 improvement missed the 5%
   requirement. Validation therefore withheld holdout and product proof, removed the
   temporary collection, and wrote only ignored tune/validation rows. No retry or
-  rollout is authorized; `hybrid-v1` remains default pending a new decision.
+  rollout is authorized; `hybrid-v1` remains default.
+- ADR 0024 is accepted and its free/local remediation is implemented. The unchanged
+  5% nDCG gate now evaluates fingerprinted `hybrid-v3`: ordinary syntax follows
+  dense order, while exact or multi-intent syntax selects balanced RRF plus the
+  pinned local reranker. The reproducible 80-query v4 fixture reuses only v3 tuning
+  evidence and has fresh hash-bound validation/holdout queries and identities.
+  No v4 paid run, product proof, or profile promotion is authorized.

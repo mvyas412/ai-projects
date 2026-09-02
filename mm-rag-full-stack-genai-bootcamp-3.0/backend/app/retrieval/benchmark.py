@@ -30,20 +30,29 @@ from backend.app.retrieval.evaluation import (
     phase5_gate,
 )
 from backend.app.retrieval.ranking import (
+    HYBRID_V3_DENSE_ROUTE,
     FastEmbedCandidateReranker,
     RetrievalCandidate,
     diversify_candidates,
     hybrid_v2_profile_fingerprint,
+    hybrid_v3_profile_fingerprint,
     reciprocal_rank_fusion,
     rerank_with_timeout,
     select_hybrid_v2_fusion,
+    select_hybrid_v3_route,
 )
 from backend.app.retrieval.scope import ensure_scope_payload_indexes
 from backend.app.retrieval.sparse import SPARSE_VECTOR_NAME, FastEmbedBM25Encoder
 
 BENCHMARK_NAMESPACE = UUID("43557cc4-1ed6-4b60-8f73-13d29fb76c0a")
 BENCHMARK_WORKSPACE_ID = uuid5(BENCHMARK_NAMESPACE, "phase5-workspace")
-PROFILE_NAMES = ("dense-v1", "hybrid-v1", "hybrid-v2", "hybrid-rerank-v1")
+PROFILE_NAMES = (
+    "dense-v1",
+    "hybrid-v1",
+    "hybrid-v2",
+    "hybrid-v3",
+    "hybrid-rerank-v1",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -81,10 +90,14 @@ def run_benchmark(
     if len(dataset_revisions) != 1:
         raise ValueError("Benchmark queries must use one dataset revision")
     dataset_revision = next(iter(dataset_revisions))
-    if dataset_revision == "phase5-retrieval-v3":
+    if dataset_revision == "phase5-retrieval-v4":
+        candidate_profile = "hybrid-v3"
+        quality_contract_revision = QUALITY_CONTRACT_V2
+        _validate_frozen_candidate_bounds(settings)
+    elif dataset_revision == "phase5-retrieval-v3":
         candidate_profile = "hybrid-v2"
         quality_contract_revision = QUALITY_CONTRACT_V2
-        _validate_v3_candidate_bounds(settings)
+        _validate_frozen_candidate_bounds(settings)
     else:
         candidate_profile = "hybrid-v1"
         quality_contract_revision = QUALITY_CONTRACT_V1
@@ -167,6 +180,13 @@ def run_benchmark(
                 timeout_seconds=settings.rag_rerank_timeout_seconds,
             )
             rerank_ms = (time.perf_counter() - rerank_started) * 1000
+            v3_route = select_hybrid_v3_route(query.query)
+            v3_candidates = dense if v3_route == HYBRID_V3_DENSE_ROUTE else reranked
+            v3_latency_ms = (
+                embedding_share_ms + dense_ms
+                if v3_route == HYBRID_V3_DENSE_ROUTE
+                else embedding_share_ms + dense_ms + sparse_ms + fusion_ms + rerank_ms
+            )
             first_result = not per_profile["dense-v1"]
             provider_calls = 1 if first_result else 0
             cost = estimated_cost if first_result else 0.0
@@ -196,6 +216,16 @@ def run_benchmark(
                     fused_v2,
                     point_to_chunk,
                     embedding_share_ms + dense_ms + sparse_ms + fusion_ms,
+                    provider_calls,
+                    cost,
+                )
+            )
+            per_profile["hybrid-v3"].append(
+                _result(
+                    query,
+                    v3_candidates,
+                    point_to_chunk,
+                    v3_latency_ms,
                     provider_calls,
                     cost,
                 )
@@ -267,7 +297,11 @@ def run_benchmark(
             class_metrics=class_metrics,
             candidate_profile=candidate_profile,
             quality_contract_revision=quality_contract_revision,
-            candidate_fingerprint=hybrid_v2_profile_fingerprint(),
+            candidate_fingerprint=(
+                hybrid_v3_profile_fingerprint()
+                if candidate_profile == "hybrid-v3"
+                else hybrid_v2_profile_fingerprint()
+            ),
             embedding_model=settings.openai_embedding_model,
             embedding_input_tokens=input_tokens,
             provider_calls=1,
@@ -287,7 +321,7 @@ def report_json(report: BenchmarkReport) -> str:
     return json.dumps(asdict(report), sort_keys=True, indent=2)
 
 
-def _validate_v3_candidate_bounds(settings: Settings) -> None:
+def _validate_frozen_candidate_bounds(settings: Settings) -> None:
     actual = (
         settings.rag_dense_candidate_limit,
         settings.rag_sparse_candidate_limit,
@@ -296,7 +330,10 @@ def _validate_v3_candidate_bounds(settings: Settings) -> None:
         settings.rag_max_candidates_per_document,
     )
     if actual != (30, 30, 20, 8, 3):
-        raise ValueError("Phase 5 v3 requires the frozen 30/30/20/8 candidate and diversity bounds")
+        raise ValueError(
+            "Phase 5 protected evaluation requires the frozen 30/30/20/8 "
+            "candidate and diversity bounds"
+        )
 
 
 def _create_collection(qdrant: QdrantClient, collection: str, vector_size: int) -> None:

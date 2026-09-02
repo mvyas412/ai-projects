@@ -21,8 +21,9 @@ The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-
 is the Phase 5 implementation checkpoint. It includes the accepted Phase 3/4
 runtime and governance boundaries plus hybrid retrieval. The v3 paid candidate
 failed only the nDCG validation gate on 2026-09-02; holdout and the product proof
-were withheld. The accepted ADR 0023 quality/candidate contract remains implemented
-and verified, but another candidate requires a new reviewed remediation decision.
+were withheld. Accepted ADR 0024 preserves that quality bar and adds the free/local
+`hybrid-v3` candidate with fresh protected v4 evidence. A v4 paid run and profile
+promotion remain unapproved.
 
 ## Status legend
 
@@ -342,25 +343,28 @@ partial progress, honor holds/live work, and retain a content-free completion re
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** Implemented under accepted ADRs 0018–0023 but not accepted. The v1, v2,
+**Status:** Implemented under accepted ADRs 0018–0024 but not accepted. The v1, v2,
 and v3 paid candidates failed validation. V3 passed every evaluated validation gate
 except the required 5% relative nDCG@10 gain, so holdout and product proof were
-withheld as designed. Its approval is consumed and a new remediation decision is
-required.
+withheld as designed. Its approval is consumed. The tune-only `hybrid-v3` candidate
+and protected v4 benchmark are implemented; a v4 paid run is not authorized.
 
 ```mermaid
 flowchart LR
-    question["Authorized question + scope"] --> prep["Normalize query / intent"]
-    prep --> filter["Trusted authorization filter"]
+    question["Authorized question + scope"] --> prep["Normalize query syntax"]
+    prep --> route["Frozen hybrid-v3 route"]
+    route --> filter["Trusted authorization filter"]
     filter --> dense["Dense semantic retrieval"]
-    filter --> sparse["Sparse lexical retrieval<br/>Qdrant BM25 implemented"]
+    filter -->|exact / multi intent| sparse["Sparse lexical retrieval<br/>Qdrant BM25 implemented"]
     dense --> qdrant[("Qdrant")]
     sparse --> sindex[("Qdrant sparse vector<br/>implemented")]
-    qdrant --> fusion["Application-owned RRF<br/>implemented"]
+    qdrant --> denseOrder["Dense order<br/>ordinary syntax"]
+    qdrant --> fusion["Balanced application-owned RRF<br/>signaled syntax"]
     sindex --> fusion
     fusion --> dedupe["Deduplicate + diversify"]
     dedupe --> rerank["Bounded local cross-encoder<br/>optional profile"]
-    rerank --> context["Token-budgeted evidence"]
+    denseOrder --> context["Token-budgeted evidence"]
+    rerank --> context
     context --> generation["Grounded generation"]
     generation --> answer["Answer + ranked citations"]
     question -.-> evaluation["Retrieval evaluation"]
@@ -372,15 +376,14 @@ Authorization applies before every search. Evaluate Recall@k, MRR/nDCG,
 groundedness, citation correctness, latency, and cost. Exit: the hybrid pipeline
 measurably beats dense-only retrieval without weakening isolation or citations.
 
-The implementation retains the reproducible 120-chunk/50-query v2 diagnostic and
-adds a hashed 120-chunk/80-query v3 benchmark and frozen dense profile,
+The implementation retains the reproducible v2 and v3 diagnostics and adds a hashed
+120-chunk/80-query v4 benchmark and frozen dense profile,
 the existing Qdrant 1.19 service with an IDF-enabled named BM25 sparse vector,
 application-owned RRF over 30 candidates per authorized leg, a three-per-document
 multi-source cap, and an optional local cross-encoder over at most 20 candidates.
 Eight evidence items proceed to generation. Models are pinned and checksum-verified
 before runtime; request handling never downloads artifacts. `dense-v1` is the safe
-rollback, `hybrid-v1` is the default, and `hybrid-rerank-v1` remains opt-in until
-the accepted benchmark proves a quality benefit.
+rollback, `hybrid-v1` is the default, and prior hybrid profiles remain unchanged.
 
 The first paid candidate kept authorization and latency within bounds but could not
 demonstrate the accepted relative quality gains because dense validation Recall@10
@@ -414,6 +417,21 @@ passed, but the 4.14% relative nDCG gain missed the required 5% target. The runn
 therefore emitted no holdout result or end-to-end proof. The observed validation
 must not become tuning evidence; any ranking or quality-contract change needs a new
 versioned decision and protected evaluation revision.
+
+Accepted ADR 0024 keeps every `phase5-quality-v2` threshold unchanged. Using only
+v3 tuning evidence, it freezes `hybrid-v3-selector-v1`: ordinary query syntax keeps
+dense order, while exact or multi-intent syntax selects balanced 1:1 RRF and the
+pinned local cross-encoder. The selector cannot consume benchmark labels, expected
+answers, client routing authority, retrieved content, or a model call. Its
+fingerprint binds the syntax, fusion, 30/30/20/8 limits, diversity rule, and reranker
+artifact. Missing sparse or reranker capability falls back to already authorized
+dense or fused order.
+
+The protected `phase5-retrieval-v4` fixture reuses only v3 tuning evidence under new
+identities. All validation and holdout query text, judgments, and IDs are fresh and
+hash-bound; validation rejects overlap with v3 protected evidence. No v4 paid
+benchmark, product proof, acceptance, or rollout is authorized by the free
+implementation.
 
 ## Phase 6 — visual and table intelligence
 
@@ -592,12 +610,12 @@ reconcile commercial usage.
 | Vector/object/async policy | Bounded Qdrant scope, returned-point validation, canonical object resolution, membership-removal behavior, and future connector permission snapshots implemented under ADR 0015 through `20260831_0011` |
 | Security audit/export | Versioned safe events, runtime append-only enforcement, owner/admin review, and private checksummed export implemented under ADR 0016 at `20260831_0012` |
 | Retention/deletion | Tombstone/restore, holds, exact preview/apply, checkpointed cross-store purge, and orphan reconciliation implemented under ADR 0017 at `20260831_0013`; automatic scheduling remains disabled |
-| Retrieval evaluation | V2 remains diagnostic; hashed v3 has 120 chunks/80 queries and strict validation-before-holdout. Its paid validation failed only the nDCG gain, so holdout/output remain absent |
+| Retrieval evaluation | V2/v3 remain diagnostic; hashed v4 has 120 chunks/80 queries, fresh protected evidence, and strict validation-before-holdout. No v4 paid run is authorized |
 | Sparse search | Qdrant named IDF-enabled BM25 vector with pinned local FastEmbed implemented under ADR 0019 |
 | Fusion | Deterministic application-owned RRF, deduplication, diversification, and content-free traces implemented under ADR 0020 |
 | Reranker | Pinned bounded local FastEmbed cross-encoder implemented as an opt-in profile with fused-order fallback under ADR 0021 |
 | Phase 5 benchmark remediation | Larger v2 confounder corpus, rotated holdout, strict holdout sequencing, and clarified negative metrics implemented under ADR 0022; paid validation exposed a remaining quality/ceiling decision |
-| Phase 5 quality/candidate follow-up | ADR 0023 is implemented; paid v3 achieved 4.14% versus the required 5% nDCG gain, so no rollout or retry is authorized |
+| Phase 5 quality/candidate follow-up | ADR 0023 remains diagnostic after the v3 4.14% nDCG gain; ADR 0024 implements tune-only `hybrid-v3` and protected v4 while preserving the 5% gate |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
 
@@ -639,6 +657,7 @@ Accepted Phase 5 follow-ups:
 
 - [ADR 0022 — Phase 5 benchmark remediation and negative-query contract](decisions/0022-phase5-benchmark-remediation.md)
 - [ADR 0023 — Ceiling-aware retrieval quality and deterministic candidate selection](decisions/0023-ceiling-aware-quality-and-candidate-selection.md)
+- [ADR 0024 — Adaptive retrieval and fresh protected evidence](decisions/0024-adaptive-retrieval-and-fresh-protected-evidence.md)
 
 ## Maintenance checklist
 

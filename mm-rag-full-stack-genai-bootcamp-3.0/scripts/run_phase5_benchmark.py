@@ -16,7 +16,7 @@ def main() -> None:
     )
     parser.add_argument("--allow-paid-openai", action="store_true")
     parser.add_argument("--embedding-cost-per-million-tokens", type=float, required=True)
-    parser.add_argument("--dataset", type=Path, default=PROJECT_ROOT / "evaluation/phase5/v3")
+    parser.add_argument("--dataset", type=Path, default=PROJECT_ROOT / "evaluation/phase5/v4")
     parser.add_argument(
         "--output-dir",
         type=Path,

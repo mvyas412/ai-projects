@@ -12,6 +12,8 @@ from qdrant_client import QdrantClient, models
 
 from backend.app.core.config import Settings
 from backend.app.retrieval.ranking import (
+    HYBRID_V3_DENSE_ROUTE,
+    HYBRID_V3_FUSION_POLICY,
     CandidateReranker,
     FastEmbedCandidateReranker,
     RetrievalCandidate,
@@ -19,6 +21,7 @@ from backend.app.retrieval.ranking import (
     reciprocal_rank_fusion,
     rerank_with_timeout,
     select_hybrid_v2_fusion,
+    select_hybrid_v3_route,
 )
 from backend.app.retrieval.scope import workspace_filter
 from backend.app.retrieval.sparse import (
@@ -110,8 +113,14 @@ class QdrantOpenAIRAGEngine:
                 model=self._settings.openai_embedding_model,
             )
             vector = embeddings.embed_query(request.query)
+            selector_route = (
+                select_hybrid_v3_route(request.query)
+                if self._settings.rag_retrieval_profile == "hybrid-v3"
+                else None
+            )
             use_hybrid = bool(
                 self._settings.rag_retrieval_profile != "dense-v1"
+                and selector_route != HYBRID_V3_DENSE_ROUTE
                 and self._sparse_encoder is not None
                 and all(scope.sparse_available for scope in request.documents)
             )
@@ -162,11 +171,12 @@ class QdrantOpenAIRAGEngine:
                 sparse = [_authorized_candidate(point, request) for point in sparse_points]
                 fusion_started = perf_counter()
                 try:
-                    fusion_policy = (
-                        select_hybrid_v2_fusion(request.query)
-                        if self._settings.rag_retrieval_profile == "hybrid-v2"
-                        else None
-                    )
+                    if self._settings.rag_retrieval_profile == "hybrid-v2":
+                        fusion_policy = select_hybrid_v2_fusion(request.query)
+                    elif self._settings.rag_retrieval_profile == "hybrid-v3":
+                        fusion_policy = HYBRID_V3_FUSION_POLICY
+                    else:
+                        fusion_policy = None
                     fused = reciprocal_rank_fusion(
                         dense,
                         sparse,
@@ -189,7 +199,7 @@ class QdrantOpenAIRAGEngine:
                     ) from exc
                 fusion_ms = (perf_counter() - fusion_started) * 1000
                 if (
-                    self._settings.rag_retrieval_profile == "hybrid-rerank-v1"
+                    self._settings.rag_retrieval_profile in {"hybrid-rerank-v1", "hybrid-v3"}
                     and self._reranker is not None
                 ):
                     reranker_attempted = True
@@ -204,6 +214,7 @@ class QdrantOpenAIRAGEngine:
         logger.info(
             "retrieval_ranked",
             ranking_profile=self._settings.rag_retrieval_profile,
+            selector_route=selector_route,
             fusion_policy_revision=fusion_policy_revision,
             sparse_used=bool(sparse),
             reranker_attempted=reranker_attempted,
@@ -288,7 +299,7 @@ def build_rag_engine(settings: Settings, qdrant: QdrantClient) -> RAGEngine:
             sparse_encoder = FastEmbedBM25Encoder(settings.phase5_model_cache_dir)
         except Exception:
             sparse_encoder = None
-    if settings.rag_retrieval_profile == "hybrid-rerank-v1":
+    if settings.rag_retrieval_profile in {"hybrid-rerank-v1", "hybrid-v3"}:
         try:
             reranker = FastEmbedCandidateReranker(
                 settings.phase5_model_cache_dir,

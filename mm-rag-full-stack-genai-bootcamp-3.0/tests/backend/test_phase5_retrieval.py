@@ -50,6 +50,15 @@ class FakeSparseEncoder:
         return models.SparseVector(indices=[1], values=[1.0])
 
 
+class CountingReranker:
+    def __init__(self):
+        self.calls = 0
+
+    def scores(self, query, candidates):
+        self.calls += 1
+        return tuple(float(index) for index, _ in enumerate(candidates))
+
+
 class FakeQdrant:
     def __init__(self, dense, sparse, *, sparse_error: bool = False):
         self.dense = dense
@@ -160,6 +169,75 @@ def test_hybrid_v2_uses_only_frozen_query_signal_policy(
     ).answer(request)
 
     assert (observed["dense_weight"], observed["sparse_weight"]) == expected_weights
+    assert qdrant.filters[0].model_dump() == qdrant.filters[1].model_dump()
+
+
+def test_hybrid_v3_ordinary_query_skips_sparse_and_reranker(monkeypatch) -> None:
+    monkeypatch.setattr(engine_module, "OpenAIEmbeddings", FakeEmbeddings)
+    monkeypatch.setattr(engine_module, "ChatOpenAI", FakeChat)
+    workspace, document, version, generation = uuid4(), uuid4(), uuid4(), uuid4()
+    scope = (workspace, document, version, generation)
+    qdrant = FakeQdrant([_point("dense", scope, "dense", 1.0)], [])
+    reranker = CountingReranker()
+    request = RAGRequest(
+        workspace_id=workspace,
+        documents=(RAGDocumentScope(document, version, generation, True),),
+        query="how should administrators sign in",
+        history=(),
+    )
+
+    QdrantOpenAIRAGEngine(
+        _settings("hybrid-v3"),
+        cast(QdrantClient, qdrant),
+        sparse_encoder=FakeSparseEncoder(),
+        reranker=reranker,
+    ).answer(request)
+
+    assert len(qdrant.filters) == 1
+    assert reranker.calls == 0
+
+
+def test_hybrid_v3_signaled_query_uses_balanced_fusion_and_local_reranker(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(engine_module, "OpenAIEmbeddings", FakeEmbeddings)
+    monkeypatch.setattr(engine_module, "ChatOpenAI", FakeChat)
+    original_fusion = engine_module.reciprocal_rank_fusion
+    observed: dict[str, float] = {}
+
+    def capture_fusion(dense, sparse, **kwargs):
+        observed.update(kwargs)
+        return original_fusion(dense, sparse, **kwargs)
+
+    monkeypatch.setattr(engine_module, "reciprocal_rank_fusion", capture_fusion)
+    workspace = uuid4()
+    first = (workspace, uuid4(), uuid4(), uuid4())
+    second = (workspace, uuid4(), uuid4(), uuid4())
+    qdrant = FakeQdrant(
+        [_point("dense", first, "dense", 1.0)],
+        [_point("sparse", second, "sparse", 1.0)],
+    )
+    reranker = CountingReranker()
+    request = RAGRequest(
+        workspace_id=workspace,
+        documents=(
+            RAGDocumentScope(first[1], first[2], first[3], True),
+            RAGDocumentScope(second[1], second[2], second[3], True),
+        ),
+        query="compare renewal and retention",
+        history=(),
+    )
+
+    answer = QdrantOpenAIRAGEngine(
+        _settings("hybrid-v3"),
+        cast(QdrantClient, qdrant),
+        sparse_encoder=FakeSparseEncoder(),
+        reranker=reranker,
+    ).answer(request)
+
+    assert (observed["dense_weight"], observed["sparse_weight"]) == (1.0, 1.0)
+    assert reranker.calls == 1
+    assert answer.citations[0].document_id == second[1]
     assert qdrant.filters[0].model_dump() == qdrant.filters[1].model_dump()
 
 

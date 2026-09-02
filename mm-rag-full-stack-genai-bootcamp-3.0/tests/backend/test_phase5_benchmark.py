@@ -57,7 +57,7 @@ def test_benchmark_enforces_validation_before_holdout_without_persisting_content
             [] if validation_passes else ["failed"],
         ),
     )
-    documents, queries = load_dataset(PROJECT_ROOT / "evaluation/phase5/v3")
+    documents, queries = load_dataset(PROJECT_ROOT / "evaluation/phase5/v4")
     settings = Settings(
         app_env="test",
         database_url=SecretStr("sqlite+pysqlite:///:memory:"),
@@ -81,12 +81,13 @@ def test_benchmark_enforces_validation_before_holdout_without_persisting_content
         "dense-v1",
         "hybrid-v1",
         "hybrid-v2",
+        "hybrid-v3",
         "hybrid-rerank-v1",
     }
-    assert report.candidate_profile == "hybrid-v2"
+    assert report.candidate_profile == "hybrid-v3"
     assert report.quality_contract_revision == "phase5-quality-v2"
     assert len(report.candidate_fingerprint) == 64
-    assert set(report.class_metrics["hybrid-v2"]["validation"]) == {
+    assert set(report.class_metrics["hybrid-v3"]["validation"]) == {
         "semantic_paraphrase",
         "exact_identifier",
         "multi_document",

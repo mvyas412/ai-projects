@@ -595,12 +595,11 @@ Milestone 4.0 review material:
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** Hybrid implementation and ADR 0023 remediation are complete but not
-accepted. The single approved v3 candidate failed validation on 2026-09-02 because
-its 4.14% relative nDCG@10 gain missed the required 5%. Recall, MRR, class, identity,
-latency, and provider-call gates passed; holdout and the end-to-end proof were
-correctly withheld. The approval is consumed, `hybrid-v1` remains default, and a
-reviewed remediation decision is required before another versioned candidate.
+**Status:** Hybrid implementation and accepted ADR 0024 remediation are complete but
+not accepted. The v3 candidate remains diagnostic after its 4.14% relative nDCG@10
+gain missed the required 5%. The new evaluation-only `hybrid-v3` candidate is frozen
+from tuning evidence, the protected v4 contract is reproducible, and `hybrid-v1`
+remains default. No v4 paid run or promotion is authorized.
 
 ### Objective
 
@@ -616,19 +615,20 @@ then reranking a bounded candidate set.
 | 5.2 | Parallel dense/sparse retrieval with identical authorization filters | Completed and live-tested |
 | 5.3 | Deterministic RRF/fusion, deduplication, and source diversification | Completed and deterministic |
 | 5.4 | Bounded reranker selection and token-budgeted evidence assembly | Completed; reranker remains opt-in |
-| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | V3 validation failed only nDCG; remediation decision pending |
+| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | ADR 0024 free remediation complete; v4 paid validation requires approval |
 
 ### Accepted implementation contract
 
-- Use the frozen hashed 80-query v3 benchmark with 48/16/16 splits and protected
+- Use the frozen hashed 80-query v4 benchmark with 48/16/16 splits and protected
   semantic, identifier, multi-document, unanswerable, and unauthorized-scope cases.
 - Keep required gates deterministic; any paid embedding/generation baseline run
   remains explicit and opt-in.
 - Add free, locally generated `Qdrant/bm25` sparse vectors to the existing Qdrant
   point identity so dense and sparse legs share the exact authorization filter.
-- Preserve equal-weight `hybrid-v1`; evaluate fingerprinted `hybrid-v2` using
-  deterministic dense-favoring/balanced RRF selection before optional local
-  cross-encoder reranking. Every stage revalidates tenant/document/version/generation.
+- Preserve equal-weight `hybrid-v1`; evaluate fingerprinted `hybrid-v3` using dense
+  order for ordinary query syntax and balanced RRF plus the pinned local
+  cross-encoder for exact or multi-intent syntax. Every hybrid stage revalidates
+  tenant/document/version/generation.
 - Preserve dense-only fallback and use versioned rollout configuration. Do not make
   a provider score, reranker score, or client input an authorization signal.
 
@@ -693,6 +693,26 @@ then reranking a bounded candidate set.
   Identity counts stayed
   zero. The runner wrote only 64 tune/validation rows per profile, removed its
   temporary collection, and emitted no holdout metrics/output or product proof.
+- Accepted ADR 0024 retains `phase5-quality-v2` unchanged. Tune-only v3 evidence
+  selected `hybrid-v3-selector-v1`: ordinary syntax follows dense order; frozen
+  exact or multi-intent syntax selects balanced 1:1 RRF and the checksum-pinned
+  local reranker. Tune Recall@10 was `0.9722`, nDCG@10 was `0.8368` versus dense
+  `0.7848` (`+6.62%`), and MRR@10 was `0.8449`; identity counts were zero, provider
+  calls did not increase, and latency remained inside the accepted bound.
+- The reproducible `phase5-retrieval-v4` fixture keeps the 120-chunk/80-query
+  48/16/16 shape, reuses only v3 tuning evidence under new identities, and contains
+  fresh validation and holdout query text, judgments, and IDs. Its manifest binds
+  both protected-query hashes and rejects overlap with v3 protected evidence.
+- Product code recognizes `hybrid-v3` but leaves `hybrid-v1` as default. Ordinary
+  queries skip sparse retrieval and reranking; signaled queries reuse the identical
+  trusted dense/sparse filter and fail safely to dense or fused authorized order.
+  Another paid attempt, product proof, acceptance, and rollout each remain separate
+  approval gates.
+- The ADR 0024 deterministic gate passes 198 tests with 11 expected opt-in skips;
+  the complete free live gate passes all 209 tests with PostgreSQL, Qdrant,
+  SeaweedFS, RabbitMQ, FastAPI, and Streamlit ready. Both pinned local model trees,
+  migration head, schema drift, v4 fixture reproduction, protected-query isolation,
+  and diff hygiene pass without a paid provider call.
 
 ### Completion gate
 
@@ -868,7 +888,7 @@ commercial accounting, and compliance-grade administration.
 | Reranker | 5.4 | Accepted — bounded local FastEmbed cross-encoder in ADR 0021 |
 | Phase 5 benchmark remediation and negative-query contract | 5.0–5.5 | Accepted — ADR 0022 |
 | Phase 5 response to the failed v2 quality gate | 5.5 | Accepted — ADR 0023; free implementation complete |
-| Phase 5 response to the failed v3 nDCG gate | 5.5 | Decision required; no candidate or threshold change is authorized |
+| Phase 5 response to the failed v3 nDCG gate | 5.5 | Accepted — ADR 0024; free `hybrid-v3`/v4 implementation complete, paid run not authorized |
 | Vision embedding/enrichment models | 6.1–6.2 | TBD |
 | Structured-table execution approach | 6.3–6.4 | TBD |
 | Observability/evaluation backend | 7.0 | TBD |
@@ -880,9 +900,9 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Review the failed v3 aggregate evidence and approve a remediation direction | Preserve the 5% gate with a new tune-only candidate, explicitly revise the claim, or stop Phase 5 without acceptance |
-| 2 | Record the approved direction in a new ADR and version every changed contract | Do not tune against observed v3 validation or inspect its holdout |
-| 3 | Implement and exhaust free deterministic/live evidence for the new version | `hybrid-v1` remains default and no paid call runs implicitly |
+| 1 | Obtain explicit approval for exactly one paid v4 benchmark attempt | Approval names the frozen `hybrid-v3`/`phase5-retrieval-v4` contract and current embedding price |
+| 2 | Run validation once, then holdout and product proof only after each prior gate passes | A failure emits no later-stage evidence and never authorizes an automatic retry |
+| 3 | Review aggregate evidence and explicitly approve or reject profile promotion | Keep `hybrid-v1` default until rollout is approved |
 | 4 | Seek separate approval for one paid run only after the new candidate is frozen | Validation must precede holdout and product proof |
 
 ## Update protocol

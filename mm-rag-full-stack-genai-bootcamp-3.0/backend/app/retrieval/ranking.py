@@ -7,7 +7,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
-from typing import Protocol, Sequence
+from typing import Literal, Protocol, Sequence
 from uuid import UUID
 
 from fastembed.rerank.cross_encoder import TextCrossEncoder
@@ -27,6 +27,8 @@ class FusionPolicy:
     sparse_weight: float
 
 
+HybridV3Route = Literal["dense", "hybrid-rerank"]
+
 HYBRID_V2_DENSE_POLICY = FusionPolicy("hybrid-v2-dense-2-1-k60", 60, 2.0, 1.0)
 HYBRID_V2_EXACT_POLICY = FusionPolicy("hybrid-v2-exact-1-1-k60", 60, 1.0, 1.0)
 HYBRID_V2_PROFILE_REVISION = "hybrid-v2-selector-v1"
@@ -42,6 +44,12 @@ HYBRID_V2_TUNING_GRID = tuple(
     for k in (20, 40, 60)
     for dense, sparse in ((1.0, 1.0), (2.0, 1.0), (3.0, 1.0), (1.0, 2.0))
 )
+HYBRID_V3_FUSION_POLICY = FusionPolicy("hybrid-v3-balanced-1-1-k60", 60, 1.0, 1.0)
+HYBRID_V3_PROFILE_REVISION = "hybrid-v3-selector-v1"
+HYBRID_V3_DIVERSITY_POLICY_REVISION = "multi-document-max-three-v1"
+HYBRID_V3_CANDIDATE_BOUNDS = HYBRID_V2_CANDIDATE_BOUNDS
+HYBRID_V3_DENSE_ROUTE: HybridV3Route = "dense"
+HYBRID_V3_HYBRID_RERANK_ROUTE: HybridV3Route = "hybrid-rerank"
 
 _EXACT_SIGNAL_PATTERNS = (
     re.compile(r'["“][^"”]+["”]'),
@@ -50,6 +58,10 @@ _EXACT_SIGNAL_PATTERNS = (
     re.compile(r"\b[A-Z]{2,}(?:-[A-Z0-9]+)*\b"),
     re.compile(r"\b[A-Za-z]{3,}(?:-[A-Za-z]{2,})+\b"),
     re.compile(r"\b\S+\.(?:com|net|org|pdf|docx?|xlsx?|csv)\b", re.IGNORECASE),
+)
+_MULTI_INTENT_SIGNAL_PATTERN = re.compile(
+    r"\b(?:compare|contrast|combine|pair|versus|vs|both|and)\b",
+    re.IGNORECASE,
 )
 
 
@@ -120,6 +132,40 @@ def hybrid_v2_profile_fingerprint() -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def select_hybrid_v3_route(query: str) -> HybridV3Route:
+    """Route only from frozen query syntax; no labels or retrieved content are inputs."""
+
+    normalized = " ".join(query.split())
+    if any(pattern.search(normalized) for pattern in _EXACT_SIGNAL_PATTERNS):
+        return HYBRID_V3_HYBRID_RERANK_ROUTE
+    if _MULTI_INTENT_SIGNAL_PATTERN.search(normalized):
+        return HYBRID_V3_HYBRID_RERANK_ROUTE
+    return HYBRID_V3_DENSE_ROUTE
+
+
+def hybrid_v3_profile_fingerprint() -> str:
+    payload = {
+        "profile_revision": HYBRID_V3_PROFILE_REVISION,
+        "routes": {
+            "default": HYBRID_V3_DENSE_ROUTE,
+            "signaled": HYBRID_V3_HYBRID_RERANK_ROUTE,
+        },
+        "diversity_policy_revision": HYBRID_V3_DIVERSITY_POLICY_REVISION,
+        "candidate_bounds": dict(HYBRID_V3_CANDIDATE_BOUNDS),
+        "fusion_policy": asdict(HYBRID_V3_FUSION_POLICY),
+        "exact_patterns": [pattern.pattern for pattern in _EXACT_SIGNAL_PATTERNS],
+        "multi_intent_pattern": _MULTI_INTENT_SIGNAL_PATTERN.pattern,
+        "normalization": "unicode-preserving-whitespace-collapse-v1",
+        "reranker": {
+            "name": RERANK_MODEL.name,
+            "revision": RERANK_MODEL.revision,
+            "tree_sha256": RERANK_MODEL.tree_sha256,
+        },
+    }
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(encoded).hexdigest()
+
+
 def reciprocal_rank_fusion(
     dense: Sequence[RetrievalCandidate],
     sparse: Sequence[RetrievalCandidate],
@@ -143,7 +189,9 @@ def reciprocal_rank_fusion(
                 raise RankingInvariantError("Retrieval legs disagreed on candidate identity")
             candidates[candidate.point_id] = existing or candidate
             scores[candidate.point_id] = scores.get(candidate.point_id, 0.0) + weight / (k + rank)
-    fused = [replace(candidate, score=scores[point_id]) for point_id, candidate in candidates.items()]
+    fused = [
+        replace(candidate, score=scores[point_id]) for point_id, candidate in candidates.items()
+    ]
     return sorted(fused, key=lambda item: (-item.score, item.point_id))
 
 

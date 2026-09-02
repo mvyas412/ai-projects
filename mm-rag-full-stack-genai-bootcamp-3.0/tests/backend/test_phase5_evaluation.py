@@ -17,10 +17,12 @@ from backend.app.retrieval.evaluation import (
     phase5_gate,
     phase5_recall_target,
 )
-from scripts.build_phase5_v3_fixture import rendered_files
+from scripts.build_phase5_v4_fixture import rendered_files
 
-DATASET = PROJECT_ROOT / "evaluation/phase5/v3"
+DATASET = PROJECT_ROOT / "evaluation/phase5/v4"
+V3_DATASET = PROJECT_ROOT / "evaluation/phase5/v3"
 V2_DATASET = PROJECT_ROOT / "evaluation/phase5/v2"
+V1_DATASET = PROJECT_ROOT / "evaluation/phase5/v1"
 
 
 def test_phase5_dataset_is_hashed_balanced_and_split() -> None:
@@ -56,22 +58,29 @@ def test_phase5_dataset_is_hashed_balanced_and_split() -> None:
         }
 
 
-def test_phase5_v3_fixture_is_reproducible_and_rotates_protected_queries() -> None:
+def test_phase5_v4_fixture_is_reproducible_and_rotates_protected_queries() -> None:
     for name, expected in rendered_files().items():
         assert (DATASET / name).read_bytes() == expected
 
-    _, v2_queries = load_dataset(V2_DATASET)
-    _, v3_queries = load_dataset(DATASET)
-    v2_protected = {
-        query.query.casefold() for query in v2_queries if query.split in {"validation", "holdout"}
+    _, v3_queries = load_dataset(V3_DATASET)
+    _, v4_queries = load_dataset(DATASET)
+    v4_protected = {
+        query.query.casefold() for query in v4_queries if query.split in {"validation", "holdout"}
     }
-    v3_protected = {
-        query.query.casefold() for query in v3_queries if query.split in {"validation", "holdout"}
+    for predecessor in (V1_DATASET, V2_DATASET, V3_DATASET):
+        _, predecessor_queries = load_dataset(predecessor)
+        predecessor_protected = {
+            query.query.casefold()
+            for query in predecessor_queries
+            if query.split in {"validation", "holdout"}
+        }
+        assert predecessor_protected.isdisjoint(v4_protected)
+        assert {query.query_id for query in predecessor_queries}.isdisjoint(
+            query.query_id for query in v4_queries
+        )
+    assert {query.query.casefold() for query in v3_queries if query.split == "tune"} == {
+        query.query.casefold() for query in v4_queries if query.split == "tune"
     }
-    assert v2_protected.isdisjoint(v3_protected)
-    assert {query.query_id for query in v2_queries}.isdisjoint(
-        query.query_id for query in v3_queries
-    )
 
 
 def test_phase5_metrics_validate_identity_scope_and_negatives() -> None:

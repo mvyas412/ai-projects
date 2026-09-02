@@ -9,12 +9,17 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Literal
 
-from backend.app.retrieval.ranking import hybrid_v2_profile_fingerprint
+from backend.app.retrieval.ranking import (
+    hybrid_v2_profile_fingerprint,
+    hybrid_v3_profile_fingerprint,
+)
 
-CURRENT_DATASET_REVISION = "phase5-retrieval-v3"
+CURRENT_DATASET_REVISION = "phase5-retrieval-v4"
+PHASE5_V3_DATASET_REVISION = "phase5-retrieval-v3"
 SUPPORTED_DATASET_REVISIONS = {
     "phase5-retrieval-v1",
     "phase5-retrieval-v2",
+    PHASE5_V3_DATASET_REVISION,
     CURRENT_DATASET_REVISION,
 }
 QUALITY_CONTRACT_V1 = "phase5-quality-v1"
@@ -33,6 +38,7 @@ ANSWERABLE_QUERY_CLASSES = (
 SPLIT_COUNTS_BY_REVISION = {
     "phase5-retrieval-v1": {"tune": 30, "validation": 10, "holdout": 10},
     "phase5-retrieval-v2": {"tune": 30, "validation": 10, "holdout": 10},
+    PHASE5_V3_DATASET_REVISION: {"tune": 48, "validation": 16, "holdout": 16},
     CURRENT_DATASET_REVISION: {"tune": 48, "validation": 16, "holdout": 16},
 }
 
@@ -99,8 +105,10 @@ def load_dataset(root: Path) -> tuple[dict[str, EvaluationDocument], list[Evalua
     _validate_distribution(queries, revision)
     if revision == "phase5-retrieval-v2":
         _validate_v2_contract(manifest, documents, queries)
-    elif revision == CURRENT_DATASET_REVISION:
+    elif revision == PHASE5_V3_DATASET_REVISION:
         _validate_v3_contract(manifest, documents, queries)
+    elif revision == CURRENT_DATASET_REVISION:
+        _validate_v4_contract(root, manifest, documents, queries)
     return documents, queries
 
 
@@ -308,10 +316,8 @@ def _apply_class_guardrails(
             failures.append(f"{query_class} MRR@10 regressed beyond 2%")
 
     lexical_gain = any(
-        hybrid_by_class[query_class].recall_at_10
-        > dense_by_class[query_class].recall_at_10
-        or hybrid_by_class[query_class].ndcg_at_10
-        > dense_by_class[query_class].ndcg_at_10
+        hybrid_by_class[query_class].recall_at_10 > dense_by_class[query_class].recall_at_10
+        or hybrid_by_class[query_class].ndcg_at_10 > dense_by_class[query_class].ndcg_at_10
         or hybrid_by_class[query_class].source_coverage_at_10
         > dense_by_class[query_class].source_coverage_at_10
         for query_class in ("exact_identifier", "multi_document")
@@ -534,18 +540,84 @@ def _validate_v3_contract(
     if manifest.get("predecessor_holdout_policy") != "sealed-not-reused":
         raise EvaluationContractError("Phase 5 v3 predecessor holdout policy is invalid")
 
-    for split in SPLIT_COUNTS_BY_REVISION[CURRENT_DATASET_REVISION]:
+    _validate_protected_class_contract(queries, PHASE5_V3_DATASET_REVISION)
+
+
+def _validate_v4_contract(
+    root: Path,
+    manifest: dict[str, Any],
+    documents: dict[str, EvaluationDocument],
+    queries: list[EvaluationQuery],
+) -> None:
+    _validate_v2_contract(manifest, documents, queries)
+    if manifest.get("quality_contract_revision") != QUALITY_CONTRACT_V2:
+        raise EvaluationContractError("Phase 5 v4 quality contract revision is invalid")
+    if manifest.get("candidate_profile") != "hybrid-v3":
+        raise EvaluationContractError("Phase 5 v4 candidate profile is invalid")
+    if manifest.get("candidate_profile_fingerprint") != hybrid_v3_profile_fingerprint():
+        raise EvaluationContractError("Phase 5 v4 candidate fingerprint is stale")
+    if manifest.get("predecessor_holdout_policy") != "v1-v3-sealed-not-reused":
+        raise EvaluationContractError("Phase 5 v4 predecessor holdout policy is invalid")
+    if manifest.get("tuning_source_revision") != "phase5-retrieval-v3:tune":
+        raise EvaluationContractError("Phase 5 v4 tuning source revision is invalid")
+    _validate_protected_class_contract(queries, CURRENT_DATASET_REVISION)
+
+    predecessor_rows = [
+        row
+        for revision in ("v1", "v2", "v3")
+        for row in _jsonl(root.parent / revision / "judgments.jsonl")
+        if row.get("split") in {"validation", "holdout"}
+    ]
+    predecessor_queries = {_normalized(_required_text(row, "query")) for row in predecessor_rows}
+    protected_queries = {
+        _normalized(query.query) for query in queries if query.split in {"validation", "holdout"}
+    }
+    if predecessor_queries & protected_queries:
+        raise EvaluationContractError("Phase 5 v4 reuses protected predecessor query text")
+    predecessor_ids = {_required_text(row, "query_id") for row in predecessor_rows}
+    protected_ids = {
+        query.query_id for query in queries if query.split in {"validation", "holdout"}
+    }
+    if predecessor_ids & protected_ids:
+        raise EvaluationContractError("Phase 5 v4 reuses protected predecessor query IDs")
+    if manifest.get("protected_query_sha256") != _protected_query_hash(protected_queries):
+        raise EvaluationContractError("Phase 5 v4 protected query hash is invalid")
+    if manifest.get("predecessor_protected_query_sha256") != _protected_query_hash(
+        predecessor_queries
+    ):
+        raise EvaluationContractError("Phase 5 v4 predecessor query hash is invalid")
+
+    v3_tune_rows = _jsonl(root.parent / "v3" / "judgments.jsonl")
+    v3_tune_queries = {
+        _normalized(_required_text(row, "query"))
+        for row in v3_tune_rows
+        if row.get("split") == "tune"
+    }
+    v4_tune_queries = {_normalized(query.query) for query in queries if query.split == "tune"}
+    if v4_tune_queries != v3_tune_queries:
+        raise EvaluationContractError("Phase 5 v4 tuning evidence changed from v3")
+
+
+def _validate_protected_class_contract(queries: list[EvaluationQuery], revision: str) -> None:
+    revision_label = revision.removeprefix("phase5-retrieval-")
+    for split in SPLIT_COUNTS_BY_REVISION[revision]:
         split_queries = [query for query in queries if query.split == split]
         class_counts = Counter(query.query_class for query in split_queries)
         if any(class_counts[query_class] < 4 for query_class in QUERY_CLASSES):
-            raise EvaluationContractError(f"Phase 5 v3 {split} query classes are undersized")
+            raise EvaluationContractError(
+                f"Phase 5 {revision_label} {split} query classes are undersized"
+            )
         negative_kinds = Counter(
             query.negative_kind for query in split_queries if query.query_class == "negative"
         )
         if not {"unanswerable", "unauthorized_scope"} <= set(negative_kinds):
             raise EvaluationContractError(
-                f"Phase 5 v3 {split} lacks both negative-query kinds"
+                f"Phase 5 {revision_label} {split} lacks both negative-query kinds"
             )
+
+
+def _protected_query_hash(queries: Iterable[str]) -> str:
+    return hashlib.sha256("\n".join(sorted(queries)).encode()).hexdigest()
 
 
 def _normalized(value: str) -> str:

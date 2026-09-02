@@ -51,7 +51,7 @@ backup:
 	./scripts/backup_phase3_postgres.sh
 
 phase5-evaluation:
-	uv run python -m scripts.build_phase5_v3_fixture --check
+	uv run python -m scripts.build_phase5_v4_fixture --check
 	uv run python -m scripts.run_phase5_evaluation
 
 check:
@@ -63,4 +63,4 @@ check-live:
 check-acceptance: check-live models-verify phase5-evaluation
 	@test -n "$(PHASE5_EMBEDDING_COST_USD_PER_MILLION_TOKENS)" || (echo "Set PHASE5_EMBEDDING_COST_USD_PER_MILLION_TOKENS before the approved paid run" && exit 2)
 	uv run python -m scripts.run_phase5_benchmark --allow-paid-openai --embedding-cost-per-million-tokens "$(PHASE5_EMBEDDING_COST_USD_PER_MILLION_TOKENS)"
-	RAG_RETRIEVAL_PROFILE=hybrid-v2 uv run python -m scripts.run_openai_acceptance
+	RAG_RETRIEVAL_PROFILE=hybrid-v3 uv run python -m scripts.run_openai_acceptance

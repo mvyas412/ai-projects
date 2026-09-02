@@ -93,7 +93,7 @@ class Settings(BaseSettings):
     qdrant_collection_name: str = "mm_rag_phase3_documents"
     rag_retrieval_limit: int = Field(default=8, ge=1, le=30)
     rag_retrieval_profile: Literal[
-        "dense-v1", "hybrid-v1", "hybrid-v2", "hybrid-rerank-v1"
+        "dense-v1", "hybrid-v1", "hybrid-v2", "hybrid-v3", "hybrid-rerank-v1"
     ] = "hybrid-v1"
     rag_sparse_indexing_enabled: bool = True
     rag_dense_candidate_limit: int = Field(default=30, ge=8, le=100)

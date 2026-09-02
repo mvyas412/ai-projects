@@ -1,0 +1,25 @@
+{
+  "candidate_profile": "hybrid-v3",
+  "candidate_profile_fingerprint": "ed6930d3e84d50aefea6a5914af55a87c3f4bcc6f6bec54f49c7f8dfaebcdd9e",
+  "chunk_count": 120,
+  "dataset_revision": "phase5-retrieval-v4",
+  "files": {
+    "dense-profile.json": "5a0dade60e37d9d0fd2567fece3afe0b760b754e89f7e04f461ec53a0a8444e8",
+    "documents.jsonl": "1ba5d11fbcdb47f49169664bde391fcfa7a4467fd18770072fb63cb4605dad81",
+    "judgments.jsonl": "37f31b13d35a3e607297f4dac5a894b1163e153ef80baa083d244e26c2c5ced2"
+  },
+  "holdout_policy": "validation-before-holdout",
+  "minimum_quality_candidate_pool": 50,
+  "predecessor_holdout_policy": "v1-v3-sealed-not-reused",
+  "predecessor_protected_query_sha256": "aba0dba34268dda8bd4e531306b44eca153f5d4fc2f38e096202fb71a782251b",
+  "protected_query_sha256": "60b3137105c2c25b9314485e1b759a560d648e02d2a938ba0ee3e98f3e9cb7d1",
+  "quality_contract_revision": "phase5-quality-v2",
+  "query_count": 80,
+  "split": {
+    "holdout": 16,
+    "tune": 48,
+    "validation": 16
+  },
+  "supersedes": "phase5-retrieval-v3",
+  "tuning_source_revision": "phase5-retrieval-v3:tune"
+}
