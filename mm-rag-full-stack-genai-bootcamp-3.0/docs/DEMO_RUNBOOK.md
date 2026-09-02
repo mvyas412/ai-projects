@@ -101,4 +101,9 @@ from every free gate.
   dense order, while exact or multi-intent syntax selects balanced RRF plus the
   pinned local reranker. The reproducible 80-query v4 fixture reuses only v3 tuning
   evidence and has fresh hash-bound validation/holdout queries and identities.
-  No v4 paid run, product proof, or profile promotion is authorized.
+- The single approved 2026-09-02 v4 attempt used one 2,545-token embedding batch
+  for an estimated `$0.00005090`. `hybrid-v3` passed Recall, MRR, class, identity,
+  latency, and provider-call gates, but its 2.28% relative nDCG@10 gain missed the
+  required 5%. Validation withheld holdout and the product proof, removed the
+  temporary collection, and wrote only ignored tune/validation rows. No retry or
+  rollout is authorized; `hybrid-v1` remains default.

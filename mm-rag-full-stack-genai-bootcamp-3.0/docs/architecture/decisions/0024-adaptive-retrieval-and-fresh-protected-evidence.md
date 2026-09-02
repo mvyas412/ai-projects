@@ -147,3 +147,24 @@ accepted.
   checks pass before requesting a paid run.
 - One separately authorized paid attempt passes validation, holdout, and product
   proof before any acceptance or promotion proposal.
+
+## Paid v4 outcome
+
+The user authorized exactly one paid v4 attempt on 2026-09-02 at the then-current
+[published `text-embedding-3-small` rate](https://developers.openai.com/api/docs/models/text-embedding-3-small)
+of `$0.02` per one million input tokens.
+Before consuming it, all 209 live tests, migration and schema checks, both pinned
+model checksums, and the reproducible 120-chunk/80-query v4 fixture passed.
+
+One batched embedding request processed 2,545 tokens for an estimated `$0.00005090`.
+Validation dense/`hybrid-v3` Recall@10 was `1.0000`/`1.0000`, nDCG@10 was
+`0.8439`/`0.8632`, and MRR@10 was `0.8500`/`0.8500`. The 2.2835% relative nDCG
+gain missed the unchanged 5% target; all other evaluated aggregate, class,
+identity, latency, and provider-call gates passed.
+
+The runner therefore withheld holdout retrieval/output and the end-to-end product
+proof. Each ignored profile result contains 64 tune/validation rows, the temporary
+Qdrant collection was removed, and no retry ran. The approval is consumed,
+`hybrid-v3` remains evaluation-only, and `hybrid-v1` remains the product default.
+A material candidate or quality-contract change requires a new reviewed ADR and
+fresh protected evidence.

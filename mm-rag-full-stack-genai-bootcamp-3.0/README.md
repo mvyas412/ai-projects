@@ -17,18 +17,17 @@ security review, checksummed compliance export, and durable tombstone-first life
 plans. Qdrant access requires bounded trusted scope, object access is backend-mediated
 and integrity-checked, and retention apply fails closed unless an exact owner-approved
 preview remains current. No automatic destructive retention schedule is enabled.
-Phase 5 implementation is complete but not yet accepted. The v1, v2, and v3 paid
-candidates all stopped at validation. The single approved v3 attempt on 2026-09-02
-passed the ceiling-aware Recall, MRR, class, identity, latency, and provider-call
-gates, but improved nDCG@10 by only 4.14% against the required 5%. The runner
+Phase 5 implementation is complete but not yet accepted. The v1 through v4 paid
+candidates all stopped at validation. The single approved v4 attempt on 2026-09-02
+used one 2,545-token embedding batch and passed the ceiling-aware Recall, MRR,
+class, identity, latency, and provider-call gates. Its nDCG@10 improved from
+`0.8439` to `0.8632`, a 2.28% relative gain against the required 5%. The runner
 correctly withheld holdout and the end-to-end proof. Accepted ADR 0024 keeps that
-5% standard and adds the tune-only `hybrid-v3` candidate: ordinary queries retain
-dense order, while exact and multi-intent syntax selects balanced hybrid retrieval
-plus the pinned local reranker. The reproducible 80-query v4 fixture reuses only v3
-tuning evidence and rotates every protected query and identity. The prior approval
-is consumed; no v4 paid run or profile promotion is authorized. The free gate passes
-198 deterministic tests plus all 209 live tests, pinned model verification, and v4
-fixture reproduction without a provider call. The default
+5% standard and its tune-only `hybrid-v3` candidate unchanged: ordinary queries
+retain dense order, while exact and multi-intent syntax selects balanced hybrid
+retrieval plus the pinned local reranker. The v4 approval is consumed; no retry or
+profile promotion is authorized. The free gate passes 198 deterministic tests plus
+all 209 live tests, pinned model verification, and v4 fixture reproduction. The default
 `hybrid-v1` profile combines authorized dense and Qdrant-native BM25 legs through
 deterministic RRF;
 `dense-v1` remains the rollback path, and `hybrid-rerank-v1` remains opt-in until
@@ -66,10 +65,10 @@ The current `3.0` lineage contains:
   content-free candidate traces with safe dense fallback.
 - A pinned, checksum-verified offline FastEmbed BM25 model and optional local ONNX
   cross-encoder, provisioned at setup/image-build time and never in a request path.
-- Reproducible hashed v2 diagnostic and v3 candidate benchmarks. V3 contains 120
-  chunks and 80 balanced queries with protected 48/16/16 splits, class-level gates,
-  validation-before-holdout execution, a frozen selector fingerprint, and an explicit
-  paid runner whose raw results remain Git-ignored.
+- Reproducible hashed v2/v3 diagnostics and v4 candidate benchmark. V4 contains
+  120 chunks and 80 balanced queries with protected 48/16/16 splits, class-level
+  gates, validation-before-holdout execution, a frozen selector fingerprint, and
+  an explicit paid runner whose raw results remain Git-ignored.
 - A presentation-focused native Streamlit experience with top navigation,
   workspace switching, document/collection management, persistent chat,
   evidence inspection, first-document guidance, downloads, settings, and
@@ -135,7 +134,7 @@ The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
 shows the Phase 5 implementation checkpoint, including hybrid retrieval and the
-failed v3 paid quality gate that now requires an explicit remediation decision.
+failed v4 paid nDCG gate that now requires an explicit close-or-remediate decision.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
@@ -432,9 +431,8 @@ make phase5-evaluation  # validates the free hashed 80-query v4 benchmark contra
 make check-acceptance PHASE5_EMBEDDING_COST_USD_PER_MILLION_TOKENS=<current-rate>
 ```
 
-Run `make check-acceptance` only after fresh explicit approval. The 2026-09-02 v3
-authorization has been consumed and does not permit a retry. ADR 0024 records the
-approved remediation, but it authorizes only free/local implementation. The command
+Run `make check-acceptance` only after fresh explicit approval. The 2026-09-02 v4
+authorization has been consumed and does not permit a retry. The command
 compares dense-v1, hybrid-v1, hybrid-v2, hybrid-v3, and hybrid-rerank-v1
 profiles with one batched paid embedding request. Validation
 must pass before holdout retrieval/output and the end-to-end product proof can run. It then exercises

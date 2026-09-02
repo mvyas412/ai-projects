@@ -19,11 +19,11 @@ handbook remain the editable source of truth.
 
 The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 is the Phase 5 implementation checkpoint. It includes the accepted Phase 3/4
-runtime and governance boundaries plus hybrid retrieval. The v3 paid candidate
-failed only the nDCG validation gate on 2026-09-02; holdout and the product proof
-were withheld. Accepted ADR 0024 preserves that quality bar and adds the free/local
-`hybrid-v3` candidate with fresh protected v4 evidence. A v4 paid run and profile
-promotion remain unapproved.
+runtime and governance boundaries plus hybrid retrieval. The single approved v4
+attempt on 2026-09-02 passed every evaluated validation gate except the required
+5% relative nDCG@10 gain, achieving 2.28%; holdout and the product proof were
+withheld. `hybrid-v3` remains evaluation-only, `hybrid-v1` remains default, and a
+close-or-remediate decision is now required.
 
 ## Status legend
 
@@ -184,7 +184,7 @@ flowchart LR
 | 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
 | 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and preserved at `mm-rag-v4.0.0` |
-| 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | V3 paid validation missed the nDCG gate; remediation decision pending |
+| 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | V4 paid validation missed the nDCG gate; close-or-remediate decision pending |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
 | 8 | Independently scalable deployment | Gateway, API/workers, dedicated frontend TBD, managed services | Managed PostgreSQL, Qdrant, object storage | Planned |
@@ -343,11 +343,12 @@ partial progress, honor holds/live work, and retain a content-free completion re
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** Implemented under accepted ADRs 0018–0024 but not accepted. The v1, v2,
-and v3 paid candidates failed validation. V3 passed every evaluated validation gate
-except the required 5% relative nDCG@10 gain, so holdout and product proof were
-withheld as designed. Its approval is consumed. The tune-only `hybrid-v3` candidate
-and protected v4 benchmark are implemented; a v4 paid run is not authorized.
+**Status:** Implemented under accepted ADRs 0018–0024 but not accepted. The v1
+through v4 paid candidates failed validation. V4 passed every evaluated validation
+gate except the required 5% relative nDCG@10 gain, achieving 2.28%, so holdout and
+product proof were withheld as designed. Its approval is consumed. `hybrid-v3`
+remains evaluation-only and `hybrid-v1` remains default while an explicit
+close-or-remediate decision is pending.
 
 ```mermaid
 flowchart LR
@@ -429,9 +430,15 @@ dense or fused order.
 
 The protected `phase5-retrieval-v4` fixture reuses only v3 tuning evidence under new
 identities. All validation and holdout query text, judgments, and IDs are fresh and
-hash-bound; validation rejects overlap with v3 protected evidence. No v4 paid
-benchmark, product proof, acceptance, or rollout is authorized by the free
-implementation.
+hash-bound; validation rejects overlap with v3 protected evidence.
+
+The single approved v4 run embedded 2,545 tokens in one paid batch for an estimated
+`$0.00005090`. Validation dense/`hybrid-v3` Recall@10 was `1.0000`/`1.0000`,
+nDCG@10 was `0.8439`/`0.8632`, and MRR@10 was `0.8500`/`0.8500`. Identity, class,
+latency, and provider-call gates passed, but the 2.28% nDCG gain missed the required
+5%. The runner emitted no holdout result or product proof, removed its temporary
+collection, and did not retry. A changed candidate or contract now requires a new
+reviewed ADR and fresh protected evidence.
 
 ## Phase 6 — visual and table intelligence
 
@@ -610,12 +617,12 @@ reconcile commercial usage.
 | Vector/object/async policy | Bounded Qdrant scope, returned-point validation, canonical object resolution, membership-removal behavior, and future connector permission snapshots implemented under ADR 0015 through `20260831_0011` |
 | Security audit/export | Versioned safe events, runtime append-only enforcement, owner/admin review, and private checksummed export implemented under ADR 0016 at `20260831_0012` |
 | Retention/deletion | Tombstone/restore, holds, exact preview/apply, checkpointed cross-store purge, and orphan reconciliation implemented under ADR 0017 at `20260831_0013`; automatic scheduling remains disabled |
-| Retrieval evaluation | V2/v3 remain diagnostic; hashed v4 has 120 chunks/80 queries, fresh protected evidence, and strict validation-before-holdout. No v4 paid run is authorized |
+| Retrieval evaluation | V2/v3 remain diagnostic; hashed v4 has 120 chunks/80 queries and fresh protected evidence. Its single paid validation missed only nDCG; holdout/proof were withheld and no retry is authorized |
 | Sparse search | Qdrant named IDF-enabled BM25 vector with pinned local FastEmbed implemented under ADR 0019 |
 | Fusion | Deterministic application-owned RRF, deduplication, diversification, and content-free traces implemented under ADR 0020 |
 | Reranker | Pinned bounded local FastEmbed cross-encoder implemented as an opt-in profile with fused-order fallback under ADR 0021 |
 | Phase 5 benchmark remediation | Larger v2 confounder corpus, rotated holdout, strict holdout sequencing, and clarified negative metrics implemented under ADR 0022; paid validation exposed a remaining quality/ceiling decision |
-| Phase 5 quality/candidate follow-up | ADR 0023 remains diagnostic after the v3 4.14% nDCG gain; ADR 0024 implements tune-only `hybrid-v3` and protected v4 while preserving the 5% gate |
+| Phase 5 quality/candidate follow-up | ADR 0023 remains diagnostic after the v3 4.14% nDCG gain; ADR 0024's v4 candidate achieved 2.28% against the preserved 5% gate and now needs a close-or-remediate decision |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
 
