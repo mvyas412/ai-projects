@@ -1,7 +1,8 @@
 # ADR 0023: Ceiling-aware retrieval quality and deterministic candidate selection
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-02
+- Accepted: 2026-09-02
 - Milestone: 5.5
 
 ## Context
@@ -178,6 +179,14 @@ validation, citation identity, immutable generations, or non-disclosing errors.
    grid, and unchanged 30/20/8 candidate limits?
 4. Approve keeping reranking opt-in and requiring new explicit authorization only
    after every free v3 and candidate check passes?
+
+## Acceptance resolution
+
+All four recommendations were explicitly approved on 2026-09-02. The ceiling-aware
+Recall@10 formula, class guardrails, fresh protected v3 evaluation revision,
+deterministic evaluation-only `hybrid-v2` selector, bounded tuning grid, unchanged
+candidate limits, opt-in reranker, and separate future paid-run authorization are
+accepted for free/local implementation.
 
 ## Acceptance evidence required
 

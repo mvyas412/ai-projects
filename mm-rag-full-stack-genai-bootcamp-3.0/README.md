@@ -21,9 +21,9 @@ Phase 5 implementation is complete but not yet accepted. The v1 candidate on
 2026-09-01 and v2 candidate on 2026-09-02 both stopped at validation. V2 correctly
 withheld holdout and the end-to-end proof; scope identity and latency passed, but
 the current hybrid profile did not beat dense quality. A reviewed tuning/metric
-decision is required before another paid attempt. Proposed ADR 0023 documents the
-recommended ceiling-aware quality gate, protected v3 evaluation, class guardrails,
-and deterministic `hybrid-v2` candidate; it authorizes no behavior yet. The default
+decision is required before another paid attempt. ADR 0023 accepts free implementation
+of the ceiling-aware quality gate, protected v3 evaluation, class guardrails, and
+deterministic `hybrid-v2` candidate. It does not authorize a paid run. The default
 `hybrid-v1` profile combines authorized dense and Qdrant-native BM25 legs through
 deterministic RRF;
 `dense-v1` remains the rollback path, and `hybrid-rerank-v1` remains opt-in until

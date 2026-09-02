@@ -20,9 +20,9 @@ implicitly. The v1 candidate on 2026-09-01 and v2 candidate on 2026-09-02 both
 stopped at validation. The v2 gate correctly withheld holdout and the end-to-end
 proof. Scope identity and latency passed, but the current hybrid profile did not
 beat dense quality, so Phase 5 remains open pending a reviewed tuning/metric decision.
-Proposed ADR 0023 documents the recommended ceiling-aware gate, protected v3
-evaluation, class guardrails, and deterministic candidate-selection contract; none
-of those changes is implemented or approved yet.
+ADR 0023 is accepted and authorizes free implementation of the ceiling-aware gate,
+protected v3 evaluation, class guardrails, and deterministic candidate-selection
+contract. No additional paid run is authorized.
 
 See the latest application's tracked project plan and architecture handbook for
 scope and status. Secrets, local context, environments, and generated data remain

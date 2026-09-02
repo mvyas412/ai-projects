@@ -45,7 +45,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 5.5 Proposed ADR 0023 quality/candidate decision |
+| Active milestone | Phase 5.5 ADR 0023 free remediation implementation |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -53,7 +53,7 @@ Rules:
 | Phase 4 | Completed and accepted — Milestones 4.0–4.5 squash-merged through PR #3 |
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
-| Phase 5 | Hybrid implementation complete; v2 validation failed and ADR 0023 is Proposed for review |
+| Phase 5 | ADR 0023 accepted; v3 quality/candidate remediation in progress |
 | Phases 6–9 | Planned |
 
 ## Delivery sequence and gates
@@ -597,9 +597,9 @@ Milestone 4.0 review material:
 
 **Status:** Hybrid implementation and ADR 0022 remediation are complete but not
 accepted. The approved v2 candidate failed validation on 2026-09-02; holdout and
-the end-to-end proof were correctly withheld. Proposed ADR 0023 now defines a
-ceiling-aware quality contract and deterministic candidate-selection alternative.
-No retry is authorized.
+the end-to-end proof were correctly withheld. ADR 0023 accepts a ceiling-aware
+quality contract, protected v3 evaluation, and deterministic candidate selection
+for free/local implementation. No paid retry is authorized.
 
 ### Objective
 
@@ -615,7 +615,7 @@ then reranking a bounded candidate set.
 | 5.2 | Parallel dense/sparse retrieval with identical authorization filters | Completed and live-tested |
 | 5.3 | Deterministic RRF/fusion, deduplication, and source diversification | Completed and deterministic |
 | 5.4 | Bounded reranker selection and token-budgeted evidence assembly | Completed; reranker remains opt-in |
-| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | V2 validation failed; Proposed ADR 0023 awaits review |
+| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | ADR 0023 accepted; free remediation in progress |
 
 ### Accepted implementation contract
 
@@ -841,7 +841,7 @@ commercial accounting, and compliance-grade administration.
 | Fusion, deduplication, and diversification | 5.3 | Accepted — application-owned RRF in ADR 0020 |
 | Reranker | 5.4 | Accepted — bounded local FastEmbed cross-encoder in ADR 0021 |
 | Phase 5 benchmark remediation and negative-query contract | 5.0–5.5 | Accepted — ADR 0022 |
-| Phase 5 response to the failed v2 quality gate | 5.5 | Proposed — ADR 0023; no threshold, corpus, or candidate change accepted |
+| Phase 5 response to the failed v2 quality gate | 5.5 | Accepted — ADR 0023; free implementation authorized |
 | Vision embedding/enrichment models | 6.1–6.2 | TBD |
 | Structured-table execution approach | 6.3–6.4 | TBD |
 | Observability/evaluation backend | 7.0 | TBD |
@@ -853,8 +853,8 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Review and approve, revise, or reject Proposed ADR 0023 | Explicit decision before benchmark or ranking code changes |
-| 2 | If accepted, implement the v3 fixture, ceiling-aware gate, and deterministic `hybrid-v2` candidate using tune evidence only | Deterministic free regression evidence with protected validation/holdout |
+| 1 | Implement the accepted v3 fixture, ceiling-aware gate, and deterministic `hybrid-v2` candidate using tune evidence only | Deterministic free regression evidence with protected validation/holdout |
+| 2 | Freeze the simplest passing candidate and run every free deterministic/live gate | Reproducible profile fingerprint and healthy services without paid calls |
 | 3 | Obtain new paid-run approval only after every selected free remediation passes | No implicit reuse of the consumed approval |
 | 4 | If the accepted gate passes, publish a reviewable Phase 5 PR | Aggregate evidence, clean branch, and successful CI |
 
