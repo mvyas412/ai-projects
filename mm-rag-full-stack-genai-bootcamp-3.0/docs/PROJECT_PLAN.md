@@ -1,6 +1,6 @@
 # Multimodal RAG production project plan
 
-> Living delivery plan — updated 2026-09-01
+> Living delivery plan — updated 2026-09-02
 
 This is the version-controlled planning source of truth for the journey from the
 preserved prototype through the enterprise platform. It defines sequence, scope,
@@ -45,7 +45,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 5.5 paid release acceptance |
+| Active milestone | Phase 5.5 candidate-quality decision after failed v2 validation |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -53,7 +53,7 @@ Rules:
 | Phase 4 | Completed and accepted — Milestones 4.0–4.5 squash-merged through PR #3 |
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
-| Phase 5 | Hybrid implementation and ADR 0022 free v2 remediation complete; fresh paid proof pending |
+| Phase 5 | Hybrid implementation complete; v2 validation failed and the next quality decision requires review |
 | Phases 6–9 | Planned |
 
 ## Delivery sequence and gates
@@ -595,9 +595,9 @@ Milestone 4.0 review material:
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** Hybrid implementation and the accepted ADR 0022 free remediation are
-complete but not accepted. The first paid candidate failed because the v1 corpus
-saturated dense Recall@10; one newly approved v2 paid proof remains required.
+**Status:** Hybrid implementation and ADR 0022 remediation are complete but not
+accepted. The approved v2 candidate failed validation on 2026-09-02; holdout and
+the end-to-end proof were correctly withheld. No retry is authorized.
 
 ### Objective
 
@@ -608,12 +608,12 @@ then reranking a bounded candidate set.
 
 | Milestone | Deliverable | Status |
 | --- | --- | --- |
-| 5.0 | Versioned retrieval evaluation dataset and dense-only baseline | V2 120-chunk/50-query contract implemented and free-validated; paid measurement pending |
+| 5.0 | Versioned retrieval evaluation dataset and dense-only baseline | V2 measured; dense Recall@10 remains above the feasible range for a 10% relative gain |
 | 5.1 | Sparse-engine evaluation and ADR | Completed — ADR 0019 implemented |
 | 5.2 | Parallel dense/sparse retrieval with identical authorization filters | Completed and live-tested |
 | 5.3 | Deterministic RRF/fusion, deduplication, and source diversification | Completed and deterministic |
 | 5.4 | Bounded reranker selection and token-budgeted evidence assembly | Completed; reranker remains opt-in |
-| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | ADR 0022 free remediation passes; fresh paid proof awaits approval |
+| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | V2 validation failed; candidate/metric decision pending review |
 
 ### Accepted implementation contract
 
@@ -660,6 +660,11 @@ then reranking a bounded candidate set.
   distribution, hash, and split-isolation checks are deterministic; validation failure
   emits no holdout metrics or output; excluded/out-of-scope/unknown identities are hard
   failures; retrieval emptiness is descriptive; and grounded abstention returns no citation.
+- The single approved v2 attempt on 2026-09-02 used one 2,262-token embedding
+  request at an estimated `$0.00004524`. Validation dense/hybrid Recall@10 was
+  `0.9375`/`0.9375`, nDCG@10 was `0.8585`/`0.8572`, and MRR@10 was
+  `0.8750`/`0.8542`. Identity counts stayed zero and hybrid p95 was `38.6 ms`.
+  Validation failed all three quality conditions; no holdout or product proof ran.
 
 ### Completion gate
 
@@ -834,6 +839,7 @@ commercial accounting, and compliance-grade administration.
 | Fusion, deduplication, and diversification | 5.3 | Accepted — application-owned RRF in ADR 0020 |
 | Reranker | 5.4 | Accepted — bounded local FastEmbed cross-encoder in ADR 0021 |
 | Phase 5 benchmark remediation and negative-query contract | 5.0–5.5 | Accepted — ADR 0022 |
+| Phase 5 response to the failed v2 quality gate | 5.5 | Review required; no threshold, corpus, or candidate change accepted |
 | Vision embedding/enrichment models | 6.1–6.2 | TBD |
 | Structured-table execution approach | 6.3–6.4 | TBD |
 | Observability/evaluation backend | 7.0 | TBD |
@@ -845,10 +851,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Obtain fresh approval for one v2 paid acceptance run | Prior approval remains consumed; no implicit retry |
-| 2 | Run validation first and unlock holdout/product proof only if it passes | One bounded paid attempt with aggregate evidence only |
-| 3 | If ADR 0018 passes on v2, publish a reviewable Phase 5 PR | Aggregate quality evidence, clean branch, and successful CI |
-| 4 | After explicit PR approval, squash-merge and create the immutable Phase 5 release checkpoint | Accepted squash commit and annotated release tag |
+| 1 | Review the failed v2 evidence and choose whether to harden the corpus while preserving gates or revise the metric contract | Explicitly accepted ADR before code or another paid run |
+| 2 | Use tuning-split evidence only to improve candidate generation/fusion; keep validation and holdout protected | Deterministic free regression evidence |
+| 3 | Obtain new approval only after the selected free remediation passes | No implicit reuse of the consumed approval |
+| 4 | If the accepted gate passes, publish a reviewable Phase 5 PR | Aggregate evidence, clean branch, and successful CI |
 
 ## Update protocol
 

@@ -113,4 +113,13 @@ only the 40 tune/validation rows with no holdout metrics. Identity metrics separ
 count excluded, out-of-scope, and unknown candidates. Grounded generation maps an
 explicit insufficient-evidence result to a citation-free abstention. `make check`
 passes 171 tests with 11 expected opt-in skips, lint, typing, migration-head, and
-schema-drift checks. No paid request was made; the final paid acceptance item remains open.
+schema-drift checks.
+
+The one newly authorized v2 attempt ran on 2026-09-02. It used one 2,262-token
+embedding request (estimated `$0.00004524`) and failed validation: dense/hybrid
+Recall@10 was `0.9375`/`0.9375`, nDCG@10 was `0.8585`/`0.8572`, and MRR@10 was
+`0.8750`/`0.8542`. Excluded, unauthorized, and unknown identity counts stayed zero;
+latency remained within bounds. The runner emitted only 40 tune/validation rows per
+profile, no holdout metrics/output, and no end-to-end product proof. The temporary
+collection was removed. This satisfies the sequencing/safety contract but not the
+ADR 0018 quality gate; the approval is consumed and no retry is authorized.

@@ -83,4 +83,7 @@ from every free gate.
   sparse/reranker fallback, pinned offline model checks, and healthy rebuilt runtime
   containers. The first paid candidate stopped at the quality gate because dense
   Recall@10 saturated the v1 corpus; no paid end-to-end proof or automatic retry ran.
-  Proposed ADR 0022 defines the recommended v2 correction.
+- The approved 2026-09-02 v2 attempt also failed validation. Authorization identity
+  and latency passed, but hybrid Recall@10 did not improve and ranking metrics
+  regressed slightly. The runner withheld holdout and the product proof, wrote only
+  ignored tune/validation results, removed its temporary collection, and did not retry.

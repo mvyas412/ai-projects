@@ -17,10 +17,11 @@ security review, checksummed compliance export, and durable tombstone-first life
 plans. Qdrant access requires bounded trusted scope, object access is backend-mediated
 and integrity-checked, and retention apply fails closed unless an exact owner-approved
 preview remains current. No automatic destructive retention schedule is enabled.
-Phase 5 implementation is complete but not yet accepted. The first separately
-approved paid candidate stopped at its quality gate because the v1 corpus saturated
-dense Recall@10. ADR 0022's harder v2 benchmark and free/local gates are implemented
-while preserving the approved thresholds; a newly approved paid proof remains. The default
+Phase 5 implementation is complete but not yet accepted. The v1 candidate on
+2026-09-01 and v2 candidate on 2026-09-02 both stopped at validation. V2 correctly
+withheld holdout and the end-to-end proof; scope identity and latency passed, but
+the current hybrid profile did not beat dense quality. A reviewed tuning/metric
+decision is required before another paid attempt. The default
 `hybrid-v1` profile
 combines authorized dense and Qdrant-native BM25 legs through deterministic RRF;
 `dense-v1` remains the rollback path, and `hybrid-rerank-v1` remains opt-in until
@@ -423,7 +424,8 @@ make phase5-evaluation  # validates the free hashed 50-query benchmark contract
 make check-acceptance PHASE5_EMBEDDING_COST_USD_PER_MILLION_TOKENS=<current-rate>
 ```
 
-Run `make check-acceptance` only after fresh explicit approval. It compares dense,
+Run `make check-acceptance` only after fresh explicit approval. The 2026-09-02
+authorization has been consumed and does not permit a retry. The command compares dense,
 hybrid, and hybrid-rerank profiles with one batched paid embedding request. Validation
 must pass before holdout retrieval/output and the end-to-end product proof can run. It then exercises
 async text/image ingestion, scoped hybrid retrieval, grounded generation, citations,

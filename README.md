@@ -16,11 +16,10 @@ are accepted, and the versioned benchmark, immutable sparse indexing, authorized
 dense/BM25 retrieval, deterministic RRF, optional local reranking, rollout profiles,
 and free regression gates are implemented. Final acceptance still requires one
 successful, separately approved paid benchmark/end-to-end run; no paid call runs
-implicitly. The first paid candidate on 2026-09-01 stopped at the quality gate
-because the v1 corpus saturated dense Recall@10. ADR 0022's 120-chunk v2 benchmark,
-validation-before-holdout execution, and separated identity/abstention metrics are
-now implemented and pass all free gates without weakening the approved thresholds.
-A newly approved paid v2 proof remains required.
+implicitly. The v1 candidate on 2026-09-01 and v2 candidate on 2026-09-02 both
+stopped at validation. The v2 gate correctly withheld holdout and the end-to-end
+proof. Scope identity and latency passed, but the current hybrid profile did not
+beat dense quality, so Phase 5 remains open pending a reviewed tuning/metric decision.
 
 See the latest application's tracked project plan and architecture handbook for
 scope and status. Secrets, local context, environments, and generated data remain
