@@ -11,7 +11,9 @@ planned in isolated branches and worktrees.
   release tagged `mm-rag-v3.0.0`, plus completed Phase 4 authorization, governance,
   audit, and lifecycle controls preserved at the annotated `mm-rag-v4.0.0` tag.
 
-Phase 5 work is preserved on `codex/phase5-hybrid-retrieval`. ADRs 0018–0024
+Phase 5 work is preserved on `codex/phase5-hybrid-retrieval`. PR #5 was
+squash-merged into `main` at `5436614`; its source tree is identical to the merged
+tree and no Phase 5 release tag was created. ADRs 0018–0024
 are accepted, and the versioned benchmark, immutable sparse indexing, authorized
 dense/BM25 retrieval, deterministic RRF, bounded local reranking, adaptive
 `hybrid-v3` candidate, rollout profiles, and free regression gates are implemented.
@@ -21,7 +23,12 @@ missed the required 5%. The runner withheld holdout and the end-to-end proof as
 designed. The user approved closing Phase 5 without promoting `hybrid-v3` or retrying
 the paid gate. Phase 5 is therefore implementation-complete but closed without
 quality acceptance; `hybrid-v1` remains the default and `dense-v1` remains rollback.
-Phase 6 decision kickoff is the next planned step and has not started.
+
+Phase 6 decision kickoff is in progress on
+`codex/phase6-visual-table-intelligence`. Proposed ADRs 0025–0030 define the
+evaluation, immutable provenance, local-first extraction, visual retrieval,
+structured-table calculation, evidence-viewer, and rollout contracts. They do not
+authorize implementation, a provider/model selection, a paid run, or a release tag.
 
 See the latest application's tracked project plan and architecture handbook for
 scope and status. Secrets, local context, environments, and generated data remain
