@@ -25,6 +25,22 @@ from backend.app.storage.s3 import S3ObjectStorage
 from backend.app.workers.health import ProcessHealth, health_is_ready
 
 
+async def _recover_expired_and_heartbeat(
+    service: IngestionWorkerService,
+    health: ProcessHealth,
+    *,
+    in_flight: int,
+) -> None:
+    try:
+        recovered = await asyncio.to_thread(service.recover_expired)
+        for _ in recovered:
+            health.increment("leases_recovered")
+    except Exception:
+        health.increment("recovery_failed")
+    # Recovery is the worker's idle path, so it must also keep readiness fresh.
+    health.update(state="running", ready=True, in_flight=in_flight)
+
+
 async def _run(settings: Settings) -> None:
     logger = structlog.get_logger(__name__)
     engine = create_database_engine(settings)
@@ -102,12 +118,11 @@ async def _run(settings: Settings) -> None:
 
     async def recover() -> None:
         while not stop.is_set():
-            try:
-                recovered = await asyncio.to_thread(service.recover_expired)
-                for _ in recovered:
-                    health.increment("leases_recovered")
-            except Exception:
-                health.increment("recovery_failed")
+            await _recover_expired_and_heartbeat(
+                service,
+                health,
+                in_flight=len(in_flight),
+            )
             try:
                 await asyncio.wait_for(
                     stop.wait(), timeout=settings.worker_recovery_poll_seconds

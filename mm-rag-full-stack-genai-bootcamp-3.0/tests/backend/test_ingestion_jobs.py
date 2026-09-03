@@ -17,6 +17,7 @@ from backend.app.models import (
     DocumentVersionStatus,
     IngestionAttempt,
     IngestionAttemptState,
+    IngestionGeneration,
     IngestionJob,
     IngestionJobState,
     IngestionOutboxEvent,
@@ -278,6 +279,112 @@ def test_job_creation_is_idempotent_and_authorized(job_context: JobContext) -> N
                 request_hash=REQUEST_HASH,
                 pipeline_fingerprint=PIPELINE_FINGERPRINT,
             )
+
+
+def test_owner_pipeline_upgrade_promotes_a_successor_generation_atomically(
+    job_context: JobContext,
+) -> None:
+    now = datetime(2026, 9, 1, 8, 0, tzinfo=UTC)
+    first_job_id = _create_job(
+        job_context,
+        user=job_context.member,
+        key="phase5-predecessor",
+        now=now,
+    )
+    with job_context.factory.begin() as session:
+        state_machine = IngestionJobStateMachine(session)
+        _, attempt = state_machine.claim_job(
+            job_id=first_job_id,
+            worker_id="phase4-worker",
+            now=now,
+            lease_duration=timedelta(minutes=5),
+        )
+        generation = state_machine.create_generation(
+            job_id=first_job_id,
+            attempt_id=attempt.id,
+            fencing_token=attempt.fencing_token,
+            now=now,
+        )
+        state_machine.complete_success(
+            job_id=first_job_id,
+            attempt_id=attempt.id,
+            fencing_token=attempt.fencing_token,
+            generation_id=generation.id,
+            manifest={"profile": "phase4-dense"},
+            manifest_object_key="phase4/manifest.json",
+            manifest_sha256="d" * 64,
+            chunk_count=1,
+            vector_count=1,
+            now=now + timedelta(seconds=1),
+        )
+        first_generation_id = generation.id
+
+    phase5_fingerprint = "e" * 64
+    with job_context.factory.begin() as session:
+        with pytest.raises(IngestionJobPermissionError):
+            IngestionJobStateMachine(session).create_job(
+                user=job_context.member,
+                workspace_id=job_context.workspace_id,
+                document_id=job_context.document_id,
+                document_version_id=job_context.version_id,
+                idempotency_key="member-pipeline-upgrade",
+                request_hash="f" * 64,
+                pipeline_fingerprint=phase5_fingerprint,
+                predecessor_job_id=first_job_id,
+                now=now + timedelta(minutes=1),
+            )
+
+    with job_context.factory.begin() as session:
+        state_machine = IngestionJobStateMachine(session)
+        successor, created = state_machine.create_job(
+            user=job_context.owner,
+            workspace_id=job_context.workspace_id,
+            document_id=job_context.document_id,
+            document_version_id=job_context.version_id,
+            idempotency_key="owner-pipeline-upgrade",
+            request_hash="f" * 64,
+            pipeline_fingerprint=phase5_fingerprint,
+            predecessor_job_id=first_job_id,
+            now=now + timedelta(minutes=1),
+        )
+        assert created
+        version = session.get(DocumentVersion, job_context.version_id)
+        assert version is not None
+        assert version.active_generation_id == first_generation_id
+        successor_job_id = successor.id
+
+    with job_context.factory.begin() as session:
+        state_machine = IngestionJobStateMachine(session)
+        _, attempt = state_machine.claim_job(
+            job_id=successor_job_id,
+            worker_id="phase5-worker",
+            now=now + timedelta(minutes=2),
+            lease_duration=timedelta(minutes=5),
+        )
+        successor_generation = state_machine.create_generation(
+            job_id=successor_job_id,
+            attempt_id=attempt.id,
+            fencing_token=attempt.fencing_token,
+            now=now + timedelta(minutes=2),
+        )
+        state_machine.complete_success(
+            job_id=successor_job_id,
+            attempt_id=attempt.id,
+            fencing_token=attempt.fencing_token,
+            generation_id=successor_generation.id,
+            manifest={"profile": "phase5-hybrid"},
+            manifest_object_key="phase5/manifest.json",
+            manifest_sha256="a" * 64,
+            chunk_count=1,
+            vector_count=1,
+            now=now + timedelta(minutes=2, seconds=1),
+        )
+        version = session.get(DocumentVersion, job_context.version_id)
+        first_generation = session.get(IngestionGeneration, first_generation_id)
+        assert version is not None and first_generation is not None
+        assert version.active_generation_id == successor_generation.id
+        assert version.ingestion_fingerprint == PIPELINE_FINGERPRINT
+        assert first_generation.state == "promoted"
 
 
 def test_queued_claim_and_heartbeat_use_fenced_attempt(job_context: JobContext) -> None:

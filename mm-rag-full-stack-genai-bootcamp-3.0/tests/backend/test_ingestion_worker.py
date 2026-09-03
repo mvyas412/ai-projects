@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -40,6 +41,7 @@ from backend.app.services.ingestion_worker import DeliveryDisposition, Ingestion
 from backend.app.storage.keys import original_object_key
 from backend.app.storage.local import LocalFileStorage
 from backend.app.workers.health import ProcessHealth
+from backend.app.workers.ingestion_worker import _recover_expired_and_heartbeat
 from backend.app.workers.outbox_dispatcher import OutboxDispatcher
 
 
@@ -298,6 +300,22 @@ def test_worker_schedules_retry_and_hides_dependency_detail(
         assert generation is not None
         assert generation.state == IngestionGenerationState.ABANDONED.value
         assert [event.dispatch_sequence for event in events] == [1, 2]
+
+
+@pytest.mark.asyncio
+async def test_idle_recovery_refreshes_worker_readiness(
+    test_settings, worker_context
+) -> None:
+    worker = _worker(test_settings, worker_context, SuccessfulIndexer())
+    health = ProcessHealth(test_settings.runtime_health_directory, "worker")
+    health.update(state="degraded", ready=False, in_flight=4)
+
+    await _recover_expired_and_heartbeat(worker, health, in_flight=0)
+
+    payload = json.loads(health.path.read_text(encoding="utf-8"))
+    assert payload["state"] == "running"
+    assert payload["ready"] is True
+    assert payload["in_flight"] == 0
 
 
 def test_worker_observes_cancellation_before_promotion(

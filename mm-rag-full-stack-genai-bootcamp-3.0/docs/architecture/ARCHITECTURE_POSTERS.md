@@ -4,11 +4,12 @@
 > The handbook remains the editable source of truth; regenerate these posters
 > whenever architecture, data flow, technology, or phase status changes.
 
-## Current Phase 4 workflow and DEV architecture
+## Current Phase 5 workflow and DEV architecture
 
-This implementation checkpoint shows the accepted Phase 3 asynchronous runtime plus
-Phase 4 central policy, RLS, scoped cross-store access, audit/export, recoverable
-tombstones, holds, and durable lifecycle reconciliation.
+This implementation checkpoint shows the accepted Phase 3/4 runtime and governance
+boundaries plus immutable sparse indexing, authorized dense/BM25 retrieval,
+deterministic RRF, the verified free v3 remediation, optional local reranking, and
+the remaining paid quality gate.
 
 ![MM-RAG current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 

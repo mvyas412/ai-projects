@@ -92,6 +92,19 @@ class Settings(BaseSettings):
     qdrant_timeout_seconds: int = Field(default=3, ge=1, le=30)
     qdrant_collection_name: str = "mm_rag_phase3_documents"
     rag_retrieval_limit: int = Field(default=8, ge=1, le=30)
+    rag_retrieval_profile: Literal[
+        "dense-v1", "hybrid-v1", "hybrid-v2", "hybrid-v3", "hybrid-rerank-v1"
+    ] = "hybrid-v1"
+    rag_sparse_indexing_enabled: bool = True
+    rag_dense_candidate_limit: int = Field(default=30, ge=8, le=100)
+    rag_sparse_candidate_limit: int = Field(default=30, ge=8, le=100)
+    rag_fusion_k: int = Field(default=60, ge=1, le=1000)
+    rag_max_candidates_per_document: int = Field(default=3, ge=1, le=30)
+    rag_rerank_candidate_limit: int = Field(default=20, ge=8, le=50)
+    rag_rerank_timeout_seconds: float = Field(default=2.0, gt=0, le=30)
+    rag_rerank_max_characters: int = Field(default=4000, ge=256, le=16000)
+    rag_model_threads: int = Field(default=2, ge=1, le=16)
+    phase5_model_cache_dir: Path = PROJECT_ROOT / "data/runtime/models"
 
     openai_api_key: SecretStr | None = None
     openai_chat_model: str = DEFAULT_OPENAI_CHAT_MODEL
@@ -251,6 +264,16 @@ class Settings(BaseSettings):
     def validate_worker_timing(self) -> Self:
         if self.worker_heartbeat_seconds * 2 >= self.worker_lease_seconds:
             raise ValueError("WORKER_HEARTBEAT_SECONDS must be less than half the lease")
+        return self
+
+    @model_validator(mode="after")
+    def validate_retrieval_bounds(self) -> Self:
+        if self.rag_retrieval_limit > self.rag_rerank_candidate_limit:
+            raise ValueError("RAG_RETRIEVAL_LIMIT cannot exceed RAG_RERANK_CANDIDATE_LIMIT")
+        if self.rag_rerank_candidate_limit > (
+            self.rag_dense_candidate_limit + self.rag_sparse_candidate_limit
+        ):
+            raise ValueError("RAG_RERANK_CANDIDATE_LIMIT exceeds the candidate pool")
         return self
 
     @field_validator("openai_chat_model", mode="before")

@@ -23,7 +23,14 @@ from backend.app.retrieval.scope import (
 class FakeIndexClient:
     def __init__(self, *, exists: bool) -> None:
         self.exists = exists
-        self.calls: list[tuple[str, str, models.PayloadSchemaType, bool]] = []
+        self.calls: list[
+            tuple[
+                str,
+                str,
+                models.PayloadSchemaType | models.KeywordIndexParams,
+                bool,
+            ]
+        ] = []
 
     def collection_exists(self, collection_name: str) -> bool:
         return self.exists
@@ -32,7 +39,7 @@ class FakeIndexClient:
         self,
         collection_name: str,
         field_name: str,
-        field_schema: models.PayloadSchemaType,
+        field_schema: models.PayloadSchemaType | models.KeywordIndexParams,
         *,
         wait: bool,
     ) -> object:
@@ -73,7 +80,12 @@ def test_scope_payload_indexes_are_created_for_existing_collection() -> None:
 
     assert ensure_scope_payload_indexes(client, "documents") is True
     assert [call[1] for call in client.calls] == list(INDEXED_SCOPE_PAYLOAD_FIELDS)
-    assert all(call[2] == models.PayloadSchemaType.KEYWORD for call in client.calls)
+    tenant_schema = client.calls[0][2]
+    assert isinstance(tenant_schema, models.KeywordIndexParams)
+    assert tenant_schema.is_tenant is True
+    assert all(
+        call[2] == models.PayloadSchemaType.KEYWORD for call in client.calls[1:]
+    )
     assert all(call[3] is True for call in client.calls)
 
 

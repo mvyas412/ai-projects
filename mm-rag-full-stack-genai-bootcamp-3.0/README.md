@@ -1,4 +1,4 @@
-# Multimodal RAG Production — Phase 3 baseline with Phase 4 governance
+# Multimodal RAG Production — Phase 4 release with Phase 5 implementation
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
@@ -7,8 +7,9 @@ remain unchanged at the immutable `mm-rag-v1.0.0` and `mm-rag-v2.0.0` Git tags.
 ## Current status
 
 Phase 3 is accepted and preserved at `mm-rag-v3.0.0`. Phase 4 Milestones 4.0–4.5
-are completed and accepted: PR #3 was squash-merged into `main` at `57ee453`, its
-tree matches the approved source head, and the source branch remains preserved.
+are completed and accepted: implementation PR #3 and closure PR #4 were
+squash-merged, and the accepted lineage is preserved by annotated tag
+`mm-rag-v4.0.0` at `996898e`.
 ADRs 0013–0017 are accepted and migrations through `20260831_0013` add central
 default-deny policy,
 tenant-constrained ACLs, PostgreSQL RLS, cross-store authorization, safe append-only
@@ -16,7 +17,23 @@ security review, checksummed compliance export, and durable tombstone-first life
 plans. Qdrant access requires bounded trusted scope, object access is backend-mediated
 and integrity-checked, and retention apply fails closed unless an exact owner-approved
 preview remains current. No automatic destructive retention schedule is enabled.
-No Phase 4 release tag has been requested or created.
+Phase 5 implementation is complete and closed without quality acceptance. The v1
+through v4 paid candidates all stopped at validation. The single approved v4 attempt on 2026-09-02
+used one 2,545-token embedding batch and passed the ceiling-aware Recall, MRR,
+class, identity, latency, and provider-call gates. Its nDCG@10 improved from
+`0.8439` to `0.8632`, a 2.28% relative gain against the required 5%. The runner
+correctly withheld holdout and the end-to-end proof. Accepted ADR 0024 keeps that
+5% standard and its tune-only `hybrid-v3` candidate unchanged: ordinary queries
+retain dense order, while exact and multi-intent syntax selects balanced hybrid
+retrieval plus the pinned local reranker. The v4 approval is consumed; no retry or
+profile promotion is authorized. The user approved ending Phase 5 without another
+remediation cycle; `hybrid-v3` remains evaluation-only. The free gate passes 198
+deterministic tests plus all 209 live tests, pinned model verification, and v4 fixture
+reproduction. The default
+`hybrid-v1` profile combines authorized dense and Qdrant-native BM25 legs through
+deterministic RRF;
+`dense-v1` remains the rollback path, and `hybrid-rerank-v1` remains opt-in until
+measured evidence proves the bounded local cross-encoder improves quality.
 
 The current `3.0` lineage contains:
 
@@ -45,6 +62,15 @@ The current `3.0` lineage contains:
   document-indexer boundary, with mandatory workspace/document/version vector scope.
 - Persistent workspace-, collection-, or document-scoped conversations with
   backend-mediated retrieval, answer generation, and structured citations.
+- Immutable dense-and-sparse successor generations, identical trusted Qdrant filters
+  on both retrieval legs, deterministic RRF/deduplication/diversification, and
+  content-free candidate traces with safe dense fallback.
+- A pinned, checksum-verified offline FastEmbed BM25 model and optional local ONNX
+  cross-encoder, provisioned at setup/image-build time and never in a request path.
+- Reproducible hashed v2/v3 diagnostics and v4 candidate benchmark. V4 contains
+  120 chunks and 80 balanced queries with protected 48/16/16 splits, class-level
+  gates, validation-before-holdout execution, a frozen selector fingerprint, and
+  an explicit paid runner whose raw results remain Git-ignored.
 - A presentation-focused native Streamlit experience with top navigation,
   workspace switching, document/collection management, persistent chat,
   evidence inspection, first-document guidance, downloads, settings, and
@@ -109,8 +135,9 @@ future capabilities have already been implemented.
 The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
-shows the verified Phase 4 development checkpoint and distinguishes implemented
-governance/lifecycle controls from later production-provider decisions.
+shows the Phase 5 implementation checkpoint, including hybrid retrieval and the
+failed v4 paid nDCG gate. Phase 5 is closed without candidate promotion; Phase 6
+decision kickoff is planned but has not started.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
@@ -403,16 +430,24 @@ The same gates are available through stable commands:
 ```bash
 make check       # locked dependencies, lint, types, tests, migration head, diff hygiene
 make check-live  # also checks live services and the SeaweedFS provider contract
-make check-acceptance  # also makes paid OpenAI calls in isolated temporary data
+make phase5-evaluation  # validates the free hashed 80-query v4 benchmark contract
+make check-acceptance PHASE5_EMBEDDING_COST_USD_PER_MILLION_TOKENS=<current-rate>
 ```
 
-`make check-acceptance` exercises text and generated-image ingestion, embeddings,
-scoped Qdrant retrieval, grounded generation, citations, persistence, audit, and
-cross-tenant denial. It removes its temporary SQL, files, and vector collection.
+Run `make check-acceptance` only after fresh explicit approval. The 2026-09-02 v4
+authorization has been consumed and does not permit a retry. The command
+compares dense-v1, hybrid-v1, hybrid-v2, hybrid-v3, and hybrid-rerank-v1
+profiles with one batched paid embedding request. Validation
+must pass before holdout retrieval/output and the end-to-end product proof can run. It then exercises
+async text/image ingestion, scoped hybrid retrieval, grounded generation, citations,
+persistence, audit, and cross-tenant denial. Temporary collections are removed and
+raw benchmark identities remain ignored. A failed benchmark gate stops before the
+end-to-end product proof and never authorizes an automatic retry.
 
 GitHub Actions runs deterministic and PostgreSQL/Qdrant integration gates on pushes
-to the Phase 3 and Phase 4 branches and relevant pull requests. The SeaweedFS contract
-remains in the local live gate until CI provisions that command-based service explicitly.
+to the Phase 3, Phase 4, and Phase 5 branches and relevant pull requests. The
+SeaweedFS contract remains in the local live gate until CI provisions that
+command-based service explicitly.
 Coverage must remain at or above 70%.
 
 Use the [demonstration runbook](docs/DEMO_RUNBOOK.md) for preflight, the five-minute
@@ -453,5 +488,6 @@ Phase 2 is merged and recoverable at `mm-rag-v2.0.0`. Phase 3 is implemented,
 accepted, and merged into `main` through PR #2 at `228ce63` after the explicitly
 authorized real-OpenAI asynchronous browser proof. The immutable accepted release
 is tagged `mm-rag-v3.0.0` at `9ebe767`. Phase 4 is completed, accepted, and
-squash-merged through PR #3 at `57ee453`; no Phase 4 release tag has been created.
+squash-merged through PR #3 at `57ee453`; its documentation closure is preserved by
+annotated tag `mm-rag-v4.0.0` at `996898e`.
 Production providers and deployment remain future Phase 8 decisions.

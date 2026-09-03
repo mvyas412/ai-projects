@@ -114,9 +114,12 @@ class IngestionJobStateMachine:
         role = self._require_document_action(
             user, document, PolicyAction.DOCUMENT_INDEX
         )
-        if version.ingestion_fingerprint != pipeline_fingerprint:
+        if (
+            version.ingestion_fingerprint != pipeline_fingerprint
+            and predecessor_job_id is None
+        ):
             raise IngestionJobValidationError(
-                "pipeline_fingerprint does not match the document version"
+                "A pipeline upgrade requires a predecessor job"
             )
 
         operation = IngestionOperation.INDEX_DOCUMENT_VERSION.value
@@ -755,13 +758,21 @@ class IngestionJobStateMachine:
         if (
             predecessor.document_id != version.document_id
             or predecessor.document_version_id != version.id
-            or predecessor.pipeline_fingerprint != pipeline_fingerprint
         ):
             raise IngestionJobValidationError("Predecessor does not match the document version")
         document = self._documents.get_document(workspace_id, predecessor.document_id)
         if document is None:
             raise IngestionJobNotFoundError
         self._require_job_action(user, predecessor, PolicyAction.JOB_RETRY)
+        if predecessor.pipeline_fingerprint != pipeline_fingerprint:
+            # A successful active generation remains authoritative until an
+            # owner/admin successor with the new pipeline promotes atomically.
+            if (
+                predecessor.state != IngestionJobState.SUCCEEDED.value
+                or version.active_generation_id is None
+                or role not in {WorkspaceRole.OWNER, WorkspaceRole.ADMIN}
+            ):
+                raise IngestionJobPermissionError
         if (
             predecessor.state == IngestionJobState.SUCCEEDED.value
             and role not in {WorkspaceRole.OWNER, WorkspaceRole.ADMIN}

@@ -1,11 +1,12 @@
-# Phase 3 demonstration runbook
+# Current MM-RAG demonstration runbook
 
-This runbook presents the durable asynchronous workflow while keeping the accepted
-V1 and V2 releases immutable.
+This runbook presents the accepted durable/governed foundation and the closed
+Phase 5 hybrid-retrieval implementation while keeping all release tags immutable.
 
 ## Before the session
 
-1. From the `3.0` directory, run `make setup` once.
+1. From the `3.0` directory, run `make setup` once. This provisions and verifies
+   the pinned free BM25 and reranker artifacts outside request handling.
 2. Confirm ignored `.env` and `.streamlit/secrets.toml` contain the local Auth0,
    PostgreSQL, Qdrant, SeaweedFS, RabbitMQ, and OpenAI settings. Never display them.
 3. Run `make services`, `make migrate`, and `make runtime`.
@@ -15,19 +16,21 @@ V1 and V2 releases immutable.
 6. Open `http://localhost:8503`, sign in, and confirm the personal workspace,
    authenticated email, and Settings readiness.
 
-Run `make check-acceptance` only with explicit authorization: it makes paid OpenAI
-requests and is separate from the normal Phase 3 release gate.
+Run `make check-acceptance PHASE5_EMBEDDING_COST_USD_PER_MILLION_TOKENS=<current-rate>`
+only with explicit authorization. It makes paid OpenAI requests and is separate
+from every free gate.
 
 ## Five-minute product story
 
 1. **Architecture:** show the current workflow/DEV poster and explain PostgreSQL
-   job truth, RabbitMQ wake-ups, immutable object/generation writes, and fenced promotion.
+   job truth, RabbitMQ wake-ups, immutable dense/sparse generations, and fenced promotion.
 2. **Library:** upload a representative PDF, DOCX, image, Markdown, or text source.
    Point out the immediate durable job response and queued/running stage progress.
 3. **Control:** demonstrate refresh and explain cooperative cancellation and immutable
    successor retry. Do not cancel the primary golden-path job.
 4. **Ready state:** after promotion, show the READY document and authorized source download.
-5. **Ask:** run a document- or collection-scoped question and inspect source/page evidence.
+5. **Ask:** run semantic and exact-identifier questions, then inspect source/page evidence.
+   Explain identical dense/sparse authorization filters, deterministic RRF, and dense fallback.
 6. **Persistence:** refresh or sign out/in; reopen the job/document/conversation state.
 7. **Operations:** show aggregate `make operations-status` output and explain the
    separate dispatcher/worker health, safe alerts, retention preview, and restore proof.
@@ -44,6 +47,9 @@ requests and is separate from the normal Phase 3 release gate.
 - Public status uses stable codes and correlation IDs without provider errors, keys,
   object paths, document content, or tokens.
 - Every retrieval requires tenant, workspace, document/version, and active generation.
+- Sparse or reranker failure cannot broaden scope; retrieval falls back to the already
+  authorized dense or fused order.
+- Models are pinned and checksum-verified before startup; request paths do not download them.
 
 ## Visual acceptance checklist
 
@@ -72,3 +78,36 @@ requests and is separate from the normal Phase 3 release gate.
   as its citation; the conversation, answer, and citation persisted after navigation.
   No authentication token or secret value was displayed or added to tracked files,
   and no second paid run was made.
+- Initial Phase 5 free implementation evidence covered the hashed 50-query contract,
+  immutable successor reindex, real-Qdrant filter parity, deterministic RRF,
+  sparse/reranker fallback, pinned offline model checks, and healthy rebuilt runtime
+  containers. The first paid candidate stopped at the quality gate because dense
+  Recall@10 saturated the v1 corpus; no paid end-to-end proof or automatic retry ran.
+- The approved 2026-09-02 v2 attempt also failed validation. Authorization identity
+  and latency passed, but hybrid Recall@10 did not improve and ranking metrics
+  regressed slightly. The runner withheld holdout and the product proof, wrote only
+  ignored tune/validation results, removed its temporary collection, and did not retry.
+- ADR 0023 free/local implementation is complete. The hashed 80-query v3 fixture,
+  ceiling-aware/class gates, deterministic `hybrid-v2` fingerprint, and all 194 live
+  tests pass without provider calls.
+- The single approved 2026-09-02 v3 attempt embedded 2,516 tokens for an estimated
+  `$0.00005032`. `hybrid-v2` passed Recall, MRR, class, identity, latency, and
+  provider-call gates, but its 4.14% relative nDCG@10 improvement missed the 5%
+  requirement. Validation therefore withheld holdout and product proof, removed the
+  temporary collection, and wrote only ignored tune/validation rows. No retry or
+  rollout is authorized; `hybrid-v1` remains default.
+- ADR 0024 is accepted and its free/local remediation is implemented. The unchanged
+  5% nDCG gate now evaluates fingerprinted `hybrid-v3`: ordinary syntax follows
+  dense order, while exact or multi-intent syntax selects balanced RRF plus the
+  pinned local reranker. The reproducible 80-query v4 fixture reuses only v3 tuning
+  evidence and has fresh hash-bound validation/holdout queries and identities.
+- The single approved 2026-09-02 v4 attempt used one 2,545-token embedding batch
+  for an estimated `$0.00005090`. `hybrid-v3` passed Recall, MRR, class, identity,
+  latency, and provider-call gates, but its 2.28% relative nDCG@10 gain missed the
+  required 5%. Validation withheld holdout and the product proof, removed the
+  temporary collection, and wrote only ignored tune/validation rows. No retry or
+  rollout is authorized; `hybrid-v1` remains default.
+- The user approved closing Phase 5 without promoting `hybrid-v3` or running another
+  paid remediation cycle. This is an honest quality-gate outcome, not a RAG product
+  failure: the implementation remains available, the earlier Phase 3 end-to-end
+  product proof remains valid, and dense retrieval remains the rollback path.

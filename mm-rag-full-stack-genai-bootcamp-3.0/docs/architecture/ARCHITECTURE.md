@@ -1,6 +1,6 @@
 # Multimodal RAG architecture handbook
 
-> Living architecture baseline — updated 2026-08-31
+> Living architecture baseline — updated 2026-09-02
 
 This document is the version-controlled architecture source of truth for the
 complete system and Phases 1–9. Update it whenever a component, boundary, data
@@ -18,8 +18,13 @@ roadmap view, and one diagram for each phase. The Mermaid diagrams in this
 handbook remain the editable source of truth.
 
 The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
-is the verified Phase 4 development checkpoint. It includes the accepted Phase 3
-runtime plus implemented authorization, audit, and lifecycle boundaries.
+is the Phase 5 implementation checkpoint. It includes the accepted Phase 3/4
+runtime and governance boundaries plus hybrid retrieval. The single approved v4
+attempt on 2026-09-02 passed every evaluated validation gate except the required
+5% relative nDCG@10 gain, achieving 2.28%; holdout and the product proof were
+withheld. `hybrid-v3` remains evaluation-only, `hybrid-v1` remains default, and a
+user-approved closure now ends Phase 5 without candidate promotion. Phase 6 decision
+kickoff is planned but has not started.
 
 ## Status legend
 
@@ -29,6 +34,7 @@ runtime plus implemented authorization, audit, and lifecycle boundaries.
 | In progress | Approved decision or implementation work has started but its phase gate has not passed |
 | Planned | Intended capability or boundary that is not implemented yet |
 | Proposed / TBD | Candidate design or technology requiring a decision |
+| Closed without acceptance | Implementation ended without satisfying the phase gate or promoting its candidate |
 
 The diagrams describe both current and target states. A displayed component is
 not necessarily implemented; each phase states its status explicitly.
@@ -70,9 +76,9 @@ flowchart LR
     subgraph rag["Retrieval and generation"]
         query["Authorized query orchestration"]
         dense["Dense / multimodal search"]
-        sparse["Sparse / lexical search<br/>TBD"]
-        fusion["RRF / score fusion"]
-        rerank["Reranking"]
+        sparse["Sparse / lexical search<br/>Qdrant BM25 accepted"]
+        fusion["Deterministic RRF<br/>accepted"]
+        rerank["Bounded local reranker<br/>accepted"]
         context["Evidence and citation builder"]
         model["OpenAI / governed model provider"]
     end
@@ -166,8 +172,8 @@ flowchart LR
     p1["Phase 1<br/>Prototype<br/>Implemented"] -->
     p2["Phase 2<br/>Product foundation<br/>Completed"] -->
     p3["Phase 3<br/>Async ingestion<br/>Completed"] -->
-    p4["Phase 4<br/>Governance foundation<br/>Implemented"] -->
-    p5["Phase 5<br/>Hybrid retrieval<br/>Planned"] -->
+    p4["Phase 4<br/>Governance foundation<br/>Completed / v4.0.0"] -->
+    p5["Phase 5<br/>Hybrid retrieval<br/>Closed / gate not met"] -->
     p6["Phase 6<br/>Visual/table intelligence<br/>Planned"] -->
     p7["Phase 7<br/>Evaluation/observability<br/>Planned"] -->
     p8["Phase 8<br/>Scalable platform<br/>Planned"] -->
@@ -179,8 +185,8 @@ flowchart LR
 | 1 | Working multimodal RAG prototype | Streamlit, LangChain, PyMuPDF, Tesseract, pdfplumber, OpenAI | Qdrant, local files | Implemented and frozen |
 | 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
-| 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and accepted at `57ee453` |
-| 5 | Higher-quality retrieval | Dense search, sparse search TBD, RRF, reranker | Qdrant, sparse index TBD | Planned |
+| 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and preserved at `mm-rag-v4.0.0` |
+| 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | Closed without acceptance; v4 nDCG gate missed and no candidate was promoted |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
 | 8 | Independently scalable deployment | Gateway, API/workers, dedicated frontend TBD, managed services | Managed PostgreSQL, Qdrant, object storage | Planned |
@@ -288,14 +294,16 @@ wake-ups and reload/fence PostgreSQL state. A validated immutable generation bec
 visible through one active pointer, so failure or cancellation cannot expose partial
 vectors. Aggregate operations, retention preview, process health, a representative
 large upload, and a temporary PostgreSQL restore exercise complete Milestone 3.5's
-free hardening evidence. The signed-in acceptance proof additionally verifies the
+free hardening evidence. The idle recovery loop refreshes readiness so heartbeat age
+continues to detect a stalled worker even when no deliveries are in flight. The
+signed-in acceptance proof additionally verifies the
 live embedding, promotion, active-generation retrieval, citation, and persistence path.
 
 ## Phase 4 — fine-grained authorization and governance
 
 **Status:** Completed and accepted. Milestones 4.0–4.5 were squash-merged through
-PR #3 at `57ee453`; no Phase 4 release tag has been created. Phase 2 starts isolation
-and this phase deepens it with central policy,
+PR #3 at `57ee453`; annotated tag `mm-rag-v4.0.0` preserves documentation closure
+commit `996898e`. Phase 2 starts isolation and this phase deepens it with central policy,
 ACL persistence, PostgreSQL RLS, mandatory Qdrant scope, canonical backend-mediated
 object access, a fail-closed future connector permission contract, safe append-only
 security review, checksummed compliance export, and tombstone-first lifecycle.
@@ -337,21 +345,29 @@ partial progress, honor holds/live work, and retain a content-free completion re
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** Planned. Sparse and reranking technologies require evaluation.
+**Status:** Closed without acceptance under ADRs 0018–0024. The v1
+through v4 paid candidates failed validation. V4 passed every evaluated validation
+gate except the required 5% relative nDCG@10 gain, achieving 2.28%, so holdout and
+product proof were withheld as designed. Its approval is consumed. `hybrid-v3`
+remains evaluation-only and `hybrid-v1` remains default. The user approved ending
+Phase 5 without promotion or another remediation cycle.
 
 ```mermaid
 flowchart LR
-    question["Authorized question + scope"] --> prep["Normalize query / intent"]
-    prep --> filter["Trusted authorization filter"]
+    question["Authorized question + scope"] --> prep["Normalize query syntax"]
+    prep --> route["Frozen hybrid-v3 route"]
+    route --> filter["Trusted authorization filter"]
     filter --> dense["Dense semantic retrieval"]
-    filter --> sparse["Sparse lexical retrieval<br/>TBD"]
+    filter -->|exact / multi intent| sparse["Sparse lexical retrieval<br/>Qdrant BM25 implemented"]
     dense --> qdrant[("Qdrant")]
-    sparse --> sindex[("Sparse index TBD")]
-    qdrant --> fusion["RRF / evaluated fusion"]
+    sparse --> sindex[("Qdrant sparse vector<br/>implemented")]
+    qdrant --> denseOrder["Dense order<br/>ordinary syntax"]
+    qdrant --> fusion["Balanced application-owned RRF<br/>signaled syntax"]
     sindex --> fusion
     fusion --> dedupe["Deduplicate + diversify"]
-    dedupe --> rerank["Bounded reranker"]
-    rerank --> context["Token-budgeted evidence"]
+    dedupe --> rerank["Bounded local cross-encoder<br/>optional profile"]
+    denseOrder --> context["Token-budgeted evidence"]
+    rerank --> context
     context --> generation["Grounded generation"]
     generation --> answer["Answer + ranked citations"]
     question -.-> evaluation["Retrieval evaluation"]
@@ -362,6 +378,74 @@ flowchart LR
 Authorization applies before every search. Evaluate Recall@k, MRR/nDCG,
 groundedness, citation correctness, latency, and cost. Exit: the hybrid pipeline
 measurably beats dense-only retrieval without weakening isolation or citations.
+
+The implementation retains the reproducible v2 and v3 diagnostics and adds a hashed
+120-chunk/80-query v4 benchmark and frozen dense profile,
+the existing Qdrant 1.19 service with an IDF-enabled named BM25 sparse vector,
+application-owned RRF over 30 candidates per authorized leg, a three-per-document
+multi-source cap, and an optional local cross-encoder over at most 20 candidates.
+Eight evidence items proceed to generation. Models are pinned and checksum-verified
+before runtime; request handling never downloads artifacts. `dense-v1` is the safe
+rollback, `hybrid-v1` is the default, and prior hybrid profiles remain unchanged.
+
+The first paid candidate kept authorization and latency within bounds but could not
+demonstrate the accepted relative quality gains because dense validation Recall@10
+was already 1.0 on only 24 chunks. Accepted ADR 0022 preserves the thresholds,
+versions a larger confounder corpus, rotates holdout evidence, and separates
+out-of-scope identity safety from answer-level abstention. The implemented runner
+scores validation first and produces no holdout metrics or output on failure.
+Unanswerable retrieval emptiness is descriptive; grounded generation uses an
+explicit insufficient-evidence result that carries no citations.
+
+The approved 2026-09-02 v2 attempt preserved scope identity and latency but did not
+improve validation quality: dense/hybrid Recall@10 was `0.9375`/`0.9375`, nDCG@10
+was `0.8585`/`0.8572`, and MRR@10 was `0.8750`/`0.8542`. Since dense Recall@10 is
+above `0.9091`, a 10% relative improvement is mathematically unreachable at depth
+10 on this validation split. Tuning-only evidence also shows the equal-weight fused
+profile helps multi-document queries but loses semantic-paraphrase recall. The next
+step must be an explicit corpus/metric/candidate decision, not an automatic retry.
+
+Accepted ADR 0023 is implemented with a ceiling-aware Recall@10 formula,
+per-query-class non-regression floors, a fresh protected v3 evaluation revision, and
+a deterministic `hybrid-v2` selector. The fingerprinted selector uses versioned query
+syntax to choose dense-favoring or balanced RRF; it never uses judgment labels, an
+LLM router, or client ranking authority. `hybrid-v1` remains the default while paid
+evidence and rollout approval remain separate.
+
+The single approved v3 run on 2026-09-02 embedded 2,516 tokens in one paid batch at
+an estimated `$0.00005032`. On validation, dense/`hybrid-v2` Recall@10 was
+`0.9167`/`0.9583`, nDCG@10 was `0.8667`/`0.9026`, and MRR@10 was
+`0.9167`/`0.9583`. Class floors, identity safety, provider-call count, and latency
+passed, but the 4.14% relative nDCG gain missed the required 5% target. The runner
+therefore emitted no holdout result or end-to-end proof. The observed validation
+must not become tuning evidence; any ranking or quality-contract change needs a new
+versioned decision and protected evaluation revision.
+
+Accepted ADR 0024 keeps every `phase5-quality-v2` threshold unchanged. Using only
+v3 tuning evidence, it freezes `hybrid-v3-selector-v1`: ordinary query syntax keeps
+dense order, while exact or multi-intent syntax selects balanced 1:1 RRF and the
+pinned local cross-encoder. The selector cannot consume benchmark labels, expected
+answers, client routing authority, retrieved content, or a model call. Its
+fingerprint binds the syntax, fusion, 30/30/20/8 limits, diversity rule, and reranker
+artifact. Missing sparse or reranker capability falls back to already authorized
+dense or fused order.
+
+The protected `phase5-retrieval-v4` fixture reuses only v3 tuning evidence under new
+identities. All validation and holdout query text, judgments, and IDs are fresh and
+hash-bound; validation rejects overlap with v3 protected evidence.
+
+The single approved v4 run embedded 2,545 tokens in one paid batch for an estimated
+`$0.00005090`. Validation dense/`hybrid-v3` Recall@10 was `1.0000`/`1.0000`,
+nDCG@10 was `0.8439`/`0.8632`, and MRR@10 was `0.8500`/`0.8500`. Identity, class,
+latency, and provider-call gates passed, but the 2.28% nDCG gain missed the required
+5%. The runner emitted no holdout result or product proof, removed its temporary
+collection, and did not retry. A changed candidate or contract now requires a new
+reviewed ADR and fresh protected evidence.
+
+The approved closure preserves this result as an honest failed quality gate rather
+than treating the working RAG product as unsuccessful. No retrieval profile changed:
+`hybrid-v1` remains default, `dense-v1` remains rollback, and `hybrid-v3` remains
+evaluation-only. Phase 6 discovery is the next planned activity.
 
 ## Phase 6 — visual and table intelligence
 
@@ -540,7 +624,12 @@ reconcile commercial usage.
 | Vector/object/async policy | Bounded Qdrant scope, returned-point validation, canonical object resolution, membership-removal behavior, and future connector permission snapshots implemented under ADR 0015 through `20260831_0011` |
 | Security audit/export | Versioned safe events, runtime append-only enforcement, owner/admin review, and private checksummed export implemented under ADR 0016 at `20260831_0012` |
 | Retention/deletion | Tombstone/restore, holds, exact preview/apply, checkpointed cross-store purge, and orphan reconciliation implemented under ADR 0017 at `20260831_0013`; automatic scheduling remains disabled |
-| Sparse search | Required in Phase 5; engine not selected |
+| Retrieval evaluation | V2/v3 remain diagnostic; hashed v4 has 120 chunks/80 queries and fresh protected evidence. Its single paid validation missed only nDCG; holdout/proof were withheld and no retry is authorized |
+| Sparse search | Qdrant named IDF-enabled BM25 vector with pinned local FastEmbed implemented under ADR 0019 |
+| Fusion | Deterministic application-owned RRF, deduplication, diversification, and content-free traces implemented under ADR 0020 |
+| Reranker | Pinned bounded local FastEmbed cross-encoder implemented as an opt-in profile with fused-order fallback under ADR 0021 |
+| Phase 5 benchmark remediation | Larger v2 confounder corpus, rotated holdout, strict holdout sequencing, and clarified negative metrics implemented under ADR 0022; paid validation exposed a remaining quality/ceiling decision |
+| Phase 5 quality/candidate follow-up | ADR 0023 remains diagnostic; ADR 0024's v4 candidate achieved 2.28% against the preserved 5% gate, and Phase 5 is closed without promotion |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
 
@@ -571,12 +660,25 @@ Accepted Phase 4 decisions are:
 - [ADR 0016 — Security audit and compliance export](decisions/0016-security-audit-compliance-export.md)
 - [ADR 0017 — Governed retention, deletion, encryption, and incident controls](decisions/0017-governed-retention-deletion-incident-controls.md)
 
+Accepted Phase 5 decisions are:
+
+- [ADR 0018 — Versioned retrieval evaluation and dense baseline](decisions/0018-retrieval-evaluation-dense-baseline.md)
+- [ADR 0019 — Qdrant-native sparse retrieval](decisions/0019-qdrant-sparse-bm25-retrieval.md)
+- [ADR 0020 — Deterministic reciprocal-rank fusion](decisions/0020-deterministic-rrf-fusion.md)
+- [ADR 0021 — Bounded local cross-encoder reranking](decisions/0021-bounded-local-reranking.md)
+
+Accepted Phase 5 follow-ups:
+
+- [ADR 0022 — Phase 5 benchmark remediation and negative-query contract](decisions/0022-phase5-benchmark-remediation.md)
+- [ADR 0023 — Ceiling-aware retrieval quality and deterministic candidate selection](decisions/0023-ceiling-aware-quality-and-candidate-selection.md)
+- [ADR 0024 — Adaptive retrieval and fresh protected evidence](decisions/0024-adaptive-retrieval-and-fresh-protected-evidence.md)
+
 ## Maintenance checklist
 
 1. Update the affected phase, diagram, status, and technology table.
 2. Update the whole-system diagram when a cross-phase boundary or flow changes.
-3. Record consequential Phase 4 decisions and rationale in the ignored
-   `Phase4_context.md` active context document; keep `Phase3_context.md` historical.
+3. Record consequential Phase 5 decisions and rationale in the ignored
+   `Phase5_context.md` active context document; keep earlier phase contexts historical.
 4. Keep unapproved technologies labeled **Proposed / TBD**.
 5. Verify Mermaid fences and links before committing.
 6. Never place credentials, tokens, private URLs, customer data, or other secrets

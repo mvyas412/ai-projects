@@ -1,0 +1,18 @@
+{
+  "chunk_count": 120,
+  "dataset_revision": "phase5-retrieval-v2",
+  "files": {
+    "dense-profile.json": "4fb4940b9feda5e28cc0bcc28b4d00b217f96de4aa0714bdd85ac6b7c9333603",
+    "documents.jsonl": "63b461accaaed2778d57aef8d8756b22c06bb890ec094554dbf238556a6da3dd",
+    "judgments.jsonl": "960e1333a5b3df7b74622813d10c7d379fee0d0619a0add8e0a714c4e113a98b"
+  },
+  "holdout_policy": "validation-before-holdout",
+  "minimum_quality_candidate_pool": 50,
+  "query_count": 50,
+  "split": {
+    "holdout": 10,
+    "tune": 30,
+    "validation": 10
+  },
+  "supersedes": "phase5-retrieval-v1"
+}

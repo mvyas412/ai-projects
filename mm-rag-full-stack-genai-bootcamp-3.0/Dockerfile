@@ -17,7 +17,9 @@ RUN uv sync --locked --no-dev --no-install-project
 COPY alembic.ini ./
 COPY backend ./backend
 COPY migrations ./migrations
+COPY scripts ./scripts
 RUN uv sync --locked --no-dev
+RUN uv run --no-sync python -m scripts.prefetch_phase5_models
 
 RUN useradd --create-home --uid 10001 mmrag \
     && mkdir -p /app/data/runtime/health \
