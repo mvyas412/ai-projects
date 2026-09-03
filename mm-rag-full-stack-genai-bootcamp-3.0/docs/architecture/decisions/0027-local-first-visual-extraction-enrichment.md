@@ -1,7 +1,8 @@
 # ADR 0027: Local-first visual extraction and enrichment
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-02
+- Accepted: 2026-09-03
 - Milestone: 6.1
 
 ## Context
@@ -40,7 +41,7 @@ become evidence without evaluation and provenance.
 | Use a local VLM as the sole parser | One model-shaped path | Hardware-heavy, nondeterministic, weaker structural guarantees, and difficult exact validation |
 | Local structural extraction plus optional versioned visual enrichment | Deterministic provenance and free baseline with measured model upgrades | More pipeline stages and artifacts to govern |
 
-## Proposed decision
+## Decision
 
 Introduce provider-neutral `DocumentStructureExtractor`, `RegionRenderer`, and
 `VisualEnricher` interfaces inside the existing worker process.
@@ -101,12 +102,12 @@ visual retrieval or answer evidence.
 - Provider-backed vision remains available for measured quality, not silently embedded
   in every ingestion job.
 
-## Approval questions
+## Acceptance resolution
 
-1. Approve Docling behind an adapter as the proposed local PDF structure extractor?
-2. Approve retaining Tesseract and evaluating accurate TableFormer as the first local path?
-3. Approve the three enrichment levels and no generated-description promotion without evidence?
-4. Approve paid/provider vision only through a separately authorized candidate run?
+The user approved all recommendations on 2026-09-03: Docling behind an adapter as
+the local structure candidate; retained Tesseract and evaluated accurate TableFormer;
+the three enrichment levels with evidence required before description promotion;
+and paid/provider vision only through a separately authorized candidate run.
 
 ## Acceptance evidence required after approval
 

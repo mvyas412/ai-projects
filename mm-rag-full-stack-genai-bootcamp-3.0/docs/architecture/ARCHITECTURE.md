@@ -1,6 +1,6 @@
 # Multimodal RAG architecture handbook
 
-> Living architecture baseline — updated 2026-09-02
+> Living architecture baseline — updated 2026-09-03
 
 This document is the version-controlled architecture source of truth for the
 complete system and Phases 1–9. Update it whenever a component, boundary, data
@@ -24,8 +24,9 @@ attempt on 2026-09-02 passed every evaluated validation gate except the required
 5% relative nDCG@10 gain, achieving 2.28%; holdout and the product proof were
 withheld. `hybrid-v3` remains evaluation-only, `hybrid-v1` remains default, and a
 user-approved closure now ends Phase 5 without candidate promotion. PR #5 was
-squash-merged at `5436614`. Phase 6 decision kickoff is now in progress through
-Proposed ADRs 0025–0030; no Phase 6 runtime behavior has changed.
+squash-merged at `5436614`. Phase 6 kickoff PR #6 was squash-merged at `95d18b3`,
+and ADRs 0025–0030 were accepted on 2026-09-03. No Phase 6 runtime behavior has
+changed yet.
 
 ## Status legend
 
@@ -175,7 +176,7 @@ flowchart LR
     p3["Phase 3<br/>Async ingestion<br/>Completed"] -->
     p4["Phase 4<br/>Governance foundation<br/>Completed / v4.0.0"] -->
     p5["Phase 5<br/>Hybrid retrieval<br/>Closed / gate not met"] -->
-    p6["Phase 6<br/>Visual/table intelligence<br/>Decision kickoff / Proposed"] -->
+    p6["Phase 6<br/>Visual/table intelligence<br/>In progress / decisions accepted"] -->
     p7["Phase 7<br/>Evaluation/observability<br/>Planned"] -->
     p8["Phase 8<br/>Scalable platform<br/>Planned"] -->
     p9["Phase 9<br/>Enterprise platform<br/>Planned"]
@@ -188,7 +189,7 @@ flowchart LR
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
 | 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and preserved at `mm-rag-v4.0.0` |
 | 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | Closed without acceptance; v4 nDCG gate missed and no candidate was promoted |
-| 6 | Native image and table understanding | Proposed local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | Decision kickoff in progress; ADRs 0025–0030 Proposed |
+| 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | In progress; ADRs 0025–0030 accepted, implementation not started |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
 | 8 | Independently scalable deployment | Gateway, API/workers, dedicated frontend TBD, managed services | Managed PostgreSQL, Qdrant, object storage | Planned |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Planned |
@@ -451,10 +452,10 @@ release tag was created.
 
 ## Phase 6 — visual and table intelligence
 
-**Status:** Decision kickoff in progress. ADRs 0025–0030 are Proposed. The diagram
-below is a target design, not implemented behavior; no extractor, model, provider,
-schema, vector collection, calculation engine, evidence API, or paid run has been
-approved by this kickoff.
+**Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. The diagram
+below remains a target design, not implemented behavior. Milestone 6.0 is the first
+approved implementation step; no extractor, schema, vector collection, calculation
+engine, evidence API, paid run, promotion, or release tag exists yet.
 
 ```mermaid
 flowchart LR
@@ -469,7 +470,7 @@ flowchart LR
     table --> structure["Cell/structure reconstruction"]
     structure --> validate["Schema/type validation"]
     validate --> tsummary["Table summary + index form"]
-    chunks --> qdrant[("Qdrant multivectors")]
+    chunks --> qdrant[("Qdrant text + visual collections")]
     ivec --> qdrant
     tsummary --> qdrant
     crop --> objects[("Object storage")]
@@ -488,11 +489,11 @@ box, content ID, and extractor-version provenance. Exact calculations use
 validated structure, not generated prose. Exit: figures and tables become
 first-class retrievable, inspectable, and correctly cited evidence.
 
-The proposed decision sequence is evaluation contract (ADR 0025), immutable
+The accepted decision sequence is evaluation contract (ADR 0025), immutable
 provenance (ADR 0026), local-first extraction/enrichment (ADR 0027), visual indexing
 and retrieval (ADR 0028), structured tables and safe calculation (ADR 0029), then
-evidence presentation and rollout (ADR 0030). Each ADR must be accepted before its
-implementation boundary changes.
+evidence presentation and rollout (ADR 0030). All six are accepted; implementation
+must follow those boundaries in milestone order.
 
 ## Phase 7 — evaluation and observability
 
@@ -641,12 +642,12 @@ reconcile commercial usage.
 | Reranker | Pinned bounded local FastEmbed cross-encoder implemented as an opt-in profile with fused-order fallback under ADR 0021 |
 | Phase 5 benchmark remediation | Larger v2 confounder corpus, rotated holdout, strict holdout sequencing, and clarified negative metrics implemented under ADR 0022; paid validation exposed a remaining quality/ceiling decision |
 | Phase 5 quality/candidate follow-up | ADR 0023 remains diagnostic; ADR 0024's v4 candidate achieved 2.28% against the preserved 5% gate, and Phase 5 is closed without promotion |
-| Phase 6 evaluation | Proposed ADR 0025 defines the corpus, protected splits, metrics, class gates, and explicit paid-run boundary |
-| Region/artifact provenance | Proposed ADR 0026 makes PostgreSQL canonical for immutable region and artifact lineage while binaries remain in object storage |
-| Visual extraction/enrichment | Proposed ADR 0027 evaluates a local-first structured extractor and keeps generated descriptions non-authoritative; exact models remain unselected |
-| Visual embeddings/retrieval | Proposed ADR 0028 evaluates a free paired visual embedding candidate in an isolated authorized index; exact revision and checksum remain unselected |
-| Structured tables/calculation | Proposed ADR 0029 uses normalized, validated table cells and an application-owned calculation allowlist; no generated SQL or request-time analytical engine |
-| Region evidence/viewer/rollout | Proposed ADR 0030 defines backend-mediated evidence descriptors, accessible inspection, staged validation, and explicit promotion/release gates |
+| Phase 6 evaluation | Accepted ADR 0025 defines the corpus, protected splits, metrics, class gates, and explicit paid-run boundary |
+| Region/artifact provenance | Accepted ADR 0026 makes PostgreSQL canonical for immutable region and artifact lineage while binaries remain in object storage |
+| Visual extraction/enrichment | Accepted ADR 0027 selects a local-first structured extraction contract and keeps generated descriptions non-authoritative; exact artifacts must be pinned and verified during implementation |
+| Visual embeddings/retrieval | Accepted ADR 0028 selects a free paired visual embedding candidate in an isolated authorized index; exact revision and checksum must be pinned before use |
+| Structured tables/calculation | Accepted ADR 0029 uses normalized, validated table cells and an application-owned calculation allowlist; no generated SQL or request-time analytical engine |
+| Region evidence/viewer/rollout | Accepted ADR 0030 defines backend-mediated evidence descriptors, accessible inspection, staged validation, and explicit promotion/release gates |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
 
@@ -690,7 +691,7 @@ Accepted Phase 5 follow-ups:
 - [ADR 0023 — Ceiling-aware retrieval quality and deterministic candidate selection](decisions/0023-ceiling-aware-quality-and-candidate-selection.md)
 - [ADR 0024 — Adaptive retrieval and fresh protected evidence](decisions/0024-adaptive-retrieval-and-fresh-protected-evidence.md)
 
-Proposed Phase 6 decisions are:
+Accepted Phase 6 decisions are:
 
 - [ADR 0025 — Phase 6 visual and table evaluation contract](decisions/0025-phase6-visual-table-evaluation-contract.md)
 - [ADR 0026 — Immutable region and derived-artifact provenance](decisions/0026-immutable-region-artifact-provenance.md)

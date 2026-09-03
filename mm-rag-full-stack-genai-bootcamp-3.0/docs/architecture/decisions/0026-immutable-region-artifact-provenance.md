@@ -1,7 +1,8 @@
 # ADR 0026: Immutable region and derived-artifact provenance
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-02
+- Accepted: 2026-09-03
 - Milestone: 6.1
 
 ## Context
@@ -37,7 +38,7 @@ boundary.
 | Store every crop and OCR blob directly in PostgreSQL | One transactional store | Bloats the database and duplicates object-storage responsibilities |
 | PostgreSQL provenance index plus immutable object artifacts and denormalized Qdrant identity | Fits existing trust boundaries and supports reconciliation | Requires schema, cross-store validation, and promotion checks |
 
-## Proposed decision
+## Decision
 
 Create immutable, generation-scoped `content_regions` and `content_artifacts` in
 PostgreSQL under the existing tenant RLS and composite foreign-key pattern.
@@ -100,12 +101,12 @@ render consistently across devices without losing source precision.
 - Reprocessing duplicates immutable artifacts by generation, trading storage for
   deterministic rollback and auditability.
 
-## Approval questions
+## Acceptance resolution
 
-1. Approve PostgreSQL as the region/artifact provenance authority?
-2. Approve generation-scoped immutable identities and successor-only corrections?
-3. Approve normalized top-left bounding boxes plus original page geometry?
-4. Approve object-storage binaries, Qdrant denormalization, and existing lifecycle controls?
+The user approved all recommendations on 2026-09-03: PostgreSQL provenance
+authority; generation-scoped immutable identities and successor-only corrections;
+normalized top-left bounding boxes with original page geometry; and object-storage
+binaries, Qdrant denormalization, and existing lifecycle controls.
 
 ## Acceptance evidence required after approval
 

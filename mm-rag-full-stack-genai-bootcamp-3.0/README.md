@@ -1,4 +1,4 @@
-# Multimodal RAG Production — Phase 5 closure and Phase 6 decisions
+# Multimodal RAG Production — Phase 6 visual and table intelligence
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
@@ -139,8 +139,9 @@ provides presentation-ready whole-system, final-production, and Phase 1–9 imag
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
 shows the Phase 5 implementation checkpoint, including hybrid retrieval and the
 failed v4 paid nDCG gate. Phase 5 is closed without candidate promotion. Phase 6
-decision kickoff is in progress through Proposed ADRs 0025–0030; the current poster
-remains accurate because no Phase 6 runtime behavior has changed.
+decision kickoff PR #6 was squash-merged at `95d18b3`, and ADRs 0025–0030 were
+accepted on 2026-09-03. Implementation has not started, so the current poster remains
+the accurate runtime checkpoint.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
@@ -183,7 +184,7 @@ Accepted Phase 5 decisions are:
 - [Ceiling-aware retrieval quality and deterministic candidate selection](docs/architecture/decisions/0023-ceiling-aware-quality-and-candidate-selection.md)
 - [Adaptive retrieval and fresh protected evidence](docs/architecture/decisions/0024-adaptive-retrieval-and-fresh-protected-evidence.md)
 
-Proposed Phase 6 decisions are:
+Accepted Phase 6 decisions are:
 
 - [Visual and table evaluation contract](docs/architecture/decisions/0025-phase6-visual-table-evaluation-contract.md)
 - [Immutable region and derived-artifact provenance](docs/architecture/decisions/0026-immutable-region-artifact-provenance.md)
@@ -192,9 +193,10 @@ Proposed Phase 6 decisions are:
 - [Structured tables and safe exact calculation](docs/architecture/decisions/0029-structured-tables-safe-calculation.md)
 - [Region evidence, viewer, and Phase 6 rollout](docs/architecture/decisions/0030-region-evidence-viewer-rollout.md)
 
-These Phase 6 ADRs require explicit acceptance before implementation. They do not
-authorize dependency or model selection, provider calls, paid evaluation, profile
-promotion, or a release tag.
+These ADRs authorize implementation in milestone order, beginning with the free
+evaluation contract. Exact artifacts remain subject to pinned revision, license,
+checksum, and measured acceptance requirements. Provider calls, paid evaluation,
+profile promotion, and a release tag still require their separate explicit gates.
 
 ## Prerequisites
 

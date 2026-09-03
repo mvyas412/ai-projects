@@ -7,6 +7,7 @@ on:
       - "phase-4/mm-rag-governance"
       - "codex/phase5-hybrid-retrieval"
       - "codex/phase6-visual-table-intelligence"
+      - "codex/phase6-visual-table-implementation"
     paths:
       - "mm-rag-full-stack-genai-bootcamp-3.0/**"
       - ".github/workflows/mm-rag-phase3-ci.yml"

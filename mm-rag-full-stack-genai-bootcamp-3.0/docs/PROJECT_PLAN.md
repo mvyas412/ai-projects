@@ -1,6 +1,6 @@
 # Multimodal RAG production project plan
 
-> Living delivery plan — updated 2026-09-02
+> Living delivery plan — updated 2026-09-03
 
 This is the version-controlled planning source of truth for the journey from the
 preserved prototype through the enterprise platform. It defines sequence, scope,
@@ -39,7 +39,9 @@ Rules:
 | Phase 4 source branch | `phase-4/mm-rag-governance` — preserved |
 | Phase 5 source branch | `codex/phase5-hybrid-retrieval` — preserved after squash merge |
 | Phase 5 merge | PR #5 squash-merged into `main` at `5436614`; source and merged trees match |
-| Phase 6 decision branch | `codex/phase6-visual-table-intelligence` from merged Phase 5 |
+| Phase 6 kickoff branch | `codex/phase6-visual-table-intelligence` — preserved after PR #6 squash merge |
+| Phase 6 kickoff merge | PR #6 squash-merged into `main` at `95d18b3`; source and merged trees match |
+| Phase 6 implementation branch | `codex/phase6-visual-table-implementation` from merged kickoff |
 | Phase 1 | Completed and frozen at `mm-rag-v1.0.0` |
 | Phase 2 | Completed and accepted — implementation, live-model, security, and visual gates pass |
 | Phase 2 release | Squash-merged at `52d4cfa`; tagged `mm-rag-v2.0.0` |
@@ -48,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 6 Milestone 6.0 decision review; ADRs 0025–0030 are Proposed |
+| Active milestone | Phase 6 Milestone 6.0 approved for implementation; ADRs 0025–0030 Accepted |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -57,7 +59,7 @@ Rules:
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
-| Phase 6 | Decision kickoff in progress; no Phase 6 runtime implementation has started |
+| Phase 6 | In progress — decisions accepted; Milestone 6.0 implementation is next |
 | Phases 7–9 | Planned |
 
 ## Delivery sequence and gates
@@ -86,7 +88,7 @@ security and data-integrity gates on which it depends.
 | 3 | Durable asynchronous ingestion | Retryable jobs survive service failure | Completed and accepted |
 | 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Completed and accepted |
 | 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Closed without acceptance |
-| 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Decision kickoff in progress |
+| 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | In progress — decisions accepted |
 | 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Planned |
 | 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Planned |
 | 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Planned |
@@ -741,43 +743,45 @@ then reranking a bounded candidate set.
 
 ## Phase 6 — visual and table intelligence
 
-**Status:** Decision kickoff in progress. ADRs 0025–0030 are Proposed; no Phase 6
-runtime, dependency, model, provider, schema, or paid-evaluation change is authorized
-until the relevant decisions are accepted.
+**Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. Runtime
+implementation has not started; Milestone 6.0 is the first approved implementation
+step. Paid/provider evaluation, profile promotion, and release tagging remain
+separate explicit gates.
 
 ### Objective
 
 Make figures, diagrams, charts, and tables first-class searchable evidence instead
 of depending mainly on OCR text and Markdown representations.
 
-### Proposed milestones
+### Milestones
 
 | Milestone | Deliverable | Decision status |
 | --- | --- | --- |
-| 6.0 | Visual/table corpus, questions, and baseline quality measures | Proposed — ADR 0025 |
-| 6.1 | Versioned visual crops, provenance, captions, OCR, and summaries | Proposed — ADRs 0026–0027 |
-| 6.2 | Multimodal image embeddings and modality-aware retrieval | Proposed — ADR 0028 |
-| 6.3 | Table structure reconstruction, typing, validation, and normalized storage | Proposed — ADR 0029 |
-| 6.4 | Query routing for semantic retrieval versus safe exact calculation | Proposed — ADRs 0028–0029 |
-| 6.5 | Evidence viewer for page region, figure, table, and calculation provenance | Proposed — ADR 0030 |
+| 6.0 | Visual/table corpus, questions, and baseline quality measures | Accepted — ADR 0025; implementation next |
+| 6.1 | Versioned visual crops, provenance, captions, OCR, and summaries | Accepted — ADRs 0026–0027; not started |
+| 6.2 | Multimodal image embeddings and modality-aware retrieval | Accepted — ADR 0028; not started |
+| 6.3 | Table structure reconstruction, typing, validation, and normalized storage | Accepted — ADR 0029; not started |
+| 6.4 | Query routing for semantic retrieval versus safe exact calculation | Accepted — ADRs 0028–0029; not started |
+| 6.5 | Evidence viewer for page region, figure, table, and calculation provenance | Accepted — ADR 0030; not started |
 
-### Proposed decision sequence
+### Accepted decision sequence
 
-1. Accept the corpus, split, metrics, and release gates before changing runtime
+1. Implement the accepted corpus, split, metrics, and release gates before changing runtime
    behavior (ADR 0025).
-2. Accept immutable region/artifact identity and lineage before adding extractors
+2. Implement immutable region/artifact identity and lineage before adding extractors
    or indexes (ADR 0026).
-3. Select the local-first extraction/enrichment contract and explicit provider gate
+3. Implement the local-first extraction/enrichment contract and explicit provider gate
    (ADR 0027).
-4. Select visual embeddings, index isolation, authorization, routing, and fusion
+4. Implement visual embeddings, index isolation, authorization, routing, and fusion
    (ADR 0028).
-5. Accept normalized table storage and the closed safe-calculation allowlist
+5. Implement normalized table storage and the closed safe-calculation allowlist
    (ADR 0029).
-6. Accept the evidence API/viewer and staged rollout/rollback gates (ADR 0030).
+6. Implement the evidence API/viewer and staged rollout/rollback gates (ADR 0030).
 
 This order prevents a parser, model, vector layout, or calculation engine from
 silently defining the public provenance contract. Phase 5's `hybrid-v1` default,
-`dense-v1` rollback, and protected evidence remain unchanged during review.
+`dense-v1` rollback, and protected evidence remain unchanged during implementation
+until a separately approved promotion gate succeeds.
 
 ### Completion gate
 
@@ -926,12 +930,12 @@ commercial accounting, and compliance-grade administration.
 | Phase 5 benchmark remediation and negative-query contract | 5.0–5.5 | Accepted — ADR 0022 |
 | Phase 5 response to the failed v2 quality gate | 5.5 | Accepted — ADR 0023; free implementation complete |
 | Phase 5 response to the failed v3 nDCG gate | 5.5 | Accepted — ADR 0024; Phase 5 closed without acceptance after v4 missed only nDCG |
-| Phase 6 visual/table evaluation contract | 6.0 | Proposed — ADR 0025 |
-| Immutable region and derived-artifact provenance | 6.1 | Proposed — ADR 0026 |
-| Local-first visual extraction and enrichment | 6.1 | Proposed — ADR 0027 |
-| Visual embedding, indexing, routing, and fusion | 6.2–6.4 | Proposed — ADR 0028 |
-| Structured tables and safe exact calculation | 6.3–6.4 | Proposed — ADR 0029 |
-| Region evidence, viewer, and Phase 6 rollout | 6.5 | Proposed — ADR 0030 |
+| Phase 6 visual/table evaluation contract | 6.0 | Accepted — ADR 0025 |
+| Immutable region and derived-artifact provenance | 6.1 | Accepted — ADR 0026 |
+| Local-first visual extraction and enrichment | 6.1 | Accepted — ADR 0027 |
+| Visual embedding, indexing, routing, and fusion | 6.2–6.4 | Accepted — ADR 0028 |
+| Structured tables and safe exact calculation | 6.3–6.4 | Accepted — ADR 0029 |
+| Region evidence, viewer, and Phase 6 rollout | 6.5 | Accepted — ADR 0030 |
 | Observability/evaluation backend | 7.0 | TBD |
 | Cloud/orchestration and managed services | 8.0 | TBD |
 | Dedicated frontend framework | 8.0 | TBD |
@@ -941,11 +945,11 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Review and explicitly accept, revise, or reject ADRs 0025–0030 in sequence | Phase 6 contracts and unresolved questions have an approved answer before implementation |
-| 2 | Start Milestone 6.0 only after ADR 0025 is accepted | The visual/table benchmark is reproducible without changing product runtime or making a paid call |
+| 1 | Implement Milestone 6.0 under accepted ADR 0025 | The visual/table benchmark and frozen text/OCR baseline are reproducible without changing product runtime or making a paid call |
+| 2 | Review the free Milestone 6.0 evidence before beginning schema/extractor work | Corpus hashes, split isolation, withholding, identity, calculation, and text-regression fixtures pass |
 | 3 | Preserve `hybrid-v1` as default, `dense-v1` as rollback, and `hybrid-v3` as evaluation-only | Phase 6 kickoff causes no hidden Phase 5 rollout change |
 | 4 | Keep Phase 5 v4 validation and holdout immutable | No tuning against v4 validation and no v4 holdout inspection |
-| 5 | Require separate explicit approval for any paid evaluation, provider vision call, profile promotion, or release tag | A Proposed ADR or kickoff merge grants none of those actions |
+| 5 | Require separate explicit approval for any paid evaluation, provider vision call, profile promotion, or release tag | ADR acceptance grants none of those actions |
 
 ## Update protocol
 

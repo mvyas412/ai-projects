@@ -2,8 +2,9 @@
 
 This runbook presents the accepted durable/governed foundation and the closed
 Phase 5 hybrid-retrieval implementation while keeping all release tags immutable.
-PR #5 was squash-merged at `5436614`. Phase 6 is in decision kickoff only, so the
-demonstrated product behavior remains the Phase 5 checkpoint.
+PR #5 was squash-merged at `5436614`. Phase 6 ADRs 0025–0030 are accepted, but no
+Phase 6 runtime implementation exists yet, so demonstrated behavior remains the
+Phase 5 checkpoint.
 
 ## Before the session
 
@@ -115,6 +116,6 @@ from every free gate.
   product proof remains valid, and dense retrieval remains the rollback path.
 - PR #5 passed its required checks and was squash-merged into `main` at `5436614`;
   the reviewed source tree and merged tree match, and no Phase 5 release tag exists.
-- Phase 6 decision kickoff adds only Proposed ADRs 0025–0030 and synchronized
-  documentation. It does not change runtime behavior, select a model/provider, or
-  authorize a paid Phase 6 run.
+- Phase 6 decision kickoff PR #6 was squash-merged at `95d18b3`. ADRs 0025–0030
+  were accepted on 2026-09-03, authorizing implementation in milestone order.
+  Runtime behavior remains unchanged, and no paid Phase 6 run is authorized.

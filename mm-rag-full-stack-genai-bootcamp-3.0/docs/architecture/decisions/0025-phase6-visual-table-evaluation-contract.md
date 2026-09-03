@@ -1,7 +1,8 @@
 # ADR 0025: Phase 6 visual and table evaluation contract
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-02
+- Accepted: 2026-09-03
 - Milestone: 6.0
 
 ## Context
@@ -36,7 +37,7 @@ not be reused as Phase 6 tuning evidence.
 | Versioned redistributable fixtures plus an ignored representative tier | Reproducible required gate plus realistic local evidence | Requires dataset governance, hashing, adjudication, and strict result handling |
 | Make an LLM judge the release authority | Reduces manual labeling | Nondeterministic, potentially paid, and vulnerable to prompt/model drift |
 
-## Proposed decision
+## Decision
 
 Adopt a two-tier `phase6-visual-table-v1` evaluation contract.
 
@@ -74,7 +75,7 @@ Freeze the current text/OCR/Markdown behavior before implementing Phase 6. Repor
   and estimated cost; and
 - text-only regression against the retained Phase 5 default and dense rollback.
 
-The proposed quality gate requires, on validation and later holdout:
+The accepted quality gate requires, on validation and later holdout:
 
 - at least a 10% reduction in remaining Recall@10 error over the relevant
   OCR/Markdown baseline and at least 5% relative nDCG@10 improvement;
@@ -113,12 +114,12 @@ technology on attractive demos alone.
   rather than return a plausible number.
 - A local candidate can fail quality without invalidating the existing RAG product.
 
-## Approval questions
+## Acceptance resolution
 
-1. Approve the two-tier corpus and 80-question minimum?
-2. Approve the five balanced question classes and 60/20/20 split?
-3. Approve the quality, identity, calculation, and text-regression gates?
-4. Approve validation-before-holdout and explicit authorization for every paid run?
+The user approved all recommendations on 2026-09-03: the two-tier corpus and
+80-question minimum; the five question classes and 60/20/20 split; the quality,
+identity, calculation, and text-regression gates; and validation-before-holdout
+with fresh explicit authorization for every paid run.
 
 ## Acceptance evidence required after approval
 
