@@ -1,4 +1,4 @@
-.PHONY: setup models models-verify services runtime runtime-stop services-stop migrate api ui dispatcher worker operations-status operations-retention-preview backup phase5-evaluation phase6-evaluation check check-live check-acceptance
+.PHONY: setup models models-verify phase6-models phase6-models-verify services runtime runtime-stop services-stop migrate api ui dispatcher worker operations-status operations-retention-preview backup phase5-evaluation phase6-evaluation check check-live check-acceptance
 
 setup:
 	uv python install 3.12
@@ -10,6 +10,12 @@ models:
 
 models-verify:
 	uv run python -m scripts.prefetch_phase5_models --verify-only
+
+phase6-models:
+	uv run python -m scripts.prefetch_phase6_models
+
+phase6-models-verify:
+	uv run python -m scripts.prefetch_phase6_models --verify-only
 
 services:
 	docker compose up -d

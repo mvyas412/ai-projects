@@ -18,7 +18,7 @@ def pipeline_manifest(settings: Settings, media_type: str) -> dict[str, object]:
         "application/pdf": "pypdf",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "python-docx",
     }.get(media_type, "utf8-or-vision")
-    return {
+    manifest: dict[str, object] = {
         "schema_version": 1,
         "profile": PIPELINE_PROFILE,
         "media_type": media_type,
@@ -61,6 +61,26 @@ def pipeline_manifest(settings: Settings, media_type: str) -> dict[str, object]:
         },
         "citation_schema_revision": 1,
     }
+    if settings.phase6_visual_enabled and media_type in {
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/tiff",
+        "image/webp",
+    }:
+        manifest["visual_extraction"] = {
+            "profile": settings.phase6_extraction_profile,
+            "implementation": "docling-or-pillow",
+            "library_version": version("docling"),
+            "artifacts_manifest_revision": "docling-structural-v1",
+            "remote_services": False,
+            "picture_description": False,
+            "ocr": "tesseract-cli-eng",
+            "table_structure": "tableformer-accurate",
+            "image_scale": settings.phase6_image_scale,
+            "locator_schema_revision": "region-locator-v1",
+        }
+    return manifest
 
 
 def pipeline_fingerprint(settings: Settings, media_type: str) -> str:

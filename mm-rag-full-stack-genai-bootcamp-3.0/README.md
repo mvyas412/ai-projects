@@ -205,6 +205,13 @@ negative cases. Tune/validation/holdout splits are hash-bound, the baseline runn
 withholds holdout evidence, and `make phase6-evaluation` reproduces the free baseline
 without provider calls.
 
+Milestone 6.1 adds immutable `content_regions` and `content_artifacts` at migration
+`20260903_0014`. PostgreSQL remains the provenance authority, generated binaries
+remain opaque in object storage, and visual outputs stay invisible until their
+generation is atomically promoted. Docling `2.124.0`, Tesseract CLI, accurate
+TableFormer, and standalone-image Pillow extraction run locally behind the opt-in
+`structural-v1` profile. Remote services and generated descriptions are disabled.
+
 ## Prerequisites
 
 - [uv](https://docs.astral.sh/uv/)
@@ -233,6 +240,18 @@ uv run python -c "import sys; print(sys.executable)"
 ```
 
 The printed path must be inside this directory's `.venv/`.
+
+Before enabling the Phase 6 structural profile, provision and verify its ignored
+local Docling model cache:
+
+```bash
+make phase6-models
+make phase6-models-verify
+```
+
+The reviewed profile contains only the Docling layout and TableFormer artifacts.
+Its exact 15-file, 701,214,178-byte tree is checksum-bound in code; runtime
+extraction fails closed if any file is missing or changed.
 
 ## Configure local settings
 

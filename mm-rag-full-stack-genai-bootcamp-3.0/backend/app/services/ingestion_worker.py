@@ -30,6 +30,11 @@ from backend.app.services.ingestion_jobs import (
     IngestionJobStateMachine,
     retry_delay,
 )
+from backend.app.services.visual_ingestion import (
+    VisualIngestionProcessor,
+    VisualProcessingRequest,
+    VisualProcessingResult,
+)
 from backend.app.storage.authorized import resolve_original_object
 from backend.app.storage.base import (
     ObjectIntegrityError,
@@ -74,6 +79,7 @@ class IngestionWorkerService:
         indexer: DocumentIndexer,
         *,
         worker_id: str,
+        visual_processor: VisualIngestionProcessor | None = None,
         shutdown_requested: threading.Event | None = None,
     ) -> None:
         self._settings = settings
@@ -81,6 +87,7 @@ class IngestionWorkerService:
         self._original_storage = original_storage
         self._artifact_storage = artifact_storage
         self._indexer = indexer
+        self._visual_processor = visual_processor
         self._worker_id = worker_id
         self._shutdown = shutdown_requested or threading.Event()
 
@@ -145,13 +152,28 @@ class IngestionWorkerService:
                 ),
                 progress=progress,
             )
+            visual_result = None
+            if self._visual_processor is not None:
+                self._checkpoint(work, IngestionProgressStage.WRITING_OUTPUTS)
+                visual_result = self._visual_processor.process(
+                    VisualProcessingRequest(
+                        workspace_id=work.job.workspace_id,
+                        document_id=work.job.document_id,
+                        document_version_id=work.job.document_version_id,
+                        generation_id=work.generation_id,
+                        job_id=work.job.id,
+                        attempt_id=work.attempt.id,
+                        media_type=work.document.media_type,
+                        content=content,
+                    )
+                )
             if self._shutdown.is_set():
                 raise WorkerShutdown
             if ownership_lost.is_set():
                 raise IngestionAttemptOwnershipError("Worker lease was lost")
             if cancellation.is_set():
                 raise WorkerCancellation
-            return self._promote(work, result)
+            return self._promote(work, result, visual_result)
         except WorkerShutdown:
             return DeliveryDisposition.REQUEUE
         except WorkerCancellation:
@@ -271,7 +293,10 @@ class IngestionWorkerService:
             raise WorkerCancellation
 
     def _promote(
-        self, work: ClaimedWork, result: IndexingResult
+        self,
+        work: ClaimedWork,
+        result: IndexingResult,
+        visual_result: VisualProcessingResult | None = None,
     ) -> DeliveryDisposition:
         self._checkpoint(work, IngestionProgressStage.PROMOTING)
         vector_count = result.vector_count or result.chunk_count
@@ -293,6 +318,14 @@ class IngestionWorkerService:
             "vector_count": vector_count,
             "sparse_vector_count": result.sparse_vector_count,
         }
+        if visual_result is not None:
+            manifest["visual_outputs"] = {
+                "schema_revision": "phase6-visual-output-v1",
+                "region_count": visual_result.region_count,
+                "artifact_count": visual_result.artifact_count,
+                "artifact_bytes": visual_result.artifact_bytes,
+                "manifest_sha256": visual_result.manifest_sha256,
+            }
         content = json.dumps(
             manifest,
             sort_keys=True,

@@ -105,6 +105,15 @@ class Settings(BaseSettings):
     rag_rerank_max_characters: int = Field(default=4000, ge=256, le=16000)
     rag_model_threads: int = Field(default=2, ge=1, le=16)
     phase5_model_cache_dir: Path = PROJECT_ROOT / "data/runtime/models"
+    phase6_visual_enabled: bool = False
+    phase6_extraction_profile: Literal["structural-v1"] = "structural-v1"
+    phase6_docling_artifacts_path: Path = PROJECT_ROOT / "data/runtime/docling-models"
+    phase6_docling_timeout_seconds: int = Field(default=300, ge=30, le=1800)
+    phase6_image_scale: float = Field(default=2.0, ge=1.0, le=4.0)
+    phase6_max_pages: int = Field(default=250, ge=1, le=2000)
+    phase6_visual_collection_name: str = "mm_rag_phase3_visual"
+    phase6_visual_embedding_model: str = "Qdrant/clip-ViT-B-32"
+    phase6_visual_embedding_revision: str = "phase6-clip-v1"
 
     openai_api_key: SecretStr | None = None
     openai_chat_model: str = DEFAULT_OPENAI_CHAT_MODEL
@@ -133,6 +142,14 @@ class Settings(BaseSettings):
         normalized = value.strip().rstrip("/")
         if not normalized.startswith(("http://", "https://")):
             raise ValueError("QDRANT_URL must use http:// or https://")
+        return normalized
+
+    @field_validator("phase6_visual_collection_name")
+    @classmethod
+    def validate_phase6_collection_name(cls, value: str) -> str:
+        normalized = value.strip()
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{2,199}", normalized):
+            raise ValueError("Phase 6 visual collection name is invalid")
         return normalized
 
     @field_validator("s3_endpoint_url", mode="before")

@@ -25,8 +25,9 @@ attempt on 2026-09-02 passed every evaluated validation gate except the required
 withheld. `hybrid-v3` remains evaluation-only, `hybrid-v1` remains default, and a
 user-approved closure now ends Phase 5 without candidate promotion. PR #5 was
 squash-merged at `5436614`. Phase 6 kickoff PR #6 was squash-merged at `95d18b3`,
-and ADRs 0025–0030 were accepted on 2026-09-03. Milestone 6.0's deterministic
-evaluation framework is implemented, but no Phase 6 product runtime behavior has
+and ADRs 0025–0030 were accepted on 2026-09-03. Milestones 6.0–6.1 implement the
+deterministic evaluation framework and opt-in local provenance/extraction path, but
+no Phase 6 behavior is enabled by default and no visual retrieval behavior has
 changed yet.
 
 ## Status legend
@@ -190,7 +191,7 @@ flowchart LR
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
 | 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and preserved at `mm-rag-v4.0.0` |
 | 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | Closed without acceptance; v4 nDCG gate missed and no candidate was promoted |
-| 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | In progress; ADRs 0025–0030 accepted and Milestone 6.0 evaluation framework implemented |
+| 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | In progress; Milestones 6.0–6.1 implemented behind an opt-in profile |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
 | 8 | Independently scalable deployment | Gateway, API/workers, dedicated frontend TBD, managed services | Managed PostgreSQL, Qdrant, object storage | Planned |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Planned |
@@ -453,11 +454,11 @@ release tag was created.
 
 ## Phase 6 — visual and table intelligence
 
-**Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. Milestone 6.0
-implements the deterministic visual/table corpus, OCR/Markdown baseline, protected
-split handling, and quality gates. The diagram below remains the target product
-runtime: no Phase 6 extractor, schema, vector collection, calculation engine,
-evidence API, paid run, promotion, or release tag exists yet.
+**Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. Milestones
+6.0–6.1 implement the deterministic quality contract, immutable region/artifact
+schema, and local structural extractor. The diagram below remains partly target
+runtime: no visual collection, calculation engine, evidence API, paid run, profile
+promotion, or release tag exists yet.
 
 ```mermaid
 flowchart LR
@@ -503,6 +504,20 @@ Manifest hashes bind all inputs. The baseline exposes only tune/validation
 aggregates, records zero provider calls, and enforces quality, identity, citation,
 calculation, abstention, text-regression, latency, and cost gates before protected
 holdout evaluation can run.
+
+Migration `20260903_0014` makes PostgreSQL canonical for immutable, generation-
+scoped region locators and artifact lineage. Normalized top-left coordinates retain
+source page geometry; composite foreign keys bind workspace, document version,
+generation, and creation attempt. Application/worker roles cannot mutate rows, and
+API reads inherit document authorization through RLS. Binary and text artifacts
+are conditionally written to both attempt and generation namespaces, verified by
+size and SHA-256, and exposed only after the existing generation promotion.
+
+The opt-in `structural-v1` adapter pins Docling `2.124.0`, Tesseract CLI English,
+accurate TableFormer, and a checksum-bound local model tree. It generates page
+renders, crops, captions, OCR/table text, and structured-table artifacts with remote
+services and generated descriptions disabled. Standalone images use deterministic
+Pillow conversion. Missing or changed model bytes fail closed before parsing.
 
 ## Phase 7 — evaluation and observability
 

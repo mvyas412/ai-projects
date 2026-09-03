@@ -20,8 +20,10 @@ from backend.app.core.logging import configure_logging
 from backend.app.db.session import create_database_engine, create_session_factory
 from backend.app.rag.indexing import build_document_indexer
 from backend.app.services.ingestion_worker import DeliveryDisposition, IngestionWorkerService
+from backend.app.services.visual_ingestion import LocalVisualIngestionProcessor
 from backend.app.storage.factory import create_artifact_storage, create_object_storage
 from backend.app.storage.s3 import S3ObjectStorage
+from backend.app.visual.extraction import DoclingStructureExtractor
 from backend.app.workers.health import ProcessHealth, health_is_ready
 
 
@@ -59,6 +61,27 @@ async def _run(settings: Settings) -> None:
     artifacts = create_artifact_storage(settings)
     identity = f"worker-{socket.gethostname()}-{os.getpid()}"[:200]
     shutdown = threading.Event()
+    visual_processor = (
+        LocalVisualIngestionProcessor(
+            factory,
+            artifacts,
+            DoclingStructureExtractor(
+                settings.phase6_docling_artifacts_path,
+                image_scale=settings.phase6_image_scale,
+                timeout_seconds=settings.phase6_docling_timeout_seconds,
+                max_pages=settings.phase6_max_pages,
+            ),
+            extractor_config={
+                "profile": settings.phase6_extraction_profile,
+                "image_scale": settings.phase6_image_scale,
+                "ocr": "tesseract-cli-eng",
+                "table_structure": "tableformer-accurate",
+                "remote_services": False,
+            },
+        )
+        if settings.phase6_visual_enabled
+        else None
+    )
     service = IngestionWorkerService(
         settings,
         factory,
@@ -66,6 +89,7 @@ async def _run(settings: Settings) -> None:
         artifacts,
         build_document_indexer(settings, qdrant),
         worker_id=identity,
+        visual_processor=visual_processor,
         shutdown_requested=shutdown,
     )
     health = ProcessHealth(settings.runtime_health_directory, "worker")

@@ -12,6 +12,8 @@ from backend.app.models import (
     Collection,
     CollectionDocument,
     ComplianceExport,
+    ContentArtifact,
+    ContentRegion,
     Conversation,
     ConversationDocument,
     ConversationMessage,
@@ -31,6 +33,8 @@ from backend.app.models import (
 _REGISTERED_MODELS = (
     AuditEvent,
     ComplianceExport,
+    ContentRegion,
+    ContentArtifact,
     User,
     Workspace,
     WorkspaceMembership,

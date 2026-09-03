@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 6 Milestone 6.1; Milestone 6.0 deterministic evaluation contract completed |
+| Active milestone | Phase 6 Milestone 6.2; Milestones 6.0–6.1 completed |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -59,7 +59,7 @@ Rules:
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
-| Phase 6 | In progress — decisions accepted; Milestone 6.0 implemented and verified |
+| Phase 6 | In progress — Milestones 6.0–6.1 implemented and verified |
 | Phases 7–9 | Planned |
 
 ## Delivery sequence and gates
@@ -743,10 +743,11 @@ then reranking a bounded candidate set.
 
 ## Phase 6 — visual and table intelligence
 
-**Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. Milestone 6.0
-is implemented with a free deterministic corpus, OCR/Markdown baseline, and release
-gate contract. Product runtime changes begin in Milestone 6.1. Paid/provider
-evaluation, profile promotion, and release tagging remain separate explicit gates.
+**Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. Milestones
+6.0–6.1 implement the deterministic evaluation contract, immutable region/artifact
+provenance, and opt-in local structural extraction. Milestone 6.2 is next.
+Paid/provider evaluation, profile promotion, and release tagging remain separate
+explicit gates.
 
 ### Objective
 
@@ -758,8 +759,8 @@ of depending mainly on OCR text and Markdown representations.
 | Milestone | Deliverable | Decision status |
 | --- | --- | --- |
 | 6.0 | Visual/table corpus, questions, and baseline quality measures | Completed — 40 regions, 80 questions, protected splits, reproducible free baseline and gates |
-| 6.1 | Versioned visual crops, provenance, captions, OCR, and summaries | Accepted — ADRs 0026–0027; implementation next |
-| 6.2 | Multimodal image embeddings and modality-aware retrieval | Accepted — ADR 0028; not started |
+| 6.1 | Versioned visual crops, provenance, captions, OCR, and summaries | Completed — migration `20260903_0014`, immutable objects, Docling/Tesseract/TableFormer local profile |
+| 6.2 | Multimodal image embeddings and modality-aware retrieval | Accepted — ADR 0028; implementation next |
 | 6.3 | Table structure reconstruction, typing, validation, and normalized storage | Accepted — ADR 0029; not started |
 | 6.4 | Query routing for semantic retrieval versus safe exact calculation | Accepted — ADRs 0028–0029; not started |
 | 6.5 | Evidence viewer for page region, figure, table, and calculation provenance | Accepted — ADR 0030; not started |
@@ -789,6 +790,14 @@ reports only tune and validation aggregates, makes zero provider calls, and neve
 emits protected holdout identities. The intentionally imperfect lexical baseline
 sets the comparison point for later visual/table candidates without changing a
 retrieval profile.
+
+Milestone 6.1 pins Docling `2.124.0` and a 15-file, 701,214,178-byte local layout/
+TableFormer artifact tree. Runtime verifies its SHA-256 before use and disables
+remote services, external plugins, picture descriptions, and request-time model
+downloads. The worker writes attempt and generation copies, verifies stored bytes,
+then commits region/artifact rows under worker RLS before existing fenced promotion.
+Standalone images use the same immutable contract through Pillow. The feature flag
+remains off until the later retrieval, evidence, quality, and browser gates pass.
 
 ### Completion gate
 

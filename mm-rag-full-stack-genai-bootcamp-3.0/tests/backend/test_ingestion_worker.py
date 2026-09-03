@@ -16,6 +16,8 @@ from backend.app.db.base import Base
 from backend.app.db.session import SessionFactory, create_database_engine, create_session_factory
 from backend.app.models import (
     AuditEvent,
+    ContentArtifact,
+    ContentRegion,
     Document,
     DocumentVersion,
     DocumentVersionStatus,
@@ -30,6 +32,7 @@ from backend.app.models import (
     WorkspaceMembership,
     WorkspaceRole,
 )
+from backend.app.models.visual import ContentRegionKind
 from backend.app.rag.indexing import IndexingRequest, IndexingResult, IndexingUnavailableError
 from backend.app.services.ingestion_api import IngestionAPIService
 from backend.app.services.ingestion_jobs import (
@@ -38,8 +41,11 @@ from backend.app.services.ingestion_jobs import (
 )
 from backend.app.services.ingestion_operations import IngestionOperationsService
 from backend.app.services.ingestion_worker import DeliveryDisposition, IngestionWorkerService
+from backend.app.services.visual_ingestion import LocalVisualIngestionProcessor
 from backend.app.storage.keys import original_object_key
 from backend.app.storage.local import LocalFileStorage
+from backend.app.visual.extraction import ExtractedRegion, ExtractionResult
+from backend.app.visual.provenance import NormalizedBoundingBox
 from backend.app.workers.health import ProcessHealth
 from backend.app.workers.ingestion_worker import _recover_expired_and_heartbeat
 from backend.app.workers.outbox_dispatcher import OutboxDispatcher
@@ -179,7 +185,9 @@ def worker_context(test_settings) -> Iterator[WorkerContext]:
         engine.dispose()
 
 
-def _worker(test_settings, context: WorkerContext, indexer) -> IngestionWorkerService:
+def _worker(
+    test_settings, context: WorkerContext, indexer, *, visual_processor=None
+) -> IngestionWorkerService:
     return IngestionWorkerService(
         test_settings,
         context.factory,
@@ -187,7 +195,35 @@ def _worker(test_settings, context: WorkerContext, indexer) -> IngestionWorkerSe
         context.storage,
         indexer,
         worker_id="worker-test-1",
+        visual_processor=visual_processor,
     )
+
+
+class FixtureVisualExtractor:
+    def __init__(self, png: bytes) -> None:
+        self._png = png
+
+    def extract(self, content: bytes, media_type: str) -> ExtractionResult:
+        return ExtractionResult(
+            extractor_name="fixture",
+            extractor_revision="1.0.0",
+            regions=(
+                ExtractedRegion(
+                    page_number=1,
+                    kind=ContentRegionKind.CHART,
+                    ordinal=0,
+                    bbox=NormalizedBoundingBox(0.1, 0.2, 0.6, 0.5),
+                    page_width=100.0,
+                    page_height=80.0,
+                    rotation=0,
+                    page_render=self._png,
+                    crop=self._png,
+                    source_caption="Revenue chart",
+                    ocr_text="2025 revenue 42",
+                    confidence=0.99,
+                ),
+            ),
+        )
 
 
 def test_worker_promotes_one_immutable_generation(test_settings, worker_context) -> None:
@@ -224,6 +260,51 @@ def test_worker_promotes_one_immutable_generation(test_settings, worker_context)
         assert succeeded_event.actor_kind == "service"
         assert succeeded_event.actor_user_id is None
         assert succeeded_event.service_actor == "ingestion-worker"
+
+
+def test_worker_promotes_immutable_visual_region_artifacts(
+    test_settings, worker_context
+) -> None:
+    from io import BytesIO
+
+    from PIL import Image
+
+    output = BytesIO()
+    Image.new("RGB", (20, 10), "navy").save(output, format="PNG")
+    processor = LocalVisualIngestionProcessor(
+        worker_context.factory,
+        worker_context.storage,
+        FixtureVisualExtractor(output.getvalue()),
+        extractor_config={"profile": "fixture-v1"},
+    )
+    worker = _worker(
+        test_settings,
+        worker_context,
+        SuccessfulIndexer(),
+        visual_processor=processor,
+    )
+
+    assert worker.process(worker_context.message) == DeliveryDisposition.ACK
+
+    with worker_context.factory() as session:
+        generation = session.scalar(
+            select(IngestionGeneration).where(
+                IngestionGeneration.job_id == worker_context.job_id
+            )
+        )
+        regions = list(session.scalars(select(ContentRegion)))
+        artifacts = list(session.scalars(select(ContentArtifact)))
+        assert generation is not None
+        assert generation.state == IngestionGenerationState.PROMOTED.value
+        assert generation.manifest is not None
+        visual = generation.manifest["visual_outputs"]
+        assert isinstance(visual, dict)
+        assert visual["region_count"] == 1
+        assert visual["artifact_count"] == 5
+        assert len(regions) == 1
+        assert len(artifacts) == 5
+        assert all(row.generation_id == generation.id for row in artifacts)
+        assert all(worker_context.storage.exists(row.object_key) for row in artifacts)
 
 
 def test_membership_removal_blocks_job_read_but_not_workspace_owned_processing(
