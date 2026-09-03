@@ -20,6 +20,7 @@ local operations, sensitive implementation history, and detailed decision ration
 | **Planned** | Scope is understood but work has not started |
 | **Proposed** | Scope or technology still needs an explicit decision |
 | **Blocked** | A named dependency prevents useful progress |
+| **Closed without acceptance** | Implementation ended without satisfying the phase gate or promoting its candidate |
 
 Rules:
 
@@ -45,7 +46,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 5.5 post-v4 evidence review and close-or-remediate decision |
+| Active milestone | Phase 5 closure recorded; Phase 6 decision kickoff not started |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -53,7 +54,7 @@ Rules:
 | Phase 4 | Completed and accepted — Milestones 4.0–4.5 squash-merged through PR #3 |
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
-| Phase 5 | V4 paid validation missed the nDCG gate; holdout/proof withheld; close-or-remediate decision pending |
+| Phase 5 | Closed without acceptance — implementation complete, nDCG gate missed, no candidate promoted |
 | Phases 6–9 | Planned |
 
 ## Delivery sequence and gates
@@ -81,7 +82,7 @@ security and data-integrity gates on which it depends.
 | 2 | Secure, persistent multi-document product | Authenticated tenant-safe product demonstration | Completed and accepted |
 | 3 | Durable asynchronous ingestion | Retryable jobs survive service failure | Completed and accepted |
 | 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Completed and accepted |
-| 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | In progress |
+| 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Closed without acceptance |
 | 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Planned |
 | 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Planned |
 | 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Planned |
@@ -595,12 +596,12 @@ Milestone 4.0 review material:
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** Hybrid implementation and accepted ADR 0024 remediation are complete but
-not accepted. The single approved v4 attempt passed every evaluated validation gate
-except nDCG@10: `hybrid-v3` improved 2.28% against the required 5%. Holdout and the
-product proof were withheld, `hybrid-v1` remains default, and the approval is
-consumed. Phase 5 now requires an explicit close-or-remediate decision; no retry or
-promotion is authorized.
+**Status:** Closed without acceptance. Hybrid implementation and ADR 0024 remediation
+are complete, but the single approved v4 attempt passed every evaluated validation
+gate except nDCG@10: `hybrid-v3` improved 2.28% against the required 5%. Holdout and
+the product proof were withheld. The user approved ending Phase 5 without promotion
+or another remediation cycle; `hybrid-v1` remains default and `dense-v1` remains
+rollback.
 
 ### Objective
 
@@ -616,7 +617,7 @@ then reranking a bounded candidate set.
 | 5.2 | Parallel dense/sparse retrieval with identical authorization filters | Completed and live-tested |
 | 5.3 | Deterministic RRF/fusion, deduplication, and source diversification | Completed and deterministic |
 | 5.4 | Bounded reranker selection and token-budgeted evidence assembly | Completed; reranker remains opt-in |
-| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | V4 validation measured; nDCG gate missed; decision required |
+| 5.5 | Quality/latency/cost tuning, rollout controls, and regression gates | Closed without acceptance; v4 nDCG gate missed; no promotion |
 
 ### Accepted implementation contract
 
@@ -722,6 +723,10 @@ then reranking a bounded candidate set.
   were zero. The 2.28% relative nDCG gain missed the required 5%, so the runner
   wrote only 64 tune/validation rows per ignored profile, withheld holdout and the
   product proof, removed its temporary collection, and did not retry.
+- The user approved closing Phase 5 without promoting `hybrid-v3` or pursuing another
+  paid remediation cycle. The implementation and measured evidence remain preserved;
+  the phase must not be described as quality-accepted, and no `mm-rag-v5.0.0` release
+  tag is authorized by this closure.
 
 ### Completion gate
 
@@ -897,7 +902,7 @@ commercial accounting, and compliance-grade administration.
 | Reranker | 5.4 | Accepted — bounded local FastEmbed cross-encoder in ADR 0021 |
 | Phase 5 benchmark remediation and negative-query contract | 5.0–5.5 | Accepted — ADR 0022 |
 | Phase 5 response to the failed v2 quality gate | 5.5 | Accepted — ADR 0023; free implementation complete |
-| Phase 5 response to the failed v3 nDCG gate | 5.5 | Accepted — ADR 0024; v4 run completed and missed only the nDCG gate |
+| Phase 5 response to the failed v3 nDCG gate | 5.5 | Accepted — ADR 0024; Phase 5 closed without acceptance after v4 missed only nDCG |
 | Vision embedding/enrichment models | 6.1–6.2 | TBD |
 | Structured-table execution approach | 6.3–6.4 | TBD |
 | Observability/evaluation backend | 7.0 | TBD |
@@ -909,10 +914,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Review the failed v4 aggregate evidence and choose whether to close Phase 5 without promotion or draft a new remediation ADR | Decision preserves the unchanged v4 result and sealed holdout |
-| 2 | If remediation is chosen, derive any candidate only from eligible tuning evidence and create fresh protected evidence | No tuning against v4 validation and no v4 holdout inspection |
-| 3 | Keep `hybrid-v1` default and `hybrid-v3` evaluation-only | No profile promotion follows a failed validation gate |
-| 4 | Require fresh explicit approval immediately before any future paid attempt | The consumed v4 approval does not permit a retry |
+| 1 | Obtain approval before beginning the Phase 6 decision kickoff | Phase 6 scope, corpus, models, table contract, and ADR sequence are reviewed first |
+| 2 | Preserve `hybrid-v1` as default, `dense-v1` as rollback, and `hybrid-v3` as evaluation-only | Phase 5 closure causes no hidden rollout change |
+| 3 | Keep v4 validation and holdout immutable | No tuning against v4 validation and no v4 holdout inspection |
+| 4 | Require a new ADR, fresh protected evidence, and explicit approval for any future Phase 5 paid work | The consumed v4 approval never permits a retry |
 
 ## Update protocol
 

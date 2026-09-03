@@ -17,8 +17,8 @@ security review, checksummed compliance export, and durable tombstone-first life
 plans. Qdrant access requires bounded trusted scope, object access is backend-mediated
 and integrity-checked, and retention apply fails closed unless an exact owner-approved
 preview remains current. No automatic destructive retention schedule is enabled.
-Phase 5 implementation is complete but not yet accepted. The v1 through v4 paid
-candidates all stopped at validation. The single approved v4 attempt on 2026-09-02
+Phase 5 implementation is complete and closed without quality acceptance. The v1
+through v4 paid candidates all stopped at validation. The single approved v4 attempt on 2026-09-02
 used one 2,545-token embedding batch and passed the ceiling-aware Recall, MRR,
 class, identity, latency, and provider-call gates. Its nDCG@10 improved from
 `0.8439` to `0.8632`, a 2.28% relative gain against the required 5%. The runner
@@ -26,8 +26,10 @@ correctly withheld holdout and the end-to-end proof. Accepted ADR 0024 keeps tha
 5% standard and its tune-only `hybrid-v3` candidate unchanged: ordinary queries
 retain dense order, while exact and multi-intent syntax selects balanced hybrid
 retrieval plus the pinned local reranker. The v4 approval is consumed; no retry or
-profile promotion is authorized. The free gate passes 198 deterministic tests plus
-all 209 live tests, pinned model verification, and v4 fixture reproduction. The default
+profile promotion is authorized. The user approved ending Phase 5 without another
+remediation cycle; `hybrid-v3` remains evaluation-only. The free gate passes 198
+deterministic tests plus all 209 live tests, pinned model verification, and v4 fixture
+reproduction. The default
 `hybrid-v1` profile combines authorized dense and Qdrant-native BM25 legs through
 deterministic RRF;
 `dense-v1` remains the rollback path, and `hybrid-rerank-v1` remains opt-in until
@@ -134,7 +136,8 @@ The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
 shows the Phase 5 implementation checkpoint, including hybrid retrieval and the
-failed v4 paid nDCG gate that now requires an explicit close-or-remediate decision.
+failed v4 paid nDCG gate. Phase 5 is closed without candidate promotion; Phase 6
+decision kickoff is planned but has not started.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,

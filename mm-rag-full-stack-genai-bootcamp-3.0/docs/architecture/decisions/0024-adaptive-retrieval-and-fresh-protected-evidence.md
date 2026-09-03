@@ -168,3 +168,13 @@ Qdrant collection was removed, and no retry ran. The approval is consumed,
 `hybrid-v3` remains evaluation-only, and `hybrid-v1` remains the product default.
 A material candidate or quality-contract change requires a new reviewed ADR and
 fresh protected evidence.
+
+## Closure resolution
+
+The user approved the recommendation to stop paid retries and close Phase 5 without
+promoting `hybrid-v3`. Phase 5 is implementation-complete but did not satisfy its
+measured quality-acceptance gate. This outcome does not invalidate the existing RAG
+product or its earlier end-to-end acceptance evidence. `hybrid-v3` remains frozen
+and evaluation-only, `hybrid-v1` remains the configured default, and `dense-v1`
+remains the rollback profile. Any future Phase 5 remediation requires a new ADR,
+fresh protected evidence, and separately approved paid execution.

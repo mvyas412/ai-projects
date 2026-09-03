@@ -23,7 +23,8 @@ runtime and governance boundaries plus hybrid retrieval. The single approved v4
 attempt on 2026-09-02 passed every evaluated validation gate except the required
 5% relative nDCG@10 gain, achieving 2.28%; holdout and the product proof were
 withheld. `hybrid-v3` remains evaluation-only, `hybrid-v1` remains default, and a
-close-or-remediate decision is now required.
+user-approved closure now ends Phase 5 without candidate promotion. Phase 6 decision
+kickoff is planned but has not started.
 
 ## Status legend
 
@@ -33,6 +34,7 @@ close-or-remediate decision is now required.
 | In progress | Approved decision or implementation work has started but its phase gate has not passed |
 | Planned | Intended capability or boundary that is not implemented yet |
 | Proposed / TBD | Candidate design or technology requiring a decision |
+| Closed without acceptance | Implementation ended without satisfying the phase gate or promoting its candidate |
 
 The diagrams describe both current and target states. A displayed component is
 not necessarily implemented; each phase states its status explicitly.
@@ -171,7 +173,7 @@ flowchart LR
     p2["Phase 2<br/>Product foundation<br/>Completed"] -->
     p3["Phase 3<br/>Async ingestion<br/>Completed"] -->
     p4["Phase 4<br/>Governance foundation<br/>Completed / v4.0.0"] -->
-    p5["Phase 5<br/>Hybrid retrieval<br/>Implemented / quality review"] -->
+    p5["Phase 5<br/>Hybrid retrieval<br/>Closed / gate not met"] -->
     p6["Phase 6<br/>Visual/table intelligence<br/>Planned"] -->
     p7["Phase 7<br/>Evaluation/observability<br/>Planned"] -->
     p8["Phase 8<br/>Scalable platform<br/>Planned"] -->
@@ -184,7 +186,7 @@ flowchart LR
 | 2 | Backend, identity, workspaces, multi-document product | FastAPI, Pydantic, SQLAlchemy, psycopg, Alembic, Auth0/OIDC, Streamlit | PostgreSQL, Qdrant, temporary files | Completed and accepted; live multimodal model and visual acceptance passed |
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
 | 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and preserved at `mm-rag-v4.0.0` |
-| 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | V4 paid validation missed the nDCG gate; close-or-remediate decision pending |
+| 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | Closed without acceptance; v4 nDCG gate missed and no candidate was promoted |
 | 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
 | 8 | Independently scalable deployment | Gateway, API/workers, dedicated frontend TBD, managed services | Managed PostgreSQL, Qdrant, object storage | Planned |
@@ -343,12 +345,12 @@ partial progress, honor holds/live work, and retain a content-free completion re
 
 ## Phase 5 — hybrid retrieval, fusion, and reranking
 
-**Status:** Implemented under accepted ADRs 0018–0024 but not accepted. The v1
+**Status:** Closed without acceptance under ADRs 0018–0024. The v1
 through v4 paid candidates failed validation. V4 passed every evaluated validation
 gate except the required 5% relative nDCG@10 gain, achieving 2.28%, so holdout and
 product proof were withheld as designed. Its approval is consumed. `hybrid-v3`
-remains evaluation-only and `hybrid-v1` remains default while an explicit
-close-or-remediate decision is pending.
+remains evaluation-only and `hybrid-v1` remains default. The user approved ending
+Phase 5 without promotion or another remediation cycle.
 
 ```mermaid
 flowchart LR
@@ -439,6 +441,11 @@ latency, and provider-call gates passed, but the 2.28% nDCG gain missed the requ
 5%. The runner emitted no holdout result or product proof, removed its temporary
 collection, and did not retry. A changed candidate or contract now requires a new
 reviewed ADR and fresh protected evidence.
+
+The approved closure preserves this result as an honest failed quality gate rather
+than treating the working RAG product as unsuccessful. No retrieval profile changed:
+`hybrid-v1` remains default, `dense-v1` remains rollback, and `hybrid-v3` remains
+evaluation-only. Phase 6 discovery is the next planned activity.
 
 ## Phase 6 — visual and table intelligence
 
@@ -622,7 +629,7 @@ reconcile commercial usage.
 | Fusion | Deterministic application-owned RRF, deduplication, diversification, and content-free traces implemented under ADR 0020 |
 | Reranker | Pinned bounded local FastEmbed cross-encoder implemented as an opt-in profile with fused-order fallback under ADR 0021 |
 | Phase 5 benchmark remediation | Larger v2 confounder corpus, rotated holdout, strict holdout sequencing, and clarified negative metrics implemented under ADR 0022; paid validation exposed a remaining quality/ceiling decision |
-| Phase 5 quality/candidate follow-up | ADR 0023 remains diagnostic after the v3 4.14% nDCG gain; ADR 0024's v4 candidate achieved 2.28% against the preserved 5% gate and now needs a close-or-remediate decision |
+| Phase 5 quality/candidate follow-up | ADR 0023 remains diagnostic; ADR 0024's v4 candidate achieved 2.28% against the preserved 5% gate, and Phase 5 is closed without promotion |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
 

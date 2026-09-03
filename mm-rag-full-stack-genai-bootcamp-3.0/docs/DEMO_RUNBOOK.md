@@ -1,7 +1,7 @@
 # Current MM-RAG demonstration runbook
 
-This runbook presents the accepted durable/governed foundation and the Phase 5
-hybrid-retrieval implementation while keeping all release tags immutable.
+This runbook presents the accepted durable/governed foundation and the closed
+Phase 5 hybrid-retrieval implementation while keeping all release tags immutable.
 
 ## Before the session
 
@@ -107,3 +107,7 @@ from every free gate.
   required 5%. Validation withheld holdout and the product proof, removed the
   temporary collection, and wrote only ignored tune/validation rows. No retry or
   rollout is authorized; `hybrid-v1` remains default.
+- The user approved closing Phase 5 without promoting `hybrid-v3` or running another
+  paid remediation cycle. This is an honest quality-gate outcome, not a RAG product
+  failure: the implementation remains available, the earlier Phase 3 end-to-end
+  product proof remains valid, and dense retrieval remains the rollback path.
