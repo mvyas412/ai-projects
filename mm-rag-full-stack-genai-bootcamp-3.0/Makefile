@@ -1,4 +1,4 @@
-.PHONY: setup models models-verify services runtime runtime-stop services-stop migrate api ui dispatcher worker operations-status operations-retention-preview backup phase5-evaluation check check-live check-acceptance
+.PHONY: setup models models-verify services runtime runtime-stop services-stop migrate api ui dispatcher worker operations-status operations-retention-preview backup phase5-evaluation phase6-evaluation check check-live check-acceptance
 
 setup:
 	uv python install 3.12
@@ -53,6 +53,10 @@ backup:
 phase5-evaluation:
 	uv run python -m scripts.build_phase5_v4_fixture --check
 	uv run python -m scripts.run_phase5_evaluation
+
+phase6-evaluation:
+	uv run python -m scripts.build_phase6_v1_fixture --check
+	uv run python -m scripts.run_phase6_evaluation --check
 
 check:
 	./scripts/verify_phase3.sh

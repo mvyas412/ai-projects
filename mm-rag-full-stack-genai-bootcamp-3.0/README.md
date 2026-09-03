@@ -137,11 +137,12 @@ future capabilities have already been implemented.
 The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
-shows the Phase 5 implementation checkpoint, including hybrid retrieval and the
-failed v4 paid nDCG gate. Phase 5 is closed without candidate promotion. Phase 6
-decision kickoff PR #6 was squash-merged at `95d18b3`, and ADRs 0025–0030 were
-accepted on 2026-09-03. Implementation has not started, so the current poster remains
-the accurate runtime checkpoint.
+shows the Phase 5 runtime checkpoint, including hybrid retrieval and the failed v4
+paid nDCG gate. Phase 5 is closed without candidate promotion. Phase 6 decision
+kickoff PR #6 was squash-merged at `95d18b3`, and ADRs 0025–0030 were accepted on
+2026-09-03. Milestone 6.0 now provides the free deterministic visual/table corpus,
+OCR/Markdown baseline, and release-gate contract. Product runtime behavior has not
+changed yet, so the current poster remains accurate.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
@@ -197,6 +198,12 @@ These ADRs authorize implementation in milestone order, beginning with the free
 evaluation contract. Exact artifacts remain subject to pinned revision, license,
 checksum, and measured acceptance requirements. Provider calls, paid evaluation,
 profile promotion, and a release tag still require their separate explicit gates.
+
+The committed Milestone 6.0 fixture contains 40 synthetic public-safe regions and
+80 questions across figure relationships, charts, table lookup, calculation, and
+negative cases. Tune/validation/holdout splits are hash-bound, the baseline runner
+withholds holdout evidence, and `make phase6-evaluation` reproduces the free baseline
+without provider calls.
 
 ## Prerequisites
 

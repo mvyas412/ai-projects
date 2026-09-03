@@ -25,7 +25,8 @@ attempt on 2026-09-02 passed every evaluated validation gate except the required
 withheld. `hybrid-v3` remains evaluation-only, `hybrid-v1` remains default, and a
 user-approved closure now ends Phase 5 without candidate promotion. PR #5 was
 squash-merged at `5436614`. Phase 6 kickoff PR #6 was squash-merged at `95d18b3`,
-and ADRs 0025–0030 were accepted on 2026-09-03. No Phase 6 runtime behavior has
+and ADRs 0025–0030 were accepted on 2026-09-03. Milestone 6.0's deterministic
+evaluation framework is implemented, but no Phase 6 product runtime behavior has
 changed yet.
 
 ## Status legend
@@ -189,7 +190,7 @@ flowchart LR
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
 | 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and preserved at `mm-rag-v4.0.0` |
 | 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | Closed without acceptance; v4 nDCG gate missed and no candidate was promoted |
-| 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | In progress; ADRs 0025–0030 accepted, implementation not started |
+| 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | In progress; ADRs 0025–0030 accepted and Milestone 6.0 evaluation framework implemented |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
 | 8 | Independently scalable deployment | Gateway, API/workers, dedicated frontend TBD, managed services | Managed PostgreSQL, Qdrant, object storage | Planned |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Planned |
@@ -452,10 +453,11 @@ release tag was created.
 
 ## Phase 6 — visual and table intelligence
 
-**Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. The diagram
-below remains a target design, not implemented behavior. Milestone 6.0 is the first
-approved implementation step; no extractor, schema, vector collection, calculation
-engine, evidence API, paid run, promotion, or release tag exists yet.
+**Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. Milestone 6.0
+implements the deterministic visual/table corpus, OCR/Markdown baseline, protected
+split handling, and quality gates. The diagram below remains the target product
+runtime: no Phase 6 extractor, schema, vector collection, calculation engine,
+evidence API, paid run, promotion, or release tag exists yet.
 
 ```mermaid
 flowchart LR
@@ -494,6 +496,13 @@ provenance (ADR 0026), local-first extraction/enrichment (ADR 0027), visual inde
 and retrieval (ADR 0028), structured tables and safe calculation (ADR 0029), then
 evidence presentation and rollout (ADR 0030). All six are accepted; implementation
 must follow those boundaries in milestone order.
+
+The Milestone 6.0 corpus is a committed, synthetic public-safe benchmark with 40
+regions and 80 questions divided 60/20/20 across tune, validation, and holdout.
+Manifest hashes bind all inputs. The baseline exposes only tune/validation
+aggregates, records zero provider calls, and enforces quality, identity, citation,
+calculation, abstention, text-regression, latency, and cost gates before protected
+holdout evaluation can run.
 
 ## Phase 7 — evaluation and observability
 

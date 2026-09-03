@@ -5,6 +5,8 @@ uv lock --check
 uv run ruff check backend frontend migrations scripts tests
 uv run mypy backend frontend scripts tests/backend
 uv run pytest
+uv run python -m scripts.build_phase6_v1_fixture --check
+uv run python -m scripts.run_phase6_evaluation --check
 uv run alembic current
 uv run alembic check
 

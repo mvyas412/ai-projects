@@ -1,0 +1,26 @@
+{
+  "classes": [
+    "figure_relationship",
+    "chart",
+    "table_lookup",
+    "calculation",
+    "negative"
+  ],
+  "dataset_revision": "phase6-visual-table-v1",
+  "files": {
+    "baseline-profile.json": "2e13c68d159c6cfd4a369ff9a57cf4bf8a824f4cba5a637d2d97bb04237d4e76",
+    "judgments.jsonl": "4cb618b1b164ed99a2a1cf09590b8f3810ac411158144eb1f527ad2de38696fa",
+    "regions.jsonl": "acd5e271d9c1362d915d3f8a859aabadc771d4cc30ade4e9e41ffa7bee004dfe"
+  },
+  "holdout_policy": "validation-before-holdout",
+  "private_representative_tier": "ignored",
+  "protected_query_sha256": "a783873b09bb853bcea7f4ffc25b4a993549d7c43f1cfda19970cf45346e99d2",
+  "quality_contract_revision": "phase6-quality-v1",
+  "query_count": 80,
+  "region_count": 40,
+  "split": {
+    "holdout": 16,
+    "tune": 48,
+    "validation": 16
+  }
+}
