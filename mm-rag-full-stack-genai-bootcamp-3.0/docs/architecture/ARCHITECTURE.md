@@ -23,8 +23,9 @@ runtime and governance boundaries plus hybrid retrieval. The single approved v4
 attempt on 2026-09-02 passed every evaluated validation gate except the required
 5% relative nDCG@10 gain, achieving 2.28%; holdout and the product proof were
 withheld. `hybrid-v3` remains evaluation-only, `hybrid-v1` remains default, and a
-user-approved closure now ends Phase 5 without candidate promotion. Phase 6 decision
-kickoff is planned but has not started.
+user-approved closure now ends Phase 5 without candidate promotion. PR #5 was
+squash-merged at `5436614`. Phase 6 decision kickoff is now in progress through
+Proposed ADRs 0025–0030; no Phase 6 runtime behavior has changed.
 
 ## Status legend
 
@@ -174,7 +175,7 @@ flowchart LR
     p3["Phase 3<br/>Async ingestion<br/>Completed"] -->
     p4["Phase 4<br/>Governance foundation<br/>Completed / v4.0.0"] -->
     p5["Phase 5<br/>Hybrid retrieval<br/>Closed / gate not met"] -->
-    p6["Phase 6<br/>Visual/table intelligence<br/>Planned"] -->
+    p6["Phase 6<br/>Visual/table intelligence<br/>Decision kickoff / Proposed"] -->
     p7["Phase 7<br/>Evaluation/observability<br/>Planned"] -->
     p8["Phase 8<br/>Scalable platform<br/>Planned"] -->
     p9["Phase 9<br/>Enterprise platform<br/>Planned"]
@@ -187,7 +188,7 @@ flowchart LR
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
 | 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and preserved at `mm-rag-v4.0.0` |
 | 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | Closed without acceptance; v4 nDCG gate missed and no candidate was promoted |
-| 6 | Native image and table understanding | Vision enrichment, multimodal vectors, structured tables | Qdrant, PostgreSQL, object storage | Planned |
+| 6 | Native image and table understanding | Proposed local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | Decision kickoff in progress; ADRs 0025–0030 Proposed |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
 | 8 | Independently scalable deployment | Gateway, API/workers, dedicated frontend TBD, managed services | Managed PostgreSQL, Qdrant, object storage | Planned |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Planned |
@@ -445,11 +446,15 @@ reviewed ADR and fresh protected evidence.
 The approved closure preserves this result as an honest failed quality gate rather
 than treating the working RAG product as unsuccessful. No retrieval profile changed:
 `hybrid-v1` remains default, `dense-v1` remains rollback, and `hybrid-v3` remains
-evaluation-only. Phase 6 discovery is the next planned activity.
+evaluation-only. PR #5 was squash-merged into `main` at `5436614`; no Phase 5
+release tag was created.
 
 ## Phase 6 — visual and table intelligence
 
-**Status:** Planned. Models and structured-table technology are TBD.
+**Status:** Decision kickoff in progress. ADRs 0025–0030 are Proposed. The diagram
+below is a target design, not implemented behavior; no extractor, model, provider,
+schema, vector collection, calculation engine, evidence API, or paid run has been
+approved by this kickoff.
 
 ```mermaid
 flowchart LR
@@ -482,6 +487,12 @@ Every crop, cell, summary, and vector retains document-version, page, bounding
 box, content ID, and extractor-version provenance. Exact calculations use
 validated structure, not generated prose. Exit: figures and tables become
 first-class retrievable, inspectable, and correctly cited evidence.
+
+The proposed decision sequence is evaluation contract (ADR 0025), immutable
+provenance (ADR 0026), local-first extraction/enrichment (ADR 0027), visual indexing
+and retrieval (ADR 0028), structured tables and safe calculation (ADR 0029), then
+evidence presentation and rollout (ADR 0030). Each ADR must be accepted before its
+implementation boundary changes.
 
 ## Phase 7 — evaluation and observability
 
@@ -630,6 +641,12 @@ reconcile commercial usage.
 | Reranker | Pinned bounded local FastEmbed cross-encoder implemented as an opt-in profile with fused-order fallback under ADR 0021 |
 | Phase 5 benchmark remediation | Larger v2 confounder corpus, rotated holdout, strict holdout sequencing, and clarified negative metrics implemented under ADR 0022; paid validation exposed a remaining quality/ceiling decision |
 | Phase 5 quality/candidate follow-up | ADR 0023 remains diagnostic; ADR 0024's v4 candidate achieved 2.28% against the preserved 5% gate, and Phase 5 is closed without promotion |
+| Phase 6 evaluation | Proposed ADR 0025 defines the corpus, protected splits, metrics, class gates, and explicit paid-run boundary |
+| Region/artifact provenance | Proposed ADR 0026 makes PostgreSQL canonical for immutable region and artifact lineage while binaries remain in object storage |
+| Visual extraction/enrichment | Proposed ADR 0027 evaluates a local-first structured extractor and keeps generated descriptions non-authoritative; exact models remain unselected |
+| Visual embeddings/retrieval | Proposed ADR 0028 evaluates a free paired visual embedding candidate in an isolated authorized index; exact revision and checksum remain unselected |
+| Structured tables/calculation | Proposed ADR 0029 uses normalized, validated table cells and an application-owned calculation allowlist; no generated SQL or request-time analytical engine |
+| Region evidence/viewer/rollout | Proposed ADR 0030 defines backend-mediated evidence descriptors, accessible inspection, staged validation, and explicit promotion/release gates |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
 
@@ -673,12 +690,21 @@ Accepted Phase 5 follow-ups:
 - [ADR 0023 — Ceiling-aware retrieval quality and deterministic candidate selection](decisions/0023-ceiling-aware-quality-and-candidate-selection.md)
 - [ADR 0024 — Adaptive retrieval and fresh protected evidence](decisions/0024-adaptive-retrieval-and-fresh-protected-evidence.md)
 
+Proposed Phase 6 decisions are:
+
+- [ADR 0025 — Phase 6 visual and table evaluation contract](decisions/0025-phase6-visual-table-evaluation-contract.md)
+- [ADR 0026 — Immutable region and derived-artifact provenance](decisions/0026-immutable-region-artifact-provenance.md)
+- [ADR 0027 — Local-first visual extraction and enrichment](decisions/0027-local-first-visual-extraction-enrichment.md)
+- [ADR 0028 — Visual embeddings, indexing, and modality-aware retrieval](decisions/0028-visual-embedding-index-retrieval.md)
+- [ADR 0029 — Structured tables and safe exact calculation](decisions/0029-structured-tables-safe-calculation.md)
+- [ADR 0030 — Region evidence, viewer, and Phase 6 rollout](decisions/0030-region-evidence-viewer-rollout.md)
+
 ## Maintenance checklist
 
 1. Update the affected phase, diagram, status, and technology table.
 2. Update the whole-system diagram when a cross-phase boundary or flow changes.
-3. Record consequential Phase 5 decisions and rationale in the ignored
-   `Phase5_context.md` active context document; keep earlier phase contexts historical.
+3. Record consequential Phase 6 decisions and rationale in the ignored
+   `Phase6_context.md` active context document; keep earlier phase contexts historical.
 4. Keep unapproved technologies labeled **Proposed / TBD**.
 5. Verify Mermaid fences and links before committing.
 6. Never place credentials, tokens, private URLs, customer data, or other secrets

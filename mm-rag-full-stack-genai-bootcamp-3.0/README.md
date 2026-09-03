@@ -1,4 +1,4 @@
-# Multimodal RAG Production — Phase 4 release with Phase 5 implementation
+# Multimodal RAG Production — Phase 5 closure and Phase 6 decisions
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
@@ -17,7 +17,9 @@ security review, checksummed compliance export, and durable tombstone-first life
 plans. Qdrant access requires bounded trusted scope, object access is backend-mediated
 and integrity-checked, and retention apply fails closed unless an exact owner-approved
 preview remains current. No automatic destructive retention schedule is enabled.
-Phase 5 implementation is complete and closed without quality acceptance. The v1
+Phase 5 implementation is complete and closed without quality acceptance. PR #5
+was squash-merged into `main` at `5436614` with a tree identical to the reviewed
+source; no Phase 5 release tag was created. The v1
 through v4 paid candidates all stopped at validation. The single approved v4 attempt on 2026-09-02
 used one 2,545-token embedding batch and passed the ceiling-aware Recall, MRR,
 class, identity, latency, and provider-call gates. Its nDCG@10 improved from
@@ -136,8 +138,9 @@ The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
 shows the Phase 5 implementation checkpoint, including hybrid retrieval and the
-failed v4 paid nDCG gate. Phase 5 is closed without candidate promotion; Phase 6
-decision kickoff is planned but has not started.
+failed v4 paid nDCG gate. Phase 5 is closed without candidate promotion. Phase 6
+decision kickoff is in progress through Proposed ADRs 0025–0030; the current poster
+remains accurate because no Phase 6 runtime behavior has changed.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
@@ -169,6 +172,29 @@ Accepted Phase 4 decisions are:
 - [Authorized vector, object, and asynchronous access](docs/architecture/decisions/0015-authorized-vector-object-async-access.md)
 - [Security audit and compliance export](docs/architecture/decisions/0016-security-audit-compliance-export.md)
 - [Governed retention, deletion, encryption, and incident controls](docs/architecture/decisions/0017-governed-retention-deletion-incident-controls.md)
+
+Accepted Phase 5 decisions are:
+
+- [Versioned retrieval evaluation and dense baseline](docs/architecture/decisions/0018-retrieval-evaluation-dense-baseline.md)
+- [Qdrant-native sparse retrieval](docs/architecture/decisions/0019-qdrant-sparse-bm25-retrieval.md)
+- [Deterministic reciprocal-rank fusion](docs/architecture/decisions/0020-deterministic-rrf-fusion.md)
+- [Bounded local cross-encoder reranking](docs/architecture/decisions/0021-bounded-local-reranking.md)
+- [Phase 5 benchmark remediation and negative-query contract](docs/architecture/decisions/0022-phase5-benchmark-remediation.md)
+- [Ceiling-aware retrieval quality and deterministic candidate selection](docs/architecture/decisions/0023-ceiling-aware-quality-and-candidate-selection.md)
+- [Adaptive retrieval and fresh protected evidence](docs/architecture/decisions/0024-adaptive-retrieval-and-fresh-protected-evidence.md)
+
+Proposed Phase 6 decisions are:
+
+- [Visual and table evaluation contract](docs/architecture/decisions/0025-phase6-visual-table-evaluation-contract.md)
+- [Immutable region and derived-artifact provenance](docs/architecture/decisions/0026-immutable-region-artifact-provenance.md)
+- [Local-first visual extraction and enrichment](docs/architecture/decisions/0027-local-first-visual-extraction-enrichment.md)
+- [Visual embeddings, indexing, and modality-aware retrieval](docs/architecture/decisions/0028-visual-embedding-index-retrieval.md)
+- [Structured tables and safe exact calculation](docs/architecture/decisions/0029-structured-tables-safe-calculation.md)
+- [Region evidence, viewer, and Phase 6 rollout](docs/architecture/decisions/0030-region-evidence-viewer-rollout.md)
+
+These Phase 6 ADRs require explicit acceptance before implementation. They do not
+authorize dependency or model selection, provider calls, paid evaluation, profile
+promotion, or a release tag.
 
 ## Prerequisites
 
@@ -445,7 +471,7 @@ raw benchmark identities remain ignored. A failed benchmark gate stops before th
 end-to-end product proof and never authorizes an automatic retry.
 
 GitHub Actions runs deterministic and PostgreSQL/Qdrant integration gates on pushes
-to the Phase 3, Phase 4, and Phase 5 branches and relevant pull requests. The
+to the Phase 3, Phase 4, Phase 5, and Phase 6 branches and relevant pull requests. The
 SeaweedFS contract remains in the local live gate until CI provisions that
 command-based service explicitly.
 Coverage must remain at or above 70%.

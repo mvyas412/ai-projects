@@ -1,4 +1,4 @@
-name: MM-RAG Phase 3/4/5 CI
+name: MM-RAG Phase 3/4/5/6 CI
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
       - "phase-3/mm-rag-async-ingestion"
       - "phase-4/mm-rag-governance"
       - "codex/phase5-hybrid-retrieval"
+      - "codex/phase6-visual-table-intelligence"
     paths:
       - "mm-rag-full-stack-genai-bootcamp-3.0/**"
       - ".github/workflows/mm-rag-phase3-ci.yml"
@@ -15,7 +16,7 @@ on:
       - ".github/workflows/mm-rag-phase3-ci.yml"
 
 concurrency:
-  group: mm-rag-phase3-4-5-${{ github.ref }}
+  group: mm-rag-phase3-4-5-6-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
