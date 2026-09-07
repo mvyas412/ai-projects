@@ -48,3 +48,10 @@ def test_tests_run_from_the_phase_3_environment() -> None:
     assert active_environment == expected_environment, (
         f"Expected the Phase 3 environment at {expected_environment}, got {active_environment}"
     )
+
+
+def test_compose_runtime_receives_the_phase6_profile() -> None:
+    compose = (PROJECT_ROOT / "compose.yaml").read_text(encoding="utf-8")
+
+    # The shared runtime environment feeds both dispatcher and worker containers.
+    assert "PHASE6_PROFILE: ${PHASE6_PROFILE:-disabled}" in compose
