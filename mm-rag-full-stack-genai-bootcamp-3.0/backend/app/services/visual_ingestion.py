@@ -16,6 +16,11 @@ from backend.app.models.visual import (
 from backend.app.storage.base import ObjectIntegrityError, ObjectStorage
 from backend.app.storage.keys import attempt_artifact_key, generation_artifact_key
 from backend.app.visual.extraction import DocumentStructureExtractor, ExtractedRegion
+from backend.app.visual.indexing import (
+    VisualIndexingRequest,
+    VisualRegionIndexer,
+    VisualRegionIndexItem,
+)
 from backend.app.visual.provenance import (
     ARTIFACT_SCHEMA_REVISION,
     LOCATOR_SCHEMA_REVISION,
@@ -35,6 +40,7 @@ class VisualProcessingRequest:
     generation_id: UUID
     job_id: UUID
     attempt_id: UUID
+    document_title: str
     media_type: str
     content: bytes
 
@@ -45,6 +51,9 @@ class VisualProcessingResult:
     artifact_count: int
     artifact_bytes: int
     manifest_sha256: str
+    vector_count: int = 0
+    vector_profile: str | None = None
+    vector_profile_fingerprint: str | None = None
 
 
 class VisualIngestionProcessor(Protocol):
@@ -79,16 +88,19 @@ class LocalVisualIngestionProcessor:
         extractor: DocumentStructureExtractor,
         *,
         extractor_config: dict[str, object],
+        visual_indexer: VisualRegionIndexer | None = None,
     ) -> None:
         self._session_factory = session_factory
         self._storage = artifact_storage
         self._extractor = extractor
         self._extractor_config_sha256 = extractor_config_sha256(extractor_config)
+        self._visual_indexer = visual_indexer
 
     def process(self, request: VisualProcessingRequest) -> VisualProcessingResult:
         extracted = self._extractor.extract(request.content, request.media_type)
         region_rows: list[ContentRegion] = []
         artifact_rows: list[ContentArtifact] = []
+        index_items: list[VisualRegionIndexItem] = []
         manifest_regions: list[dict[str, object]] = []
         artifact_bytes = 0
         for region in extracted.regions:
@@ -174,6 +186,15 @@ class LocalVisualIngestionProcessor:
                     "region_id": str(region_id),
                 }
             )
+            index_items.append(
+                VisualRegionIndexItem(
+                    region_id=region_id,
+                    page_number=region.page_number,
+                    region_kind=region.kind.value,
+                    image=region.crop,
+                    content=_region_search_text(region),
+                )
+            )
 
         with self._session_factory.begin() as session:
             set_rls_context(
@@ -186,6 +207,20 @@ class LocalVisualIngestionProcessor:
             session.flush()
             session.add_all(artifact_rows)
             session.flush()
+        indexing_result = (
+            self._visual_indexer.index(
+                VisualIndexingRequest(
+                    workspace_id=request.workspace_id,
+                    document_id=request.document_id,
+                    document_version_id=request.document_version_id,
+                    generation_id=request.generation_id,
+                    document_title=request.document_title,
+                    regions=tuple(index_items),
+                )
+            )
+            if self._visual_indexer is not None
+            else None
+        )
         manifest_sha256 = canonical_manifest_sha256(
             {"regions": sorted(manifest_regions, key=lambda item: str(item["region_id"]))}
         )
@@ -194,6 +229,11 @@ class LocalVisualIngestionProcessor:
             artifact_count=len(artifact_rows),
             artifact_bytes=artifact_bytes,
             manifest_sha256=manifest_sha256,
+            vector_count=indexing_result.vector_count if indexing_result else 0,
+            vector_profile=indexing_result.profile if indexing_result else None,
+            vector_profile_fingerprint=(
+                indexing_result.profile_fingerprint if indexing_result else None
+            ),
         )
 
     @staticmethod
@@ -349,6 +389,13 @@ def _deterministic_caption(region: ExtractedRegion) -> str:
     label = region.kind.value.replace("_", " ")
     source = f" Source caption: {region.source_caption}" if region.source_caption else ""
     return f"{label.capitalize()} on page {region.page_number}.{source}".strip()
+
+
+def _region_search_text(region: ExtractedRegion) -> str:
+    parts = [_deterministic_caption(region)]
+    if region.ocr_text:
+        parts.append(f"Extracted text: {region.ocr_text}")
+    return "\n".join(parts)[:2000]
 
 
 def _extension(media_type: str) -> str:

@@ -140,9 +140,10 @@ The [current workflow and DEV architecture](docs/architecture/current/mm-rag-cur
 shows the Phase 5 runtime checkpoint, including hybrid retrieval and the failed v4
 paid nDCG gate. Phase 5 is closed without candidate promotion. Phase 6 decision
 kickoff PR #6 was squash-merged at `95d18b3`, and ADRs 0025–0030 were accepted on
-2026-09-03. Milestone 6.0 now provides the free deterministic visual/table corpus,
-OCR/Markdown baseline, and release-gate contract. Product runtime behavior has not
-changed yet, so the current poster remains accurate.
+2026-09-03. Milestones 6.0–6.2 now provide the free deterministic visual/table
+corpus, immutable local extraction, and opt-in visual retrieval. The Phase 5 text
+path remains the default, so the current poster remains the accepted default-runtime
+view until Phase 6 rollout is approved.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
@@ -212,6 +213,15 @@ generation is atomically promoted. Docling `2.124.0`, Tesseract CLI, accurate
 TableFormer, and standalone-image Pillow extraction run locally behind the opt-in
 `structural-v1` profile. Remote services and generated descriptions are disabled.
 
+Milestone 6.2 pins the MIT-licensed FastEmbed CLIP image/text pair to immutable
+Hugging Face revisions and checksum-bound local model trees. Region crops are
+written to a separate versioned Qdrant collection with complete tenant, document,
+version, generation, page, region, and profile identity. A query-only visual-intent
+router adds the visual leg to the always-run text path and fuses authorized results
+with deterministic RRF. Missing models, collection failures, malformed points, or
+scope mismatches expose no visual candidate and preserve the authorized text result.
+The feature remains disabled by default.
+
 ## Prerequisites
 
 - [uv](https://docs.astral.sh/uv/)
@@ -241,17 +251,19 @@ uv run python -c "import sys; print(sys.executable)"
 
 The printed path must be inside this directory's `.venv/`.
 
-Before enabling the Phase 6 structural profile, provision and verify its ignored
-local Docling model cache:
+Before enabling Phase 6, provision and verify its ignored local Docling and paired
+CLIP model caches:
 
 ```bash
 make phase6-models
 make phase6-models-verify
 ```
 
-The reviewed profile contains only the Docling layout and TableFormer artifacts.
-Its exact 15-file, 701,214,178-byte tree is checksum-bound in code; runtime
-extraction fails closed if any file is missing or changed.
+The reviewed structural profile contains only the Docling layout and TableFormer
+artifacts. Its exact 15-file, 701,214,178-byte tree is checksum-bound in code. The
+paired CLIP image/text snapshots are also revision- and checksum-bound. Runtime
+extraction and visual embedding fail closed if required bytes are missing or changed;
+neither request nor worker paths download models.
 
 ## Configure local settings
 

@@ -112,8 +112,10 @@ class Settings(BaseSettings):
     phase6_image_scale: float = Field(default=2.0, ge=1.0, le=4.0)
     phase6_max_pages: int = Field(default=250, ge=1, le=2000)
     phase6_visual_collection_name: str = "mm_rag_phase3_visual"
-    phase6_visual_embedding_model: str = "Qdrant/clip-ViT-B-32"
-    phase6_visual_embedding_revision: str = "phase6-clip-v1"
+    phase6_visual_embedding_profile: Literal["visual-clip-v1"] = "visual-clip-v1"
+    phase6_visual_embedding_batch_size: int = Field(default=8, ge=1, le=64)
+    phase6_visual_candidate_limit: int = Field(default=12, ge=1, le=50)
+    phase6_visual_fusion_k: int = Field(default=60, ge=1, le=1000)
 
     openai_api_key: SecretStr | None = None
     openai_chat_model: str = DEFAULT_OPENAI_CHAT_MODEL

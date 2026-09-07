@@ -455,10 +455,11 @@ release tag was created.
 ## Phase 6 — visual and table intelligence
 
 **Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. Milestones
-6.0–6.1 implement the deterministic quality contract, immutable region/artifact
-schema, and local structural extractor. The diagram below remains partly target
-runtime: no visual collection, calculation engine, evidence API, paid run, profile
-promotion, or release tag exists yet.
+6.0–6.2 implement the deterministic quality contract, immutable region/artifact
+schema, local structural extractor, and opt-in authorized visual collection and
+retrieval path. The diagram below remains partly target runtime: no normalized table
+schema, calculation engine, evidence API, paid run, profile promotion, or release
+tag exists yet.
 
 ```mermaid
 flowchart LR
@@ -518,6 +519,15 @@ accurate TableFormer, and a checksum-bound local model tree. It generates page
 renders, crops, captions, OCR/table text, and structured-table artifacts with remote
 services and generated descriptions disabled. Standalone images use deterministic
 Pillow conversion. Missing or changed model bytes fail closed before parsing.
+
+The opt-in `visual-clip-v1` projection uses checksum-verified local FastEmbed CLIP
+vision and text snapshots with fixed 512-dimensional cosine vectors. One global
+visual collection remains separate from the accepted text collection. Region points
+carry no object keys and include complete tenant/workspace/document/version/
+generation/page/region/profile identity. Backend-built filters and returned-payload
+validation enforce that scope before deterministic RRF. Text retrieval still runs
+for every query; only versioned visual-intent syntax adds the visual leg, and every
+visual error safely preserves the authorized text result.
 
 ## Phase 7 — evaluation and observability
 
@@ -669,7 +679,7 @@ reconcile commercial usage.
 | Phase 6 evaluation | Accepted ADR 0025 defines the corpus, protected splits, metrics, class gates, and explicit paid-run boundary |
 | Region/artifact provenance | Accepted ADR 0026 makes PostgreSQL canonical for immutable region and artifact lineage while binaries remain in object storage |
 | Visual extraction/enrichment | Accepted ADR 0027 selects a local-first structured extraction contract and keeps generated descriptions non-authoritative; exact artifacts must be pinned and verified during implementation |
-| Visual embeddings/retrieval | Accepted ADR 0028 selects a free paired visual embedding candidate in an isolated authorized index; exact revision and checksum must be pinned before use |
+| Visual embeddings/retrieval | ADR 0028 implemented opt-in: pinned checksum-bound FastEmbed CLIP pair, isolated global visual collection, complete scope validation, deterministic routing/RRF, and text fallback |
 | Structured tables/calculation | Accepted ADR 0029 uses normalized, validated table cells and an application-owned calculation allowlist; no generated SQL or request-time analytical engine |
 | Region evidence/viewer/rollout | Accepted ADR 0030 defines backend-mediated evidence descriptors, accessible inspection, staged validation, and explicit promotion/release gates |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |

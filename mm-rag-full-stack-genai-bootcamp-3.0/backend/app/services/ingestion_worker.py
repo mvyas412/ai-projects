@@ -163,6 +163,7 @@ class IngestionWorkerService:
                         generation_id=work.generation_id,
                         job_id=work.job.id,
                         attempt_id=work.attempt.id,
+                        document_title=work.document.title,
                         media_type=work.document.media_type,
                         content=content,
                     )
@@ -325,6 +326,9 @@ class IngestionWorkerService:
                 "artifact_count": visual_result.artifact_count,
                 "artifact_bytes": visual_result.artifact_bytes,
                 "manifest_sha256": visual_result.manifest_sha256,
+                "vector_count": visual_result.vector_count,
+                "vector_profile": visual_result.vector_profile,
+                "vector_profile_fingerprint": visual_result.vector_profile_fingerprint,
             }
         content = json.dumps(
             manifest,

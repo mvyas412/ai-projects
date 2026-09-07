@@ -23,7 +23,9 @@ from backend.app.services.ingestion_worker import DeliveryDisposition, Ingestion
 from backend.app.services.visual_ingestion import LocalVisualIngestionProcessor
 from backend.app.storage.factory import create_artifact_storage, create_object_storage
 from backend.app.storage.s3 import S3ObjectStorage
+from backend.app.visual.embedding import FastEmbedCLIPEncoder
 from backend.app.visual.extraction import DoclingStructureExtractor
+from backend.app.visual.indexing import QdrantVisualRegionIndexer
 from backend.app.workers.health import ProcessHealth, health_is_ready
 
 
@@ -61,8 +63,14 @@ async def _run(settings: Settings) -> None:
     artifacts = create_artifact_storage(settings)
     identity = f"worker-{socket.gethostname()}-{os.getpid()}"[:200]
     shutdown = threading.Event()
-    visual_processor = (
-        LocalVisualIngestionProcessor(
+    visual_processor = None
+    if settings.phase6_visual_enabled:
+        visual_encoder = FastEmbedCLIPEncoder(
+            settings.phase5_model_cache_dir,
+            threads=settings.rag_model_threads,
+            batch_size=settings.phase6_visual_embedding_batch_size,
+        )
+        visual_processor = LocalVisualIngestionProcessor(
             factory,
             artifacts,
             DoclingStructureExtractor(
@@ -78,10 +86,8 @@ async def _run(settings: Settings) -> None:
                 "table_structure": "tableformer-accurate",
                 "remote_services": False,
             },
+            visual_indexer=QdrantVisualRegionIndexer(settings, qdrant, visual_encoder),
         )
-        if settings.phase6_visual_enabled
-        else None
-    )
     service = IngestionWorkerService(
         settings,
         factory,

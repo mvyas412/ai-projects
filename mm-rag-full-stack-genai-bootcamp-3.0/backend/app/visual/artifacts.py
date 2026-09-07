@@ -5,10 +5,34 @@ from dataclasses import dataclass
 from importlib.metadata import version
 from pathlib import Path
 
+from backend.app.retrieval.artifacts import ModelArtifactSpec
+
 DOCLING_PACKAGE_VERSION = "2.124.0"
 DOCLING_MODEL_PROFILE = "docling-layout-tableformer-v1"
 DOCLING_MODEL_LICENSES = ("apache-2.0", "mit")
 DOCLING_MODEL_TREE_SHA256 = "84c523c99eb4e43b36ebf5aee678b66c7017b18ff4db3de22b67dcd2ab3a92cc"
+VISUAL_IMAGE_MODEL = ModelArtifactSpec(
+    name="Qdrant/clip-ViT-B-32-vision",
+    revision="e0c24ed0fa57fa3e4f97f30de74c51d944036ace",
+    license="mit",
+    files=("config.json", "model.onnx", "preprocessor_config.json"),
+    tree_sha256="7c97248e0ce88dd7bd7597de5565ec56de8a5e0c8a2c67688473d51da2eb6817",
+)
+VISUAL_TEXT_MODEL = ModelArtifactSpec(
+    name="Qdrant/clip-ViT-B-32-text",
+    revision="48ca1db27cb4063eb311ec2aa7f087a808112876",
+    license="mit",
+    files=(
+        "config.json",
+        "merges.txt",
+        "model.onnx",
+        "special_tokens_map.json",
+        "tokenizer.json",
+        "tokenizer_config.json",
+        "vocab.json",
+    ),
+    tree_sha256="9e1d3a144fffe99acff0338beae93283c933d98541b2394222b85e9c10fabeb7",
+)
 
 
 class VisualModelArtifactError(RuntimeError):

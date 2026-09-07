@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -44,6 +45,10 @@ class Citation(BaseModel):
     content_type: str
     excerpt: str = Field(max_length=1000)
     score: float | None = None
+    evidence_kind: Literal[
+        "text", "figure", "chart", "diagram", "image", "table", "calculation"
+    ] = "text"
+    region_id: UUID | None = None
 
 
 class ConversationMessageResponse(BaseModel):

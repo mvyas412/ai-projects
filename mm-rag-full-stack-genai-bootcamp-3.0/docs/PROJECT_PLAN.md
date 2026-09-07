@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 6 Milestone 6.2; Milestones 6.0–6.1 completed |
+| Active milestone | Phase 6 Milestone 6.3; Milestones 6.0–6.2 completed |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -59,7 +59,7 @@ Rules:
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
-| Phase 6 | In progress — Milestones 6.0–6.1 implemented and verified |
+| Phase 6 | In progress — Milestones 6.0–6.2 implemented and verified |
 | Phases 7–9 | Planned |
 
 ## Delivery sequence and gates
@@ -744,8 +744,9 @@ then reranking a bounded candidate set.
 ## Phase 6 — visual and table intelligence
 
 **Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. Milestones
-6.0–6.1 implement the deterministic evaluation contract, immutable region/artifact
-provenance, and opt-in local structural extraction. Milestone 6.2 is next.
+6.0–6.2 implement the deterministic evaluation contract, immutable region/artifact
+provenance, local structural extraction, and opt-in authorized visual retrieval.
+Milestone 6.3 is next.
 Paid/provider evaluation, profile promotion, and release tagging remain separate
 explicit gates.
 
@@ -760,7 +761,7 @@ of depending mainly on OCR text and Markdown representations.
 | --- | --- | --- |
 | 6.0 | Visual/table corpus, questions, and baseline quality measures | Completed — 40 regions, 80 questions, protected splits, reproducible free baseline and gates |
 | 6.1 | Versioned visual crops, provenance, captions, OCR, and summaries | Completed — migration `20260903_0014`, immutable objects, Docling/Tesseract/TableFormer local profile |
-| 6.2 | Multimodal image embeddings and modality-aware retrieval | Accepted — ADR 0028; implementation next |
+| 6.2 | Multimodal image embeddings and modality-aware retrieval | Completed — pinned local CLIP pair, isolated scoped index, deterministic router/RRF, text fallback |
 | 6.3 | Table structure reconstruction, typing, validation, and normalized storage | Accepted — ADR 0029; not started |
 | 6.4 | Query routing for semantic retrieval versus safe exact calculation | Accepted — ADRs 0028–0029; not started |
 | 6.5 | Evidence viewer for page region, figure, table, and calculation provenance | Accepted — ADR 0030; not started |
@@ -798,6 +799,17 @@ downloads. The worker writes attempt and generation copies, verifies stored byte
 then commits region/artifact rows under worker RLS before existing fenced promotion.
 Standalone images use the same immutable contract through Pillow. The feature flag
 remains off until the later retrieval, evidence, quality, and browser gates pass.
+
+Milestone 6.2 pins `Qdrant/clip-ViT-B-32-vision` and its paired text encoder to
+immutable revisions, exact local tree checksums, 512 dimensions, RGB preprocessing,
+application L2 normalization, and bounded batches. The worker indexes one immutable
+point per region in a separate global visual collection. Every filter and returned
+payload carries and revalidates tenant, workspace, document, version, active
+generation, region, page, and vector-profile identity. The Phase 5 text profile runs
+for every query; a deterministic query-only router adds the visual leg for visual
+intent, then application-owned RRF fuses bounded results. Any visual dependency or
+validation failure returns to the authorized text order. This remains opt-in and
+does not promote a Phase 6 profile.
 
 ### Completion gate
 
@@ -961,10 +973,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Implement Milestone 6.0 under accepted ADR 0025 | The visual/table benchmark and frozen text/OCR baseline are reproducible without changing product runtime or making a paid call |
-| 2 | Review the free Milestone 6.0 evidence before beginning schema/extractor work | Corpus hashes, split isolation, withholding, identity, calculation, and text-regression fixtures pass |
-| 3 | Preserve `hybrid-v1` as default, `dense-v1` as rollback, and `hybrid-v3` as evaluation-only | Phase 6 kickoff causes no hidden Phase 5 rollout change |
-| 4 | Keep Phase 5 v4 validation and holdout immutable | No tuning against v4 validation and no v4 holdout inspection |
+| 1 | Implement Milestone 6.3 under accepted ADR 0029 | Immutable normalized tables, columns, cells, validation, and object exports preserve source provenance and RLS |
+| 2 | Implement Milestone 6.4 routing and the closed calculation contract | Supported operations are deterministic and ambiguous/unsupported requests abstain without generated SQL |
+| 3 | Implement Milestone 6.5 evidence APIs/viewer and staged rollout | Users can inspect authorized regions, tables, and calculation traces without object-store coordinates |
+| 4 | Preserve `hybrid-v1` as default, `dense-v1` as rollback, and `hybrid-v3` as evaluation-only | Phase 6 implementation causes no hidden Phase 5 rollout change |
 | 5 | Require separate explicit approval for any paid evaluation, provider vision call, profile promotion, or release tag | ADR acceptance grants none of those actions |
 
 ## Update protocol

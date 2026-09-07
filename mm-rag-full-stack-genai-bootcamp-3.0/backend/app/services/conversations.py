@@ -213,6 +213,8 @@ class ConversationService:
                 content_type=item.content_type,
                 excerpt=item.excerpt,
                 score=item.score,
+                evidence_kind=item.evidence_kind,
+                region_id=item.region_id,
             ).model_dump(mode="json")
             for item in answer.citations
         ]

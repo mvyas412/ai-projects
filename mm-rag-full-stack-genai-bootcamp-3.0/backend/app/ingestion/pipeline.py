@@ -7,6 +7,7 @@ from importlib.metadata import version
 from backend.app.core.config import Settings
 from backend.app.retrieval.artifacts import SPARSE_MODEL
 from backend.app.retrieval.sparse import SPARSE_VECTOR_NAME
+from backend.app.visual.embedding import visual_embedding_manifest
 
 PIPELINE_PROFILE = "phase5-hybrid-v1"
 
@@ -79,6 +80,14 @@ def pipeline_manifest(settings: Settings, media_type: str) -> dict[str, object]:
             "table_structure": "tableformer-accurate",
             "image_scale": settings.phase6_image_scale,
             "locator_schema_revision": "region-locator-v1",
+        }
+        manifest["visual_embedding"] = {
+            **visual_embedding_manifest(
+                batch_size=settings.phase6_visual_embedding_batch_size
+            ),
+            "collection": settings.phase6_visual_collection_name,
+            "payload_schema_revision": 1,
+            "active_generation_filter_required": True,
         }
     return manifest
 
