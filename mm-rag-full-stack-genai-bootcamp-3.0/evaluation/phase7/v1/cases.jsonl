@@ -1,0 +1,8 @@
+{"case_id":"parse_pdf_validation","split":"validation","capability":"parsing","expected_outcome":"pass","expected_evidence_ids":["page-1"]}
+{"case_id":"retrieve_text_validation","split":"validation","capability":"retrieval","expected_outcome":"pass","expected_evidence_ids":["chunk-1"]}
+{"case_id":"answer_abstain_validation","split":"validation","capability":"answer","expected_outcome":"abstain","expected_evidence_ids":[]}
+{"case_id":"citation_scope_validation","split":"validation","capability":"citation","expected_outcome":"pass","expected_evidence_ids":["region-1"]}
+{"case_id":"deny_cross_tenant_validation","split":"validation","capability":"authorization","expected_outcome":"deny","expected_evidence_ids":[]}
+{"case_id":"calculation_validation","split":"validation","capability":"calculation","expected_outcome":"pass","expected_evidence_ids":["cell-1","cell-2"]}
+{"case_id":"retrieve_visual_holdout","split":"holdout","capability":"retrieval","expected_outcome":"pass","expected_evidence_ids":["region-2"]}
+{"case_id":"deny_stale_generation_holdout","split":"holdout","capability":"authorization","expected_outcome":"deny","expected_evidence_ids":[]}

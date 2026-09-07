@@ -1,0 +1,8 @@
+{"case_id":"parse_pdf_validation","outcome":"pass","evidence_ids":["page-1"],"duration_ms":4.0,"provider_calls":0}
+{"case_id":"retrieve_text_validation","outcome":"pass","evidence_ids":["chunk-1"],"duration_ms":2.0,"provider_calls":0}
+{"case_id":"answer_abstain_validation","outcome":"abstain","evidence_ids":[],"duration_ms":1.0,"provider_calls":0}
+{"case_id":"citation_scope_validation","outcome":"pass","evidence_ids":["region-1"],"duration_ms":2.0,"provider_calls":0}
+{"case_id":"deny_cross_tenant_validation","outcome":"deny","evidence_ids":[],"duration_ms":1.0,"provider_calls":0}
+{"case_id":"calculation_validation","outcome":"pass","evidence_ids":["cell-1","cell-2"],"duration_ms":3.0,"provider_calls":0}
+{"case_id":"retrieve_visual_holdout","outcome":"pass","evidence_ids":["region-2"],"duration_ms":2.0,"provider_calls":0}
+{"case_id":"deny_stale_generation_holdout","outcome":"deny","evidence_ids":[],"duration_ms":1.0,"provider_calls":0}

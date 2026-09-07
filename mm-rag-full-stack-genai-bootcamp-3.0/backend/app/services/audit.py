@@ -64,6 +64,13 @@ _SAFE_DETAIL_FIELDS = frozenset(
         "deleted_object_count",
         "deleted_vector_count",
         "resource_type",
+        "feedback_id",
+        "rating",
+        "reason",
+        "comment_consent",
+        "snapshot_consent",
+        "review_status",
+        "promoted_case_id",
     }
 )
 

@@ -5,6 +5,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from backend.app.core.telemetry import observed_span
 from backend.app.ingestion.pipeline import manifest_supports_sparse
 from backend.app.models.conversation import (
     Conversation,
@@ -325,24 +326,28 @@ class ConversationService:
             completion_tokens=answer.completion_tokens,
         )
         try:
-            self._conversations.add_messages(user_message, assistant_message)
-            # Flush UUID defaults before the audit record captures the message ID.
-            self._session.flush()
-            # Message activity drives recent-conversation ordering in the UI.
-            conversation.updated_at = datetime.now(UTC)
-            record_audit_event(
-                self._session,
-                workspace_id=workspace_id,
-                actor_user_id=user.id,
-                action="conversation.message_created",
-                resource_type="conversation",
-                resource_id=conversation_id,
-                details={
-                    "assistant_message_id": str(assistant_message.id),
-                    "citation_count": len(citation_payload),
-                },
-            )
-            self._session.commit()
+            with observed_span(
+                "conversation.persist_exchange",
+                attributes={"db.system": "postgresql", "count": 2},
+            ):
+                self._conversations.add_messages(user_message, assistant_message)
+                # Flush UUID defaults before the audit record captures the message ID.
+                self._session.flush()
+                # Message activity drives recent-conversation ordering in the UI.
+                conversation.updated_at = datetime.now(UTC)
+                record_audit_event(
+                    self._session,
+                    workspace_id=workspace_id,
+                    actor_user_id=user.id,
+                    action="conversation.message_created",
+                    resource_type="conversation",
+                    resource_id=conversation_id,
+                    details={
+                        "assistant_message_id": str(assistant_message.id),
+                        "citation_count": len(citation_payload),
+                    },
+                )
+                self._session.commit()
         except Exception:
             self._session.rollback()
             raise

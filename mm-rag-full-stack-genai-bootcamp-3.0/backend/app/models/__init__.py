@@ -19,6 +19,7 @@ from backend.app.models.document import (
     DocumentVersion,
     DocumentVersionStatus,
 )
+from backend.app.models.feedback import AnswerFeedback, FeedbackReason, FeedbackReviewStatus
 from backend.app.models.generation import IngestionGeneration, IngestionGenerationState
 from backend.app.models.ingestion import (
     IngestionAttempt,
@@ -63,6 +64,7 @@ __all__ = [
     "AuditEvent",
     "AuditActorKind",
     "AuditResult",
+    "AnswerFeedback",
     "ArtifactKind",
     "ArtifactValidationState",
     "Collection",
@@ -80,6 +82,8 @@ __all__ = [
     "Document",
     "DocumentVersion",
     "DocumentVersionStatus",
+    "FeedbackReason",
+    "FeedbackReviewStatus",
     "IngestionAttempt",
     "IngestionAttemptState",
     "IngestionJob",

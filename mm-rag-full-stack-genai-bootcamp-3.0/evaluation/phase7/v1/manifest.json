@@ -1,0 +1,15 @@
+{
+  "dataset_revision": "phase7-unified-evaluation-v1",
+  "files": {
+    "baseline-results.jsonl": "348b19176132a3b0b471b164244522816b882af47df1a96e48828df0125b07f6",
+    "cases.jsonl": "c3410c4724365f6e00c0064abec89712c2aa01e5ad93b49ef82a44e371900b28"
+  },
+  "holdout_policy": "validation-before-holdout",
+  "privacy_class": "synthetic-public-safe-metadata-only",
+  "provider_call_budget": 0,
+  "p95_latency_budget_ms": 100.0,
+  "suite_references": [
+    "phase5-retrieval-v4",
+    "phase6-visual-table-v1"
+  ]
+}

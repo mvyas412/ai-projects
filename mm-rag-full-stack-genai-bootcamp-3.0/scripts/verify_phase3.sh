@@ -8,6 +8,8 @@ uv run pytest
 uv run python -m scripts.build_phase6_v1_fixture --check
 uv run python -m scripts.run_phase6_evaluation --check
 uv run python -m scripts.run_phase6_candidate --check
+uv run python -m scripts.run_phase7_evaluation --check
+uv run python -m scripts.phase7_observability validate
 uv run alembic current
 uv run alembic check
 

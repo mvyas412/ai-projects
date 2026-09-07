@@ -29,6 +29,11 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test", "staging", "production"] = "development"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
     api_v1_prefix: str = "/api/v1"
+    telemetry_enabled: bool = False
+    otel_exporter_otlp_endpoint: str = "http://127.0.0.1:4318"
+    otel_exporter_otlp_headers: SecretStr | None = None
+    telemetry_metric_interval_seconds: int = Field(default=15, ge=5, le=300)
+    telemetry_max_queue_size: int = Field(default=512, ge=64, le=4096)
 
     auth0_issuer: str | None = None
     auth0_audience: str | None = None
@@ -86,6 +91,7 @@ class Settings(BaseSettings):
     orphan_object_retention_days: int = Field(default=7, ge=1, le=90)
     terminal_job_retention_days: int = Field(default=90, ge=1, le=730)
     security_audit_retention_days: int = Field(default=365, ge=30, le=3650)
+    feedback_retention_days: int = Field(default=90, ge=7, le=730)
 
     qdrant_url: str = "http://127.0.0.1:6337"
     qdrant_api_key: SecretStr | None = None
@@ -152,6 +158,14 @@ class Settings(BaseSettings):
         normalized = value.strip().rstrip("/")
         if not normalized.startswith(("http://", "https://")):
             raise ValueError("QDRANT_URL must use http:// or https://")
+        return normalized
+
+    @field_validator("otel_exporter_otlp_endpoint")
+    @classmethod
+    def normalize_otel_endpoint(cls, value: str) -> str:
+        normalized = value.strip().rstrip("/")
+        if not normalized.startswith(("http://", "https://")):
+            raise ValueError("OTEL_EXPORTER_OTLP_ENDPOINT must use http:// or https://")
         return normalized
 
     @field_validator("phase6_visual_collection_name")
@@ -229,6 +243,7 @@ class Settings(BaseSettings):
         "s3_secret_access_key",
         "s3_kms_key_id",
         "rabbitmq_url",
+        "otel_exporter_otlp_headers",
         mode="before",
     )
     @classmethod

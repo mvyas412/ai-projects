@@ -1,0 +1,17 @@
+---
+global:
+  scrape_native_histograms: true
+
+rule_files:
+  - /otel-lgtm/prometheus-rules/*.yaml
+
+otlp:
+  keep_identifying_resource_attributes: true
+  promote_resource_attributes:
+    - service.name
+    - service.version
+    - deployment.environment.name
+
+storage:
+  tsdb:
+    out_of_order_time_window: 10m

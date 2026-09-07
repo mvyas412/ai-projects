@@ -1,0 +1,47 @@
+groups:
+  - name: mm-rag-phase7-invariants
+    interval: 30s
+    rules:
+      - alert: MMRAGInvariantViolation
+        expr: increase(mm_rag_invariant_violations_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          owner: mm-rag-security
+        annotations:
+          impact: A zero-tolerance identity, authorization, citation, or calculation invariant failed.
+          runbook: docs/PHASE7_OBSERVABILITY_OPERATIONS.md#zero-tolerance-invariant
+          recovery: Stop promotion and preserve authoritative audit/evidence records.
+      - alert: MMRAGTelemetryExportFailing
+        expr: increase(otelcol_exporter_send_failed_spans_total[10m]) > 0
+        for: 10m
+        labels:
+          severity: warning
+          owner: mm-rag-operations
+        annotations:
+          impact: Product traffic continues, but end-to-end diagnosis may be incomplete.
+          runbook: docs/PHASE7_OBSERVABILITY_OPERATIONS.md#telemetry-loss
+          recovery: Collector export succeeds for two consecutive windows.
+  - name: mm-rag-phase7-error-budget
+    interval: 1m
+    rules:
+      - alert: MMRAGFastErrorBudgetBurn
+        expr: mm_rag_slo_error_budget_burn_rate{window="1h"} > 14.4 and mm_rag_slo_error_budget_burn_rate{window="5m"} > 14.4
+        for: 2m
+        labels:
+          severity: critical
+          owner: mm-rag-operations
+        annotations:
+          impact: The approved pilot SLO budget is being consumed rapidly.
+          runbook: docs/PHASE7_OBSERVABILITY_OPERATIONS.md#error-budget-burn
+          recovery: Both burn windows return below the approved threshold.
+      - alert: MMRAGSlowErrorBudgetBurn
+        expr: mm_rag_slo_error_budget_burn_rate{window="6h"} > 6 and mm_rag_slo_error_budget_burn_rate{window="30m"} > 6
+        for: 15m
+        labels:
+          severity: warning
+          owner: mm-rag-operations
+        annotations:
+          impact: Reliability is trending beyond the approved pilot budget.
+          runbook: docs/PHASE7_OBSERVABILITY_OPERATIONS.md#error-budget-burn
+          recovery: Both burn windows return below the approved threshold.

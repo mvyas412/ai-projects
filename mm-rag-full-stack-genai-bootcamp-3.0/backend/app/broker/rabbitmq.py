@@ -4,6 +4,7 @@ from typing import Any
 
 import aio_pika
 from aio_pika import DeliveryMode, ExchangeType, Message
+from opentelemetry.propagate import inject
 
 from backend.app.broker.messages import IngestionEventMessage
 from backend.app.core.config import Settings
@@ -94,6 +95,8 @@ class RabbitMQPublisher:
     async def publish(self, message: IngestionEventMessage) -> None:
         await self.connect()
         assert self._exchange is not None
+        carrier: dict[str, Any] = {}
+        inject(carrier)
         try:
             result = await self._exchange.publish(
                 Message(
@@ -105,6 +108,7 @@ class RabbitMQPublisher:
                     timestamp=message.occurred_at,
                     type=message.event_type,
                     app_id="mm-rag-outbox-dispatcher",
+                    headers=carrier,
                 ),
                 routing_key=self._settings.rabbitmq_routing_key,
                 mandatory=True,

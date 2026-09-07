@@ -137,6 +137,12 @@ class ConversationMessage(Base):
             "sequence_number",
             name="uq_conversation_messages_conversation_sequence",
         ),
+        UniqueConstraint(
+            "id",
+            "conversation_id",
+            "workspace_id",
+            name="uq_conversation_messages_feedback_identity",
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)

@@ -1,0 +1,29 @@
+{
+  "editable": false,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Accepted, requeued, and failed ingestion outcomes without document content.",
+      "gridPos": {"h": 9, "w": 12, "x": 0, "y": 0},
+      "id": 1,
+      "targets": [{"expr": "sum(rate(mm_rag_operations_total{operation=\"ingestion.process\"}[5m])) by (outcome)", "refId": "A"}],
+      "title": "Ingestion outcomes",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Worker end-to-end p95 processing duration.",
+      "gridPos": {"h": 9, "w": 12, "x": 12, "y": 0},
+      "id": 2,
+      "targets": [{"expr": "histogram_quantile(0.95, sum(rate(mm_rag_operation_duration_milliseconds_bucket{operation=\"ingestion.process\"}[5m])) by (le))", "refId": "A"}],
+      "title": "Ingestion p95 duration",
+      "type": "timeseries"
+    }
+  ],
+  "schemaVersion": 41,
+  "tags": ["mm-rag", "phase7", "ingestion"],
+  "time": {"from": "now-6h", "to": "now"},
+  "title": "MM-RAG — Durable ingestion",
+  "uid": "mm-rag-ingestion",
+  "version": 1
+}

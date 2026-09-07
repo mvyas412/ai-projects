@@ -1,0 +1,54 @@
+{
+  "candidate_fingerprint_required": true,
+  "dataset_revision": "phase7-unified-evaluation-v1",
+  "deterministic_release_authority": true,
+  "gate": {
+    "failures": [],
+    "passed": true
+  },
+  "historical_suites": {
+    "phase5": {
+      "dataset_revision": "phase5-retrieval-v4",
+      "document_count": 120,
+      "historical_result": "closed_without_candidate_promotion",
+      "query_count": 80
+    },
+    "phase6": {
+      "candidate_revision": "visual-table-v1",
+      "dataset_revision": "phase6-visual-table-v1",
+      "gate_passed": true
+    }
+  },
+  "holdout": {
+    "authorization_escape_count": 0,
+    "case_count": 2,
+    "estimated_cost_usd": 0.0,
+    "evidence_identity_accuracy": 1.0,
+    "failures": [],
+    "invalid_citation_count": 0,
+    "outcome_accuracy": 1.0,
+    "p95_latency_ms": 2.0,
+    "passed": true,
+    "passed_count": 2,
+    "provider_calls": 0,
+    "schema_revision": "phase7-release-evaluation-v1",
+    "split": "holdout"
+  },
+  "paid_judge_authority": false,
+  "schema_revision": "phase7-release-report-v1",
+  "validation": {
+    "authorization_escape_count": 0,
+    "case_count": 6,
+    "estimated_cost_usd": 0.0,
+    "evidence_identity_accuracy": 1.0,
+    "failures": [],
+    "invalid_citation_count": 0,
+    "outcome_accuracy": 1.0,
+    "p95_latency_ms": 4.0,
+    "passed": true,
+    "passed_count": 6,
+    "provider_calls": 0,
+    "schema_revision": "phase7-release-evaluation-v1",
+    "split": "validation"
+  }
+}

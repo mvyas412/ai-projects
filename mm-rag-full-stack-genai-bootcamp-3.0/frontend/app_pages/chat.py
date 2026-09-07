@@ -20,9 +20,7 @@ except BackendAPIError as exc:
     st.stop()
 
 ready_documents = [
-    document
-    for document in documents
-    if document["latest_version"]["status"] == "ready"
+    document for document in documents if document["latest_version"]["status"] == "ready"
 ]
 
 
@@ -62,9 +60,7 @@ def show_evidence(
 
     region = evidence.get("region")
     if region:
-        st.caption(
-            "The outlined area below is the exact stored source region for this citation."
-        )
+        st.caption("The outlined area below is the exact stored source region for this citation.")
         _show_region_evidence(evidence, message_id, citation_index)
     else:
         st.info(
@@ -75,9 +71,7 @@ def show_evidence(
 
     if evidence.get("table"):
         st.markdown("### Structured table")
-        st.caption(
-            "Cells marked CITED are the exact operands or values supporting this answer."
-        )
+        st.caption("Cells marked CITED are the exact operands or values supporting this answer.")
         st.markdown(_table_html(evidence["table"]), unsafe_allow_html=True)
 
     calculation = evidence.get("calculation")
@@ -92,8 +86,7 @@ def show_evidence(
         for operand in calculation["operands"]:
             st.write(f"- {operand['label']}: `{operand['value']}`")
         st.caption(
-            f"Rule: {calculation['operator_revision']} · "
-            f"Rounding: {calculation['rounding_rule']}"
+            f"Rule: {calculation['operator_revision']} · Rounding: {calculation['rounding_rule']}"
         )
 
     try:
@@ -113,9 +106,7 @@ def show_evidence(
         st.error(str(exc), icon=":material/error:")
 
 
-def _show_region_evidence(
-    evidence: dict[str, Any], message_id: str, citation_index: int
-) -> None:
+def _show_region_evidence(evidence: dict[str, Any], message_id: str, citation_index: int) -> None:
     artifacts = {item["kind"]: item for item in evidence["artifacts"]}
     page_render = artifacts.get("page_render")
     crop = artifacts.get("region_crop")
@@ -173,9 +164,7 @@ def _show_region_evidence(
             st.write(content.decode("utf-8", errors="replace"))
     with provenance_tab:
         region = evidence["region"]
-        st.write(
-            f"Extractor: `{region['extractor_name']} {region['extractor_revision']}`"
-        )
+        st.write(f"Extractor: `{region['extractor_name']} {region['extractor_revision']}`")
         st.write(f"Locator contract: `{region['locator_schema_revision']}`")
         st.write(
             "Location: "
@@ -190,9 +179,7 @@ def _show_region_evidence(
             )
 
 
-def _artifact_bytes(
-    artifact: dict[str, Any], message_id: str, citation_index: int
-) -> bytes | None:
+def _artifact_bytes(artifact: dict[str, Any], message_id: str, citation_index: int) -> bytes | None:
     try:
         content, _ = client.evidence_artifact(
             workspace_id,
@@ -371,6 +358,68 @@ for message in conversation["messages"]:
                         key=f"evidence_{message['id']}_{display_index}",
                     ):
                         show_evidence(citation, message["id"], citation_index)
+        if message["role"] == "assistant":
+            feedback_key = f"feedback_{message['id']}"
+            with st.expander("Rate this answer", icon=":material/rate_review:"):
+                sentiment = st.segmented_control(
+                    "Was this useful?",
+                    ["Helpful", "Needs work"],
+                    key=f"{feedback_key}_sentiment",
+                )
+                reasons = {
+                    "Helpful": ["helpful"],
+                    "Needs work": [
+                        "incorrect",
+                        "incomplete",
+                        "unsupported",
+                        "citation_issue",
+                        "unsafe",
+                        "other",
+                    ],
+                }
+                reason = st.selectbox(
+                    "Reason",
+                    reasons.get(sentiment or "Helpful", ["helpful"]),
+                    format_func=lambda value: value.replace("_", " ").title(),
+                    key=f"{feedback_key}_reason",
+                )
+                add_comment = st.checkbox(
+                    "Add an optional comment",
+                    key=f"{feedback_key}_comment_consent",
+                )
+                comment = st.text_area(
+                    "Comment",
+                    max_chars=1000,
+                    disabled=not add_comment,
+                    key=f"{feedback_key}_comment",
+                )
+                snapshot_consent = st.checkbox(
+                    "Include answer metadata and citation identities for diagnosis",
+                    help=(
+                        "This includes model and evidence identifiers, not document text, "
+                        "your question, or the answer text."
+                    ),
+                    key=f"{feedback_key}_snapshot",
+                )
+                if st.button(
+                    "Submit feedback",
+                    key=f"{feedback_key}_submit",
+                    disabled=sentiment is None,
+                ):
+                    try:
+                        client.submit_feedback(
+                            workspace_id,
+                            selected_id,
+                            message["id"],
+                            rating=1 if sentiment == "Helpful" else -1,
+                            reason=reason,
+                            comment=comment if add_comment else None,
+                            comment_consent=add_comment,
+                            snapshot_consent=snapshot_consent,
+                        )
+                        st.success("Feedback saved for this workspace.")
+                    except BackendAPIError as exc:
+                        st.error(str(exc), icon=":material/error:")
 
 prompt: str | None = None
 if not conversation["messages"]:

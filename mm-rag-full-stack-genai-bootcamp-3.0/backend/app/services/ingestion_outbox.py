@@ -6,6 +6,7 @@ from uuid import UUID, uuid4
 
 from sqlalchemy.orm import Session
 
+from backend.app.core.telemetry import current_traceparent
 from backend.app.models.ingestion import IngestionJob, IngestionJobState
 from backend.app.models.outbox import IngestionOutboxEvent, IngestionOutboxEventType
 from backend.app.repositories.ingestion_jobs import IngestionJobRepository
@@ -54,6 +55,16 @@ class IngestionOutboxStateMachine:
         available_at = self._utc(available_at)
         occurred_at = self._utc(occurred_at)
         event_id = uuid4()
+        payload = {
+            "event_id": str(event_id),
+            "event_type": IngestionOutboxEventType.JOB_AVAILABLE.value,
+            "schema_version": 1,
+            "job_id": str(job.id),
+            "occurred_at": self._timestamp(occurred_at),
+        }
+        traceparent = current_traceparent()
+        if traceparent is not None:
+            payload["traceparent"] = traceparent
         event = IngestionOutboxEvent(
             id=event_id,
             workspace_id=job.workspace_id,
@@ -61,13 +72,7 @@ class IngestionOutboxStateMachine:
             dispatch_sequence=dispatch_sequence,
             event_type=IngestionOutboxEventType.JOB_AVAILABLE.value,
             schema_version=1,
-            payload={
-                "event_id": str(event_id),
-                "event_type": IngestionOutboxEventType.JOB_AVAILABLE.value,
-                "schema_version": 1,
-                "job_id": str(job.id),
-                "occurred_at": self._timestamp(occurred_at),
-            },
+            payload=payload,
             available_at=available_at,
         )
         self._events.add(event)

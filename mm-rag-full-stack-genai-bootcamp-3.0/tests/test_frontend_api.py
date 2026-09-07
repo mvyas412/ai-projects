@@ -23,7 +23,11 @@ def test_api_client_sends_bearer_token_and_expected_path(monkeypatch) -> None:
     assert _client().current_user() == {"workspaces": []}
     assert captured["method"] == "GET"
     assert captured["url"] == "http://backend.test/api/v1/users/me"
-    assert captured["headers"] == {"Authorization": "Bearer test-token"}
+    headers = captured["headers"]
+    assert isinstance(headers, dict)
+    assert headers["Authorization"] == "Bearer test-token"
+    assert len(headers["X-Request-ID"]) == 36
+    assert len(headers["traceparent"]) == 55
 
 
 @pytest.mark.parametrize(

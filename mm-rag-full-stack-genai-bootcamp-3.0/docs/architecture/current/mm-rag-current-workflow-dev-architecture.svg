@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
   <title id="title">MM-RAG Platform — Current Workflow and DEV Architecture</title>
-  <desc id="desc">Accepted Phase 6 development workflow showing the secure product boundary, durable asynchronous ingestion, immutable visual and table provenance, local structural extraction, scoped visual retrieval, exact table calculation, and authorized evidence inspection released as mm-rag-v6.0.0.</desc>
+  <desc id="desc">Current MM-RAG development workflow showing the accepted Phase 6 product path and implemented Phase 7 privacy-bounded telemetry, evaluation, feedback, dashboards, alerts, and acceptance baseline.</desc>
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#193b68"/>
@@ -27,18 +27,18 @@
 
   <rect width="1600" height="900" fill="#f8fafc"/>
   <text x="800" y="40" text-anchor="middle" class="title">MM-RAG Platform — Current Workflow &amp; DEV Architecture</text>
-  <text x="800" y="68" text-anchor="middle" class="subtitle">Phase 6 · Visual &amp; table intelligence · Accepted and released September 7, 2026</text>
+  <text x="800" y="68" text-anchor="middle" class="subtitle">Phase 7 · Evaluation &amp; observability · Implementation complete · Acceptance baseline pending</text>
 
   <text x="22" y="101" class="small" font-weight="700">Status snapshot</text>
   <rect x="116" y="84" width="116" height="26" rx="13" fill="#e8f7ef" stroke="#47a477"/>
   <text x="174" y="101" text-anchor="middle" class="tiny" fill="#26805a">IMPLEMENTED</text>
   <rect x="241" y="84" width="139" height="26" rx="13" fill="#e8f7ef" stroke="#47a477"/>
-  <text x="310" y="101" text-anchor="middle" class="tiny" fill="#26805a">ALL GATES PASS</text>
+  <text x="310" y="101" text-anchor="middle" class="tiny" fill="#26805a">FREE GATES PASS</text>
   <rect x="389" y="84" width="128" height="26" rx="13" fill="#fff7df" stroke="#c58a19"/>
-  <text x="453" y="101" text-anchor="middle" class="tiny" fill="#8a5a00">PHASE 6 RELEASED</text>
+  <text x="453" y="101" text-anchor="middle" class="tiny" fill="#8a5a00">7-DAY BASELINE</text>
   <rect x="1242" y="82" width="146" height="28" rx="14" fill="#e8f7ef" stroke="#47a477"/>
-  <text x="1315" y="100" text-anchor="middle" class="tiny" fill="#26805a">mm-rag-v6.0.0</text>
-  <text x="1398" y="100" class="small">visual-table-v1 · disabled rollback</text>
+  <text x="1315" y="100" text-anchor="middle" class="tiny" fill="#26805a">PHASE 6 SAFE</text>
+  <text x="1398" y="100" class="small">visual-table-v1 remains the product default</text>
 
   <!-- Lane 1 -->
   <rect x="20" y="125" width="300" height="630" rx="13" fill="#edf6ff" stroke="#347bbd" stroke-width="1.5"/>
@@ -73,9 +73,9 @@
   <text x="51" y="609" class="dot" fill="#347bbd">4</text><text x="69" y="609" class="body">Ask, inspect exact evidence and calculations</text>
 
   <rect x="36" y="651" width="268" height="77" rx="10" fill="#e8f7ef" stroke="#47a477"/>
-  <text x="53" y="677" class="card-title">Phase 6 user experience</text>
-  <text x="53" y="699" class="body">Visual/table questions resolve exact source regions;</text>
-  <text x="53" y="717" class="body">unsafe or ambiguous calculations abstain.</text>
+  <text x="53" y="677" class="card-title">Phase 7 feedback experience</text>
+  <text x="53" y="699" class="body">Bounded rating and reason by default;</text>
+  <text x="53" y="717" class="body">optional detail requires explicit consent.</text>
 
   <!-- Lane 2 -->
   <rect x="332" y="125" width="300" height="630" rx="13" fill="#f2f1ff" stroke="#5268b5" stroke-width="1.5"/>
@@ -126,7 +126,7 @@
   <rect x="842" y="200" width="73" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="878" y="215" text-anchor="middle" class="tiny" fill="#26805a">HEALTHY</text>
   <line x1="672" y1="229" x2="916" y2="229" class="divider"/>
   <text x="675" y="250" class="dot" fill="#25855e">•</text><text x="689" y="250" class="body">Users, workspaces, documents, chat, audit</text>
-  <text x="675" y="272" class="dot" fill="#25855e">•</text><text x="689" y="272" class="body">RLS, audit, lifecycle at migration 0017</text>
+  <text x="675" y="272" class="dot" fill="#25855e">•</text><text x="689" y="272" class="body">RLS, audit, lifecycle, feedback at migration 0018</text>
   <text x="675" y="294" class="dot" fill="#25855e">•</text><text x="689" y="294" class="body">Immutable page, region, table, cell traces</text>
 
   <rect x="660" y="336" width="268" height="143" class="card" stroke="#25855e"/>
@@ -219,11 +219,11 @@
   <text x="1299" y="575" class="dot" fill="#198789">•</text><text x="1313" y="575" class="body">Closed Decimal math · safe abstention</text>
 
   <rect x="1284" y="620" width="280" height="108" class="card" stroke="#198789"/>
-  <text x="1301" y="646" class="card-title">Phase 6 acceptance &amp; release</text>
-  <rect x="1478" y="630" width="73" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="1514" y="645" text-anchor="middle" class="tiny" fill="#26805a">RELEASED</text>
+  <text x="1301" y="646" class="card-title">Phase 7 operational layer</text>
+  <rect x="1478" y="630" width="73" height="22" rx="11" fill="#e8f7ef" stroke="#47a477"/><text x="1514" y="645" text-anchor="middle" class="tiny" fill="#26805a">BUILT</text>
   <line x1="1296" y1="659" x2="1552" y2="659" class="divider"/>
-  <text x="1299" y="681" class="dot" fill="#198789">•</text><text x="1313" y="681" class="body">Visual/table/calc/browser proofs passed</text>
-  <text x="1299" y="703" class="dot" fill="#198789">•</text><text x="1313" y="703" class="body">mm-rag-v6.0.0 → closure d97e8e8</text>
+  <text x="1299" y="681" class="dot" fill="#198789">•</text><text x="1313" y="681" class="body">OTLP → Collector → free local LGTM</text>
+  <text x="1299" y="703" class="dot" fill="#198789">•</text><text x="1313" y="703" class="body">Eval · feedback · dashboards · runbooks</text>
 
   <!-- Primary and planned flow arrows -->
   <path d="M304 260 H348" class="flow"/>
@@ -253,7 +253,7 @@
   <rect x="932" y="814" width="286" height="50" rx="9" fill="#e8f7ef" stroke="#47a477"/>
   <text x="946" y="836" class="card-title" fill="#26805a">Phase 6 · accepted &amp; released</text>
   <text x="946" y="854" class="small">visual-table-v1 · mm-rag-v6.0.0</text>
-  <rect x="1230" y="814" width="332" height="50" rx="9" fill="#f2f5f8" stroke="#64748b"/>
-  <text x="1244" y="836" class="card-title" fill="#64748b">Phase 7 · next planned</text>
-  <text x="1244" y="854" class="small">Evaluation, tracing, observability, SLOs</text>
+  <rect x="1230" y="814" width="332" height="50" rx="9" fill="#fff7df" stroke="#c58a19"/>
+  <text x="1244" y="836" class="card-title" fill="#8a5a00">Phase 7 · implemented</text>
+  <text x="1244" y="854" class="small">Acceptance waits for 7-day SLO baseline</text>
 </svg>

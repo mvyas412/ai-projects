@@ -6,10 +6,15 @@ import threading
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
+from time import perf_counter
 from uuid import UUID
+
+from opentelemetry.propagate import extract
+from opentelemetry.trace import SpanKind
 
 from backend.app.broker.messages import IngestionEventMessage
 from backend.app.core.config import Settings
+from backend.app.core.telemetry import observed_span, record_operation
 from backend.app.db.rls import DatabasePurpose, set_rls_context
 from backend.app.db.session import SessionFactory
 from backend.app.ingestion.pipeline import pipeline_manifest
@@ -92,6 +97,26 @@ class IngestionWorkerService:
         self._shutdown = shutdown_requested or threading.Event()
 
     def process(self, message: IngestionEventMessage) -> DeliveryDisposition:
+        carrier = {"traceparent": message.traceparent} if message.traceparent else {}
+        started = perf_counter()
+        disposition = DeliveryDisposition.REQUEUE
+        try:
+            with observed_span(
+                "ingestion.process",
+                kind=SpanKind.CONSUMER,
+                context=extract(carrier),
+                attributes={"job.id": str(message.job_id), "event.id": str(message.event_id)},
+            ):
+                disposition = self._process(message)
+                return disposition
+        finally:
+            record_operation(
+                "ingestion.process",
+                outcome=disposition.value,
+                duration_ms=(perf_counter() - started) * 1000,
+            )
+
+    def _process(self, message: IngestionEventMessage) -> DeliveryDisposition:
         try:
             work = self._claim(message.job_id)
         except (IngestionJobNotFoundError, IngestionInvalidTransitionError):
@@ -113,9 +138,7 @@ class IngestionWorkerService:
             self._checkpoint(work, IngestionProgressStage.LOADING_ORIGINAL)
             if self._shutdown.is_set():
                 raise WorkerShutdown
-            stored = resolve_original_object(
-                self._original_storage, work.document, work.version
-            )
+            stored = resolve_original_object(self._original_storage, work.document, work.version)
             content = self._original_storage.read(stored.key)
             if hashlib.sha256(content).hexdigest() != work.version.content_sha256:
                 raise ObjectIntegrityError("Original identity mismatch")
@@ -198,9 +221,7 @@ class IngestionWorkerService:
     def _claim(self, job_id: UUID) -> ClaimedWork:
         now = datetime.now(UTC)
         with self._session_factory.begin() as session:
-            workspace_id = set_rls_context(
-                session, purpose=DatabasePurpose.WORKER, job_id=job_id
-            )
+            workspace_id = set_rls_context(session, purpose=DatabasePurpose.WORKER, job_id=job_id)
             if workspace_id is None:
                 raise IngestionJobNotFoundError
             state = IngestionJobStateMachine(session)
@@ -250,9 +271,7 @@ class IngestionWorkerService:
                         attempt_id=work.attempt.id,
                         fencing_token=work.attempt.fencing_token,
                         now=datetime.now(UTC),
-                        lease_duration=timedelta(
-                            seconds=self._settings.worker_lease_seconds
-                        ),
+                        lease_duration=timedelta(seconds=self._settings.worker_lease_seconds),
                     )
                 if cancel:
                     cancellation.set()
@@ -417,9 +436,7 @@ class IngestionWorkerService:
         except Exception:
             return DeliveryDisposition.REQUEUE
 
-    def _record_failure(
-        self, work: ClaimedWork, exc: Exception
-    ) -> DeliveryDisposition:
+    def _record_failure(self, work: ClaimedWork, exc: Exception) -> DeliveryDisposition:
         retryable, code, summary = _classify_failure(exc)
         now = datetime.now(UTC)
         try:

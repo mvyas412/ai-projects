@@ -1,4 +1,6 @@
+import secrets
 from typing import Any
+from uuid import uuid4
 
 import httpx
 
@@ -220,6 +222,48 @@ class BackendAPIClient:
             timeout=180.0,
         )
 
+    def submit_feedback(
+        self,
+        workspace_id: str,
+        conversation_id: str,
+        message_id: str,
+        *,
+        rating: int,
+        reason: str,
+        comment: str | None,
+        comment_consent: bool,
+        snapshot_consent: bool,
+    ) -> dict[str, Any]:
+        return self._json(
+            "POST",
+            f"/api/v1/workspaces/{workspace_id}/feedback/conversations/"
+            f"{conversation_id}/messages/{message_id}",
+            json={
+                "rating": rating,
+                "reason": reason,
+                "comment": comment,
+                "comment_consent": comment_consent,
+                "snapshot_consent": snapshot_consent,
+            },
+        )
+
+    def feedback(self, workspace_id: str) -> list[dict[str, Any]]:
+        return self._json("GET", f"/api/v1/workspaces/{workspace_id}/feedback")
+
+    def review_feedback(
+        self,
+        workspace_id: str,
+        feedback_id: str,
+        *,
+        status: str,
+        promoted_case_id: str | None = None,
+    ) -> dict[str, Any]:
+        return self._json(
+            "POST",
+            f"/api/v1/workspaces/{workspace_id}/feedback/{feedback_id}/review",
+            json={"status": status, "promoted_case_id": promoted_case_id},
+        )
+
     def evidence(
         self,
         workspace_id: str,
@@ -267,6 +311,10 @@ class BackendAPIClient:
     ) -> httpx.Response:
         try:
             request_headers = dict(self._headers) if authenticated else {}
+            request_headers.setdefault("X-Request-ID", str(uuid4()))
+            request_headers.setdefault(
+                "traceparent", f"00-{secrets.token_hex(16)}-{secrets.token_hex(8)}-01"
+            )
             request_headers.update(kwargs.pop("headers", {}) or {})
             response = httpx.request(
                 method,

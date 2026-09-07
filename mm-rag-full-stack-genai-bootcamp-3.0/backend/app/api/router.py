@@ -6,6 +6,7 @@ from backend.app.api.routes.audit import security_router
 from backend.app.api.routes.conversations import router as conversations_router
 from backend.app.api.routes.documents import router as documents_router
 from backend.app.api.routes.evidence import router as evidence_router
+from backend.app.api.routes.feedback import router as feedback_router
 from backend.app.api.routes.health import router as health_router
 from backend.app.api.routes.ingestion import router as ingestion_router
 from backend.app.api.routes.lifecycle import router as lifecycle_router
@@ -21,6 +22,7 @@ api_router.include_router(documents_router)
 api_router.include_router(ingestion_router)
 api_router.include_router(conversations_router)
 api_router.include_router(evidence_router)
+api_router.include_router(feedback_router)
 api_router.include_router(audit_router)
 api_router.include_router(security_router)
 api_router.include_router(lifecycle_router)

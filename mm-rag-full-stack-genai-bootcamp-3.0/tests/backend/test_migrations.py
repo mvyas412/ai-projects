@@ -10,7 +10,7 @@ def test_migration_history_has_phase6_structured_table_head() -> None:
     config = Config(PROJECT_ROOT / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260907_0017"]
+    assert scripts.get_heads() == ["20260907_0018"]
     baseline = scripts.get_revision("20260829_0001")
     assert baseline is not None
     assert baseline.down_revision is None
@@ -61,3 +61,6 @@ def test_migration_history_has_phase6_structured_table_head() -> None:
     dispatcher_rls = scripts.get_revision("20260907_0017")
     assert dispatcher_rls is not None
     assert dispatcher_rls.down_revision == "20260907_0016"
+    feedback = scripts.get_revision("20260907_0018")
+    assert feedback is not None
+    assert feedback.down_revision == "20260907_0017"
