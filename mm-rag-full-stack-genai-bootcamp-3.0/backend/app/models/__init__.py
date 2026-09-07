@@ -40,6 +40,15 @@ from backend.app.models.source_permission import (
     SourcePermissionPrincipal,
     SourcePermissionSnapshot,
 )
+from backend.app.models.table import (
+    CalculationOperator,
+    CalculationTrace,
+    TableCell,
+    TableColumn,
+    TableLogicalType,
+    TableRegion,
+    TableValidationState,
+)
 from backend.app.models.user import User
 from backend.app.models.visual import (
     ArtifactKind,
@@ -63,6 +72,8 @@ __all__ = [
     "ConversationMessage",
     "ConversationTargetType",
     "ComplianceExport",
+    "CalculationOperator",
+    "CalculationTrace",
     "ContentArtifact",
     "ContentRegion",
     "ContentRegionKind",
@@ -89,6 +100,11 @@ __all__ = [
     "RetentionHold",
     "SourcePermissionPrincipal",
     "SourcePermissionSnapshot",
+    "TableCell",
+    "TableColumn",
+    "TableLogicalType",
+    "TableRegion",
+    "TableValidationState",
     "User",
     "Workspace",
     "WorkspaceMembership",

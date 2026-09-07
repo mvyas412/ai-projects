@@ -77,7 +77,12 @@ class RAGCitation:
     evidence_kind: Literal[
         "text", "figure", "chart", "diagram", "image", "table", "calculation"
     ] = "text"
+    generation_id: UUID | None = None
     region_id: UUID | None = None
+    table_id: UUID | None = None
+    cell_ids: tuple[UUID, ...] = ()
+    calculation_trace_id: UUID | None = None
+    evidence_schema_revision: Literal["evidence-v1"] = "evidence-v1"
 
 
 @dataclass(frozen=True, slots=True)
@@ -229,7 +234,7 @@ class QdrantOpenAIRAGEngine:
                     rerank_ms = (perf_counter() - rerank_started) * 1000
         visual_route = (
             select_visual_route(request.query)
-            if self._settings.phase6_visual_enabled
+            if self._settings.phase6_enabled
             else TEXT_ONLY_ROUTE
         )
         visual: list[RetrievalCandidate] = []
@@ -372,7 +377,7 @@ def build_rag_engine(settings: Settings, qdrant: QdrantClient) -> RAGEngine:
             )
         except Exception:
             reranker = None
-    if settings.phase6_visual_enabled:
+    if settings.phase6_enabled:
         try:
             visual_encoder = FastEmbedCLIPEncoder(
                 settings.phase5_model_cache_dir,
@@ -430,7 +435,7 @@ def _retrieval_filter(request: RAGRequest) -> models.Filter:
 
 
 def _authorized_citation(point: Any, request: RAGRequest) -> RAGCitation:
-    payload, document_id, version_id, _ = _authorized_payload(point, request)
+    payload, document_id, version_id, generation_id = _authorized_payload(point, request)
     return RAGCitation(
         document_id=document_id,
         document_version_id=version_id,
@@ -439,6 +444,7 @@ def _authorized_citation(point: Any, request: RAGRequest) -> RAGCitation:
         content_type=str(payload.get("content_type", "text")),
         excerpt=str(payload.get("content", ""))[:1000],
         score=float(point.score) if point.score is not None else None,
+        generation_id=generation_id,
     )
 
 
@@ -501,6 +507,7 @@ def _candidate_citation(candidate: RetrievalCandidate) -> RAGCitation:
         page_number=candidate.page_number,
         score=candidate.score,
         evidence_kind=_evidence_kind(candidate.evidence_kind),
+        generation_id=candidate.generation_id,
         region_id=candidate.region_id,
     )
 

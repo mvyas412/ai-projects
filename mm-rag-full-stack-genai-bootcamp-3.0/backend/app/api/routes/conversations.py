@@ -4,7 +4,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from backend.app.api.dependencies import get_current_user, get_rag_engine
+from backend.app.api.dependencies import get_app_settings, get_current_user, get_rag_engine
+from backend.app.core.config import Settings
 from backend.app.db.session import get_db_session
 from backend.app.models.access import ResourceVisibility
 from backend.app.models.conversation import (
@@ -143,9 +144,14 @@ def create_message(
     user: Annotated[User, Depends(get_current_user)],
     session: Annotated[Session, Depends(get_db_session)],
     rag_engine: Annotated[RAGEngine, Depends(get_rag_engine)],
+    settings: Annotated[Settings, Depends(get_app_settings)],
 ) -> MessageExchangeResponse:
     try:
-        user_message, assistant_message = ConversationService(session, rag_engine).ask(
+        user_message, assistant_message = ConversationService(
+            session,
+            rag_engine,
+            table_calculation_enabled=settings.phase6_enabled,
+        ).ask(
             user=user,
             workspace_id=workspace_id,
             conversation_id=conversation_id,

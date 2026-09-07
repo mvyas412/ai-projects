@@ -7,6 +7,7 @@ from uuid import UUID
 
 from backend.app.db.rls import DatabasePurpose, set_rls_context
 from backend.app.db.session import SessionFactory
+from backend.app.models.table import TableCell, TableColumn, TableRegion, TableValidationState
 from backend.app.models.visual import (
     ArtifactKind,
     ArtifactValidationState,
@@ -15,6 +16,16 @@ from backend.app.models.visual import (
 )
 from backend.app.storage.base import ObjectIntegrityError, ObjectStorage
 from backend.app.storage.keys import attempt_artifact_key, generation_artifact_key
+from backend.app.tables.normalization import (
+    TABLE_SCHEMA_REVISION,
+    NormalizedTable,
+    TableNormalizationError,
+    normalize_table,
+    normalized_table_csv,
+    normalized_table_json,
+    table_cell_id,
+    table_column_id,
+)
 from backend.app.visual.extraction import DocumentStructureExtractor, ExtractedRegion
 from backend.app.visual.indexing import (
     VisualIndexingRequest,
@@ -54,6 +65,9 @@ class VisualProcessingResult:
     vector_count: int = 0
     vector_profile: str | None = None
     vector_profile_fingerprint: str | None = None
+    table_count: int = 0
+    exact_table_count: int = 0
+    table_cell_count: int = 0
 
 
 class VisualIngestionProcessor(Protocol):
@@ -72,6 +86,7 @@ class _ArtifactDraft:
     media_type: str
     producer_name: str
     producer_revision: str
+    schema_revision: str = ARTIFACT_SCHEMA_REVISION
     parent_artifact_id: UUID | None = None
     prompt_revision: str | None = None
     pixel_width: int | None = None
@@ -89,17 +104,24 @@ class LocalVisualIngestionProcessor:
         *,
         extractor_config: dict[str, object],
         visual_indexer: VisualRegionIndexer | None = None,
+        table_exact_max_rows: int = 1000,
+        table_max_columns: int = 100,
     ) -> None:
         self._session_factory = session_factory
         self._storage = artifact_storage
         self._extractor = extractor
         self._extractor_config_sha256 = extractor_config_sha256(extractor_config)
         self._visual_indexer = visual_indexer
+        self._table_exact_max_rows = table_exact_max_rows
+        self._table_max_columns = table_max_columns
 
     def process(self, request: VisualProcessingRequest) -> VisualProcessingResult:
         extracted = self._extractor.extract(request.content, request.media_type)
         region_rows: list[ContentRegion] = []
         artifact_rows: list[ContentArtifact] = []
+        table_rows: list[TableRegion] = []
+        table_column_rows: list[TableColumn] = []
+        table_cell_rows: list[TableCell] = []
         index_items: list[VisualRegionIndexItem] = []
         manifest_regions: list[dict[str, object]] = []
         artifact_bytes = 0
@@ -147,7 +169,28 @@ class LocalVisualIngestionProcessor:
                     confidence=region.confidence,
                 )
             )
-            drafts = self._artifact_drafts(region, extracted.extractor_name, extracted.extractor_revision)
+            try:
+                normalized_table = (
+                    normalize_table(
+                        region.table,
+                        generation_id=request.generation_id,
+                        region_id=region_id,
+                        max_exact_rows=self._table_exact_max_rows,
+                        max_columns=self._table_max_columns,
+                        confidence=region.confidence,
+                    )
+                    if region.table is not None
+                    else None
+                )
+            except TableNormalizationError:
+                # Keep visual/text evidence when exact table structure is unusable.
+                normalized_table = None
+            drafts = self._artifact_drafts(
+                region,
+                extracted.extractor_name,
+                extracted.extractor_revision,
+                normalized_table,
+            )
             region_artifacts: list[dict[str, object]] = []
             parent_ids: dict[ArtifactKind, UUID] = {}
             for draft in drafts:
@@ -163,6 +206,7 @@ class LocalVisualIngestionProcessor:
                         media_type=draft.media_type,
                         producer_name=draft.producer_name,
                         producer_revision=draft.producer_revision,
+                        schema_revision=draft.schema_revision,
                         parent_artifact_id=parent_id,
                         prompt_revision=draft.prompt_revision,
                         pixel_width=draft.pixel_width,
@@ -179,11 +223,27 @@ class LocalVisualIngestionProcessor:
                         "kind": row.kind,
                     }
                 )
+            if normalized_table is not None:
+                table_row, columns, cells = self._table_rows(
+                    request=request,
+                    region=region,
+                    normalized=normalized_table,
+                    extractor_name=extracted.extractor_name,
+                    extractor_revision=extracted.extractor_revision,
+                    source_crop_artifact_id=parent_ids[ArtifactKind.REGION_CROP],
+                    normalized_artifact_id=parent_ids[ArtifactKind.NORMALIZED_JSON],
+                )
+                table_rows.append(table_row)
+                table_column_rows.extend(columns)
+                table_cell_rows.extend(cells)
             manifest_regions.append(
                 {
                     "artifacts": sorted(region_artifacts, key=lambda item: str(item["kind"])),
                     "locator_sha256": locator.sha256,
                     "region_id": str(region_id),
+                    "table_id": (
+                        str(normalized_table.table_id) if normalized_table is not None else None
+                    ),
                 }
             )
             index_items.append(
@@ -206,6 +266,11 @@ class LocalVisualIngestionProcessor:
             session.add_all(region_rows)
             session.flush()
             session.add_all(artifact_rows)
+            session.flush()
+            session.add_all(table_rows)
+            session.flush()
+            session.add_all(table_column_rows)
+            session.add_all(table_cell_rows)
             session.flush()
         indexing_result = (
             self._visual_indexer.index(
@@ -234,11 +299,20 @@ class LocalVisualIngestionProcessor:
             vector_profile_fingerprint=(
                 indexing_result.profile_fingerprint if indexing_result else None
             ),
+            table_count=len(table_rows),
+            exact_table_count=sum(
+                row.validation_state == TableValidationState.VALIDATED.value
+                for row in table_rows
+            ),
+            table_cell_count=len(table_cell_rows),
         )
 
     @staticmethod
     def _artifact_drafts(
-        region: ExtractedRegion, producer_name: str, producer_revision: str
+        region: ExtractedRegion,
+        producer_name: str,
+        producer_revision: str,
+        normalized_table: NormalizedTable | None,
     ) -> tuple[_ArtifactDraft, ...]:
         from io import BytesIO
 
@@ -298,7 +372,22 @@ class LocalVisualIngestionProcessor:
         )
         if region.table is not None:
             payload = json.dumps(
-                {"columns": region.table.columns, "rows": region.table.rows},
+                {
+                    "columns": region.table.columns,
+                    "rows": region.table.rows,
+                    "cells": [
+                        {
+                            "row_index": cell.row_index,
+                            "column_index": cell.column_index,
+                            "row_span": cell.row_span,
+                            "column_span": cell.column_span,
+                            "text": cell.text,
+                            "column_header": cell.column_header,
+                            "row_header": cell.row_header,
+                        }
+                        for cell in region.table.cells
+                    ],
+                },
                 sort_keys=True,
                 separators=(",", ":"),
                 ensure_ascii=False,
@@ -312,7 +401,111 @@ class LocalVisualIngestionProcessor:
                     producer_revision,
                 )
             )
+        if normalized_table is not None:
+            drafts.extend(
+                (
+                    _ArtifactDraft(
+                        ArtifactKind.NORMALIZED_JSON,
+                        normalized_table_json(normalized_table),
+                        "application/json",
+                        "mm-rag",
+                        "table-normalizer-v1",
+                        schema_revision=TABLE_SCHEMA_REVISION,
+                    ),
+                    _ArtifactDraft(
+                        ArtifactKind.NORMALIZED_CSV,
+                        normalized_table_csv(normalized_table),
+                        "text/csv; charset=utf-8",
+                        "mm-rag",
+                        "table-normalizer-v1",
+                        schema_revision=TABLE_SCHEMA_REVISION,
+                    ),
+                )
+            )
         return tuple(drafts)
+
+    @staticmethod
+    def _table_rows(
+        *,
+        request: VisualProcessingRequest,
+        region: ExtractedRegion,
+        normalized: NormalizedTable,
+        extractor_name: str,
+        extractor_revision: str,
+        source_crop_artifact_id: UUID,
+        normalized_artifact_id: UUID,
+    ) -> tuple[TableRegion, list[TableColumn], list[TableCell]]:
+        common = {
+            "workspace_id": request.workspace_id,
+            "document_id": request.document_id,
+            "document_version_id": request.document_version_id,
+            "generation_id": request.generation_id,
+            "creation_attempt_id": request.attempt_id,
+            "table_id": normalized.table_id,
+        }
+        table_row = TableRegion(
+            id=normalized.table_id,
+            workspace_id=request.workspace_id,
+            document_id=request.document_id,
+            document_version_id=request.document_version_id,
+            generation_id=request.generation_id,
+            region_id=normalized.region_id,
+            creation_attempt_id=request.attempt_id,
+            source_crop_artifact_id=source_crop_artifact_id,
+            normalized_artifact_id=normalized_artifact_id,
+            page_number=region.page_number,
+            header_row_count=normalized.header_row_count,
+            row_count=normalized.row_count,
+            column_count=normalized.column_count,
+            structure_schema_revision="normalized-table-v1",
+            structure_sha256=normalized.structure_sha256,
+            extractor_name=extractor_name,
+            extractor_revision=extractor_revision,
+            validation_state=normalized.validation_state.value,
+            validation_codes=list(normalized.validation_codes),
+            confidence=region.confidence,
+        )
+        columns = [
+            TableColumn(
+                id=table_column_id(normalized.table_id, column.index),
+                **common,
+                column_index=column.index,
+                raw_header=column.raw_header,
+                normalized_header=column.normalized_header,
+                logical_type=column.logical_type.value,
+                unit=column.unit,
+                currency=column.currency,
+            )
+            for column in normalized.columns
+        ]
+        cells = [
+            TableCell(
+                id=table_cell_id(normalized.table_id, cell.row_index, cell.column_index),
+                **common,
+                row_index=cell.row_index,
+                column_index=cell.column_index,
+                row_span=cell.row_span,
+                column_span=cell.column_span,
+                is_header=cell.is_header,
+                header_associations=[
+                    str(table_cell_id(normalized.table_id, row, column))
+                    for row, column in cell.header_positions
+                ],
+                raw_text=cell.raw_text,
+                normalized_text=cell.normalized_text,
+                logical_type=cell.logical_type.value,
+                normalized_value=cell.normalized_value,
+                unit=cell.unit,
+                currency=cell.currency,
+                bbox_x=cell.bbox.x if cell.bbox else None,
+                bbox_y=cell.bbox.y if cell.bbox else None,
+                bbox_width=cell.bbox.width if cell.bbox else None,
+                bbox_height=cell.bbox.height if cell.bbox else None,
+                confidence=region.confidence,
+            )
+            for cell in normalized.cells
+        ]
+        return table_row, columns, cells
 
     def _persist_artifact(
         self,
@@ -378,7 +571,7 @@ class LocalVisualIngestionProcessor:
             pixel_height=draft.pixel_height,
             producer_name=draft.producer_name,
             producer_revision=draft.producer_revision,
-            schema_revision=ARTIFACT_SCHEMA_REVISION,
+            schema_revision=draft.schema_revision,
             prompt_revision=draft.prompt_revision,
             confidence=None,
             validation_state=ArtifactValidationState.VALIDATED.value,
@@ -403,4 +596,6 @@ def _extension(media_type: str) -> str:
         return "png"
     if media_type == "application/json":
         return "json"
+    if media_type.startswith("text/csv"):
+        return "csv"
     return "txt"

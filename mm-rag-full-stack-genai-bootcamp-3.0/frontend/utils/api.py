@@ -220,6 +220,37 @@ class BackendAPIClient:
             timeout=180.0,
         )
 
+    def evidence(
+        self,
+        workspace_id: str,
+        conversation_id: str,
+        message_id: str,
+        citation_index: int,
+    ) -> dict[str, Any]:
+        return self._json(
+            "GET",
+            f"/api/v1/workspaces/{workspace_id}/conversations/{conversation_id}/"
+            f"messages/{message_id}/evidence/{citation_index}",
+        )
+
+    def evidence_artifact(
+        self,
+        workspace_id: str,
+        conversation_id: str,
+        message_id: str,
+        citation_index: int,
+        artifact_id: str,
+    ) -> tuple[bytes, str]:
+        response = self._request(
+            "GET",
+            f"/api/v1/workspaces/{workspace_id}/conversations/{conversation_id}/"
+            f"messages/{message_id}/evidence/{citation_index}/artifacts/{artifact_id}",
+            timeout=30.0,
+        )
+        return response.content, response.headers.get(
+            "content-type", "application/octet-stream"
+        )
+
     def _json(
         self, method: str, path: str, *, authenticated: bool = True, **kwargs: Any
     ) -> Any:

@@ -329,6 +329,9 @@ class IngestionWorkerService:
                 "vector_count": visual_result.vector_count,
                 "vector_profile": visual_result.vector_profile,
                 "vector_profile_fingerprint": visual_result.vector_profile_fingerprint,
+                "table_count": visual_result.table_count,
+                "exact_table_count": visual_result.exact_table_count,
+                "table_cell_count": visual_result.table_cell_count,
             }
         content = json.dumps(
             manifest,

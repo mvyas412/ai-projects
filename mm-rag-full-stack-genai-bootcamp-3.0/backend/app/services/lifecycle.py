@@ -4,6 +4,7 @@ import hashlib
 import json
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
+from pathlib import PurePosixPath
 from uuid import UUID
 
 from qdrant_client import models
@@ -40,6 +41,7 @@ from backend.app.models.source_permission import (
     SourcePermissionSnapshot,
 )
 from backend.app.models.user import User
+from backend.app.models.visual import ContentArtifact
 from backend.app.repositories.conversations import ConversationRepository
 from backend.app.repositories.documents import DocumentRepository
 from backend.app.retrieval.scope import VectorScope
@@ -842,6 +844,27 @@ class LifecycleService:
                     )
                 )
             )
+            content_artifacts = list(
+                self._session.execute(
+                    select(
+                        ContentArtifact.object_key,
+                        ContentArtifact.creation_attempt_id,
+                        IngestionGeneration.job_id,
+                    )
+                    .join(
+                        IngestionGeneration,
+                        (IngestionGeneration.id == ContentArtifact.generation_id)
+                        & (
+                            IngestionGeneration.workspace_id
+                            == ContentArtifact.workspace_id
+                        ),
+                    )
+                    .where(
+                        ContentArtifact.workspace_id == workspace_id,
+                        ContentArtifact.document_id == document_id,
+                    )
+                )
+            )
             plan = self._session.get(LifecycleDeletionPlan, plan_id)
             if plan is None:
                 raise LifecycleConflictError("Deletion plan is missing")
@@ -879,6 +902,9 @@ class LifecycleService:
                 artifact_name="manifest.json",
             )
             for attempt in attempts
+        )
+        artifact_keys.update(
+            self._artifact_object_keys(workspace_id, content_artifacts)
         )
         artifact_count = 0
         artifacts_present = any(self._artifacts.exists(key) for key in artifact_keys)
@@ -1133,6 +1159,27 @@ class LifecycleService:
                     if attempt is not None
                     else None
                 )
+                content_artifacts = list(
+                    self._session.execute(
+                        select(
+                            ContentArtifact.object_key,
+                            ContentArtifact.creation_attempt_id,
+                            IngestionGeneration.job_id,
+                        )
+                        .join(
+                            IngestionGeneration,
+                            (IngestionGeneration.id == ContentArtifact.generation_id)
+                            & (
+                                IngestionGeneration.workspace_id
+                                == ContentArtifact.workspace_id
+                            ),
+                        )
+                        .where(
+                            ContentArtifact.workspace_id == workspace_id,
+                            ContentArtifact.generation_id == generation_id,
+                        )
+                    )
+                )
                 document_id = generation.document_id
                 version_id = generation.document_version_id
             self._delete_generation_vectors(
@@ -1140,10 +1187,19 @@ class LifecycleService:
             )
             self._delete_objects(
                 self._artifacts,
-                {key for key in (final_key, attempt_key) if key is not None},
+                {
+                    *self._artifact_object_keys(workspace_id, content_artifacts),
+                    *(key for key in (final_key, attempt_key) if key is not None),
+                },
             )
             with self._session.begin():
                 self._require(user, workspace_id, PolicyAction.RETENTION_APPLY)
+                set_rls_context(
+                    self._session,
+                    purpose=DatabasePurpose.OPERATIONS,
+                    workspace_id=workspace_id,
+                    principal_id=user.id,
+                )
                 generation = self._session.scalar(
                     select(IngestionGeneration).where(
                         IngestionGeneration.id == generation_id,
@@ -1372,20 +1428,55 @@ class LifecycleService:
                 )
             )
         )
+        content_artifacts = list(
+            self._session.execute(
+                select(
+                    ContentArtifact.object_key,
+                    ContentArtifact.creation_attempt_id,
+                    IngestionGeneration.job_id,
+                )
+                .join(
+                    IngestionGeneration,
+                    (IngestionGeneration.id == ContentArtifact.generation_id)
+                    & (IngestionGeneration.workspace_id == ContentArtifact.workspace_id),
+                )
+                .where(ContentArtifact.workspace_id == workspace_id)
+            )
+        )
+        artifacts.update(self._artifact_object_keys(workspace_id, content_artifacts))
         return {"originals": originals, "artifacts": artifacts}
+
+    @staticmethod
+    def _artifact_object_keys(
+        workspace_id: UUID,
+        rows,
+    ) -> set[str]:
+        keys: set[str] = set()
+        for final_key, attempt_id, job_id in rows:
+            keys.add(final_key)
+            keys.add(
+                attempt_artifact_key(
+                    workspace_id=workspace_id,
+                    job_id=job_id,
+                    attempt_id=attempt_id,
+                    artifact_name=PurePosixPath(final_key).name,
+                )
+            )
+        return keys
 
     def _delete_vectors(
         self, workspace_id: UUID, document_id: UUID, version_id: UUID
     ) -> int:
-        count = self._vector_count(workspace_id, document_id, version_id)
-        if not self._qdrant.collection_exists(self._settings.qdrant_collection_name):
-            return 0
         scope = VectorScope(workspace_id, document_id, version_id)
-        self._qdrant.delete(
-            collection_name=self._settings.qdrant_collection_name,
-            points_selector=models.FilterSelector(filter=scope.filter()),
-            wait=True,
-        )
+        count = self._scoped_vector_count(scope)
+        for collection in self._vector_collections():
+            if not self._qdrant.collection_exists(collection):
+                continue
+            self._qdrant.delete(
+                collection_name=collection,
+                points_selector=models.FilterSelector(filter=scope.filter()),
+                wait=True,
+            )
         if self._vector_count(workspace_id, document_id, version_id) != 0:
             raise LifecycleDependencyError
         return count
@@ -1397,33 +1488,47 @@ class LifecycleService:
         version_id: UUID,
         generation_id: UUID,
     ) -> None:
-        if not self._qdrant.collection_exists(self._settings.qdrant_collection_name):
-            return
         scope = VectorScope(workspace_id, document_id, version_id, generation_id)
-        self._qdrant.delete(
-            collection_name=self._settings.qdrant_collection_name,
-            points_selector=models.FilterSelector(filter=scope.filter()),
-            wait=True,
-        )
-        result = self._qdrant.count(
-            collection_name=self._settings.qdrant_collection_name,
-            count_filter=scope.filter(),
-            exact=True,
-        )
-        if int(result.count) != 0:
+        for collection in self._vector_collections():
+            if not self._qdrant.collection_exists(collection):
+                continue
+            self._qdrant.delete(
+                collection_name=collection,
+                points_selector=models.FilterSelector(filter=scope.filter()),
+                wait=True,
+            )
+        if self._scoped_vector_count(scope) != 0:
             raise LifecycleDependencyError
 
     def _vector_count(
         self, workspace_id: UUID, document_id: UUID, version_id: UUID
     ) -> int:
-        if not self._qdrant.collection_exists(self._settings.qdrant_collection_name):
-            return 0
-        result = self._qdrant.count(
-            collection_name=self._settings.qdrant_collection_name,
-            count_filter=VectorScope(workspace_id, document_id, version_id).filter(),
-            exact=True,
+        return self._scoped_vector_count(
+            VectorScope(workspace_id, document_id, version_id)
         )
-        return int(result.count)
+
+    def _scoped_vector_count(self, scope: VectorScope) -> int:
+        count = 0
+        for collection in self._vector_collections():
+            if not self._qdrant.collection_exists(collection):
+                continue
+            result = self._qdrant.count(
+                collection_name=collection,
+                count_filter=scope.filter(),
+                exact=True,
+            )
+            count += int(result.count)
+        return count
+
+    def _vector_collections(self) -> tuple[str, ...]:
+        return tuple(
+            dict.fromkeys(
+                (
+                    self._settings.qdrant_collection_name,
+                    self._settings.phase6_visual_collection_name,
+                )
+            )
+        )
 
     @staticmethod
     def _delete_objects(storage: ObjectStorage, keys: set[str]) -> int:

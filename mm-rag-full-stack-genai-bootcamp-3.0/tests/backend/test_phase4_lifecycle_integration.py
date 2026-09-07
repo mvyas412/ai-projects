@@ -38,8 +38,16 @@ from backend.app.storage.s3 import S3ObjectStorage
 )
 def test_live_document_purge_reconciles_postgres_qdrant_and_seaweedfs() -> None:
     base_settings = get_settings()
-    collection = f"phase4_lifecycle_{uuid4().hex}"
-    settings = base_settings.model_copy(update={"qdrant_collection_name": collection})
+    collections = (
+        f"phase4_lifecycle_text_{uuid4().hex}",
+        f"phase6_lifecycle_visual_{uuid4().hex}",
+    )
+    settings = base_settings.model_copy(
+        update={
+            "qdrant_collection_name": collections[0],
+            "phase6_visual_collection_name": collections[1],
+        }
+    )
     engine = create_database_engine(settings)
     factory = create_session_factory(engine)
     qdrant = QdrantClient(
@@ -65,21 +73,26 @@ def test_live_document_purge_reconciles_postgres_qdrant_and_seaweedfs() -> None:
     audit_id = uuid4()
     plan_id: UUID | None = None
     try:
-        qdrant.create_collection(
-            collection_name=collection,
-            vectors_config=models.VectorParams(size=2, distance=models.Distance.COSINE),
-        )
-        qdrant.upsert(
-            collection_name=collection,
-            wait=True,
-            points=[
-                models.PointStruct(
-                    id=point_id,
-                    vector=[1.0, 0.0],
-                    payload={**VectorScope(workspace_id, document_id, version_id).payload()},
-                )
-            ],
-        )
+        for collection in collections:
+            qdrant.create_collection(
+                collection_name=collection,
+                vectors_config=models.VectorParams(size=2, distance=models.Distance.COSINE),
+            )
+            qdrant.upsert(
+                collection_name=collection,
+                wait=True,
+                points=[
+                    models.PointStruct(
+                        id=point_id,
+                        vector=[1.0, 0.0],
+                        payload={
+                            **VectorScope(
+                                workspace_id, document_id, version_id
+                            ).payload()
+                        },
+                    )
+                ],
+            )
         originals.put(object_key, content, media_type="text/plain")
         with factory.begin() as session:
             session.add(user)
@@ -183,12 +196,13 @@ def test_live_document_purge_reconciles_postgres_qdrant_and_seaweedfs() -> None:
             assert result.deleted_security_audit_events == 1
 
         assert not originals.exists(object_key)
-        count = qdrant.count(
-            collection_name=collection,
-            count_filter=VectorScope(workspace_id, document_id, version_id).filter(),
-            exact=True,
-        )
-        assert count.count == 0
+        for collection in collections:
+            count = qdrant.count(
+                collection_name=collection,
+                count_filter=VectorScope(workspace_id, document_id, version_id).filter(),
+                exact=True,
+            )
+            assert count.count == 0
         with factory() as session:
             assert session.get(Document, document_id) is None
             loaded_plan = session.get(LifecycleDeletionPlan, plan_id)
@@ -211,8 +225,9 @@ def test_live_document_purge_reconciles_postgres_qdrant_and_seaweedfs() -> None:
             ) is None
     finally:
         originals.delete(object_key)
-        if qdrant.collection_exists(collection):
-            qdrant.delete_collection(collection)
+        for collection in collections:
+            if qdrant.collection_exists(collection):
+                qdrant.delete_collection(collection)
         with factory.begin() as session:
             session.execute(delete(Workspace).where(Workspace.id == workspace_id))
             session.execute(delete(User).where(User.id == user.id))

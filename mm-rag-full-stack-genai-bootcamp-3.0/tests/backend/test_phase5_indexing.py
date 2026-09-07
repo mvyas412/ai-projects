@@ -6,7 +6,12 @@ from pydantic import SecretStr
 from qdrant_client import QdrantClient, models
 
 from backend.app.core.config import Settings
-from backend.app.ingestion.pipeline import manifest_supports_sparse, pipeline_manifest
+from backend.app.ingestion.pipeline import (
+    PHASE6_PIPELINE_PROFILE,
+    PIPELINE_PROFILE,
+    manifest_supports_sparse,
+    pipeline_manifest,
+)
 from backend.app.rag import indexing as indexing_module
 from backend.app.rag.indexing import IndexingRequest, QdrantOpenAIDocumentIndexer
 from backend.app.retrieval.sparse import SPARSE_VECTOR_NAME
@@ -120,3 +125,28 @@ def test_generation_manifest_requires_complete_pinned_sparse_output() -> None:
     assert manifest_supports_sparse(manifest) is True
     manifest["sparse_vector_count"] = 1
     assert manifest_supports_sparse(manifest) is False
+
+
+def test_phase6_manifest_is_versioned_and_disabled_by_default() -> None:
+    default_manifest = pipeline_manifest(_settings(), "application/pdf")
+
+    assert default_manifest["profile"] == PIPELINE_PROFILE
+    assert default_manifest["citation_schema_revision"] == 1
+    assert "visual_extraction" not in default_manifest
+    assert "structured_tables" not in default_manifest
+
+    candidate_settings = Settings(
+        app_env="test",
+        openai_api_key=SecretStr("test-key"),
+        rag_sparse_indexing_enabled=True,
+        phase6_profile="visual-table-v1",
+    )
+    candidate_manifest = pipeline_manifest(candidate_settings, "application/pdf")
+
+    assert candidate_settings.phase6_enabled is True
+    assert candidate_manifest["profile"] == PHASE6_PIPELINE_PROFILE
+    assert candidate_manifest["citation_schema_revision"] == "evidence-v1"
+    visual_extraction = cast(dict[str, object], candidate_manifest["visual_extraction"])
+    structured_tables = cast(dict[str, object], candidate_manifest["structured_tables"])
+    assert visual_extraction["remote_services"] is False
+    assert structured_tables["generated_sql"] is False

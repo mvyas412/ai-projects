@@ -64,7 +64,7 @@ async def _run(settings: Settings) -> None:
     identity = f"worker-{socket.gethostname()}-{os.getpid()}"[:200]
     shutdown = threading.Event()
     visual_processor = None
-    if settings.phase6_visual_enabled:
+    if settings.phase6_enabled:
         visual_encoder = FastEmbedCLIPEncoder(
             settings.phase5_model_cache_dir,
             threads=settings.rag_model_threads,
@@ -87,6 +87,8 @@ async def _run(settings: Settings) -> None:
                 "remote_services": False,
             },
             visual_indexer=QdrantVisualRegionIndexer(settings, qdrant, visual_encoder),
+            table_exact_max_rows=settings.phase6_table_exact_max_rows,
+            table_max_columns=settings.phase6_table_max_columns,
         )
     service = IngestionWorkerService(
         settings,

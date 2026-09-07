@@ -5,19 +5,27 @@ import json
 from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from pathlib import PurePosixPath
 from uuid import UUID, uuid4
 
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from backend.app.broker.messages import IngestionEventMessage
 from backend.app.broker.rabbitmq import BrokerPublishError
+from backend.app.core.security import AuthenticatedIdentity, get_current_identity
 from backend.app.db.base import Base
 from backend.app.db.session import SessionFactory, create_database_engine, create_session_factory
+from backend.app.main import create_app
 from backend.app.models import (
     AuditEvent,
+    CalculationTrace,
     ContentArtifact,
     ContentRegion,
+    Conversation,
+    ConversationMessage,
+    ConversationTargetType,
     Document,
     DocumentVersion,
     DocumentVersionStatus,
@@ -27,6 +35,10 @@ from backend.app.models import (
     IngestionJob,
     IngestionJobState,
     IngestionOutboxEvent,
+    MessageRole,
+    TableCell,
+    TableColumn,
+    TableRegion,
     User,
     Workspace,
     WorkspaceMembership,
@@ -34,6 +46,7 @@ from backend.app.models import (
 )
 from backend.app.models.visual import ContentRegionKind
 from backend.app.rag.indexing import IndexingRequest, IndexingResult, IndexingUnavailableError
+from backend.app.schemas.conversations import Citation
 from backend.app.services.ingestion_api import IngestionAPIService
 from backend.app.services.ingestion_jobs import (
     IngestionJobNotFoundError,
@@ -41,10 +54,16 @@ from backend.app.services.ingestion_jobs import (
 )
 from backend.app.services.ingestion_operations import IngestionOperationsService
 from backend.app.services.ingestion_worker import DeliveryDisposition, IngestionWorkerService
+from backend.app.services.lifecycle import LifecycleService
 from backend.app.services.visual_ingestion import LocalVisualIngestionProcessor
-from backend.app.storage.keys import original_object_key
+from backend.app.storage.keys import attempt_artifact_key, original_object_key
 from backend.app.storage.local import LocalFileStorage
-from backend.app.visual.extraction import ExtractedRegion, ExtractionResult
+from backend.app.tables.calculation import (
+    PostgresTableCalculationEngine,
+    TableCalculationRequest,
+    TableCalculationScope,
+)
+from backend.app.visual.extraction import ExtractedRegion, ExtractedTable, ExtractionResult
 from backend.app.visual.provenance import NormalizedBoundingBox
 from backend.app.workers.health import ProcessHealth
 from backend.app.workers.ingestion_worker import _recover_expired_and_heartbeat
@@ -226,6 +245,61 @@ class FixtureVisualExtractor:
         )
 
 
+class FixtureTableExtractor(FixtureVisualExtractor):
+    def extract(self, content: bytes, media_type: str) -> ExtractionResult:
+        return ExtractionResult(
+            extractor_name="fixture",
+            extractor_revision="1.0.0",
+            regions=(
+                ExtractedRegion(
+                    page_number=1,
+                    kind=ContentRegionKind.TABLE,
+                    ordinal=0,
+                    bbox=NormalizedBoundingBox(0.1, 0.2, 0.6, 0.5),
+                    page_width=100.0,
+                    page_height=80.0,
+                    rotation=0,
+                    page_render=self._png,
+                    crop=self._png,
+                    source_caption="Revenue table",
+                    ocr_text="Year | Revenue\n2025 | $42",
+                    confidence=0.99,
+                    table=ExtractedTable(
+                        columns=("Year", "Revenue"),
+                        rows=(("2025", "$42"),),
+                    ),
+                ),
+            ),
+        )
+
+
+class FixtureMalformedTableExtractor(FixtureVisualExtractor):
+    def extract(self, content: bytes, media_type: str) -> ExtractionResult:
+        result = super().extract(content, media_type)
+        region = result.regions[0]
+        return ExtractionResult(
+            extractor_name=result.extractor_name,
+            extractor_revision=result.extractor_revision,
+            regions=(
+                ExtractedRegion(
+                    page_number=region.page_number,
+                    kind=ContentRegionKind.TABLE,
+                    ordinal=region.ordinal,
+                    bbox=region.bbox,
+                    page_width=region.page_width,
+                    page_height=region.page_height,
+                    rotation=region.rotation,
+                    page_render=region.page_render,
+                    crop=region.crop,
+                    source_caption="Unstructured table image",
+                    ocr_text=None,
+                    confidence=region.confidence,
+                    table=ExtractedTable(columns=(), rows=()),
+                ),
+            ),
+        )
+
+
 def test_worker_promotes_one_immutable_generation(test_settings, worker_context) -> None:
     worker = _worker(test_settings, worker_context, SuccessfulIndexer())
     assert worker.process(worker_context.message) == DeliveryDisposition.ACK
@@ -306,6 +380,318 @@ def test_worker_promotes_immutable_visual_region_artifacts(
         assert all(row.generation_id == generation.id for row in artifacts)
         assert all(worker_context.storage.exists(row.object_key) for row in artifacts)
 
+
+def test_worker_promotes_normalized_table_structure(test_settings, worker_context) -> None:
+    from io import BytesIO
+
+    from PIL import Image
+
+    output = BytesIO()
+    Image.new("RGB", (20, 10), "white").save(output, format="PNG")
+    processor = LocalVisualIngestionProcessor(
+        worker_context.factory,
+        worker_context.storage,
+        FixtureTableExtractor(output.getvalue()),
+        extractor_config={"profile": "fixture-v1"},
+    )
+    worker = _worker(
+        test_settings,
+        worker_context,
+        SuccessfulIndexer(),
+        visual_processor=processor,
+    )
+
+    assert worker.process(worker_context.message) == DeliveryDisposition.ACK
+
+    with worker_context.factory() as session:
+        generation = session.scalar(
+            select(IngestionGeneration).where(
+                IngestionGeneration.job_id == worker_context.job_id
+            )
+        )
+        tables = list(session.scalars(select(TableRegion)))
+        columns = list(session.scalars(select(TableColumn)))
+        cells = list(session.scalars(select(TableCell)))
+        assert generation is not None and generation.manifest is not None
+        visual = generation.manifest["visual_outputs"]
+        assert isinstance(visual, dict)
+        assert visual["table_count"] == 1
+        assert visual["exact_table_count"] == 1
+        assert visual["table_cell_count"] == 4
+        assert len(tables) == 1
+        assert len(columns) == 2
+        assert len(cells) == 4
+        assert tables[0].validation_state == "validated"
+        assert {cell.normalized_value for cell in cells if not cell.is_header} == {
+            "2025",
+            "42",
+        }
+
+    with worker_context.factory.begin() as session:
+        decision = PostgresTableCalculationEngine(session).calculate(
+            TableCalculationRequest(
+                workspace_id=worker_context.workspace_id,
+                documents=(
+                    TableCalculationScope(
+                        worker_context.document_id,
+                        worker_context.version_id,
+                        generation.id,
+                        "Fixture report",
+                    ),
+                ),
+                query="What is the total Revenue?",
+            )
+        )
+        assert decision.evidence is not None
+        assert decision.evidence.result_value == "42"
+        assert decision.evidence.currency == "USD"
+        trace = session.get(CalculationTrace, decision.evidence.trace_id)
+        assert trace is not None
+        assert trace.operator == "sum"
+        assert trace.query_fingerprint != "What is the total Revenue?"
+
+
+def test_malformed_table_keeps_visual_evidence_but_skips_exact_structure(
+    test_settings, worker_context
+) -> None:
+    from io import BytesIO
+
+    from PIL import Image
+
+    output = BytesIO()
+    Image.new("RGB", (20, 10), "white").save(output, format="PNG")
+    processor = LocalVisualIngestionProcessor(
+        worker_context.factory,
+        worker_context.storage,
+        FixtureMalformedTableExtractor(output.getvalue()),
+        extractor_config={"profile": "fixture-v1"},
+    )
+    worker = _worker(
+        test_settings,
+        worker_context,
+        SuccessfulIndexer(),
+        visual_processor=processor,
+    )
+
+    assert worker.process(worker_context.message) == DeliveryDisposition.ACK
+
+    with worker_context.factory() as session:
+        generation = session.scalar(
+            select(IngestionGeneration).where(
+                IngestionGeneration.job_id == worker_context.job_id
+            )
+        )
+        assert generation is not None and generation.manifest is not None
+        visual = generation.manifest["visual_outputs"]
+        assert visual["region_count"] == 1
+        assert visual["table_count"] == 0
+        assert session.scalar(select(TableRegion)) is None
+        artifact_kinds = set(session.scalars(select(ContentArtifact.kind)))
+        assert {"region_crop", "structured_table"} <= artifact_kinds
+
+
+def test_evidence_api_rechecks_scope_generation_and_artifact_integrity(
+    test_settings, worker_context
+) -> None:
+    from io import BytesIO
+
+    from PIL import Image
+
+    output = BytesIO()
+    Image.new("RGB", (20, 10), "white").save(output, format="PNG")
+    processor = LocalVisualIngestionProcessor(
+        worker_context.factory,
+        worker_context.storage,
+        FixtureTableExtractor(output.getvalue()),
+        extractor_config={"profile": "fixture-v1"},
+    )
+    worker = _worker(
+        test_settings,
+        worker_context,
+        SuccessfulIndexer(),
+        visual_processor=processor,
+    )
+    assert worker.process(worker_context.message) == DeliveryDisposition.ACK
+
+    conversation_id, message_id, legacy_message_id = uuid4(), uuid4(), uuid4()
+    with worker_context.factory.begin() as session:
+        generation = session.scalar(
+            select(IngestionGeneration).where(
+                IngestionGeneration.job_id == worker_context.job_id
+            )
+        )
+        table = session.scalar(select(TableRegion))
+        assert generation is not None and table is not None
+        decision = PostgresTableCalculationEngine(session).calculate(
+            TableCalculationRequest(
+                workspace_id=worker_context.workspace_id,
+                documents=(
+                    TableCalculationScope(
+                        worker_context.document_id,
+                        worker_context.version_id,
+                        generation.id,
+                        "Fixture report",
+                    ),
+                ),
+                query="What is the total Revenue?",
+            )
+        )
+        evidence = decision.evidence
+        assert evidence is not None
+        citation = Citation(
+            document_id=evidence.document_id,
+            document_version_id=evidence.document_version_id,
+            generation_id=evidence.generation_id,
+            document_title=evidence.document_title,
+            page_number=evidence.page_number,
+            content_type="application/vnd.mm-rag.table-calculation+json",
+            excerpt="Exact sum from one validated table cell.",
+            evidence_kind="calculation",
+            region_id=evidence.region_id,
+            table_id=evidence.table_id,
+            cell_ids=list(evidence.cell_ids),
+            calculation_trace_id=evidence.trace_id,
+        )
+        session.add(
+            Conversation(
+                id=conversation_id,
+                workspace_id=worker_context.workspace_id,
+                created_by_user_id=worker_context.user.id,
+                title="Evidence verification",
+                target_type=ConversationTargetType.WORKSPACE.value,
+            )
+        )
+        session.flush()
+        session.add(
+            ConversationMessage(
+                id=message_id,
+                conversation_id=conversation_id,
+                workspace_id=worker_context.workspace_id,
+                sequence_number=1,
+                role=MessageRole.ASSISTANT.value,
+                content="The exact sum is USD 42.",
+                citations=[citation.model_dump(mode="json")],
+                model_name="deterministic-table-v1",
+            )
+        )
+        session.add(
+            ConversationMessage(
+                id=legacy_message_id,
+                conversation_id=conversation_id,
+                workspace_id=worker_context.workspace_id,
+                sequence_number=2,
+                role=MessageRole.ASSISTANT.value,
+                content="A compatible historical text answer.",
+                citations=[
+                    {
+                        "document_id": str(worker_context.document_id),
+                        "document_version_id": str(worker_context.version_id),
+                        "document_title": "Fixture report",
+                        "page_number": 1,
+                        "content_type": "text/plain",
+                        "excerpt": "Historical text evidence",
+                    }
+                ],
+                model_name="historical-model",
+            )
+        )
+
+    with worker_context.factory() as session:
+        stored_artifacts = tuple(session.scalars(select(ContentArtifact)))
+        referenced = LifecycleService(
+            session,
+            test_settings,
+            worker_context.storage,
+            worker_context.storage,
+            None,
+        )._referenced_object_keys(worker_context.workspace_id)["artifacts"]
+        for artifact in stored_artifacts:
+            assert artifact.object_key in referenced
+            assert attempt_artifact_key(
+                workspace_id=worker_context.workspace_id,
+                job_id=worker_context.job_id,
+                attempt_id=artifact.creation_attempt_id,
+                artifact_name=PurePosixPath(artifact.object_key).name,
+            ) in referenced
+
+    app = create_app(test_settings)
+    with TestClient(app) as client:
+        app.state.session_factory = worker_context.factory
+        app.state.artifact_storage = worker_context.storage
+        app.dependency_overrides[get_current_identity] = lambda: AuthenticatedIdentity(
+            subject=worker_context.user.external_subject,
+            email="owner@example.com",
+            display_name="Owner",
+        )
+        evidence_url = (
+            f"/api/v1/workspaces/{worker_context.workspace_id}/conversations/"
+            f"{conversation_id}/messages/{message_id}/evidence/0"
+        )
+        described = client.get(evidence_url)
+        assert described.status_code == 200, described.text
+        descriptor = described.json()
+        assert descriptor["schema_revision"] == "evidence-v1"
+        assert descriptor["calculation"]["result_value"] == "42"
+        assert descriptor["table"]["validation_state"] == "validated"
+        assert sum(cell["cited"] for cell in descriptor["table"]["cells"]) == 1
+        assert "object_key" not in described.text
+
+        legacy_url = (
+            f"/api/v1/workspaces/{worker_context.workspace_id}/conversations/"
+            f"{conversation_id}/messages/{legacy_message_id}/evidence/0"
+        )
+        legacy = client.get(legacy_url)
+        assert legacy.status_code == 200
+        assert legacy.json()["generation_id"] == str(generation.id)
+        assert legacy.json()["region"] is None
+        assert legacy.json()["artifacts"] == []
+
+        crop = next(
+            artifact
+            for artifact in descriptor["artifacts"]
+            if artifact["kind"] == "region_crop"
+        )
+        artifact_url = f"{evidence_url}/artifacts/{crop['id']}"
+        streamed = client.get(artifact_url)
+        assert streamed.status_code == 200
+        assert streamed.headers["cache-control"] == "private, no-store"
+        assert streamed.content == output.getvalue()
+        assert client.get(f"{evidence_url}/artifacts/{uuid4()}").status_code == 404
+
+        app.dependency_overrides[get_current_identity] = lambda: AuthenticatedIdentity(
+            subject="auth0|other-evidence-user",
+            email="other@example.com",
+            display_name="Other",
+        )
+        denied = client.get(artifact_url)
+        assert denied.status_code == 404
+        assert output.getvalue() not in denied.content
+
+        app.dependency_overrides[get_current_identity] = lambda: AuthenticatedIdentity(
+            subject=worker_context.user.external_subject,
+            email="owner@example.com",
+            display_name="Owner",
+        )
+        artifact = None
+        with worker_context.factory() as session:
+            artifact = session.get(ContentArtifact, UUID(crop["id"]))
+        assert artifact is not None
+        worker_context.storage.put(
+            artifact.object_key,
+            b"changed artifact bytes",
+            media_type=artifact.media_type,
+            if_absent=False,
+        )
+        integrity_failure = client.get(artifact_url)
+        assert integrity_failure.status_code == 503
+        assert b"changed artifact bytes" not in integrity_failure.content
+
+        with worker_context.factory.begin() as session:
+            version = session.get(DocumentVersion, worker_context.version_id)
+            assert version is not None
+            version.active_generation_id = None
+            version.active_generation_promoted_at = None
+        assert client.get(evidence_url).status_code == 404
 
 def test_membership_removal_blocks_job_read_but_not_workspace_owned_processing(
     test_settings, worker_context

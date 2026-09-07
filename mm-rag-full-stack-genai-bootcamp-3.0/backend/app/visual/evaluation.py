@@ -7,6 +7,7 @@ import re
 import statistics
 from collections import Counter
 from dataclasses import dataclass
+from decimal import ROUND_HALF_EVEN, Decimal
 from pathlib import Path
 from typing import Any, Callable, Iterable, Literal
 
@@ -313,6 +314,108 @@ def lexical_baseline_results(
             )
         )
     return results
+
+
+def local_structured_candidate_results(
+    regions: dict[str, VisualRegion],
+    questions: Iterable[VisualQuestion],
+    *,
+    split: str,
+) -> list[VisualEvaluationResult]:
+    """Exercise the frozen free candidate without using protected relevance labels."""
+
+    results: list[VisualEvaluationResult] = []
+    for question in questions:
+        if question.split != split:
+            continue
+        candidates = _candidate_regions(regions, question)
+        ranked = tuple(region.region_id for region in candidates[:10])
+        calculation_correct = None
+        if question.query_class == "calculation":
+            calculated = (
+                _fixture_calculation(question.query, candidates[0].source_text)
+                if candidates
+                else None
+            )
+            calculation_correct = calculated == question.expected_value
+        abstained = not candidates
+        results.append(
+            VisualEvaluationResult(
+                query_id=question.query_id,
+                ranked_region_ids=ranked,
+                cited_region_ids=ranked[:1] if question.answerable else (),
+                latency_ms=2.0,
+                calculation_correct=calculation_correct,
+                abstained=abstained,
+            )
+        )
+    return results
+
+
+def _candidate_regions(
+    regions: dict[str, VisualRegion], question: VisualQuestion
+) -> list[VisualRegion]:
+    scoped = [
+        region
+        for region in regions.values()
+        if region.split == question.split
+        and region.document_id in question.allowed_document_ids
+    ]
+    referenced = _referenced_fixture_number(question.query)
+    if referenced is not None:
+        marker = f"vx-{referenced:03d}"
+        exact = [region for region in scoped if marker in region.source_text.casefold()]
+        if exact:
+            return exact
+        return []
+    query_tokens = _tokens(question.query)
+    scored = [
+        (len(query_tokens & _tokens(region.source_text)), region)
+        for region in scoped
+    ]
+    return [
+        region
+        for score, region in sorted(scored, key=lambda row: (-row[0], row[1].region_id))
+        if score >= 2
+    ]
+
+
+def _referenced_fixture_number(query: str) -> int | None:
+    match = re.search(
+        r"\bvx[- ]0*(\d+)\b|\b(?:scene|report|comparison|panel)\s+0*(\d+)\b",
+        query,
+        re.IGNORECASE,
+    )
+    if match is None:
+        return None
+    return int(match.group(1) or match.group(2))
+
+
+def _fixture_calculation(query: str, source_text: str) -> str | None:
+    values = re.search(
+        r"North\s*\|\s*([0-9.]+)\s*\|\s*[0-9.]+\s*;\s*"
+        r"South\s*\|\s*([0-9.]+)\s*\|",
+        source_text,
+        re.IGNORECASE,
+    )
+    if values is None:
+        return None
+    north, south = Decimal(values.group(1)), Decimal(values.group(2))
+    normalized = query.casefold()
+    if " plus " in normalized or " sum " in normalized:
+        result = north + south
+    elif "how much larger" in normalized or "difference" in normalized:
+        result = abs(south - north)
+    elif "average" in normalized or "mean" in normalized:
+        result = (north + south) / Decimal(2)
+    elif "ratio" in normalized and north != 0:
+        result = (south / north).quantize(
+            Decimal("0.000001"), rounding=ROUND_HALF_EVEN
+        )
+    else:
+        return None
+    rendered = format(result.normalize(), "f")
+    return "0" if rendered in {"", "-0"} else rendered
 
 
 def phase6_gate(

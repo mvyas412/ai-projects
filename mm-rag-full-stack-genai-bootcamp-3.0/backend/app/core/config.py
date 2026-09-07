@@ -105,7 +105,7 @@ class Settings(BaseSettings):
     rag_rerank_max_characters: int = Field(default=4000, ge=256, le=16000)
     rag_model_threads: int = Field(default=2, ge=1, le=16)
     phase5_model_cache_dir: Path = PROJECT_ROOT / "data/runtime/models"
-    phase6_visual_enabled: bool = False
+    phase6_profile: Literal["disabled", "visual-table-v1"] = "disabled"
     phase6_extraction_profile: Literal["structural-v1"] = "structural-v1"
     phase6_docling_artifacts_path: Path = PROJECT_ROOT / "data/runtime/docling-models"
     phase6_docling_timeout_seconds: int = Field(default=300, ge=30, le=1800)
@@ -116,10 +116,18 @@ class Settings(BaseSettings):
     phase6_visual_embedding_batch_size: int = Field(default=8, ge=1, le=64)
     phase6_visual_candidate_limit: int = Field(default=12, ge=1, le=50)
     phase6_visual_fusion_k: int = Field(default=60, ge=1, le=1000)
+    phase6_table_exact_max_rows: int = Field(default=1000, ge=1, le=10000)
+    phase6_table_max_columns: int = Field(default=100, ge=1, le=500)
 
     openai_api_key: SecretStr | None = None
     openai_chat_model: str = DEFAULT_OPENAI_CHAT_MODEL
     openai_embedding_model: str = DEFAULT_OPENAI_EMBEDDING_MODEL
+
+    @property
+    def phase6_enabled(self) -> bool:
+        """Keep the Phase 6 candidate behind one versioned environment gate."""
+
+        return self.phase6_profile == "visual-table-v1"
 
     @field_validator("log_level", mode="before")
     @classmethod

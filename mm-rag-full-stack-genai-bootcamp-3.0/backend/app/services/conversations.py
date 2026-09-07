@@ -14,7 +14,14 @@ from backend.app.models.conversation import (
 )
 from backend.app.models.document import Document, DocumentVersion
 from backend.app.models.user import User
-from backend.app.rag.engine import RAGDocumentScope, RAGEngine, RAGRequest
+from backend.app.rag.engine import (
+    INSUFFICIENT_EVIDENCE_MESSAGE,
+    RAGAnswer,
+    RAGCitation,
+    RAGDocumentScope,
+    RAGEngine,
+    RAGRequest,
+)
 from backend.app.repositories.conversations import ConversationRepository
 from backend.app.repositories.documents import CollectionRepository, DocumentRepository
 from backend.app.schemas.conversations import Citation, ConversationCreate
@@ -25,6 +32,13 @@ from backend.app.services.policy import (
     PolicyNotFoundError,
     PolicyService,
     resource_context,
+)
+from backend.app.tables.calculation import (
+    CalculationEvidence,
+    PostgresTableCalculationEngine,
+    TableCalculationRequest,
+    TableCalculationScope,
+    format_calculation_answer,
 )
 
 
@@ -52,14 +66,51 @@ class UnsafeCitationError(ConversationError):
     pass
 
 
+def _calculation_answer(evidence: CalculationEvidence | None) -> RAGAnswer:
+    if evidence is None:
+        return RAGAnswer(content=INSUFFICIENT_EVIDENCE_MESSAGE, citations=())
+    return RAGAnswer(
+        content=format_calculation_answer(evidence),
+        citations=(
+            RAGCitation(
+                document_id=evidence.document_id,
+                document_version_id=evidence.document_version_id,
+                document_title=evidence.document_title,
+                page_number=evidence.page_number,
+                content_type="application/vnd.mm-rag.table-calculation+json",
+                excerpt=(
+                    f"Exact {evidence.operator.value} from "
+                    f"{len(evidence.cell_ids)} validated table cell(s)."
+                ),
+                evidence_kind="calculation",
+                generation_id=evidence.generation_id,
+                region_id=evidence.region_id,
+                table_id=evidence.table_id,
+                cell_ids=evidence.cell_ids,
+                calculation_trace_id=evidence.trace_id,
+            ),
+        ),
+        model_name="deterministic-table-v1",
+    )
+
+
 class ConversationService:
-    def __init__(self, session: Session, rag_engine: RAGEngine) -> None:
+    def __init__(
+        self,
+        session: Session,
+        rag_engine: RAGEngine,
+        *,
+        table_calculation_enabled: bool = False,
+    ) -> None:
         self._session = session
         self._rag_engine = rag_engine
         self._conversations = ConversationRepository(session)
         self._documents = DocumentRepository(session)
         self._collections = CollectionRepository(session)
         self._policy = PolicyService(session)
+        self._table_calculator = (
+            PostgresTableCalculationEngine(session) if table_calculation_enabled else None
+        )
 
     def list_conversations(
         self, *, user: User, workspace_id: UUID
@@ -167,29 +218,60 @@ class ConversationService:
         if not resolved:
             raise NoIndexedEvidenceError("No indexed document is available for this scope")
 
-        answer = self._rag_engine.answer(
-            RAGRequest(
-                workspace_id=workspace_id,
-                documents=tuple(
-                    RAGDocumentScope(
-                        document.id,
-                        version.id,
-                        version.active_generation_id,
-                        manifest_supports_sparse(
-                            self._documents.generation_manifest(workspace_id, version)
-                        ),
-                    )
-                    for document, version in resolved
-                ),
-                query=content,
-                history=tuple((message.role, message.content) for message in prior_messages),
+        rag_request = RAGRequest(
+            workspace_id=workspace_id,
+            documents=tuple(
+                RAGDocumentScope(
+                    document.id,
+                    version.id,
+                    version.active_generation_id,
+                    manifest_supports_sparse(
+                        self._documents.generation_manifest(workspace_id, version)
+                    ),
+                )
+                for document, version in resolved
+            ),
+            query=content,
+            history=tuple((message.role, message.content) for message in prior_messages),
+        )
+        calculation = (
+            self._table_calculator.calculate(
+                TableCalculationRequest(
+                    workspace_id=workspace_id,
+                    documents=tuple(
+                        TableCalculationScope(
+                            document.id,
+                            version.id,
+                            version.active_generation_id,
+                            document.title,
+                        )
+                        for document, version in resolved
+                        if version.active_generation_id is not None
+                    ),
+                    query=content,
+                )
             )
+            if self._table_calculator is not None
+            else None
+        )
+        answer = (
+            _calculation_answer(calculation.evidence)
+            if calculation is not None and calculation.attempted
+            else self._rag_engine.answer(rag_request)
         )
         # Treat model citations as untrusted output and revalidate every source
         # against the backend-resolved scope before anything is persisted.
-        allowed = {(document.id, version.id) for document, version in resolved}
+        allowed = {
+            (document.id, version.id, version.active_generation_id)
+            for document, version in resolved
+        }
         if any(
-            (citation.document_id, citation.document_version_id) not in allowed
+            (
+                citation.document_id,
+                citation.document_version_id,
+                citation.generation_id,
+            )
+            not in allowed
             for citation in answer.citations
         ):
             raise UnsafeCitationError("The generated answer contained unauthorized evidence")
@@ -206,6 +288,7 @@ class ConversationService:
         )
         citation_payload = [
             Citation(
+                evidence_schema_revision=item.evidence_schema_revision,
                 document_id=item.document_id,
                 document_version_id=item.document_version_id,
                 document_title=item.document_title,
@@ -214,7 +297,11 @@ class ConversationService:
                 excerpt=item.excerpt,
                 score=item.score,
                 evidence_kind=item.evidence_kind,
+                generation_id=item.generation_id,
                 region_id=item.region_id,
+                table_id=item.table_id,
+                cell_ids=list(item.cell_ids),
+                calculation_trace_id=item.calculation_trace_id,
             ).model_dump(mode="json")
             for item in answer.citations
         ]

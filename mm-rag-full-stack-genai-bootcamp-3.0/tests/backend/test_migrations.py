@@ -6,11 +6,11 @@ from alembic.script import ScriptDirectory
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_migration_history_has_phase6_region_provenance_head() -> None:
+def test_migration_history_has_phase6_structured_table_head() -> None:
     config = Config(PROJECT_ROOT / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260903_0014"]
+    assert scripts.get_heads() == ["20260907_0016"]
     baseline = scripts.get_revision("20260829_0001")
     assert baseline is not None
     assert baseline.down_revision is None
@@ -52,3 +52,9 @@ def test_migration_history_has_phase6_region_provenance_head() -> None:
     phase6_provenance = scripts.get_revision("20260903_0014")
     assert phase6_provenance is not None
     assert phase6_provenance.down_revision == "20260831_0013"
+    structured_tables = scripts.get_revision("20260907_0015")
+    assert structured_tables is not None
+    assert structured_tables.down_revision == "20260903_0014"
+    calculation_traces = scripts.get_revision("20260907_0016")
+    assert calculation_traces is not None
+    assert calculation_traces.down_revision == "20260907_0015"

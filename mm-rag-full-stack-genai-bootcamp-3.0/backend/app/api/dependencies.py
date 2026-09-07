@@ -4,6 +4,7 @@ from fastapi import Depends, Request
 from qdrant_client import QdrantClient
 from sqlalchemy.orm import Session
 
+from backend.app.core.config import Settings
 from backend.app.core.security import AuthenticatedIdentity, get_current_identity
 from backend.app.db.session import get_db_session
 from backend.app.models.user import User
@@ -38,3 +39,7 @@ def get_document_indexer(request: Request) -> DocumentIndexer:
 
 def get_qdrant_client(request: Request) -> QdrantClient:
     return request.app.state.qdrant_client
+
+
+def get_app_settings(request: Request) -> Settings:
+    return request.app.state.settings

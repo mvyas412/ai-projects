@@ -38,6 +38,7 @@ class ConversationCreate(BaseModel):
 
 
 class Citation(BaseModel):
+    evidence_schema_revision: Literal["evidence-v1"] = "evidence-v1"
     document_id: UUID
     document_version_id: UUID
     document_title: str
@@ -48,7 +49,11 @@ class Citation(BaseModel):
     evidence_kind: Literal[
         "text", "figure", "chart", "diagram", "image", "table", "calculation"
     ] = "text"
+    generation_id: UUID | None = None
     region_id: UUID | None = None
+    table_id: UUID | None = None
+    cell_ids: list[UUID] = Field(default_factory=list)
+    calculation_trace_id: UUID | None = None
 
 
 class ConversationMessageResponse(BaseModel):

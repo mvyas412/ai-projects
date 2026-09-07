@@ -96,7 +96,7 @@ def _settings(**overrides) -> Settings:
         openai_api_key=SecretStr("test-key"),
         rag_retrieval_profile="dense-v1",
         rag_sparse_indexing_enabled=False,
-        phase6_visual_enabled=True,
+        phase6_profile="visual-table-v1",
         **overrides,
     )
 

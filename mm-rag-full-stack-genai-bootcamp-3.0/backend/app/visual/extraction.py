@@ -21,9 +21,25 @@ class VisualExtractionError(RuntimeError):
 
 
 @dataclass(frozen=True, slots=True)
+class ExtractedTableCell:
+    row_index: int
+    column_index: int
+    row_span: int
+    column_span: int
+    text: str
+    column_header: bool = False
+    row_header: bool = False
+    bbox: NormalizedBoundingBox | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class ExtractedTable:
     columns: tuple[str, ...]
     rows: tuple[tuple[str, ...], ...]
+    cells: tuple[ExtractedTableCell, ...] = ()
+    row_count: int | None = None
+    column_count: int | None = None
+    header_row_count: int = 1
 
 
 @dataclass(frozen=True, slots=True)
@@ -203,7 +219,51 @@ def _table_data(item, document) -> ExtractedTable:
         tuple("" if value is None else str(value).strip() for value in row)
         for row in frame.itertuples(index=False, name=None)
     )
-    return ExtractedTable(columns=columns, rows=rows)
+    page = document.pages.get(item.prov[0].page_no) if item.prov else None
+    cells: list[ExtractedTableCell] = []
+    for cell in sorted(
+        item.data.table_cells,
+        key=lambda value: (value.start_row_offset_idx, value.start_col_offset_idx),
+    ):
+        bbox = None
+        if cell.bbox is not None and page is not None:
+            normalized = cell.bbox.to_top_left_origin(page.size.height).normalized(page.size)
+            x = min(0.999999, _clamp(normalized.l))
+            y = min(0.999999, _clamp(normalized.t))
+            bbox = NormalizedBoundingBox(
+                x,
+                y,
+                min(1.0 - x, _clamp(normalized.width, positive=True)),
+                min(1.0 - y, _clamp(normalized.height, positive=True)),
+            )
+        cells.append(
+            ExtractedTableCell(
+                row_index=cell.start_row_offset_idx,
+                column_index=cell.start_col_offset_idx,
+                row_span=cell.row_span,
+                column_span=cell.col_span,
+                text=cell.text.strip(),
+                column_header=cell.column_header,
+                row_header=cell.row_header,
+                bbox=bbox,
+            )
+        )
+    header_row_count = max(
+        (
+            cell.row_index + cell.row_span
+            for cell in cells
+            if cell.column_header
+        ),
+        default=1,
+    )
+    return ExtractedTable(
+        columns=columns,
+        rows=rows,
+        cells=tuple(cells),
+        row_count=item.data.num_rows or len(rows) + 1,
+        column_count=item.data.num_cols or len(columns),
+        header_row_count=header_row_count,
+    )
 
 
 def _extract_standalone_image(content: bytes) -> ExtractionResult:

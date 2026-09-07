@@ -1,6 +1,9 @@
+from html import escape
+from io import BytesIO
 from typing import Any
 
 import streamlit as st
+from PIL import Image, ImageDraw
 from utils.api import BackendAPIError
 from utils.runtime import api_client, selected_workspace
 
@@ -24,30 +27,239 @@ ready_documents = [
 
 
 @st.dialog("Evidence details", width="large")
-def show_evidence(citation: dict[str, Any]) -> None:
-    st.subheader(citation["document_title"])
-    if citation.get("page_number"):
-        st.badge(f"Page {citation['page_number']}", color="blue")
-    if citation.get("score") is not None:
-        st.caption(f"Retrieval score: {citation['score']:.3f}")
-    st.markdown("**Retrieved excerpt**")
-    st.write(citation["excerpt"])
+def show_evidence(
+    citation: dict[str, Any],
+    message_id: str,
+    citation_index: int,
+) -> None:
+    try:
+        with st.spinner("Resolving current authorized evidence…"):
+            evidence = client.evidence(
+                workspace_id,
+                selected_id,
+                message_id,
+                citation_index,
+            )
+    except BackendAPIError as exc:
+        if exc.status_code == 404:
+            st.warning(
+                "This evidence is no longer available in your current access scope.",
+                icon=":material/lock:",
+            )
+        else:
+            st.error(str(exc), icon=":material/error:")
+        return
+
+    st.subheader(evidence["document_title"])
+    with st.container(horizontal=True):
+        st.badge(evidence["evidence_kind"].replace("_", " ").title(), color="blue")
+        if evidence.get("page_number"):
+            st.badge(f"Page {evidence['page_number']}", color="gray")
+        if citation.get("score") is not None:
+            st.caption(f"Retrieval score: {citation['score']:.3f}")
+    st.markdown("**Retrieved evidence label**")
+    st.write(evidence["excerpt"])
+
+    region = evidence.get("region")
+    if region:
+        st.caption(
+            "The outlined area below is the exact stored source region for this citation."
+        )
+        _show_region_evidence(evidence, message_id, citation_index)
+    else:
+        st.info(
+            "This is text evidence from an earlier-compatible citation; no visual region "
+            "was attached.",
+            icon=":material/article:",
+        )
+
+    if evidence.get("table"):
+        st.markdown("### Structured table")
+        st.caption(
+            "Cells marked CITED are the exact operands or values supporting this answer."
+        )
+        st.markdown(_table_html(evidence["table"]), unsafe_allow_html=True)
+
+    calculation = evidence.get("calculation")
+    if calculation:
+        st.markdown("### Exact calculation")
+        result = _display_value(
+            calculation["result_value"],
+            calculation.get("unit"),
+            calculation.get("currency"),
+        )
+        st.metric(calculation["operator"].replace("_", " ").title(), result)
+        for operand in calculation["operands"]:
+            st.write(f"- {operand['label']}: `{operand['value']}`")
+        st.caption(
+            f"Rule: {calculation['operator_revision']} · "
+            f"Rounding: {calculation['rounding_rule']}"
+        )
+
     try:
         content, media_type = client.document_content(
             workspace_id,
-            citation["document_id"],
-            citation["document_version_id"],
+            evidence["document_id"],
+            evidence["document_version_id"],
         )
         st.download_button(
             "Download original source",
             data=content,
-            file_name=citation["document_title"],
+            file_name=evidence["document_title"],
             mime=media_type,
             icon=":material/download:",
-            type="primary",
         )
     except BackendAPIError as exc:
         st.error(str(exc), icon=":material/error:")
+
+
+def _show_region_evidence(
+    evidence: dict[str, Any], message_id: str, citation_index: int
+) -> None:
+    artifacts = {item["kind"]: item for item in evidence["artifacts"]}
+    page_render = artifacts.get("page_render")
+    crop = artifacts.get("region_crop")
+    visual_tab, layers_tab, provenance_tab = st.tabs(
+        ["Source location", "Evidence layers", "Provenance"]
+    )
+    with visual_tab:
+        zoom = st.slider(
+            "Page zoom",
+            min_value=50,
+            max_value=200,
+            value=100,
+            step=25,
+            key=f"evidence_zoom_{message_id}_{citation_index}",
+        )
+        if page_render:
+            page_bytes = _artifact_bytes(page_render, message_id, citation_index)
+            if page_bytes is not None:
+                highlighted = _highlight_region(page_bytes, evidence["region"])
+                image = Image.open(BytesIO(highlighted))
+                st.image(
+                    highlighted,
+                    caption="Full source page; the double outline marks the cited region.",
+                    width=max(240, int(image.width * zoom / 100)),
+                )
+        else:
+            st.info("A full-page render is not available for this evidence.")
+        if crop:
+            crop_bytes = _artifact_bytes(crop, message_id, citation_index)
+            if crop_bytes is not None:
+                st.image(crop_bytes, caption="Exact cited source crop", width="stretch")
+    with layers_tab:
+        text_layers = [
+            item
+            for item in evidence["artifacts"]
+            if item["kind"]
+            in {
+                "ocr_text",
+                "source_caption",
+                "deterministic_caption",
+                "generated_description",
+            }
+        ]
+        if not text_layers:
+            st.info("No additional text layers were produced for this region.")
+        for artifact in text_layers:
+            content = _artifact_bytes(artifact, message_id, citation_index)
+            if content is None:
+                continue
+            st.markdown(f"**{artifact['kind'].replace('_', ' ').title()}**")
+            st.caption(
+                f"{artifact['provenance_class'].title()} · "
+                f"{artifact['producer_name']} {artifact['producer_revision']}"
+            )
+            st.write(content.decode("utf-8", errors="replace"))
+    with provenance_tab:
+        region = evidence["region"]
+        st.write(
+            f"Extractor: `{region['extractor_name']} {region['extractor_revision']}`"
+        )
+        st.write(f"Locator contract: `{region['locator_schema_revision']}`")
+        st.write(
+            "Location: "
+            f"x={region['bbox_x']:.4f}, y={region['bbox_y']:.4f}, "
+            f"width={region['bbox_width']:.4f}, height={region['bbox_height']:.4f}"
+        )
+        for artifact in evidence["artifacts"]:
+            st.caption(
+                f"{artifact['kind'].replace('_', ' ').title()}: "
+                f"{artifact['provenance_class']} · {artifact['validation_state']} · "
+                f"{artifact['schema_revision']}"
+            )
+
+
+def _artifact_bytes(
+    artifact: dict[str, Any], message_id: str, citation_index: int
+) -> bytes | None:
+    try:
+        content, _ = client.evidence_artifact(
+            workspace_id,
+            selected_id,
+            message_id,
+            citation_index,
+            artifact["id"],
+        )
+        return content
+    except BackendAPIError as exc:
+        st.error(str(exc), icon=":material/error:")
+        return None
+
+
+def _highlight_region(page_bytes: bytes, region: dict[str, Any]) -> bytes:
+    image = Image.open(BytesIO(page_bytes)).convert("RGB")
+    left = round(region["bbox_x"] * image.width)
+    top = round(region["bbox_y"] * image.height)
+    right = round((region["bbox_x"] + region["bbox_width"]) * image.width)
+    bottom = round((region["bbox_y"] + region["bbox_height"]) * image.height)
+    width = max(3, round(min(image.size) * 0.006))
+    drawing = ImageDraw.Draw(image)
+    drawing.rectangle((left, top, right, bottom), outline="white", width=width * 2)
+    drawing.rectangle((left, top, right, bottom), outline="black", width=width)
+    output = BytesIO()
+    image.save(output, format="PNG")
+    return output.getvalue()
+
+
+def _table_html(table: dict[str, Any]) -> str:
+    cells_by_row: dict[int, list[dict[str, Any]]] = {}
+    for cell in table["cells"]:
+        cells_by_row.setdefault(cell["row_index"], []).append(cell)
+    rows: list[str] = []
+    for row_index in range(table["row_count"]):
+        rendered: list[str] = []
+        for cell in sorted(cells_by_row.get(row_index, []), key=lambda item: item["column_index"]):
+            tag = "th" if cell["is_header"] else "td"
+            marker = '<span class="mm-rag-cited">CITED</span> ' if cell["cited"] else ""
+            rendered.append(
+                f'<{tag} rowspan="{cell["row_span"]}" colspan="{cell["column_span"]}" '
+                f'class="{"cited-cell" if cell["cited"] else ""}">'
+                f"{marker}{escape(cell['text'])}</{tag}>"
+            )
+        rows.append(f"<tr>{''.join(rendered)}</tr>")
+    return (
+        "<style>"
+        ".mm-rag-evidence-table{border-collapse:collapse;width:100%;font-size:.92rem}"
+        ".mm-rag-evidence-table th,.mm-rag-evidence-table td{border:1px solid "
+        "currentColor;padding:.45rem;text-align:left;vertical-align:top}"
+        ".mm-rag-evidence-table .cited-cell{outline:3px double currentColor;"
+        "outline-offset:-4px;font-weight:650}"
+        ".mm-rag-cited{font-size:.65rem;border:1px solid currentColor;"
+        "padding:.08rem .2rem;margin-right:.2rem}"
+        "</style>"
+        f'<div style="overflow-x:auto"><table class="mm-rag-evidence-table" '
+        f'aria-label="Structured evidence table with {table["row_count"]} rows and '
+        f'{table["column_count"]} columns">{"".join(rows)}</table></div>'
+    )
+
+
+def _display_value(value: str, unit: str | None, currency: str | None) -> str:
+    if currency:
+        return f"{currency} {value}"
+    if unit == "%":
+        return f"{value}%"
+    return f"{value} {unit}" if unit else value
 
 
 with st.expander("Start a conversation", icon=":material/add_comment:"):
@@ -146,8 +358,9 @@ for message in conversation["messages"]:
         st.write(message["content"])
         if message["role"] == "assistant" and message["citations"]:
             st.caption(f"{len(message['citations'])} supporting source(s)")
-            for index, citation in enumerate(message["citations"], start=1):
-                label = f"[{index}] {citation['document_title']}"
+            for citation_index, citation in enumerate(message["citations"]):
+                display_index = citation_index + 1
+                label = f"[{display_index}] {citation['document_title']}"
                 if citation.get("page_number"):
                     label += f" · page {citation['page_number']}"
                 with st.expander(label, icon=":material/article:"):
@@ -155,9 +368,9 @@ for message in conversation["messages"]:
                     if st.button(
                         "Inspect evidence",
                         icon=":material/visibility:",
-                        key=f"evidence_{message['id']}_{index}",
+                        key=f"evidence_{message['id']}_{display_index}",
                     ):
-                        show_evidence(citation)
+                        show_evidence(citation, message["id"], citation_index)
 
 prompt: str | None = None
 if not conversation["messages"]:
