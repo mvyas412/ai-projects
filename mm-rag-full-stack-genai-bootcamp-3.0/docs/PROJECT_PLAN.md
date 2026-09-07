@@ -59,7 +59,7 @@ Rules:
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
-| Phase 6 | In progress — Milestones 6.0–6.5 implemented; PR #7 checks and corrected visual browser proof pass; numeric calculation proof and promotion pending |
+| Phase 6 | In progress — Milestones 6.0–6.5 implemented; PR #7 checks and representative visual/table/calculation browser proof pass; promotion pending |
 | Phases 7–9 | Planned |
 
 ## Delivery sequence and gates
@@ -747,9 +747,9 @@ then reranking a bounded candidate set.
 6.0–6.5 are implemented and locally verified on the Phase 6 review branch behind
 the disabled-by-default `visual-table-v1` profile. PR #7 checks and the authenticated
 application-shell/readiness/logout verification pass. The corrected representative
-visual retrieval and region/table evidence proof also passes. One contract-valid
-numeric calculation proof, explicit profile promotion, Phase 6 acceptance, and
-release tagging remain separate gates.
+visual retrieval, region/table evidence, and numeric calculation proof also passes.
+Explicit profile promotion, Phase 6 acceptance, and release tagging remain separate
+gates.
 A single bounded paid candidate attempt was authorized and executed on 2026-09-07,
 but it stopped before visual/table processing and therefore is not acceptance evidence.
 
@@ -887,6 +887,15 @@ it safely abstained without a provider call because those cells are intentionall
 typed as text rather than numeric values. A validated page-23 numeric table is the
 appropriate subject for the remaining exact-calculation proof. The two-question
 limit was honored and no retry was attempted.
+
+After reauthentication, one separately approved no-provider proof used the validated
+page-23 amount table. The application computed the absolute difference between the
+normalized peak and off-peak amounts, `6904` and `1784`, as `5120` in 156 ms. The
+viewer marked both exact operand cells, resolved the stored region/page/crop, and
+showed the immutable `closed-table-operations-v1` trace with exact-decimal rounding.
+No upload, retry, embedding, or answer-model call occurred. The representative
+visual/table/calculation candidate gate is therefore complete; promotion remains an
+explicit decision.
 
 ### Completion gate
 
@@ -1050,10 +1059,9 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Complete one contract-valid, no-provider numeric calculation proof under a fresh bounded approval | Exact result, immutable trace, cited cells, and evidence inspection are recorded |
+| 1 | Request explicit Phase 6 profile-promotion acceptance; keep `PHASE6_PROFILE=disabled` until then | `visual-table-v1` rollout decision is recorded; `hybrid-v1` remains text default, `dense-v1` rollback and `hybrid-v3` evaluation-only |
 | 2 | Review and squash-merge green Phase 6 implementation PR #7 after candidate acceptance | The accepted reviewed tree is merged to `main`; source branch and prior tags remain preserved |
-| 3 | Decide whether the free evidence is sufficient or a separately authorized paid/provider comparison is still needed | The decision and any measured result are recorded without reusing old approval |
-| 4 | Request explicit profile-promotion acceptance; keep `PHASE6_PROFILE=disabled` until then | `hybrid-v1` remains default, `dense-v1` rollback and `hybrid-v3` evaluation-only |
+| 3 | Decide whether the completed bounded proof is sufficient or a separately authorized paid/provider comparison is still needed | The decision and any measured result are recorded without reusing old approval |
 | 5 | Create `mm-rag-v6.0.0` only after a separate explicit tag decision | Accepted merged commit and annotated immutable tag are recorded |
 
 ## Update protocol

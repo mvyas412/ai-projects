@@ -460,9 +460,9 @@ release tag was created.
 6.0–6.5 are implemented and locally verified behind `visual-table-v1`, which remains
 disabled by default. The diagram is the implemented candidate runtime. Signed-in
 application-shell/readiness/logout verification and corrected representative visual
-retrieval/evidence inspection pass. One contract-valid numeric calculation proof,
-any separately justified paid/provider comparison, explicit profile promotion,
-Phase 6 acceptance, and release tagging remain pending gates.
+retrieval/evidence inspection and safe numeric calculation pass. Any separately
+justified paid/provider comparison, explicit profile promotion, Phase 6 acceptance,
+and release tagging remain pending gates.
 
 ```mermaid
 flowchart LR
@@ -605,6 +605,13 @@ question intentionally stopped at the safe-calculation boundary because its two
 source cells contain narrative text rather than normalized numeric values; no model
 provider was called for that abstention. A separate validated numeric table must be
 used for the remaining exact-calculation proof.
+
+The follow-up no-provider proof selected normalized integer cells `6904` and `1784`
+from the validated page-23 amount table and returned the exact absolute difference
+`5120`. `evidence-v1` marked both operand cells, resolved the stored region/page/crop,
+and displayed the immutable calculation rule and rounding contract. This completed
+the representative visual/table/calculation proof without an embedding or answer-
+model call. The candidate remains disabled until explicit promotion approval.
 
 ## Phase 7 — evaluation and observability
 

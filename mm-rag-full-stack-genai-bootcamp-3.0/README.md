@@ -41,12 +41,12 @@ versioned, disabled-by-default `visual-table-v1` profile. The free synthetic
 candidate passes validation and holdout with zero provider calls; PostgreSQL
 schema/RLS, local model, Docling, lifecycle, citation-negative, and deterministic
 calculation checks pass. The signed-in representative proof now confirms corrected
-visual retrieval and exact region/table inspection; one contract-valid numeric
-calculation proof, explicit profile promotion, Phase 6 acceptance, and any
+visual retrieval, exact region/table inspection, and safe numeric calculation with
+an immutable trace. Explicit profile promotion, Phase 6 acceptance, and any
 `mm-rag-v6.0.0` tag remain separate pending gates.
 The authenticated application-shell check now passes with the personal workspace,
 READY library state, persisted grounded conversation, service readiness, and logout;
-the opt-in visual path now passes while the numeric calculation proof remains pending.
+the opt-in visual and numeric-calculation candidate proof now passes.
 
 The current `3.0` lineage contains:
 
