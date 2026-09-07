@@ -1,6 +1,6 @@
 # Multimodal RAG production project plan
 
-> Living delivery plan — updated 2026-09-03
+> Living delivery plan — updated 2026-09-07
 
 This is the version-controlled planning source of truth for the journey from the
 preserved prototype through the enterprise platform. It defines sequence, scope,
@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 6 Milestone 6.3; Milestones 6.0–6.2 completed |
+| Active milestone | Phase 6 implementation verification and review; Milestones 6.0–6.5 implemented behind a disabled profile |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -59,7 +59,7 @@ Rules:
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
-| Phase 6 | In progress — Milestones 6.0–6.2 implemented and verified |
+| Phase 6 | In progress — Milestones 6.0–6.5 implemented locally; browser acceptance and promotion pending |
 | Phases 7–9 | Planned |
 
 ## Delivery sequence and gates
@@ -88,7 +88,7 @@ security and data-integrity gates on which it depends.
 | 3 | Durable asynchronous ingestion | Retryable jobs survive service failure | Completed and accepted |
 | 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Completed and accepted |
 | 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Closed without acceptance |
-| 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | In progress — decisions accepted |
+| 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | In progress — implementation complete behind disabled profile; acceptance pending |
 | 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Planned |
 | 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Planned |
 | 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Planned |
@@ -744,11 +744,10 @@ then reranking a bounded candidate set.
 ## Phase 6 — visual and table intelligence
 
 **Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. Milestones
-6.0–6.2 implement the deterministic evaluation contract, immutable region/artifact
-provenance, local structural extraction, and opt-in authorized visual retrieval.
-Milestone 6.3 is next.
-Paid/provider evaluation, profile promotion, and release tagging remain separate
-explicit gates.
+6.0–6.5 are implemented and locally verified on the Phase 6 review branch behind
+the disabled-by-default `visual-table-v1` profile. Signed-in browser proof, explicit
+profile promotion, Phase 6 acceptance, and release tagging remain separate gates.
+No paid/provider Phase 6 run has been authorized or executed.
 
 ### Objective
 
@@ -762,9 +761,9 @@ of depending mainly on OCR text and Markdown representations.
 | 6.0 | Visual/table corpus, questions, and baseline quality measures | Completed — 40 regions, 80 questions, protected splits, reproducible free baseline and gates |
 | 6.1 | Versioned visual crops, provenance, captions, OCR, and summaries | Completed — migration `20260903_0014`, immutable objects, Docling/Tesseract/TableFormer local profile |
 | 6.2 | Multimodal image embeddings and modality-aware retrieval | Completed — pinned local CLIP pair, isolated scoped index, deterministic router/RRF, text fallback |
-| 6.3 | Table structure reconstruction, typing, validation, and normalized storage | Accepted — ADR 0029; not started |
-| 6.4 | Query routing for semantic retrieval versus safe exact calculation | Accepted — ADRs 0028–0029; not started |
-| 6.5 | Evidence viewer for page region, figure, table, and calculation provenance | Accepted — ADR 0030; not started |
+| 6.3 | Table structure reconstruction, typing, validation, and normalized storage | Implemented — migrations `20260907_0015`/`0016`, immutable JSON/CSV, composite scope and RLS |
+| 6.4 | Query routing for semantic retrieval versus safe exact calculation | Implemented — closed typed executor, deterministic routing, safe ambiguity/unsupported abstention |
+| 6.5 | Evidence viewer for page region, figure, table, and calculation provenance | Implemented — `evidence-v1` API, integrity-checked streams, region/cell/calculation viewer; browser proof pending |
 
 ### Accepted decision sequence
 
@@ -810,6 +809,33 @@ for every query; a deterministic query-only router adds the visual leg for visua
 intent, then application-owned RRF fuses bounded results. Any visual dependency or
 validation failure returns to the authorized text order. This remains opt-in and
 does not promote a Phase 6 profile.
+
+Milestone 6.3 persists generation-scoped `table_regions`, `table_columns`, and
+`table_cells` beneath composite workspace/document/version/generation/attempt
+constraints and PostgreSQL RLS. Raw values, normalized typed values, spans, header
+associations, units/currencies, source coordinates, validation codes, and immutable
+normalized JSON/CSV objects remain inspectable. A structurally unusable table keeps
+its visual/text evidence but cannot enter exact calculation.
+
+Milestone 6.4 routes only recognized calculation intent to an application-owned,
+closed operation plan. It supports lookup, count, sum, average, min/max, difference,
+and ratio over currently authorized active-generation cells. `calculation_traces`
+record immutable operator, ordered operands, types, units, rounding, result, and a
+query hash. Ambiguous tables/columns/rows, mixed units, unsupported values, and
+division by zero abstain; no generated SQL or arbitrary analytical runtime exists.
+
+Milestone 6.5 resolves persisted citation labels through current conversation and
+document policy, active generation, and region/table/cell/trace identity. It verifies
+artifact metadata and bytes before streaming, exposes no storage key, and gives the
+Streamlit viewer page/crop highlighting, provenance-labeled layers, semantic tables
+with non-color-only cited-cell markers, and calculation details. Lifecycle purge and
+orphan inventory now cover visual vectors and both attempt/final artifact namespaces.
+
+The frozen free `visual-table-v1` synthetic candidate passes validation before
+holdout and then passes holdout: Recall/MRR/nDCG@10, source coverage, exact
+calculation, and safe abstention are `1.0`; identity/citation errors and provider
+calls are zero; nominal p95 is 2 ms. This verifies the deterministic fixture
+contract, not signed-in product behavior or production-quality generalization.
 
 ### Completion gate
 
@@ -973,11 +999,11 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Implement Milestone 6.3 under accepted ADR 0029 | Immutable normalized tables, columns, cells, validation, and object exports preserve source provenance and RLS |
-| 2 | Implement Milestone 6.4 routing and the closed calculation contract | Supported operations are deterministic and ambiguous/unsupported requests abstain without generated SQL |
-| 3 | Implement Milestone 6.5 evidence APIs/viewer and staged rollout | Users can inspect authorized regions, tables, and calculation traces without object-store coordinates |
-| 4 | Preserve `hybrid-v1` as default, `dense-v1` as rollback, and `hybrid-v3` as evaluation-only | Phase 6 implementation causes no hidden Phase 5 rollout change |
-| 5 | Require separate explicit approval for any paid evaluation, provider vision call, profile promotion, or release tag | ADR acceptance grants none of those actions |
+| 1 | Publish the reviewed Phase 6 implementation branch through required PR checks | Migrations, free evaluation, model, unit, integration, coverage, and diff gates pass on the reviewed tree |
+| 2 | Run the signed-in Phase 6 browser proof only after explicit acceptance-run approval | Visual/table retrieval, exact calculation, evidence inspection, persistence, denial, fallback, narrow/desktop, and light/dark states are recorded |
+| 3 | Decide whether the free evidence is sufficient or a separately authorized paid/provider comparison is still needed | The decision and any measured result are recorded without reusing old approval |
+| 4 | Request explicit profile-promotion acceptance; keep `PHASE6_PROFILE=disabled` until then | `hybrid-v1` remains default, `dense-v1` rollback and `hybrid-v3` evaluation-only |
+| 5 | Create `mm-rag-v6.0.0` only after a separate explicit tag decision | Accepted merged commit and annotated immutable tag are recorded |
 
 ## Update protocol
 

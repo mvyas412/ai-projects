@@ -17,9 +17,11 @@ from backend.app.visual.evaluation import (
     evaluate_validation_then_holdout,
     lexical_baseline_results,
     load_dataset,
+    local_structured_candidate_results,
     phase6_gate,
 )
 from scripts.build_phase6_v1_fixture import rendered_files
+from scripts.run_phase6_candidate import rendered_summary as rendered_candidate_summary
 from scripts.run_phase6_evaluation import rendered_summary
 
 DATASET = PROJECT_ROOT / "evaluation/phase6/v1"
@@ -70,6 +72,34 @@ def test_phase6_baseline_is_reproducible_free_and_withholds_holdout() -> None:
     assert summary["provider_calls"] == 0
     assert set(summary["splits"]) == {"tune", "validation"}
     assert "p6v1-q" not in rendered.decode()
+
+
+def test_frozen_free_candidate_passes_validation_before_holdout() -> None:
+    rendered = rendered_candidate_summary()
+    summary = json.loads(rendered)
+    assert summary["gate"] == {"failures": [], "passed": True}
+    assert summary["holdout"]["recall_at_10"] == 1
+    assert summary["holdout"]["calculation_accuracy"] == 1
+    assert summary["provider_calls"] == 0
+    assert "p6v1-q" not in rendered.decode()
+
+
+def test_local_candidate_abstains_for_every_protected_negative() -> None:
+    regions, questions = load_dataset(DATASET)
+    for split in ("validation", "holdout"):
+        results = {
+            result.query_id: result
+            for result in local_structured_candidate_results(
+                regions, questions, split=split
+            )
+        }
+        negatives = [
+            question
+            for question in questions
+            if question.split == split and not question.answerable
+        ]
+        assert all(results[question.query_id].abstained for question in negatives)
+        assert all(not results[question.query_id].cited_region_ids for question in negatives)
 
 
 def test_phase6_metrics_validate_scope_citations_calculations_and_abstention() -> None:

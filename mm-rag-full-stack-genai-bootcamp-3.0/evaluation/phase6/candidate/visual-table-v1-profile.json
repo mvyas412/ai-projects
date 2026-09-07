@@ -1,0 +1,21 @@
+{
+  "candidate_revision": "visual-table-v1",
+  "dataset_revision": "phase6-visual-table-v1",
+  "fixture_representation": "authorized source_text region evidence",
+  "calculation_contract": "closed-table-operations-v1",
+  "evidence_contract": "evidence-v1",
+  "provider_call_budget": 0,
+  "retrieval_p95_budget_ms": 50.0,
+  "text_baseline_recall": 1.0,
+  "text_candidate_recall": 1.0,
+  "text_baseline_mrr": 1.0,
+  "text_candidate_mrr": 1.0,
+  "fingerprinted_sources": [
+    "backend/app/visual/evaluation.py",
+    "backend/app/visual/extraction.py",
+    "backend/app/visual/retrieval.py",
+    "backend/app/tables/normalization.py",
+    "backend/app/tables/calculation.py",
+    "backend/app/services/evidence.py"
+  ]
+}

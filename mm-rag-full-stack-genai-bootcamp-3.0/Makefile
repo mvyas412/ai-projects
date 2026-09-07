@@ -63,6 +63,7 @@ phase5-evaluation:
 phase6-evaluation:
 	uv run python -m scripts.build_phase6_v1_fixture --check
 	uv run python -m scripts.run_phase6_evaluation --check
+	uv run python -m scripts.run_phase6_candidate --check
 
 check:
 	./scripts/verify_phase3.sh

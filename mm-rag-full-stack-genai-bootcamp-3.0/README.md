@@ -36,6 +36,12 @@ reproduction. The default
 deterministic RRF;
 `dense-v1` remains the rollback path, and `hybrid-rerank-v1` remains opt-in until
 measured evidence proves the bounded local cross-encoder improves quality.
+Phase 6 Milestones 6.0–6.5 are implemented on the review branch behind the
+versioned, disabled-by-default `visual-table-v1` profile. The free synthetic
+candidate passes validation and holdout with zero provider calls; PostgreSQL
+schema/RLS, local model, Docling, lifecycle, citation-negative, and deterministic
+calculation checks pass. Signed-in browser proof, explicit profile promotion,
+Phase 6 acceptance, and any `mm-rag-v6.0.0` tag remain separate pending gates.
 
 The current `3.0` lineage contains:
 
@@ -73,6 +79,10 @@ The current `3.0` lineage contains:
   120 chunks and 80 balanced queries with protected 48/16/16 splits, class-level
   gates, validation-before-holdout execution, a frozen selector fingerprint, and
   an explicit paid runner whose raw results remain Git-ignored.
+- Immutable visual regions/artifacts, pinned local Docling and CLIP models, scoped
+  visual indexing, and deterministic modality-aware fusion behind an opt-in profile.
+- PostgreSQL-normalized tables and calculation traces, a closed typed arithmetic
+  executor, `evidence-v1` resolution/streaming, and exact-region/cell inspection.
 - A presentation-focused native Streamlit experience with top navigation,
   workspace switching, document/collection management, persistent chat,
   evidence inspection, first-document guidance, downloads, settings, and
@@ -140,10 +150,11 @@ The [current workflow and DEV architecture](docs/architecture/current/mm-rag-cur
 shows the Phase 5 runtime checkpoint, including hybrid retrieval and the failed v4
 paid nDCG gate. Phase 5 is closed without candidate promotion. Phase 6 decision
 kickoff PR #6 was squash-merged at `95d18b3`, and ADRs 0025–0030 were accepted on
-2026-09-03. Milestones 6.0–6.2 now provide the free deterministic visual/table
-corpus, immutable local extraction, and opt-in visual retrieval. The Phase 5 text
-path remains the default, so the current poster remains the accepted default-runtime
-view until Phase 6 rollout is approved.
+2026-09-03. Milestones 6.0–6.5 now provide the deterministic visual/table corpus,
+immutable local extraction and visual retrieval, normalized tables, exact
+calculation, and backend-mediated evidence inspection. The Phase 5 text path remains
+the default, so the current poster remains the accepted default-runtime view until
+Phase 6 rollout is approved.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
@@ -222,6 +233,22 @@ with deterministic RRF. Missing models, collection failures, malformed points, o
 scope mismatches expose no visual candidate and preserve the authorized text result.
 The feature remains disabled by default.
 
+Milestones 6.3–6.4 add migrations `20260907_0015` and `20260907_0016` for immutable,
+tenant-scoped table regions, columns, cells, and exact-calculation traces.
+Normalized JSON/CSV artifacts preserve raw values beside typed values, spans,
+headers, units, currencies, and cell coordinates. Only validated tables enter the
+closed `lookup`, `count`, `sum`, `average`, `minimum`, `maximum`, `difference`, and
+`ratio` executor. Ambiguous, malformed, unsupported, or mixed-unit requests abstain;
+no generated SQL is accepted.
+
+Milestone 6.5 adds the versioned `evidence-v1` descriptor and authorized artifact
+streaming API. Every request rechecks current conversation/document policy, active
+generation, region/table/cell/trace identity, and object size/media type/SHA-256.
+The Streamlit viewer highlights the exact page region and cited cells, shows
+provenance layers and calculation operands, and never exposes storage keys or
+credentials. Lifecycle reconciliation now covers both visual vectors and all
+attempt/final visual artifacts.
+
 ## Prerequisites
 
 - [uv](https://docs.astral.sh/uv/)
@@ -264,6 +291,10 @@ artifacts. Its exact 15-file, 701,214,178-byte tree is checksum-bound in code. T
 paired CLIP image/text snapshots are also revision- and checksum-bound. Runtime
 extraction and visual embedding fail closed if required bytes are missing or changed;
 neither request nor worker paths download models.
+
+`PHASE6_PROFILE=disabled` is the safe default. `visual-table-v1` identifies the
+review candidate, but enabling it in a shared or acceptance environment is a
+separate rollout action after the required approval and preflight.
 
 ## Configure local settings
 
@@ -497,6 +528,8 @@ The same gates are available through stable commands:
 make check       # locked dependencies, lint, types, tests, migration head, diff hygiene
 make check-live  # also checks live services and the SeaweedFS provider contract
 make phase5-evaluation  # validates the free hashed 80-query v4 benchmark contract
+make phase6-models-verify  # verifies pinned local Docling and CLIP trees
+make phase6-evaluation  # validates the free Phase 6 baseline and candidate gate
 make check-acceptance PHASE5_EMBEDDING_COST_USD_PER_MILLION_TOKENS=<current-rate>
 ```
 

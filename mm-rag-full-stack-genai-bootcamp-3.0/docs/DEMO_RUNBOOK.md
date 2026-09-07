@@ -2,14 +2,17 @@
 
 This runbook presents the accepted durable/governed foundation and the closed
 Phase 5 hybrid-retrieval implementation while keeping all release tags immutable.
-PR #5 was squash-merged at `5436614`. Phase 6 ADRs 0025–0030 are accepted, but no
-Phase 6 runtime implementation exists yet, so demonstrated behavior remains the
-Phase 5 checkpoint.
+PR #5 was squash-merged at `5436614`. Phase 6 ADRs 0025–0030 and Milestones
+6.0–6.5 are implemented on the review branch, but `PHASE6_PROFILE=disabled` remains
+the safe default. Until signed-in browser acceptance and explicit promotion, the
+accepted demonstration remains the Phase 5 checkpoint.
 
 ## Before the session
 
 1. From the `3.0` directory, run `make setup` once. This provisions and verifies
-   the pinned free BM25 and reranker artifacts outside request handling.
+   the pinned free BM25 and reranker artifacts outside request handling. Before a
+   Phase 6 candidate proof, also run `make phase6-models` and
+   `make phase6-models-verify`.
 2. Confirm ignored `.env` and `.streamlit/secrets.toml` contain the local Auth0,
    PostgreSQL, Qdrant, SeaweedFS, RabbitMQ, and OpenAI settings. Never display them.
 3. Run `make services`, `make migrate`, and `make runtime`.
@@ -38,6 +41,29 @@ from every free gate.
 7. **Operations:** show aggregate `make operations-status` output and explain the
    separate dispatcher/worker health, safe alerts, retention preview, and restore proof.
 8. **Logout:** sign out and verify the protected workspace is no longer visible.
+
+## Phase 6 candidate proof — explicit gate only
+
+Do not switch the default profile merely to demonstrate implementation. After an
+explicit acceptance-run approval, set the ignored environment to
+`PHASE6_PROFILE=visual-table-v1`, rebuild/restart the API and worker, run migrations,
+and complete the following with a representative visual/table PDF:
+
+1. Confirm the worker starts only with checksum-verified local Docling and CLIP trees.
+2. Upload once and verify immutable promotion reports visual regions and validated tables.
+3. Ask a visual relationship/table lookup and inspect the exact outlined page region.
+4. Ask one supported exact calculation and inspect cited cells, ordered operands,
+   unit/currency, rounding rule, and result.
+5. Refresh and sign out/in; confirm the evidence persists for the authorized user.
+6. Verify another tenant, stale generation, tombstone, and corrupted artifact receive
+   generic unavailable responses and no bytes.
+7. Check desktop/narrow widths, light/dark themes, keyboard controls, zoom, and
+   non-color-only highlighting.
+8. Stop on any failure and restore `PHASE6_PROFILE=disabled`; promotion requires a
+   separate explicit acceptance decision.
+
+Uploading/indexing or asking through the live model boundary may incur provider cost.
+Obtain fresh explicit authorization before this proof; prior Phase 5 approvals do not apply.
 
 ## Failure-safe talking points
 
@@ -118,4 +144,11 @@ from every free gate.
   the reviewed source tree and merged tree match, and no Phase 5 release tag exists.
 - Phase 6 decision kickoff PR #6 was squash-merged at `95d18b3`. ADRs 0025–0030
   were accepted on 2026-09-03, authorizing implementation in milestone order.
-  Runtime behavior remains unchanged, and no paid Phase 6 run is authorized.
+- Milestones 6.0–6.5 are implemented behind `visual-table-v1`: immutable visual and
+  table provenance, scoped CLIP retrieval, normalized table/cell storage, closed
+  Decimal calculation, `evidence-v1`, integrity-checked artifact streaming, and the
+  region/table/calculation viewer. The free synthetic candidate passes validation
+  then holdout with zero provider calls. Local schema/RLS, model, Docling, lifecycle,
+  and citation-negative checks pass.
+- Browser proof, profile promotion, acceptance, and any Phase 6 tag remain pending.
+  No paid/provider Phase 6 run is authorized.
