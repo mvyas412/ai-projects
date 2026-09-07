@@ -853,6 +853,28 @@ and another paid run requires fresh authorization. The corrected repository gate
 passes 262 tests with 14 expected opt-in skips; the free live-service gate passes
 275 tests with one expected skip, migration head `20260907_0016`, and no schema drift.
 
+The approved successor candidate then succeeded on its first and only attempt. Its
+promoted manifest records 31 dense text vectors with the explicit legacy sparse
+fallback, 33 visual regions/vectors, 193 immutable artifacts, 23 reconstructed
+tables, 21 calculation-eligible tables, and 523 cells. The first question returned
+the correct 30-day Clause 11.4 answer with page-4 evidence. The second, explicitly
+visual heatmap question safely abstained because generic `which`/`what is` table-
+lookup routing ran before visual retrieval. The third question was not submitted.
+Free diagnostics proved the authorized visual index returns the page-12 heatmap as
+its top result. Explicit visual intent now takes precedence over generic lookup
+wording while true table-calculation failures remain fail-closed. A fresh paid run
+is required to validate that correction; the Phase 6 acceptance gate remains open.
+The corrected full repository gate passes 263 tests with 14 expected skips, and the
+free live-service gate passes 276 tests with one expected skip. The persistent-
+database outbox lease proof now uses an isolated synthetic clock so unrelated
+legitimate due events cannot make the concurrency assertion nondeterministic.
+Real-role verification also found that PostgreSQL privilege-checks the `documents`
+table referenced by the ingestion-job RLS policy before evaluating the dispatcher's
+privileged-purpose branch. Migration `20260907_0017` supplies only the required
+`SELECT` grant: document RLS continues to return no rows to the dispatcher, while
+authorized job selection succeeds. After the migration, the dispatcher started
+cleanly and drained all pending terminal-job outbox events.
+
 ### Completion gate
 
 - Visual and table Recall@k improves over OCR/Markdown-only baselines.

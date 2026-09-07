@@ -244,6 +244,11 @@ closed `lookup`, `count`, `sum`, `average`, `minimum`, `maximum`, `difference`, 
 `ratio` executor. Ambiguous, malformed, unsupported, or mixed-unit requests abstain;
 no generated SQL is accepted.
 
+Migration `20260907_0017` grants the dispatcher role the narrow `SELECT` privilege
+needed to evaluate the existing ingestion-job RLS policy's document relationship.
+Document RLS still returns no document rows to the dispatcher; the grant only lets
+PostgreSQL evaluate the policy so authorized job/outbox dispatch can proceed.
+
 Milestone 6.5 adds the versioned `evidence-v1` descriptor and authorized artifact
 streaming API. Every request rechecks current conversation/document policy, active
 generation, region/table/cell/trace identity, and object size/media type/SHA-256.

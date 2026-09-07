@@ -10,7 +10,14 @@ from sqlalchemy.exc import DBAPIError
 from backend.app.core.config import get_settings
 from backend.app.db.rls import DatabasePurpose, set_rls_context
 from backend.app.db.session import create_database_engine, create_session_factory
-from backend.app.models import Document, User, Workspace, WorkspaceMembership, WorkspaceRole
+from backend.app.models import (
+    Document,
+    IngestionJob,
+    User,
+    Workspace,
+    WorkspaceMembership,
+    WorkspaceRole,
+)
 
 
 @pytest.mark.integration
@@ -113,10 +120,17 @@ def test_postgres_rls_isolates_unscoped_queries_and_runtime_roles() -> None:
                 )
                 session.execute(text("ALTER TABLE documents DISABLE ROW LEVEL SECURITY"))
 
-        with pytest.raises(DBAPIError):
-            with factory.begin() as session:
-                set_rls_context(session, purpose=DatabasePurpose.DISPATCHER)
-                session.scalar(select(Document.id).limit(1))
+        with factory.begin() as session:
+            set_rls_context(session, purpose=DatabasePurpose.DISPATCHER)
+            assert list(session.scalars(select(Document.id).limit(1))) == []
+
+        with factory.begin() as session:
+            session.execute(text("SET LOCAL ROLE mm_rag_dispatcher"))
+            set_rls_context(session, purpose=DatabasePurpose.DISPATCHER)
+            # The role can evaluate the job policy's document dependency but RLS
+            # still exposes no document rows to the dispatcher itself.
+            list(session.scalars(select(IngestionJob.id).limit(1)))
+            assert list(session.scalars(select(Document.id).limit(1))) == []
     finally:
         with factory.begin() as session:
             session.execute(

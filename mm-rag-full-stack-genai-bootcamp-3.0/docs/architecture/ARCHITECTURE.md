@@ -578,6 +578,25 @@ separate reviewed operation, so this fallback does not silently rewrite accepted
 data or claim sparse availability. The corrected full repository and free live gates
 pass with migration head `20260907_0016` and no schema drift.
 
+The next bounded successor ingestion promoted successfully with text, visual, and
+structured-table outputs. Text regression and evidence inspection passed, but an
+explicit heatmap question was intercepted by the broad table lookup phrases
+`which`/`what is` and safely abstained before retrieval. No third question ran.
+Local CLIP/Qdrant diagnostics then returned the authorized page-12 heatmap figure
+first and its companion table third, isolating the failure to routing precedence.
+Conversation routing now gives explicit figure/chart/image intent priority over
+generic lookup language; unsupported or ambiguous actual calculations continue to
+abstain rather than fall through to generated arithmetic. This correction still
+requires a separately authorized paid browser proof before profile promotion.
+The corrected repository and free live-service gates pass 263 and 276 tests
+respectively, with no schema drift. Real-role dispatcher verification then exposed
+that PostgreSQL must privilege-check the `documents` table referenced by the
+`ingestion_jobs` RLS policy before evaluating its dispatcher-purpose branch.
+Migration `20260907_0017` grants the dispatcher role narrow read access to satisfy
+that policy dependency. Document RLS still exposes no document rows to that role,
+while authorized ingestion-job selection succeeds and the dispatcher drains its
+outbox normally.
+
 ## Phase 7 — evaluation and observability
 
 **Status:** Planned. Use a vendor-neutral telemetry boundary where practical.
