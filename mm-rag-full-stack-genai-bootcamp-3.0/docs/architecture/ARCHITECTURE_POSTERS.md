@@ -4,12 +4,12 @@
 > The handbook remains the editable source of truth; regenerate these posters
 > whenever architecture, data flow, technology, or phase status changes.
 
-## Current Phase 5 workflow and DEV architecture
+## Current Phase 6 workflow and DEV architecture
 
-This implementation checkpoint shows the accepted Phase 3/4 runtime and governance
-boundaries plus immutable sparse indexing, authorized dense/BM25 retrieval,
-deterministic RRF, the verified free v3 remediation, optional local reranking, and
-the remaining paid quality gate.
+This accepted release view shows the Phase 3/4 runtime and governance boundaries,
+Phase 5 hybrid retrieval foundation, and Phase 6 visual/table extraction, scoped
+CLIP retrieval, exact calculation, evidence inspection, and release status at
+`mm-rag-v6.0.0`.
 
 ![MM-RAG current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 
@@ -49,6 +49,8 @@ live-service evidence and are accepted in PR #3's squash commit `57ee453`.
 ![Phase 5 hybrid retrieval, fusion, and reranking](images/05-phase-5-hybrid-retrieval.png)
 
 ## Phase 6 — Visual and table intelligence
+
+This poster records the accepted and released Phase 6 visual/table architecture.
 
 ![Phase 6 visual and table intelligence](images/06-phase-6-visual-table-intelligence.png)
 
