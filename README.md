@@ -25,12 +25,12 @@ the paid gate. Phase 5 is therefore implementation-complete but closed without
 quality acceptance; `hybrid-v1` remains the default and `dense-v1` remains rollback.
 
 Phase 6 decision kickoff PR #6 was squash-merged into `main` at `95d18b3`.
-ADRs 0025–0030 were accepted on 2026-09-03 and define the
-evaluation, immutable provenance, local-first extraction, visual retrieval,
-structured-table calculation, evidence-viewer, and rollout contracts. Implementation
-continues on `codex/phase6-visual-table-implementation`, beginning with the free
-Milestone 6.0 evaluation baseline. No Phase 6 runtime change, paid run, profile
-promotion, or release tag has occurred yet.
+ADRs 0025–0030 define the accepted evaluation, immutable provenance, local-first
+extraction, visual retrieval, structured-table calculation, evidence-viewer, and
+rollout contracts. Milestones 6.0–6.5 and the signed-in visual/table/calculation
+proof pass on `codex/phase6-visual-table-implementation`; `visual-table-v1` is the
+accepted default with an explicit disabled rollback. PR #7 is pending its approved
+squash merge. No Phase 6 release tag has been created.
 
 See the latest application's tracked project plan and architecture handbook for
 scope and status. Secrets, local context, environments, and generated data remain

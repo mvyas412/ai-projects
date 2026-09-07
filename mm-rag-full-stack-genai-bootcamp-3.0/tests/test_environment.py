@@ -54,4 +54,4 @@ def test_compose_runtime_receives_the_phase6_profile() -> None:
     compose = (PROJECT_ROOT / "compose.yaml").read_text(encoding="utf-8")
 
     # The shared runtime environment feeds both dispatcher and worker containers.
-    assert "PHASE6_PROFILE: ${PHASE6_PROFILE:-disabled}" in compose
+    assert "PHASE6_PROFILE: ${PHASE6_PROFILE:-visual-table-v1}" in compose

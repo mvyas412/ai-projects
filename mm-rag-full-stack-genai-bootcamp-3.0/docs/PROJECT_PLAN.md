@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 6 candidate browser acceptance; PR #7 checks and authenticated shell verification pass |
+| Active milestone | Phase 6 accepted; PR #7 approved for squash merge after refreshed checks |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -59,7 +59,7 @@ Rules:
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
-| Phase 6 | In progress — Milestones 6.0–6.5 implemented; PR #7 checks and representative visual/table/calculation browser proof pass; promotion pending |
+| Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phases 7–9 | Planned |
 
 ## Delivery sequence and gates
@@ -88,7 +88,7 @@ security and data-integrity gates on which it depends.
 | 3 | Durable asynchronous ingestion | Retryable jobs survive service failure | Completed and accepted |
 | 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Completed and accepted |
 | 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Closed without acceptance |
-| 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | In progress — implementation complete behind disabled profile; acceptance pending |
+| 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Completed and accepted; `visual-table-v1` promoted with explicit rollback |
 | 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Planned |
 | 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Planned |
 | 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Planned |
@@ -743,13 +743,12 @@ then reranking a bounded candidate set.
 
 ## Phase 6 — visual and table intelligence
 
-**Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. Milestones
-6.0–6.5 are implemented and locally verified on the Phase 6 review branch behind
-the disabled-by-default `visual-table-v1` profile. PR #7 checks and the authenticated
-application-shell/readiness/logout verification pass. The corrected representative
-visual retrieval, region/table evidence, and numeric calculation proof also passes.
-Explicit profile promotion, Phase 6 acceptance, and release tagging remain separate
-gates.
+**Status:** Completed and accepted. ADRs 0025–0030, Milestones 6.0–6.5, free and
+live-service gates, signed-in application-shell checks, corrected representative
+visual retrieval, exact region/table evidence, safe abstention, and immutable numeric
+calculation all pass. On 2026-09-07 the user promoted `visual-table-v1` as the
+accepted default with `disabled` retained as explicit rollback. PR #7 is approved
+for squash merge after refreshed checks; release tagging remains a separate gate.
 A single bounded paid candidate attempt was authorized and executed on 2026-09-07,
 but it stopped before visual/table processing and therefore is not acceptance evidence.
 
@@ -1059,9 +1058,9 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Request explicit Phase 6 profile-promotion acceptance; keep `PHASE6_PROFILE=disabled` until then | `visual-table-v1` rollout decision is recorded; `hybrid-v1` remains text default, `dense-v1` rollback and `hybrid-v3` evaluation-only |
-| 2 | Review and squash-merge green Phase 6 implementation PR #7 after candidate acceptance | The accepted reviewed tree is merged to `main`; source branch and prior tags remain preserved |
-| 3 | Decide whether the completed bounded proof is sufficient or a separately authorized paid/provider comparison is still needed | The decision and any measured result are recorded without reusing old approval |
+| 1 | Run refreshed gates and squash-merge approved Phase 6 implementation PR #7 | The accepted reviewed tree is merged to `main`; source branch and prior tags remain preserved |
+| 2 | Record the Phase 6 squash merge without moving prior release tags | Main/source tree identity and merge commit are recorded |
+| 3 | Start Phase 7 decision kickoff only after explicit user direction | Observability/evaluation alternatives and ADR sequence are reviewed before implementation |
 | 5 | Create `mm-rag-v6.0.0` only after a separate explicit tag decision | Accepted merged commit and annotated immutable tag are recorded |
 
 ## Update protocol

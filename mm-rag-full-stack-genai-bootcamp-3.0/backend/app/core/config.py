@@ -105,7 +105,7 @@ class Settings(BaseSettings):
     rag_rerank_max_characters: int = Field(default=4000, ge=256, le=16000)
     rag_model_threads: int = Field(default=2, ge=1, le=16)
     phase5_model_cache_dir: Path = PROJECT_ROOT / "data/runtime/models"
-    phase6_profile: Literal["disabled", "visual-table-v1"] = "disabled"
+    phase6_profile: Literal["disabled", "visual-table-v1"] = "visual-table-v1"
     phase6_extraction_profile: Literal["structural-v1"] = "structural-v1"
     phase6_docling_artifacts_path: Path = PROJECT_ROOT / "data/runtime/docling-models"
     phase6_docling_timeout_seconds: int = Field(default=300, ge=30, le=1800)
@@ -125,7 +125,7 @@ class Settings(BaseSettings):
 
     @property
     def phase6_enabled(self) -> bool:
-        """Keep the Phase 6 candidate behind one versioned environment gate."""
+        """Keep the accepted Phase 6 capability behind one reversible profile gate."""
 
         return self.phase6_profile == "visual-table-v1"
 

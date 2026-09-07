@@ -36,14 +36,14 @@ reproduction. The default
 deterministic RRF;
 `dense-v1` remains the rollback path, and `hybrid-rerank-v1` remains opt-in until
 measured evidence proves the bounded local cross-encoder improves quality.
-Phase 6 Milestones 6.0–6.5 are implemented on the review branch behind the
-versioned, disabled-by-default `visual-table-v1` profile. The free synthetic
+Phase 6 Milestones 6.0–6.5 are implemented and accepted with the versioned
+`visual-table-v1` profile promoted as the default. The free synthetic
 candidate passes validation and holdout with zero provider calls; PostgreSQL
 schema/RLS, local model, Docling, lifecycle, citation-negative, and deterministic
 calculation checks pass. The signed-in representative proof now confirms corrected
 visual retrieval, exact region/table inspection, and safe numeric calculation with
-an immutable trace. Explicit profile promotion, Phase 6 acceptance, and any
-`mm-rag-v6.0.0` tag remain separate pending gates.
+an immutable trace. PR #7's approved squash merge and any `mm-rag-v6.0.0` tag
+remain separate pending gates.
 The authenticated application-shell check now passes with the personal workspace,
 READY library state, persisted grounded conversation, service readiness, and logout;
 the opt-in visual and numeric-calculation candidate proof now passes.
@@ -214,7 +214,8 @@ Accepted Phase 6 decisions are:
 These ADRs authorize implementation in milestone order, beginning with the free
 evaluation contract. Exact artifacts remain subject to pinned revision, license,
 checksum, and measured acceptance requirements. Provider calls, paid evaluation,
-profile promotion, and a release tag still require their separate explicit gates.
+profile promotion, and release tagging use separate explicit gates; the promotion
+gate has now passed while tagging remains undecided.
 
 The committed Milestone 6.0 fixture contains 40 synthetic public-safe regions and
 80 questions across figure relationships, charts, table lookup, calculation, and
@@ -236,7 +237,7 @@ version, generation, page, region, and profile identity. A query-only visual-int
 router adds the visual leg to the always-run text path and fuses authorized results
 with deterministic RRF. Missing models, collection failures, malformed points, or
 scope mismatches expose no visual candidate and preserve the authorized text result.
-The feature remains disabled by default.
+The feature is accepted by default with `PHASE6_PROFILE=disabled` as rollback.
 
 Milestones 6.3–6.4 add migrations `20260907_0015` and `20260907_0016` for immutable,
 tenant-scoped table regions, columns, cells, and exact-calculation traces.
@@ -302,9 +303,9 @@ paired CLIP image/text snapshots are also revision- and checksum-bound. Runtime
 extraction and visual embedding fail closed if required bytes are missing or changed;
 neither request nor worker paths download models.
 
-`PHASE6_PROFILE=disabled` is the safe default. `visual-table-v1` identifies the
-review candidate, but enabling it in a shared or acceptance environment is a
-separate rollout action after the required approval and preflight.
+`PHASE6_PROFILE=visual-table-v1` is the accepted default. Set
+`PHASE6_PROFILE=disabled` for the explicit Phase 6 rollback; this does not change
+the accepted `hybrid-v1` text default or `dense-v1` text rollback.
 
 ## Configure local settings
 

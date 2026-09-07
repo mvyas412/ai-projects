@@ -27,10 +27,11 @@ user-approved closure now ends Phase 5 without candidate promotion. PR #5 was
 squash-merged at `5436614`. Phase 6 kickoff PR #6 was squash-merged at `95d18b3`,
 and ADRs 0025–0030 were accepted on 2026-09-03. Milestones 6.0–6.5 are implemented
 on the review branch, including the free candidate gate, normalized tables, closed
-calculation, and evidence inspection. `PHASE6_PROFILE=disabled` remains the default;
-the authenticated application shell, inherited READY library/conversation
-persistence, readiness, and logout boundary pass. The opt-in visual/table candidate
-proof, profile promotion, acceptance, and release tagging are still pending.
+calculation, and evidence inspection. The authenticated application shell, inherited
+READY library/conversation persistence, readiness, representative visual/table/
+calculation proof, and logout boundary pass. `visual-table-v1` is now the accepted
+default with `disabled` retained as explicit rollback. PR #7 squash merge and release
+tagging remain separate gates.
 
 ## Status legend
 
@@ -180,7 +181,7 @@ flowchart LR
     p3["Phase 3<br/>Async ingestion<br/>Completed"] -->
     p4["Phase 4<br/>Governance foundation<br/>Completed / v4.0.0"] -->
     p5["Phase 5<br/>Hybrid retrieval<br/>Closed / gate not met"] -->
-    p6["Phase 6<br/>Visual/table intelligence<br/>Implemented / acceptance pending"] -->
+    p6["Phase 6<br/>Visual/table intelligence<br/>Completed / accepted"] -->
     p7["Phase 7<br/>Evaluation/observability<br/>Planned"] -->
     p8["Phase 8<br/>Scalable platform<br/>Planned"] -->
     p9["Phase 9<br/>Enterprise platform<br/>Planned"]
@@ -193,7 +194,7 @@ flowchart LR
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
 | 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and preserved at `mm-rag-v4.0.0` |
 | 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | Closed without acceptance; v4 nDCG gate missed and no candidate was promoted |
-| 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | In progress; Milestones 6.0–6.5 implemented behind a disabled versioned profile; authenticated shell check passed, candidate browser proof pending |
+| 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | Completed and accepted; `visual-table-v1` promoted after free/live and signed-in candidate proof |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
 | 8 | Independently scalable deployment | Gateway, API/workers, dedicated frontend TBD, managed services | Managed PostgreSQL, Qdrant, object storage | Planned |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Planned |
@@ -456,13 +457,12 @@ release tag was created.
 
 ## Phase 6 — visual and table intelligence
 
-**Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. Milestones
-6.0–6.5 are implemented and locally verified behind `visual-table-v1`, which remains
-disabled by default. The diagram is the implemented candidate runtime. Signed-in
-application-shell/readiness/logout verification and corrected representative visual
-retrieval/evidence inspection and safe numeric calculation pass. Any separately
-justified paid/provider comparison, explicit profile promotion, Phase 6 acceptance,
-and release tagging remain pending gates.
+**Status:** Completed and accepted. ADRs 0025–0030 and Milestones 6.0–6.5 are
+implemented and verified. Signed-in application-shell/readiness/logout, corrected
+representative visual retrieval, exact evidence inspection, safe abstention, and
+numeric calculation pass. `visual-table-v1` is the accepted default and `disabled`
+is the explicit rollback. Phase 5 text profiles remain unchanged. PR #7 squash merge
+and release tagging remain separate gates.
 
 ```mermaid
 flowchart LR
@@ -586,8 +586,9 @@ Local CLIP/Qdrant diagnostics then returned the authorized page-12 heatmap figur
 first and its companion table third, isolating the failure to routing precedence.
 Conversation routing now gives explicit figure/chart/image intent priority over
 generic lookup language; unsupported or ambiguous actual calculations continue to
-abstain rather than fall through to generated arithmetic. This correction still
-requires a separately authorized paid browser proof before profile promotion.
+abstain rather than fall through to generated arithmetic. This correction required
+a separately authorized paid browser proof, which subsequently passed before
+profile promotion.
 The corrected repository and free live-service gates pass 263 and 276 tests
 respectively, with no schema drift. Real-role dispatcher verification then exposed
 that PostgreSQL must privilege-check the `documents` table referenced by the
@@ -611,7 +612,7 @@ from the validated page-23 amount table and returned the exact absolute differen
 `5120`. `evidence-v1` marked both operand cells, resolved the stored region/page/crop,
 and displayed the immutable calculation rule and rounding contract. This completed
 the representative visual/table/calculation proof without an embedding or answer-
-model call. The candidate remains disabled until explicit promotion approval.
+model call. The profile was subsequently promoted after explicit approval.
 
 ## Phase 7 — evaluation and observability
 

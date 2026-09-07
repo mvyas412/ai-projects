@@ -3,9 +3,9 @@
 This runbook presents the accepted durable/governed foundation and the closed
 Phase 5 hybrid-retrieval implementation while keeping all release tags immutable.
 PR #5 was squash-merged at `5436614`. Phase 6 ADRs 0025–0030 and Milestones
-6.0–6.5 are implemented on the review branch, but `PHASE6_PROFILE=disabled` remains
-the safe default. Until signed-in browser acceptance and explicit promotion, the
-accepted demonstration remains the Phase 5 checkpoint.
+6.0–6.5 are implemented and accepted. The signed-in visual/table/calculation proof
+passes, and `PHASE6_PROFILE=visual-table-v1` is the promoted default;
+`PHASE6_PROFILE=disabled` remains the explicit rollback.
 
 ## Before the session
 
@@ -42,12 +42,11 @@ from every free gate.
    separate dispatcher/worker health, safe alerts, retention preview, and restore proof.
 8. **Logout:** sign out and verify the protected workspace is no longer visible.
 
-## Phase 6 candidate proof — explicit gate only
+## Phase 6 accepted profile and rollback
 
-Do not switch the default profile merely to demonstrate implementation. After an
-explicit acceptance-run approval, set the ignored environment to
-`PHASE6_PROFILE=visual-table-v1`, rebuild/restart the API and worker, run migrations,
-and complete the following with a representative visual/table PDF:
+The default configuration now enables `PHASE6_PROFILE=visual-table-v1`. Provision
+and checksum-verify the pinned local models before starting the worker. To exercise
+the accepted proof with a representative visual/table PDF:
 
 1. Confirm the worker starts only with checksum-verified local Docling and CLIP trees.
 2. Upload once and verify immutable promotion reports visual regions and validated tables.
@@ -59,8 +58,8 @@ and complete the following with a representative visual/table PDF:
    generic unavailable responses and no bytes.
 7. Check desktop/narrow widths, light/dark themes, keyboard controls, zoom, and
    non-color-only highlighting.
-8. Stop on any failure and restore `PHASE6_PROFILE=disabled`; promotion requires a
-   separate explicit acceptance decision.
+8. Stop on any failure; set `PHASE6_PROFILE=disabled` and restart the API/worker to
+   roll back Phase 6 while preserving the accepted text path.
 
 Uploading/indexing or asking through the live model boundary may incur provider cost.
 Obtain fresh explicit authorization before this proof; prior Phase 5 approvals do not apply.
@@ -155,6 +154,7 @@ Obtain fresh explicit authorization before this proof; prior Phase 5 approvals d
   conversation/citation, aggregate Settings readiness, direct PostgreSQL/Qdrant/
   object-storage API readiness, and logout protection were verified. No token or
   secret was displayed or persisted.
-- The `visual-table-v1` representative-document proof, profile promotion,
-  acceptance, and any Phase 6 tag remain pending. No paid/provider Phase 6 run is
-  authorized.
+- The `visual-table-v1` representative visual/table/calculation proof passes and the
+  profile is accepted and promoted. Its exact evidence and fail-closed behavior are
+  recorded in the project plan and architecture handbook. PR #7 squash merge and
+  any Phase 6 tag remain separate gates.

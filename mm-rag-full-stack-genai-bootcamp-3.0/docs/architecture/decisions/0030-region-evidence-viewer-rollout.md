@@ -121,3 +121,13 @@ release-tag decisions.
 - Refresh and sign-out/sign-in preserve authorized evidence while revocation blocks it.
 - No token, secret, raw object key, private source content, or internal provider error
   appears in logs, URLs, audit events, or public UI state.
+
+## Promotion resolution
+
+On 2026-09-07 the user approved `visual-table-v1` as the accepted Phase 6 profile
+after the deterministic, live-service, signed-in visual retrieval, exact evidence,
+safe-abstention, and immutable numeric-calculation proofs passed. The application
+and local Compose defaults now select `visual-table-v1`; `disabled` remains the
+explicit rollback. Phase 5's `hybrid-v1` text default, `dense-v1` rollback, and
+evaluation-only `hybrid-v3` remain unchanged. Release tagging remains a separate
+explicit decision.

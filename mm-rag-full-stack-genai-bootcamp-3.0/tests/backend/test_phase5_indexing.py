@@ -130,26 +130,28 @@ def test_generation_manifest_requires_complete_pinned_sparse_output() -> None:
     assert manifest_supports_sparse(manifest) is False
 
 
-def test_phase6_manifest_is_versioned_and_disabled_by_default() -> None:
+def test_phase6_manifest_is_versioned_and_promoted_by_default() -> None:
     default_manifest = pipeline_manifest(_settings(), "application/pdf")
 
-    assert default_manifest["profile"] == PIPELINE_PROFILE
-    assert default_manifest["citation_schema_revision"] == 1
-    assert "visual_extraction" not in default_manifest
-    assert "structured_tables" not in default_manifest
+    assert default_manifest["profile"] == PHASE6_PIPELINE_PROFILE
+    assert default_manifest["citation_schema_revision"] == "evidence-v1"
+    assert "visual_extraction" in default_manifest
+    assert "structured_tables" in default_manifest
 
-    candidate_settings = Settings(
+    rollback_settings = Settings(
         app_env="test",
         openai_api_key=SecretStr("test-key"),
         rag_sparse_indexing_enabled=True,
-        phase6_profile="visual-table-v1",
+        phase6_profile="disabled",
     )
-    candidate_manifest = pipeline_manifest(candidate_settings, "application/pdf")
+    rollback_manifest = pipeline_manifest(rollback_settings, "application/pdf")
 
-    assert candidate_settings.phase6_enabled is True
-    assert candidate_manifest["profile"] == PHASE6_PIPELINE_PROFILE
-    assert candidate_manifest["citation_schema_revision"] == "evidence-v1"
-    visual_extraction = cast(dict[str, object], candidate_manifest["visual_extraction"])
-    structured_tables = cast(dict[str, object], candidate_manifest["structured_tables"])
+    assert rollback_settings.phase6_enabled is False
+    assert rollback_manifest["profile"] == PIPELINE_PROFILE
+    assert rollback_manifest["citation_schema_revision"] == 1
+    assert "visual_extraction" not in rollback_manifest
+    assert "structured_tables" not in rollback_manifest
+    visual_extraction = cast(dict[str, object], default_manifest["visual_extraction"])
+    structured_tables = cast(dict[str, object], default_manifest["structured_tables"])
     assert visual_extraction["remote_services"] is False
     assert structured_tables["generated_sql"] is False
