@@ -156,5 +156,5 @@ Obtain fresh explicit authorization before this proof; prior Phase 5 approvals d
   secret was displayed or persisted.
 - The `visual-table-v1` representative visual/table/calculation proof passes and the
   profile is accepted and promoted. Its exact evidence and fail-closed behavior are
-  recorded in the project plan and architecture handbook. PR #7 squash merge and
-  any Phase 6 tag remain separate gates.
+  recorded in the project plan and architecture handbook. PR #7 was squash-merged
+  at `0eb0d16`; any Phase 6 tag remains a separate gate.
