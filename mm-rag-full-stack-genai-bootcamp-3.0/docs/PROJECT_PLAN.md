@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 6 accepted; PR #7 approved for squash merge after refreshed checks |
+| Active milestone | Phase 6 accepted; PR #7 squash-merged at `0eb0d16`; release tag not yet authorized |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -747,8 +747,9 @@ then reranking a bounded candidate set.
 live-service gates, signed-in application-shell checks, corrected representative
 visual retrieval, exact region/table evidence, safe abstention, and immutable numeric
 calculation all pass. On 2026-09-07 the user promoted `visual-table-v1` as the
-accepted default with `disabled` retained as explicit rollback. PR #7 is approved
-for squash merge after refreshed checks; release tagging remains a separate gate.
+accepted default with `disabled` retained as explicit rollback. PR #7 was
+squash-merged into `main` at `0eb0d16`; its tree matches accepted source commit
+`b888a5d`. Release tagging remains a separate gate.
 A single bounded paid candidate attempt was authorized and executed on 2026-09-07,
 but it stopped before visual/table processing and therefore is not acceptance evidence.
 
@@ -1058,10 +1059,8 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Run refreshed gates and squash-merge approved Phase 6 implementation PR #7 | The accepted reviewed tree is merged to `main`; source branch and prior tags remain preserved |
-| 2 | Record the Phase 6 squash merge without moving prior release tags | Main/source tree identity and merge commit are recorded |
-| 3 | Start Phase 7 decision kickoff only after explicit user direction | Observability/evaluation alternatives and ADR sequence are reviewed before implementation |
-| 5 | Create `mm-rag-v6.0.0` only after a separate explicit tag decision | Accepted merged commit and annotated immutable tag are recorded |
+| 1 | Start Phase 7 decision kickoff only after explicit user direction | Observability/evaluation alternatives and ADR sequence are reviewed before implementation |
+| 2 | Create `mm-rag-v6.0.0` only after a separate explicit tag decision | Accepted merged commit and annotated immutable tag are recorded |
 
 ## Update protocol
 

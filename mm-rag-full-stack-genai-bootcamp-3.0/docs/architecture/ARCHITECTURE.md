@@ -30,8 +30,8 @@ on the review branch, including the free candidate gate, normalized tables, clos
 calculation, and evidence inspection. The authenticated application shell, inherited
 READY library/conversation persistence, readiness, representative visual/table/
 calculation proof, and logout boundary pass. `visual-table-v1` is now the accepted
-default with `disabled` retained as explicit rollback. PR #7 squash merge and release
-tagging remain separate gates.
+default with `disabled` retained as explicit rollback. PR #7 was squash-merged at
+`0eb0d16`; release tagging remains a separate gate.
 
 ## Status legend
 
@@ -461,8 +461,8 @@ release tag was created.
 implemented and verified. Signed-in application-shell/readiness/logout, corrected
 representative visual retrieval, exact evidence inspection, safe abstention, and
 numeric calculation pass. `visual-table-v1` is the accepted default and `disabled`
-is the explicit rollback. Phase 5 text profiles remain unchanged. PR #7 squash merge
-and release tagging remain separate gates.
+is the explicit rollback. Phase 5 text profiles remain unchanged. PR #7 was
+squash-merged at `0eb0d16`, and release tagging remains a separate gate.
 
 ```mermaid
 flowchart LR
