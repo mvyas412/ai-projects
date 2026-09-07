@@ -15,6 +15,7 @@ class IngestionEventMessage(BaseModel):
     schema_version: Literal[1]
     job_id: UUID
     occurred_at: datetime
+    traceparent: str | None = None
 
     def broker_body(self) -> bytes:
         return self.model_dump_json().encode("utf-8")

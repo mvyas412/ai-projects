@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: MM-RAG Phase 7
+    orgId: 1
+    folder: MM-RAG
+    type: file
+    disableDeletion: true
+    editable: false
+    options:
+      path: /otel-lgtm/grafana/conf/provisioning/dashboards/mm-rag

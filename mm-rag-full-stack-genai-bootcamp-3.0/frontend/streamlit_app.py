@@ -112,7 +112,7 @@ with st.sidebar:
     )
     st.caption(f"Signed in as {display_name}")
     st.button("Log out", icon=":material/logout:", on_click=st.logout)
-    st.caption("Phase 3 · Durable asynchronous intelligence")
+    st.caption("Phase 7 · Measurable multimodal intelligence")
 
 page = st.navigation(
     [

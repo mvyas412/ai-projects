@@ -1,0 +1,17 @@
+{
+  "schema_revision": "phase7-slo-baseline-v1",
+  "minimum_distinct_days": 7,
+  "required_metrics": [
+    "operation_rate",
+    "failure_ratio",
+    "p95_latency_ms",
+    "telemetry_export_failures"
+  ],
+  "numeric_slo_status": "awaiting_reviewed_baseline",
+  "zero_tolerance_invariants": [
+    "authorization_escape",
+    "secret_leakage",
+    "invalid_citation_identity",
+    "unsafe_exact_calculation"
+  ]
+}

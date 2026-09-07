@@ -1,0 +1,29 @@
+{
+  "editable": false,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Collector delivery failures; product operations remain fail-open to telemetry loss.",
+      "gridPos": {"h": 9, "w": 12, "x": 0, "y": 0},
+      "id": 1,
+      "targets": [{"expr": "sum(rate(otelcol_exporter_send_failed_spans_total[5m])) by (exporter)", "refId": "A"}],
+      "title": "Telemetry delivery health",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Bounded model-call count by model metadata; no prompts or responses are collected.",
+      "gridPos": {"h": 9, "w": 12, "x": 12, "y": 0},
+      "id": 2,
+      "targets": [{"expr": "sum(increase(mm_rag_operations_total{operation=\"rag.generation\"}[1h])) by (model_name, outcome)", "refId": "A"}],
+      "title": "Model calls for cost review",
+      "type": "timeseries"
+    }
+  ],
+  "schemaVersion": 41,
+  "tags": ["mm-rag", "phase7", "dependencies", "cost"],
+  "time": {"from": "now-24h", "to": "now"},
+  "title": "MM-RAG — Dependencies, capacity, and cost",
+  "uid": "mm-rag-dependencies-cost",
+  "version": 1
+}

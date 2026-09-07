@@ -17,6 +17,7 @@ from backend.app.broker.messages import IngestionEventMessage
 from backend.app.broker.rabbitmq import connect_rabbitmq, declare_ingestion_topology
 from backend.app.core.config import Settings, get_settings
 from backend.app.core.logging import configure_logging
+from backend.app.core.telemetry import configure_telemetry
 from backend.app.db.session import create_database_engine, create_session_factory
 from backend.app.rag.indexing import build_document_indexer
 from backend.app.services.ingestion_worker import DeliveryDisposition, IngestionWorkerService
@@ -47,6 +48,7 @@ async def _recover_expired_and_heartbeat(
 
 async def _run(settings: Settings) -> None:
     logger = structlog.get_logger(__name__)
+    telemetry = configure_telemetry(settings, service_name="mm-rag-ingestion-worker")
     engine = create_database_engine(settings)
     factory = create_session_factory(engine)
     qdrant = QdrantClient(
@@ -183,6 +185,7 @@ async def _run(settings: Settings) -> None:
         artifacts.close()
     qdrant.close()
     engine.dispose()
+    telemetry.shutdown()
     health.update(state="stopped", ready=False)
 
 

@@ -1,0 +1,29 @@
+{
+  "editable": false,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Retrieval and answer-generation operation outcomes by accepted profile.",
+      "gridPos": {"h": 9, "w": 12, "x": 0, "y": 0},
+      "id": 1,
+      "targets": [{"expr": "sum(rate(mm_rag_operations_total{operation=~\"rag.*\"}[5m])) by (operation, outcome, retrieval_profile)", "refId": "A"}],
+      "title": "RAG outcomes",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Zero-tolerance failures are never averaged into a quality score.",
+      "gridPos": {"h": 9, "w": 12, "x": 12, "y": 0},
+      "id": 2,
+      "targets": [{"expr": "sum(increase(mm_rag_invariant_violations_total[1h])) by (invariant)", "refId": "A"}],
+      "title": "Identity, authorization, citation, and calculation invariants",
+      "type": "timeseries"
+    }
+  ],
+  "schemaVersion": 41,
+  "tags": ["mm-rag", "phase7", "quality"],
+  "time": {"from": "now-24h", "to": "now"},
+  "title": "MM-RAG — RAG quality and safety",
+  "uid": "mm-rag-quality",
+  "version": 1
+}

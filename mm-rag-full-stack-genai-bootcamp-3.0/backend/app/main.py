@@ -12,6 +12,7 @@ from backend.app.api.router import api_router
 from backend.app.core.config import Settings, get_settings
 from backend.app.core.logging import RequestContextMiddleware, configure_logging
 from backend.app.core.security import build_access_token_verifier
+from backend.app.core.telemetry import configure_telemetry
 from backend.app.db.session import create_database_engine, create_session_factory
 from backend.app.rag.engine import build_rag_engine
 from backend.app.rag.indexing import build_document_indexer
@@ -26,6 +27,7 @@ def _lifespan(settings: Settings):
         """Create process-wide adapters once and release them on shutdown."""
 
         configure_logging(settings.log_level)
+        telemetry = configure_telemetry(settings, service_name="mm-rag-api")
         logger = structlog.get_logger(__name__)
 
         engine = create_database_engine(settings)
@@ -82,6 +84,7 @@ def _lifespan(settings: Settings):
             qdrant_client.close()
             engine.dispose()
             logger.info("application_stopped", app_name=settings.app_name)
+            telemetry.shutdown()
 
     return lifespan
 

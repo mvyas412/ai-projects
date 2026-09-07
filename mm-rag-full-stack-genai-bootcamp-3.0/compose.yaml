@@ -74,6 +74,43 @@ services:
     networks:
       - phase3
 
+  otel-collector:
+    profiles: ["observability"]
+    image: otel/opentelemetry-collector-contrib:0.157.0
+    restart: unless-stopped
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./observability/otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "127.0.0.1:${OTEL_GRPC_PORT:-4317}:4317"
+      - "127.0.0.1:${OTEL_HTTP_PORT:-4318}:4318"
+      - "127.0.0.1:${OTEL_HEALTH_PORT:-13133}:13133"
+    depends_on:
+      - lgtm
+    networks:
+      - phase3
+
+  lgtm:
+    profiles: ["observability"]
+    image: grafana/otel-lgtm:0.23.0
+    restart: unless-stopped
+    environment:
+      ENABLE_LOGS_GRAFANA: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_USERS_DEFAULT_THEME: light
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3003}:3000"
+      - "127.0.0.1:${PROMETHEUS_PORT:-9093}:9090"
+    volumes:
+      - ./observability/grafana/provisioning/dashboards/mm-rag.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/mm-rag.yaml:ro
+      - ./observability/grafana/dashboards:/otel-lgtm/grafana/conf/provisioning/dashboards/mm-rag:ro
+      - ./observability/prometheus.yaml:/otel-lgtm/prometheus.yaml:ro
+      - ./observability/alerts:/otel-lgtm/prometheus-rules:ro
+      - observability_data:/data
+    networks:
+      - phase3
+
   dispatcher:
     profiles: ["runtime"]
     build:
@@ -98,6 +135,8 @@ services:
       OPENAI_CHAT_MODEL: ${OPENAI_CHAT_MODEL:-gpt-4.1-mini}
       OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
       PHASE6_PROFILE: ${PHASE6_PROFILE:-visual-table-v1}
+      TELEMETRY_ENABLED: ${TELEMETRY_ENABLED:-true}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       RUNTIME_HEALTH_DIRECTORY: /app/data/runtime/health
     volumes:
       - runtime_health:/app/data/runtime/health
@@ -152,3 +191,4 @@ volumes:
   seaweedfs_data:
   rabbitmq_data:
   runtime_health:
+  observability_data:

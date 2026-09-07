@@ -11,6 +11,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from qdrant_client import QdrantClient, models
 
 from backend.app.core.config import Settings
+from backend.app.core.telemetry import observed_span, record_operation
 from backend.app.retrieval.ranking import (
     HYBRID_V3_DENSE_ROUTE,
     HYBRID_V3_FUSION_POLICY,
@@ -129,11 +130,15 @@ class QdrantOpenAIRAGEngine:
             raise RAGUnavailableError("RAG generation is not configured in this environment")
         retrieval_started = perf_counter()
         try:
-            embeddings = OpenAIEmbeddings(
-                api_key=api_key,
-                model=self._settings.openai_embedding_model,
-            )
-            vector = embeddings.embed_query(request.query)
+            with observed_span(
+                "rag.query_embedding",
+                attributes={"model.name": self._settings.openai_embedding_model},
+            ):
+                embeddings = OpenAIEmbeddings(
+                    api_key=api_key,
+                    model=self._settings.openai_embedding_model,
+                )
+                vector = embeddings.embed_query(request.query)
             selector_route = (
                 select_hybrid_v3_route(request.query)
                 if self._settings.rag_retrieval_profile == "hybrid-v3"
@@ -147,17 +152,24 @@ class QdrantOpenAIRAGEngine:
             )
             # The backend-resolved filter is reused verbatim for both retrieval legs.
             dense_started = perf_counter()
-            dense_points = self._qdrant.query_points(
-                collection_name=self._settings.qdrant_collection_name,
-                query=vector,
-                query_filter=_retrieval_filter(request),
-                limit=(
-                    self._settings.rag_dense_candidate_limit
-                    if use_hybrid
-                    else self._settings.rag_retrieval_limit
-                ),
-                with_payload=True,
-            ).points
+            with observed_span(
+                "rag.dense_retrieval",
+                attributes={
+                    "retrieval.profile": self._settings.rag_retrieval_profile,
+                    "retrieval.document_count": len(request.documents),
+                },
+            ):
+                dense_points = self._qdrant.query_points(
+                    collection_name=self._settings.qdrant_collection_name,
+                    query=vector,
+                    query_filter=_retrieval_filter(request),
+                    limit=(
+                        self._settings.rag_dense_candidate_limit
+                        if use_hybrid
+                        else self._settings.rag_retrieval_limit
+                    ),
+                    with_payload=True,
+                ).points
             dense_ms = (perf_counter() - dense_started) * 1000
         except Exception as exc:
             raise RAGUnavailableError("The retrieval service is temporarily unavailable") from exc
@@ -295,6 +307,15 @@ class QdrantOpenAIRAGEngine:
             visual_ms=round(visual_ms, 2),
             total_retrieval_ms=round((perf_counter() - retrieval_started) * 1000, 2),
         )
+        record_operation(
+            "rag.retrieval",
+            outcome="success",
+            duration_ms=(perf_counter() - retrieval_started) * 1000,
+            attributes={
+                "retrieval.profile": self._settings.rag_retrieval_profile,
+                "retrieval.result_count": len(ranked),
+            },
+        )
         citations = tuple(
             _candidate_citation(candidate)
             for candidate in ranked[: self._settings.rag_retrieval_limit]
@@ -329,15 +350,36 @@ class QdrantOpenAIRAGEngine:
             )
             messages.append(message)
         messages.append(HumanMessage(content=request.query))
+        generation_started = perf_counter()
         try:
-            response = ChatOpenAI(
-                api_key=api_key,
-                model=self._settings.openai_chat_model,
-                temperature=0,
-            ).invoke(messages)
+            with observed_span(
+                "rag.model_generation",
+                attributes={"model.name": self._settings.openai_chat_model},
+            ):
+                response = ChatOpenAI(
+                    api_key=api_key,
+                    model=self._settings.openai_chat_model,
+                    temperature=0,
+                ).invoke(messages)
         except Exception as exc:
+            record_operation(
+                "rag.generation",
+                outcome="failure",
+                duration_ms=(perf_counter() - generation_started) * 1000,
+                attributes={"model.name": self._settings.openai_chat_model},
+            )
             raise RAGUnavailableError("The generation service is temporarily unavailable") from exc
         usage = response.usage_metadata
+        record_operation(
+            "rag.generation",
+            outcome="success",
+            duration_ms=(perf_counter() - generation_started) * 1000,
+            attributes={
+                "model.name": self._settings.openai_chat_model,
+                "model.input_token_count": usage.get("input_tokens", 0) if usage else 0,
+                "model.output_token_count": usage.get("output_tokens", 0) if usage else 0,
+            },
+        )
         content = str(response.content).strip()
         if content == INSUFFICIENT_EVIDENCE_MARKER:
             # An abstention cannot carry citations because none supports an answer.

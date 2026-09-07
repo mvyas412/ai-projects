@@ -52,6 +52,8 @@ class PolicyAction(StrEnum):
     SECURITY_EXPORT_CREATE = "security.export.create"
     RETENTION_PREVIEW = "retention.preview"
     RETENTION_APPLY = "retention.apply"
+    FEEDBACK_SUBMIT = "feedback.submit"
+    FEEDBACK_REVIEW = "feedback.review"
 
 
 class ResourceType(StrEnum):
@@ -115,6 +117,7 @@ _ADMIN_ACTIONS = frozenset(
         PolicyAction.SECURITY_AUDIT_READ,
         PolicyAction.SECURITY_EXPORT_CREATE,
         PolicyAction.RETENTION_PREVIEW,
+        PolicyAction.FEEDBACK_REVIEW,
     }
 )
 _MEMBER_ACTIONS = frozenset(
@@ -139,6 +142,7 @@ _MEMBER_ACTIONS = frozenset(
         PolicyAction.JOB_CANCEL,
         PolicyAction.JOB_RETRY,
         PolicyAction.ACTIVITY_READ,
+        PolicyAction.FEEDBACK_SUBMIT,
     }
 )
 _VIEWER_ACTIONS = frozenset(
@@ -156,6 +160,7 @@ _VIEWER_ACTIONS = frozenset(
         PolicyAction.CONVERSATION_DELETE,
         PolicyAction.JOB_READ,
         PolicyAction.ACTIVITY_READ,
+        PolicyAction.FEEDBACK_SUBMIT,
     }
 )
 

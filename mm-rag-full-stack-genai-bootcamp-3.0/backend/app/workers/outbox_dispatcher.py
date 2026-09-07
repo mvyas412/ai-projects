@@ -11,11 +11,14 @@ from typing import Protocol
 from uuid import UUID
 
 import structlog
+from opentelemetry.propagate import extract
+from opentelemetry.trace import SpanKind
 
 from backend.app.broker.messages import IngestionEventMessage
 from backend.app.broker.rabbitmq import BrokerPublishError, RabbitMQPublisher
 from backend.app.core.config import Settings, get_settings
 from backend.app.core.logging import configure_logging
+from backend.app.core.telemetry import configure_telemetry, observed_span
 from backend.app.db.rls import DatabasePurpose, set_rls_context
 from backend.app.db.session import (
     SessionFactory,
@@ -79,7 +82,14 @@ class OutboxDispatcher:
                 )
                 message = IngestionEventMessage.model_validate(event.payload)
                 attempt_count = event.publication_attempt_count
-            await self._publisher.publish(message)
+            carrier = {"traceparent": message.traceparent} if message.traceparent else {}
+            with observed_span(
+                "outbox.publish",
+                kind=SpanKind.PRODUCER,
+                context=extract(carrier),
+                attributes={"event.id": str(event_id), "job.id": str(message.job_id)},
+            ):
+                await self._publisher.publish(message)
             with self._session_factory.begin() as session:
                 set_rls_context(session, purpose=DatabasePurpose.DISPATCHER)
                 IngestionOutboxStateMachine(session).mark_published(
@@ -149,6 +159,7 @@ def _publication_backoff(attempt_count: int, event_id: UUID) -> timedelta:
 
 
 async def _run(settings: Settings) -> None:
+    telemetry = configure_telemetry(settings, service_name="mm-rag-dispatcher")
     engine = create_database_engine(settings)
     factory = create_session_factory(engine)
     identity = f"dispatcher-{socket.gethostname()}-{os.getpid()}"[:200]
@@ -169,6 +180,7 @@ async def _run(settings: Settings) -> None:
         await dispatcher.run(stop)
     finally:
         engine.dispose()
+        telemetry.shutdown()
 
 
 def main() -> None:

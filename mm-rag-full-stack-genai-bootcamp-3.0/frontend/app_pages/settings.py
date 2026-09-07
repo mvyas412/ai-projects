@@ -41,3 +41,49 @@ with st.expander("Privacy and security", icon=":material/security:"):
         "workspace records."
     )
     st.caption("Access tokens and local secrets are not displayed or persisted as product data.")
+
+if workspace["role"] in {"owner", "admin"}:
+    st.subheader("Feedback review")
+    st.caption(
+        "Workspace feedback stays tenant-scoped. Promotion records a reviewed regression-case "
+        "identifier; it does not train or tune the model automatically."
+    )
+    try:
+        feedback_rows = api_client().feedback(str(workspace["id"]))
+    except BackendAPIError as exc:
+        st.error(str(exc), icon=":material/error:")
+        feedback_rows = []
+    pending = [item for item in feedback_rows if item["review_status"] == "pending"]
+    if not pending:
+        st.info("No feedback is awaiting review.")
+    for item in pending:
+        label = f"{item['reason'].replace('_', ' ').title()} · rating {item['rating']:+d}"
+        with st.expander(label, icon=":material/feedback:"):
+            if item.get("comment"):
+                st.write(item["comment"])
+            st.caption(
+                f"Submitted {item['created_at']} · retained until {item['retention_expires_at']}"
+            )
+            decision = st.selectbox(
+                "Review decision",
+                ["reviewed", "dismissed", "promoted"],
+                key=f"feedback_review_{item['id']}",
+            )
+            case_id = st.text_input(
+                "Regression case ID",
+                disabled=decision != "promoted",
+                placeholder="customer-safe-regression-001",
+                key=f"feedback_case_{item['id']}",
+            )
+            if st.button("Record review", key=f"feedback_submit_{item['id']}"):
+                try:
+                    api_client().review_feedback(
+                        str(workspace["id"]),
+                        item["id"],
+                        status=decision,
+                        promoted_case_id=case_id or None,
+                    )
+                    st.toast("Feedback review recorded", icon=":material/check:")
+                    st.rerun()
+                except BackendAPIError as exc:
+                    st.error(str(exc), icon=":material/error:")
