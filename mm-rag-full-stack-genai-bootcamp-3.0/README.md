@@ -42,6 +42,9 @@ candidate passes validation and holdout with zero provider calls; PostgreSQL
 schema/RLS, local model, Docling, lifecycle, citation-negative, and deterministic
 calculation checks pass. Signed-in browser proof, explicit profile promotion,
 Phase 6 acceptance, and any `mm-rag-v6.0.0` tag remain separate pending gates.
+The authenticated application-shell check now passes with the personal workspace,
+READY library state, persisted grounded conversation, service readiness, and logout;
+the opt-in visual/table candidate proof itself remains pending.
 
 The current `3.0` lineage contains:
 

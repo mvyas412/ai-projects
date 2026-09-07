@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 6 implementation verification and review; Milestones 6.0–6.5 implemented behind a disabled profile |
+| Active milestone | Phase 6 candidate browser acceptance; PR #7 checks and authenticated shell verification pass |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -59,7 +59,7 @@ Rules:
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
-| Phase 6 | In progress — Milestones 6.0–6.5 implemented locally; browser acceptance and promotion pending |
+| Phase 6 | In progress — Milestones 6.0–6.5 implemented; PR #7 checks and authenticated shell verification pass; candidate proof and promotion pending |
 | Phases 7–9 | Planned |
 
 ## Delivery sequence and gates
@@ -745,8 +745,10 @@ then reranking a bounded candidate set.
 
 **Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. Milestones
 6.0–6.5 are implemented and locally verified on the Phase 6 review branch behind
-the disabled-by-default `visual-table-v1` profile. Signed-in browser proof, explicit
-profile promotion, Phase 6 acceptance, and release tagging remain separate gates.
+the disabled-by-default `visual-table-v1` profile. PR #7 checks and the authenticated
+application-shell/readiness/logout verification pass. The representative visual/
+table candidate proof, explicit profile promotion, Phase 6 acceptance, and release
+tagging remain separate gates.
 No paid/provider Phase 6 run has been authorized or executed.
 
 ### Objective
@@ -999,8 +1001,8 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Publish the reviewed Phase 6 implementation branch through required PR checks | Migrations, free evaluation, model, unit, integration, coverage, and diff gates pass on the reviewed tree |
-| 2 | Run the signed-in Phase 6 browser proof only after explicit acceptance-run approval | Visual/table retrieval, exact calculation, evidence inspection, persistence, denial, fallback, narrow/desktop, and light/dark states are recorded |
+| 1 | Complete the representative signed-in Phase 6 candidate proof under a fresh bounded provider-call approval if required | Visual/table retrieval, exact calculation, evidence inspection, persistence, denial, fallback, narrow/desktop, and light/dark states are recorded |
+| 2 | Review and squash-merge green Phase 6 implementation PR #7 after candidate acceptance | The accepted reviewed tree is merged to `main`; source branch and prior tags remain preserved |
 | 3 | Decide whether the free evidence is sufficient or a separately authorized paid/provider comparison is still needed | The decision and any measured result are recorded without reusing old approval |
 | 4 | Request explicit profile-promotion acceptance; keep `PHASE6_PROFILE=disabled` until then | `hybrid-v1` remains default, `dense-v1` rollback and `hybrid-v3` evaluation-only |
 | 5 | Create `mm-rag-v6.0.0` only after a separate explicit tag decision | Accepted merged commit and annotated immutable tag are recorded |

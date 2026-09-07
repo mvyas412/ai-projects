@@ -28,8 +28,9 @@ squash-merged at `5436614`. Phase 6 kickoff PR #6 was squash-merged at `95d18b3`
 and ADRs 0025–0030 were accepted on 2026-09-03. Milestones 6.0–6.5 are implemented
 on the review branch, including the free candidate gate, normalized tables, closed
 calculation, and evidence inspection. `PHASE6_PROFILE=disabled` remains the default;
-signed-in browser proof, profile promotion, acceptance, and release tagging are
-still pending.
+the authenticated application shell, inherited READY library/conversation
+persistence, readiness, and logout boundary pass. The opt-in visual/table candidate
+proof, profile promotion, acceptance, and release tagging are still pending.
 
 ## Status legend
 
@@ -192,7 +193,7 @@ flowchart LR
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
 | 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and preserved at `mm-rag-v4.0.0` |
 | 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | Closed without acceptance; v4 nDCG gate missed and no candidate was promoted |
-| 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | In progress; Milestones 6.0–6.5 implemented behind a disabled versioned profile; browser acceptance pending |
+| 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | In progress; Milestones 6.0–6.5 implemented behind a disabled versioned profile; authenticated shell check passed, candidate browser proof pending |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
 | 8 | Independently scalable deployment | Gateway, API/workers, dedicated frontend TBD, managed services | Managed PostgreSQL, Qdrant, object storage | Planned |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Planned |
@@ -458,8 +459,10 @@ release tag was created.
 **Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. Milestones
 6.0–6.5 are implemented and locally verified behind `visual-table-v1`, which remains
 disabled by default. The diagram is the implemented candidate runtime. Signed-in
-browser proof, any separately justified paid/provider comparison, explicit profile
-promotion, Phase 6 acceptance, and release tagging remain pending gates.
+application-shell/readiness/logout verification passes; the representative
+visual/table candidate proof, any separately justified paid/provider comparison,
+explicit profile promotion, Phase 6 acceptance, and release tagging remain pending
+gates.
 
 ```mermaid
 flowchart LR

@@ -150,5 +150,11 @@ Obtain fresh explicit authorization before this proof; prior Phase 5 approvals d
   region/table/calculation viewer. The free synthetic candidate passes validation
   then holdout with zero provider calls. Local schema/RLS, model, Docling, lifecycle,
   and citation-negative checks pass.
-- Browser proof, profile promotion, acceptance, and any Phase 6 tag remain pending.
-  No paid/provider Phase 6 run is authorized.
+- On 2026-09-07, the signed-in application-shell check passed: authenticated email
+  and Owner role, Personal workspace, one READY document, its persisted grounded
+  conversation/citation, aggregate Settings readiness, direct PostgreSQL/Qdrant/
+  object-storage API readiness, and logout protection were verified. No token or
+  secret was displayed or persisted.
+- The `visual-table-v1` representative-document proof, profile promotion,
+  acceptance, and any Phase 6 tag remain pending. No paid/provider Phase 6 run is
+  authorized.
