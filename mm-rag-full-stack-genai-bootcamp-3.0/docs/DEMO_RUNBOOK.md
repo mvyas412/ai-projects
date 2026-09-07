@@ -157,4 +157,5 @@ Obtain fresh explicit authorization before this proof; prior Phase 5 approvals d
 - The `visual-table-v1` representative visual/table/calculation proof passes and the
   profile is accepted and promoted. Its exact evidence and fail-closed behavior are
   recorded in the project plan and architecture handbook. PR #7 was squash-merged
-  at `0eb0d16`; any Phase 6 tag remains a separate gate.
+  at `0eb0d16`; annotated tag `mm-rag-v6.0.0` marks verified closure commit
+  `d97e8e8`.

@@ -43,7 +43,8 @@ schema/RLS, local model, Docling, lifecycle, citation-negative, and deterministi
 calculation checks pass. The signed-in representative proof now confirms corrected
 visual retrieval, exact region/table inspection, and safe numeric calculation with
 an immutable trace. PR #7 was squash-merged into `main` at `0eb0d16`, with exact
-source/merge tree identity. Any `mm-rag-v6.0.0` tag remains a separate pending gate.
+source/merge tree identity. Annotated tag `mm-rag-v6.0.0` marks verified closure
+commit `d97e8e8`.
 The authenticated application-shell check now passes with the personal workspace,
 READY library state, persisted grounded conversation, service readiness, and logout;
 the opt-in visual and numeric-calculation candidate proof now passes.
