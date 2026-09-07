@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 6 accepted; PR #7 squash-merged at `0eb0d16`; release tag not yet authorized |
+| Active milestone | Phase 6 accepted and released; Phase 7 kickoff requires explicit direction |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -60,6 +60,7 @@ Rules:
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
+| Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phases 7–9 | Planned |
 
 ## Delivery sequence and gates
@@ -1060,7 +1061,6 @@ commercial accounting, and compliance-grade administration.
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
 | 1 | Start Phase 7 decision kickoff only after explicit user direction | Observability/evaluation alternatives and ADR sequence are reviewed before implementation |
-| 2 | Create `mm-rag-v6.0.0` only after a separate explicit tag decision | Accepted merged commit and annotated immutable tag are recorded |
 
 ## Update protocol
 

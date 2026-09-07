@@ -30,8 +30,8 @@ extraction, visual retrieval, structured-table calculation, evidence-viewer, and
 rollout contracts. Milestones 6.0–6.5 and the signed-in visual/table/calculation
 proof pass on `codex/phase6-visual-table-implementation`; `visual-table-v1` is the
 accepted default with an explicit disabled rollback. PR #7 was squash-merged into
-`main` at `0eb0d16`; the source and merged trees match. No Phase 6 release tag has
-been created.
+`main` at `0eb0d16`; the source and merged trees match. Annotated tag
+`mm-rag-v6.0.0` marks verified closure commit `d97e8e8`.
 
 See the latest application's tracked project plan and architecture handbook for
 scope and status. Secrets, local context, environments, and generated data remain

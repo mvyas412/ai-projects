@@ -31,7 +31,7 @@ calculation, and evidence inspection. The authenticated application shell, inher
 READY library/conversation persistence, readiness, representative visual/table/
 calculation proof, and logout boundary pass. `visual-table-v1` is now the accepted
 default with `disabled` retained as explicit rollback. PR #7 was squash-merged at
-`0eb0d16`; release tagging remains a separate gate.
+`0eb0d16`; annotated tag `mm-rag-v6.0.0` marks verified closure commit `d97e8e8`.
 
 ## Status legend
 
@@ -462,7 +462,8 @@ implemented and verified. Signed-in application-shell/readiness/logout, correcte
 representative visual retrieval, exact evidence inspection, safe abstention, and
 numeric calculation pass. `visual-table-v1` is the accepted default and `disabled`
 is the explicit rollback. Phase 5 text profiles remain unchanged. PR #7 was
-squash-merged at `0eb0d16`, and release tagging remains a separate gate.
+squash-merged at `0eb0d16`; annotated tag `mm-rag-v6.0.0` marks verified closure
+commit `d97e8e8`.
 
 ```mermaid
 flowchart LR

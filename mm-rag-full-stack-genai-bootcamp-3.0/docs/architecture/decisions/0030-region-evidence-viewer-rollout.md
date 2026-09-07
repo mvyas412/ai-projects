@@ -131,3 +131,10 @@ and local Compose defaults now select `visual-table-v1`; `disabled` remains the
 explicit rollback. Phase 5's `hybrid-v1` text default, `dense-v1` rollback, and
 evaluation-only `hybrid-v3` remain unchanged. Release tagging remains a separate
 explicit decision.
+
+## Release resolution
+
+On 2026-09-07 the user separately approved the Phase 6 release marker after PR #7
+and its documentation-only closure PR #8 were squash-merged and verified. Annotated
+tag `mm-rag-v6.0.0` resolves to closure commit `d97e8e8`; prior release tags remain
+unchanged and immutable.
