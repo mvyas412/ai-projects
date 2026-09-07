@@ -101,16 +101,19 @@ def test_successor_generation_writes_dense_and_sparse_atomically(monkeypatch) ->
     assert qdrant.points[0].payload["sparse_profile"] == SPARSE_VECTOR_NAME
 
 
-def test_existing_collection_adds_schema_without_mutating_points(monkeypatch) -> None:
+def test_existing_dense_only_collection_uses_safe_sparse_fallback(monkeypatch) -> None:
     monkeypatch.setattr(indexing_module, "OpenAIEmbeddings", FakeEmbeddings)
     qdrant = FakeQdrant(exists=True)
 
-    QdrantOpenAIDocumentIndexer(
+    result = QdrantOpenAIDocumentIndexer(
         _settings(), cast(QdrantClient, qdrant), FakeSparseEncoder()
     ).index(_request())
 
-    assert qdrant.updated is not None
-    assert qdrant.updated["sparse_vectors_config"][SPARSE_VECTOR_NAME].modifier == "idf"
+    assert qdrant.updated is None
+    assert result.sparse_vector_count == 0
+    assert result.sparse_fallback_used is True
+    assert not isinstance(qdrant.points[0].vector, dict)
+    assert qdrant.points[0].payload["sparse_profile"] is None
     assert qdrant.points
 
 

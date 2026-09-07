@@ -13,8 +13,45 @@ from backend.app.rag.engine import (
     _authorized_candidate,
     _retrieval_filter,
 )
+from backend.app.rag.indexing import QdrantOpenAIDocumentIndexer
 from backend.app.retrieval.ranking import reciprocal_rank_fusion
 from backend.app.retrieval.sparse import SPARSE_VECTOR_NAME
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(
+    os.getenv("MM_RAG_RUN_INTEGRATION_TESTS") != "1",
+    reason="Set MM_RAG_RUN_INTEGRATION_TESTS=1 with Compose services running",
+)
+def test_existing_dense_only_collection_reports_sparse_fallback() -> None:
+    settings = get_settings()
+    client = QdrantClient(
+        url=settings.qdrant_url,
+        api_key=(
+            settings.qdrant_api_key.get_secret_value()
+            if settings.qdrant_api_key is not None
+            else None
+        ),
+        check_compatibility=False,
+    )
+    collection = f"phase5_dense_fallback_{uuid4().hex}"
+    try:
+        client.create_collection(
+            collection_name=collection,
+            vectors_config=models.VectorParams(size=2, distance=models.Distance.COSINE),
+        )
+        scoped_settings = settings.model_copy(
+            update={"qdrant_collection_name": collection}
+        )
+        indexer = QdrantOpenAIDocumentIndexer(scoped_settings, client)
+
+        assert indexer._ensure_collection(2, sparse_enabled=True) is False
+        info = client.get_collection(collection)
+        assert not info.config.params.sparse_vectors
+    finally:
+        if client.collection_exists(collection):
+            client.delete_collection(collection)
+        client.close()
 
 
 @pytest.mark.integration

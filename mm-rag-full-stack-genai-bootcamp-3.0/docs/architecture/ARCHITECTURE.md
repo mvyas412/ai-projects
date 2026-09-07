@@ -566,6 +566,18 @@ abstention, zero identity/citation failures, zero provider calls, and nominal 2 
 p95. These values prove the deterministic fixture contract only; they do not replace
 signed-in browser evidence or establish production-data generalization.
 
+The first bounded representative-product attempt stopped before Phase 6 extraction.
+One tracked-PDF upload and one paid dense-embedding request exposed that Qdrant 1.19
+cannot add the accepted sparse-vector name to the installation's legacy dense-only
+text collection. No question call or automatic retry occurred. Runtime compatibility
+now preserves that collection, emits dense-only points, and records the fallback in
+the immutable generation manifest; retrieval already rejects sparse-incomplete
+manifests and uses the authorized dense path. Newly created text collections still
+receive both schemas. Migrating legacy vectors to a successor collection remains a
+separate reviewed operation, so this fallback does not silently rewrite accepted
+data or claim sparse availability. The corrected full repository and free live gates
+pass with migration head `20260907_0016` and no schema drift.
+
 ## Phase 7 — evaluation and observability
 
 **Status:** Planned. Use a vendor-neutral telemetry boundary where practical.

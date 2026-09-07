@@ -304,6 +304,7 @@ class IngestionWorkerService:
         if (
             self._settings.rag_sparse_indexing_enabled
             and result.sparse_vector_count != result.chunk_count
+            and not result.sparse_fallback_used
         ):
             raise ObjectIntegrityError("Sparse generation output is incomplete")
         manifest: dict[str, object] = {
@@ -318,6 +319,7 @@ class IngestionWorkerService:
             "chunk_count": result.chunk_count,
             "vector_count": vector_count,
             "sparse_vector_count": result.sparse_vector_count,
+            "sparse_fallback_used": result.sparse_fallback_used,
         }
         if visual_result is not None:
             manifest["visual_outputs"] = {

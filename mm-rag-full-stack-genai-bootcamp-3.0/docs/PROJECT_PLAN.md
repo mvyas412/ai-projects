@@ -749,7 +749,8 @@ the disabled-by-default `visual-table-v1` profile. PR #7 checks and the authenti
 application-shell/readiness/logout verification pass. The representative visual/
 table candidate proof, explicit profile promotion, Phase 6 acceptance, and release
 tagging remain separate gates.
-No paid/provider Phase 6 run has been authorized or executed.
+A single bounded paid candidate attempt was authorized and executed on 2026-09-07,
+but it stopped before visual/table processing and therefore is not acceptance evidence.
 
 ### Objective
 
@@ -838,6 +839,19 @@ holdout and then passes holdout: Recall/MRR/nDCG@10, source coverage, exact
 calculation, and safe abstention are `1.0`; identity/citation errors and provider
 calls are zero; nominal p95 is 2 ms. This verifies the deterministic fixture
 contract, not signed-in product behavior or production-quality generalization.
+
+The first representative-product attempt used the tracked PDF exactly once and
+completed one paid embedding request. It then exposed a pre-existing dense-only
+Qdrant collection compatibility issue before Phase 6 extraction: Qdrant 1.19 rejects
+adding a new sparse-vector name to an existing collection. The worker was stopped,
+the job was canceled before retry, and no question/answer call ran. The compatibility
+fix preserves the existing collection and records an explicit dense-only fallback;
+fresh collections still receive dense and sparse schemas at creation. A future
+reviewed collection migration can restore sparse indexing for legacy collections
+without deleting accepted vectors. This attempt does not satisfy the candidate gate,
+and another paid run requires fresh authorization. The corrected repository gate
+passes 262 tests with 14 expected opt-in skips; the free live-service gate passes
+275 tests with one expected skip, migration head `20260907_0016`, and no schema drift.
 
 ### Completion gate
 

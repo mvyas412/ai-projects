@@ -51,6 +51,7 @@ class IndexingResult:
     chunk_count: int
     vector_count: int | None = None
     sparse_vector_count: int = 0
+    sparse_fallback_used: bool = False
 
 
 IndexingProgress = Callable[[str, int | None, int | None, str | None], None]
@@ -105,7 +106,14 @@ class QdrantOpenAIDocumentIndexer:
             )
             if sparse_vectors and len(sparse_vectors) != len(chunks):
                 raise RuntimeError("Sparse encoder returned an invalid result count")
-            self._ensure_collection(len(embeddings[0]), sparse_enabled=bool(sparse_vectors))
+            sparse_supported = self._ensure_collection(
+                len(embeddings[0]), sparse_enabled=bool(sparse_vectors)
+            )
+            sparse_fallback_used = bool(sparse_vectors) and not sparse_supported
+            if sparse_fallback_used:
+                # Qdrant cannot add a sparse-vector name to a dense-only collection.
+                # Preserve existing data and use ADR 0019's dense-only fallback.
+                sparse_vectors = ()
             scope = VectorScope(
                 request.workspace_id,
                 request.document_id,
@@ -163,6 +171,7 @@ class QdrantOpenAIDocumentIndexer:
                 chunk_count=len(points),
                 vector_count=len(points),
                 sparse_vector_count=len(sparse_vectors),
+                sparse_fallback_used=sparse_fallback_used,
             )
         except EmptyDocumentError:
             raise
@@ -171,7 +180,7 @@ class QdrantOpenAIDocumentIndexer:
                 "The document indexing service is temporarily unavailable"
             ) from exc
 
-    def _ensure_collection(self, vector_size: int, *, sparse_enabled: bool) -> None:
+    def _ensure_collection(self, vector_size: int, *, sparse_enabled: bool) -> bool:
         name = self._settings.qdrant_collection_name
         if not self._qdrant.collection_exists(name):
             self._qdrant.create_collection(
@@ -189,21 +198,15 @@ class QdrantOpenAIDocumentIndexer:
                     else None
                 ),
             )
+            sparse_supported = sparse_enabled
         elif sparse_enabled:
             info = self._qdrant.get_collection(name)
             sparse_vectors = info.config.params.sparse_vectors or {}
-            if SPARSE_VECTOR_NAME not in sparse_vectors:
-                # Existing promoted points stay immutable; only the collection schema
-                # changes before successor generations publish sparse vectors.
-                self._qdrant.update_collection(
-                    collection_name=name,
-                    sparse_vectors_config={
-                        SPARSE_VECTOR_NAME: models.SparseVectorParams(
-                            modifier=models.Modifier.IDF
-                        )
-                    },
-                )
+            sparse_supported = SPARSE_VECTOR_NAME in sparse_vectors
+        else:
+            sparse_supported = False
         ensure_scope_payload_indexes(self._qdrant, name)
+        return sparse_supported
 
 
 def build_document_indexer(

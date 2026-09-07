@@ -336,6 +336,40 @@ def test_worker_promotes_one_immutable_generation(test_settings, worker_context)
         assert succeeded_event.service_actor == "ingestion-worker"
 
 
+def test_worker_promotes_explicit_dense_fallback_generation(
+    test_settings, worker_context
+) -> None:
+    class DenseFallbackIndexer:
+        def index(self, request: IndexingRequest, *, progress=None) -> IndexingResult:
+            return IndexingResult(
+                chunk_count=2,
+                vector_count=2,
+                sparse_vector_count=0,
+                sparse_fallback_used=True,
+            )
+
+    settings = test_settings.model_copy(update={"rag_sparse_indexing_enabled": True})
+    worker = _worker(settings, worker_context, DenseFallbackIndexer())
+
+    assert worker.process(worker_context.message) == DeliveryDisposition.ACK
+    with worker_context.factory() as session:
+        job = session.get(IngestionJob, worker_context.job_id)
+        version = session.get(DocumentVersion, worker_context.version_id)
+        generation = session.scalar(
+            select(IngestionGeneration).where(
+                IngestionGeneration.job_id == worker_context.job_id
+            )
+        )
+        assert job is not None and job.state == IngestionJobState.SUCCEEDED.value
+        assert generation is not None and generation.manifest_object_key is not None
+        assert version is not None and version.active_generation_id == generation.id
+        manifest = json.loads(
+            worker_context.storage.read(generation.manifest_object_key).decode("utf-8")
+        )
+        assert manifest["sparse_vector_count"] == 0
+        assert manifest["sparse_fallback_used"] is True
+
+
 def test_worker_promotes_immutable_visual_region_artifacts(
     test_settings, worker_context
 ) -> None:
