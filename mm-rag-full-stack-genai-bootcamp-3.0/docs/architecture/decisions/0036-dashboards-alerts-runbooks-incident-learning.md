@@ -1,6 +1,6 @@
 # ADR 0036: Dashboards, alerts, runbooks, and incident learning
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-07
 - Milestone: 7.4–7.5
 
@@ -51,3 +51,7 @@ select Slack, email, PagerDuty, or another notification provider during kickoff.
 - Development remains free and non-paging.
 - A future production notification provider can be added without changing signal names.
 
+## Decision record
+
+Accepted by the user on 2026-09-07. Local alerts are visible but non-paging;
+external notification destinations remain undecided.

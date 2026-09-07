@@ -18,14 +18,11 @@ roadmap view, and one diagram for each phase. The Mermaid diagrams in this
 handbook remain the editable source of truth.
 
 The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
-records the accepted Phase 6 implementation: the Phase 3/4 runtime and governance
-boundaries, Phase 5 hybrid retrieval foundation, and Phase 6 visual/table extraction,
-retrieval, calculation, and evidence inspection. `visual-table-v1` is the accepted
-default with `disabled` retained as explicit rollback. PR #7 was squash-merged at
-`0eb0d16`; annotated tag `mm-rag-v6.0.0` marks verified closure commit `d97e8e8`.
-Post-release image refresh PR #10 was squash-merged at `0a69f1b`. Phase 7 has begun
-decision kickoff only; ADRs 0031–0036 remain Proposed and no observability runtime
-or backend has been selected.
+records the accepted Phase 6 product path plus the implemented Phase 7 evaluation
+and observability layer. `visual-table-v1` remains the accepted product default and
+`disabled` remains its explicit rollback. ADRs 0031–0036 are Accepted; Phase 7
+acceptance remains pending the seven-day representative baseline and numeric pilot
+SLO review.
 
 ## Status legend
 
@@ -611,8 +608,9 @@ model call. The profile was subsequently promoted after explicit approval.
 
 ## Phase 7 — evaluation and observability
 
-**Status:** In progress — decision kickoff only. ADRs 0031–0036 are Proposed;
-runtime implementation has not started. Use a vendor-neutral telemetry boundary.
+**Status:** In progress — ADRs 0031–0036 are Accepted and implementation is
+complete. Acceptance remains pending the seven-day baseline and numeric pilot SLO
+review required by ADR 0033.
 
 ```mermaid
 flowchart TB
@@ -621,7 +619,7 @@ flowchart TB
     telemetry --> logs["Structured logs"]
     telemetry --> traces["Distributed traces"]
     telemetry --> metrics["Latency, errors, throughput, cost"]
-    logs --> backend["Observability backend TBD"]
+    logs --> backend["Free local Grafana LGTM<br/>production backend TBD"]
     traces --> backend
     metrics --> backend
     backend --> dashboards["SLO / cost dashboards"]
@@ -763,7 +761,7 @@ reconcile commercial usage.
 | Visual embeddings/retrieval | ADR 0028 implemented opt-in: pinned checksum-bound FastEmbed CLIP pair, isolated global visual collection, complete scope validation, deterministic routing/RRF, and text fallback |
 | Structured tables/calculation | ADR 0029 implemented at `20260907_0015`/`0016`: normalized validated cells, immutable traces, and a closed Decimal calculation allowlist; no generated SQL |
 | Region evidence/viewer/rollout | ADR 0030 implementation adds backend-mediated `evidence-v1`, integrity-checked streaming, accessible inspection, and accepted `visual-table-v1`; Phase 6 browser, promotion, and release gates pass |
-| Observability backend | Proposed in ADRs 0031–0032: OpenTelemetry boundary and free local LGTM candidate; not yet accepted or implemented; production provider remains TBD |
+| Observability backend | Accepted ADRs 0031–0032: OTLP through an OpenTelemetry Collector to optional free local Grafana LGTM; production provider remains TBD |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
 
 Accepted Phase 2 decisions are recorded in
@@ -815,7 +813,7 @@ Accepted Phase 6 decisions are:
 - [ADR 0029 — Structured tables and safe exact calculation](decisions/0029-structured-tables-safe-calculation.md)
 - [ADR 0030 — Region evidence, viewer, and Phase 6 rollout](decisions/0030-region-evidence-viewer-rollout.md)
 
-Proposed Phase 7 decisions are:
+Accepted Phase 7 decisions are:
 
 - [ADR 0031 — Telemetry correlation and privacy contract](decisions/0031-telemetry-correlation-privacy-contract.md)
 - [ADR 0032 — Observability backend and free local stack](decisions/0032-observability-backend-local-stack.md)

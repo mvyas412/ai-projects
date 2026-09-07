@@ -1,6 +1,6 @@
 # ADR 0035: User feedback and review governance
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-07
 - Milestone: 7.3
 
@@ -51,3 +51,7 @@ privacy/legal decision.
 - Deletion, hold, export, and audit behavior must extend to feedback records.
 - Platform-wide quality review remains unavailable until separately governed.
 
+## Decision record
+
+Accepted by the user on 2026-09-07. Structured feedback is minimal by default;
+comments and metadata-only diagnostic snapshots require separate explicit consent.

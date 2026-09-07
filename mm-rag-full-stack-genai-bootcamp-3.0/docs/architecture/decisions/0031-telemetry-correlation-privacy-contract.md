@@ -1,6 +1,6 @@
 # ADR 0031: Telemetry correlation and privacy contract
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-07
 - Milestone: 7.0
 
@@ -57,3 +57,7 @@ Do not add raw prompt or document capture as a shortcut.
 - Existing audit/evidence records remain authoritative for security and citations.
 - A trace can explain timing and failure location, not reveal private source content.
 
+## Decision record
+
+Accepted by the user on 2026-09-07. Implementation uses metadata-only W3C trace
+propagation and keeps content-bearing diagnostic capture disabled.

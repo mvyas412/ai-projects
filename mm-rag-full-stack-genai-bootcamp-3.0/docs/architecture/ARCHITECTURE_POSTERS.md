@@ -4,12 +4,12 @@
 > The handbook remains the editable source of truth; regenerate these posters
 > whenever architecture, data flow, technology, or phase status changes.
 
-## Current Phase 6 workflow and DEV architecture
+## Current Phase 7 workflow and DEV architecture
 
-This accepted release view shows the Phase 3/4 runtime and governance boundaries,
-Phase 5 hybrid retrieval foundation, and Phase 6 visual/table extraction, scoped
-CLIP retrieval, exact calculation, evidence inspection, and release status at
-`mm-rag-v6.0.0`.
+This current implementation view shows the Phase 3/4 runtime and governance
+boundaries, Phase 5 hybrid retrieval foundation, Phase 6 visual/table extraction,
+and the Phase 7 evaluation and observability layer. Phase 6 remains released at
+`mm-rag-v6.0.0`; Phase 7 acceptance waits for its seven-day SLO baseline.
 
 ![MM-RAG current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 

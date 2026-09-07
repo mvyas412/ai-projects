@@ -1,6 +1,6 @@
 # ADR 0034: Unified RAG evaluation and release gates
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-07
 - Milestone: 7.2
 
@@ -51,3 +51,7 @@ that one aggregate score explains RAG quality.
 - New datasets must declare license, provenance, split policy, and privacy class.
 - No historical holdout or failed-candidate evidence is silently retuned.
 
+## Decision record
+
+Accepted by the user on 2026-09-07. The repository-owned composition layer is the
+Phase 7 release-evaluation authority; paid judging remains separately authorized.

@@ -1,6 +1,6 @@
 # ADR 0032: Observability backend and free local stack
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-07
 - Milestone: 7.0–7.1
 
@@ -48,3 +48,7 @@ the portability boundary.
 - Backend outages degrade observability only; bounded buffering prevents backpressure.
 - Cardinality, retention, and resource budgets become explicit acceptance gates.
 
+## Decision record
+
+Accepted by the user on 2026-09-07. The local stack is optional, free, and
+replaceable; the Phase 8 production observability provider remains undecided.

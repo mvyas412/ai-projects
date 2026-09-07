@@ -6,6 +6,8 @@ PR #5 was squash-merged at `5436614`. Phase 6 ADRs 0025–0030 and Milestones
 6.0–6.5 are implemented and accepted. The signed-in visual/table/calculation proof
 passes, and `PHASE6_PROFILE=visual-table-v1` is the promoted default;
 `PHASE6_PROFILE=disabled` remains the explicit rollback.
+Phase 7 ADRs 0031–0036 are accepted and the evaluation/observability implementation
+is available; final Phase 7 acceptance waits for its seven-day SLO baseline.
 
 ## Before the session
 
@@ -15,7 +17,7 @@ passes, and `PHASE6_PROFILE=visual-table-v1` is the promoted default;
    `make phase6-models-verify`.
 2. Confirm ignored `.env` and `.streamlit/secrets.toml` contain the local Auth0,
    PostgreSQL, Qdrant, SeaweedFS, RabbitMQ, and OpenAI settings. Never display them.
-3. Run `make services`, `make migrate`, and `make runtime`.
+3. Run `make services`, `make observability`, `make migrate`, and `make runtime`.
 4. In separate terminals run `make api` and `make ui`.
 5. Run `make check-live`. This validates free dependencies and does not make paid
    OpenAI requests.
@@ -41,6 +43,24 @@ from every free gate.
 7. **Operations:** show aggregate `make operations-status` output and explain the
    separate dispatcher/worker health, safe alerts, retention preview, and restore proof.
 8. **Logout:** sign out and verify the protected workspace is no longer visible.
+
+## Phase 7 operator proof
+
+1. Run `make observability-status` and open the provisioned MM-RAG Grafana dashboards
+   at `http://localhost:3003`.
+2. Navigate the application, inspect a READY document, and ask a free/non-provider
+   path where available. Confirm a single safe correlation crosses frontend, API,
+   retrieval, and persistence without exposing content or credentials.
+3. Submit structured feedback on an assistant answer. Optional comment and diagnostic
+   metadata require separate consent; only an owner/admin can review the workspace queue.
+4. Run `make phase7-evaluation` and verify the composed release summary passes with no
+   provider calls and preserves validation-before-holdout ordering.
+5. Run `make observability-baseline` once per representative day. Phase 7 cannot be
+   accepted until seven distinct days span at least six elapsed days and ADR 0033
+   records the reviewed numeric targets.
+
+Detailed diagnosis, alert, and incident procedures are in
+[`PHASE7_OBSERVABILITY_OPERATIONS.md`](PHASE7_OBSERVABILITY_OPERATIONS.md).
 
 ## Phase 6 accepted profile and rollback
 

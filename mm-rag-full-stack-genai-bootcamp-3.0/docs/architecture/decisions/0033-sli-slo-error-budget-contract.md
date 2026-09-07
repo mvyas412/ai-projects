@@ -1,6 +1,6 @@
 # ADR 0033: SLI, SLO, and error-budget contract
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-07
 - Milestone: 7.0 and 7.4–7.5
 
@@ -57,3 +57,8 @@ Milestone 7.4 dashboards and alerts are accepted.
 - Dashboards distinguish expected product outcomes from operational failures.
 - Promotion policy can use both quality gates and remaining reliability budget.
 
+## Decision record
+
+Accepted by the user on 2026-09-07. The SLI contract and seven-day evidence window
+are binding; numeric pilot SLOs remain deliberately open until that baseline is
+complete and reviewed.
