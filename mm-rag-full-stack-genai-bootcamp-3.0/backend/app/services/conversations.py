@@ -40,6 +40,7 @@ from backend.app.tables.calculation import (
     TableCalculationScope,
     format_calculation_answer,
 )
+from backend.app.visual.retrieval import TEXT_ONLY_ROUTE, select_visual_route
 
 
 class ConversationError(Exception):
@@ -92,6 +93,12 @@ def _calculation_answer(evidence: CalculationEvidence | None) -> RAGAnswer:
         ),
         model_name="deterministic-table-v1",
     )
+
+
+def should_attempt_table_calculation(query: str) -> bool:
+    """Give explicit visual intent precedence over generic lookup wording."""
+
+    return select_visual_route(query) == TEXT_ONLY_ROUTE
 
 
 class ConversationService:
@@ -252,6 +259,7 @@ class ConversationService:
                 )
             )
             if self._table_calculator is not None
+            and should_attempt_table_calculation(content)
             else None
         )
         answer = (

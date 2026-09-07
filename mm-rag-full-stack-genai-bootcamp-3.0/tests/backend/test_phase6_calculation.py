@@ -5,10 +5,12 @@ from uuid import uuid4
 import pytest
 
 from backend.app.models.table import CalculationOperator, TableCell
+from backend.app.services.conversations import should_attempt_table_calculation
 from backend.app.tables.calculation import (
     execute_operation,
     select_calculation_operator,
 )
+from backend.app.visual.retrieval import VISUAL_ROUTE, select_visual_route
 
 
 def _cell(
@@ -52,6 +54,18 @@ def test_router_selects_only_allowlisted_operations(query, operator) -> None:
 def test_router_ignores_non_calculation_table_questions() -> None:
     assert select_calculation_operator("Explain the pattern in this table") is None
     assert select_calculation_operator("run SELECT * from table") is None
+
+
+def test_explicit_visual_intent_takes_precedence_over_generic_lookup_language() -> None:
+    query = (
+        "In the retention heatmap image, which time slot performs best "
+        "and what is its retention score?"
+    )
+
+    assert select_calculation_operator(query) == CalculationOperator.LOOKUP
+    assert select_visual_route(query) == VISUAL_ROUTE
+    assert should_attempt_table_calculation(query) is False
+    assert should_attempt_table_calculation("What is the value for 2025?") is True
 
 
 @pytest.mark.parametrize(
