@@ -59,7 +59,7 @@ Rules:
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
-| Phase 6 | In progress — Milestones 6.0–6.5 implemented; PR #7 checks and authenticated shell verification pass; candidate proof and promotion pending |
+| Phase 6 | In progress — Milestones 6.0–6.5 implemented; PR #7 checks and corrected visual browser proof pass; numeric calculation proof and promotion pending |
 | Phases 7–9 | Planned |
 
 ## Delivery sequence and gates
@@ -746,9 +746,10 @@ then reranking a bounded candidate set.
 **Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. Milestones
 6.0–6.5 are implemented and locally verified on the Phase 6 review branch behind
 the disabled-by-default `visual-table-v1` profile. PR #7 checks and the authenticated
-application-shell/readiness/logout verification pass. The representative visual/
-table candidate proof, explicit profile promotion, Phase 6 acceptance, and release
-tagging remain separate gates.
+application-shell/readiness/logout verification pass. The corrected representative
+visual retrieval and region/table evidence proof also passes. One contract-valid
+numeric calculation proof, explicit profile promotion, Phase 6 acceptance, and
+release tagging remain separate gates.
 A single bounded paid candidate attempt was authorized and executed on 2026-09-07,
 but it stopped before visual/table processing and therefore is not acceptance evidence.
 
@@ -874,6 +875,18 @@ privileged-purpose branch. Migration `20260907_0017` supplies only the required
 `SELECT` grant: document RLS continues to return no rows to the dispatcher, while
 authorized job selection succeeds. After the migration, the dispatcher started
 cleanly and drained all pending terminal-job outbox events.
+
+A third bounded browser proof reused the promoted document without uploading or
+starting the worker. The corrected `text-and-visual` route retrieved authorized text
+and visual candidates, answered that Prime Friday leads the retention heatmap with
+a score of 93, and cited page 12. The evidence viewer resolved the exact stored
+region, page image/crop, and structured companion table without exposing an object
+key or credential. One query embedding and one answer call were made. The second
+and final question asked for arithmetic over two narrative “Supporting value” cells;
+it safely abstained without a provider call because those cells are intentionally
+typed as text rather than numeric values. A validated page-23 numeric table is the
+appropriate subject for the remaining exact-calculation proof. The two-question
+limit was honored and no retry was attempted.
 
 ### Completion gate
 
@@ -1037,7 +1050,7 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Complete the representative signed-in Phase 6 candidate proof under a fresh bounded provider-call approval if required | Visual/table retrieval, exact calculation, evidence inspection, persistence, denial, fallback, narrow/desktop, and light/dark states are recorded |
+| 1 | Complete one contract-valid, no-provider numeric calculation proof under a fresh bounded approval | Exact result, immutable trace, cited cells, and evidence inspection are recorded |
 | 2 | Review and squash-merge green Phase 6 implementation PR #7 after candidate acceptance | The accepted reviewed tree is merged to `main`; source branch and prior tags remain preserved |
 | 3 | Decide whether the free evidence is sufficient or a separately authorized paid/provider comparison is still needed | The decision and any measured result are recorded without reusing old approval |
 | 4 | Request explicit profile-promotion acceptance; keep `PHASE6_PROFILE=disabled` until then | `hybrid-v1` remains default, `dense-v1` rollback and `hybrid-v3` evaluation-only |

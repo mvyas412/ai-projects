@@ -459,10 +459,10 @@ release tag was created.
 **Status:** In progress. ADRs 0025–0030 were accepted on 2026-09-03. Milestones
 6.0–6.5 are implemented and locally verified behind `visual-table-v1`, which remains
 disabled by default. The diagram is the implemented candidate runtime. Signed-in
-application-shell/readiness/logout verification passes; the representative
-visual/table candidate proof, any separately justified paid/provider comparison,
-explicit profile promotion, Phase 6 acceptance, and release tagging remain pending
-gates.
+application-shell/readiness/logout verification and corrected representative visual
+retrieval/evidence inspection pass. One contract-valid numeric calculation proof,
+any separately justified paid/provider comparison, explicit profile promotion,
+Phase 6 acceptance, and release tagging remain pending gates.
 
 ```mermaid
 flowchart LR
@@ -596,6 +596,15 @@ Migration `20260907_0017` grants the dispatcher role narrow read access to satis
 that policy dependency. Document RLS still exposes no document rows to that role,
 while authorized ingestion-job selection succeeds and the dispatcher drains its
 outbox normally.
+
+The corrected signed-in browser proof then reused the promoted document and routed
+the heatmap question through both authorized text and visual retrieval. It returned
+Prime Friday with retention score 93, cited page 12, and resolved the exact stored
+region, page crop, and structured companion table through `evidence-v1`. A final
+question intentionally stopped at the safe-calculation boundary because its two
+source cells contain narrative text rather than normalized numeric values; no model
+provider was called for that abstention. A separate validated numeric table must be
+used for the remaining exact-calculation proof.
 
 ## Phase 7 — evaluation and observability
 
