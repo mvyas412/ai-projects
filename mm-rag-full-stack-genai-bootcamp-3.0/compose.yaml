@@ -97,6 +97,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_CHAT_MODEL: ${OPENAI_CHAT_MODEL:-gpt-4.1-mini}
       OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+      PHASE6_PROFILE: ${PHASE6_PROFILE:-visual-table-v1}
       RUNTIME_HEALTH_DIRECTORY: /app/data/runtime/health
     volumes:
       - runtime_health:/app/data/runtime/health

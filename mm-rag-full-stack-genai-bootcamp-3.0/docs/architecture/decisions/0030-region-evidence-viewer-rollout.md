@@ -1,7 +1,8 @@
 # ADR 0030: Region evidence, viewer, and Phase 6 rollout
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-02
+- Accepted: 2026-09-03
 - Milestone: 6.5
 
 ## Context
@@ -31,7 +32,7 @@ visual/table evidence passes.
 | Let the answer model emit coordinates/cell ranges | Flexible | Coordinates are hallucination-prone and bypass retrieved-identity validation |
 | Backend-resolved evidence descriptors plus authorized artifact streaming | Exact scope, integrity, and auditability | Requires versioned API schemas and viewer work |
 
-## Proposed decision
+## Decision
 
 ### Evidence contract
 
@@ -103,12 +104,12 @@ cannot silently replace the accepted text path.
 - A Phase 6 candidate can remain opt-in if quality, latency, cost, accessibility,
   or browser evidence does not pass.
 
-## Approval questions
+## Acceptance resolution
 
-1. Approve the region/table/calculation evidence descriptor?
-2. Approve backend-mediated, integrity-checked page/crop streaming?
-3. Approve the proposed viewer provenance and accessibility behavior?
-4. Approve the seven-step rollout, separate promotion, and separate release-tag decision?
+The user approved all recommendations on 2026-09-03: the evidence descriptor;
+backend-mediated, integrity-checked page/crop streaming; the viewer provenance and
+accessibility behavior; and the seven-step rollout with separate promotion and
+release-tag decisions.
 
 ## Acceptance evidence required after approval
 
@@ -120,3 +121,13 @@ cannot silently replace the accepted text path.
 - Refresh and sign-out/sign-in preserve authorized evidence while revocation blocks it.
 - No token, secret, raw object key, private source content, or internal provider error
   appears in logs, URLs, audit events, or public UI state.
+
+## Promotion resolution
+
+On 2026-09-07 the user approved `visual-table-v1` as the accepted Phase 6 profile
+after the deterministic, live-service, signed-in visual retrieval, exact evidence,
+safe-abstention, and immutable numeric-calculation proofs passed. The application
+and local Compose defaults now select `visual-table-v1`; `disabled` remains the
+explicit rollback. Phase 5's `hybrid-v1` text default, `dense-v1` rollback, and
+evaluation-only `hybrid-v3` remain unchanged. Release tagging remains a separate
+explicit decision.

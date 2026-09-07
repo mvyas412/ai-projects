@@ -6,7 +6,12 @@ from pydantic import SecretStr
 from qdrant_client import QdrantClient, models
 
 from backend.app.core.config import Settings
-from backend.app.ingestion.pipeline import manifest_supports_sparse, pipeline_manifest
+from backend.app.ingestion.pipeline import (
+    PHASE6_PIPELINE_PROFILE,
+    PIPELINE_PROFILE,
+    manifest_supports_sparse,
+    pipeline_manifest,
+)
 from backend.app.rag import indexing as indexing_module
 from backend.app.rag.indexing import IndexingRequest, QdrantOpenAIDocumentIndexer
 from backend.app.retrieval.sparse import SPARSE_VECTOR_NAME
@@ -96,16 +101,19 @@ def test_successor_generation_writes_dense_and_sparse_atomically(monkeypatch) ->
     assert qdrant.points[0].payload["sparse_profile"] == SPARSE_VECTOR_NAME
 
 
-def test_existing_collection_adds_schema_without_mutating_points(monkeypatch) -> None:
+def test_existing_dense_only_collection_uses_safe_sparse_fallback(monkeypatch) -> None:
     monkeypatch.setattr(indexing_module, "OpenAIEmbeddings", FakeEmbeddings)
     qdrant = FakeQdrant(exists=True)
 
-    QdrantOpenAIDocumentIndexer(
+    result = QdrantOpenAIDocumentIndexer(
         _settings(), cast(QdrantClient, qdrant), FakeSparseEncoder()
     ).index(_request())
 
-    assert qdrant.updated is not None
-    assert qdrant.updated["sparse_vectors_config"][SPARSE_VECTOR_NAME].modifier == "idf"
+    assert qdrant.updated is None
+    assert result.sparse_vector_count == 0
+    assert result.sparse_fallback_used is True
+    assert not isinstance(qdrant.points[0].vector, dict)
+    assert qdrant.points[0].payload["sparse_profile"] is None
     assert qdrant.points
 
 
@@ -120,3 +128,30 @@ def test_generation_manifest_requires_complete_pinned_sparse_output() -> None:
     assert manifest_supports_sparse(manifest) is True
     manifest["sparse_vector_count"] = 1
     assert manifest_supports_sparse(manifest) is False
+
+
+def test_phase6_manifest_is_versioned_and_promoted_by_default() -> None:
+    default_manifest = pipeline_manifest(_settings(), "application/pdf")
+
+    assert default_manifest["profile"] == PHASE6_PIPELINE_PROFILE
+    assert default_manifest["citation_schema_revision"] == "evidence-v1"
+    assert "visual_extraction" in default_manifest
+    assert "structured_tables" in default_manifest
+
+    rollback_settings = Settings(
+        app_env="test",
+        openai_api_key=SecretStr("test-key"),
+        rag_sparse_indexing_enabled=True,
+        phase6_profile="disabled",
+    )
+    rollback_manifest = pipeline_manifest(rollback_settings, "application/pdf")
+
+    assert rollback_settings.phase6_enabled is False
+    assert rollback_manifest["profile"] == PIPELINE_PROFILE
+    assert rollback_manifest["citation_schema_revision"] == 1
+    assert "visual_extraction" not in rollback_manifest
+    assert "structured_tables" not in rollback_manifest
+    visual_extraction = cast(dict[str, object], default_manifest["visual_extraction"])
+    structured_tables = cast(dict[str, object], default_manifest["structured_tables"])
+    assert visual_extraction["remote_services"] is False
+    assert structured_tables["generated_sql"] is False

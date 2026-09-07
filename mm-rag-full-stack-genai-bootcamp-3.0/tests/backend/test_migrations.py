@@ -6,11 +6,11 @@ from alembic.script import ScriptDirectory
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_migration_history_has_phase4_lifecycle_head() -> None:
+def test_migration_history_has_phase6_structured_table_head() -> None:
     config = Config(PROJECT_ROOT / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260831_0013"]
+    assert scripts.get_heads() == ["20260907_0017"]
     baseline = scripts.get_revision("20260829_0001")
     assert baseline is not None
     assert baseline.down_revision is None
@@ -49,3 +49,15 @@ def test_migration_history_has_phase4_lifecycle_head() -> None:
     phase4_lifecycle = scripts.get_revision("20260831_0013")
     assert phase4_lifecycle is not None
     assert phase4_lifecycle.down_revision == "20260831_0012"
+    phase6_provenance = scripts.get_revision("20260903_0014")
+    assert phase6_provenance is not None
+    assert phase6_provenance.down_revision == "20260831_0013"
+    structured_tables = scripts.get_revision("20260907_0015")
+    assert structured_tables is not None
+    assert structured_tables.down_revision == "20260903_0014"
+    calculation_traces = scripts.get_revision("20260907_0016")
+    assert calculation_traces is not None
+    assert calculation_traces.down_revision == "20260907_0015"
+    dispatcher_rls = scripts.get_revision("20260907_0017")
+    assert dispatcher_rls is not None
+    assert dispatcher_rls.down_revision == "20260907_0016"

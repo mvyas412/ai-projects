@@ -1,4 +1,4 @@
-# Multimodal RAG Production — Phase 5 closure and Phase 6 decisions
+# Multimodal RAG Production — Phase 6 visual and table intelligence
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
@@ -36,6 +36,17 @@ reproduction. The default
 deterministic RRF;
 `dense-v1` remains the rollback path, and `hybrid-rerank-v1` remains opt-in until
 measured evidence proves the bounded local cross-encoder improves quality.
+Phase 6 Milestones 6.0–6.5 are implemented and accepted with the versioned
+`visual-table-v1` profile promoted as the default. The free synthetic
+candidate passes validation and holdout with zero provider calls; PostgreSQL
+schema/RLS, local model, Docling, lifecycle, citation-negative, and deterministic
+calculation checks pass. The signed-in representative proof now confirms corrected
+visual retrieval, exact region/table inspection, and safe numeric calculation with
+an immutable trace. PR #7's approved squash merge and any `mm-rag-v6.0.0` tag
+remain separate pending gates.
+The authenticated application-shell check now passes with the personal workspace,
+READY library state, persisted grounded conversation, service readiness, and logout;
+the opt-in visual and numeric-calculation candidate proof now passes.
 
 The current `3.0` lineage contains:
 
@@ -73,6 +84,10 @@ The current `3.0` lineage contains:
   120 chunks and 80 balanced queries with protected 48/16/16 splits, class-level
   gates, validation-before-holdout execution, a frozen selector fingerprint, and
   an explicit paid runner whose raw results remain Git-ignored.
+- Immutable visual regions/artifacts, pinned local Docling and CLIP models, scoped
+  visual indexing, and deterministic modality-aware fusion behind an opt-in profile.
+- PostgreSQL-normalized tables and calculation traces, a closed typed arithmetic
+  executor, `evidence-v1` resolution/streaming, and exact-region/cell inspection.
 - A presentation-focused native Streamlit experience with top navigation,
   workspace switching, document/collection management, persistent chat,
   evidence inspection, first-document guidance, downloads, settings, and
@@ -137,10 +152,14 @@ future capabilities have already been implemented.
 The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
-shows the Phase 5 implementation checkpoint, including hybrid retrieval and the
-failed v4 paid nDCG gate. Phase 5 is closed without candidate promotion. Phase 6
-decision kickoff is in progress through Proposed ADRs 0025–0030; the current poster
-remains accurate because no Phase 6 runtime behavior has changed.
+shows the Phase 5 runtime checkpoint, including hybrid retrieval and the failed v4
+paid nDCG gate. Phase 5 is closed without candidate promotion. Phase 6 decision
+kickoff PR #6 was squash-merged at `95d18b3`, and ADRs 0025–0030 were accepted on
+2026-09-03. Milestones 6.0–6.5 now provide the deterministic visual/table corpus,
+immutable local extraction and visual retrieval, normalized tables, exact
+calculation, and backend-mediated evidence inspection. The Phase 5 text path remains
+the default, so the current poster remains the accepted default-runtime view until
+Phase 6 rollout is approved.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
@@ -183,7 +202,7 @@ Accepted Phase 5 decisions are:
 - [Ceiling-aware retrieval quality and deterministic candidate selection](docs/architecture/decisions/0023-ceiling-aware-quality-and-candidate-selection.md)
 - [Adaptive retrieval and fresh protected evidence](docs/architecture/decisions/0024-adaptive-retrieval-and-fresh-protected-evidence.md)
 
-Proposed Phase 6 decisions are:
+Accepted Phase 6 decisions are:
 
 - [Visual and table evaluation contract](docs/architecture/decisions/0025-phase6-visual-table-evaluation-contract.md)
 - [Immutable region and derived-artifact provenance](docs/architecture/decisions/0026-immutable-region-artifact-provenance.md)
@@ -192,9 +211,54 @@ Proposed Phase 6 decisions are:
 - [Structured tables and safe exact calculation](docs/architecture/decisions/0029-structured-tables-safe-calculation.md)
 - [Region evidence, viewer, and Phase 6 rollout](docs/architecture/decisions/0030-region-evidence-viewer-rollout.md)
 
-These Phase 6 ADRs require explicit acceptance before implementation. They do not
-authorize dependency or model selection, provider calls, paid evaluation, profile
-promotion, or a release tag.
+These ADRs authorize implementation in milestone order, beginning with the free
+evaluation contract. Exact artifacts remain subject to pinned revision, license,
+checksum, and measured acceptance requirements. Provider calls, paid evaluation,
+profile promotion, and release tagging use separate explicit gates; the promotion
+gate has now passed while tagging remains undecided.
+
+The committed Milestone 6.0 fixture contains 40 synthetic public-safe regions and
+80 questions across figure relationships, charts, table lookup, calculation, and
+negative cases. Tune/validation/holdout splits are hash-bound, the baseline runner
+withholds holdout evidence, and `make phase6-evaluation` reproduces the free baseline
+without provider calls.
+
+Milestone 6.1 adds immutable `content_regions` and `content_artifacts` at migration
+`20260903_0014`. PostgreSQL remains the provenance authority, generated binaries
+remain opaque in object storage, and visual outputs stay invisible until their
+generation is atomically promoted. Docling `2.124.0`, Tesseract CLI, accurate
+TableFormer, and standalone-image Pillow extraction run locally behind the opt-in
+`structural-v1` profile. Remote services and generated descriptions are disabled.
+
+Milestone 6.2 pins the MIT-licensed FastEmbed CLIP image/text pair to immutable
+Hugging Face revisions and checksum-bound local model trees. Region crops are
+written to a separate versioned Qdrant collection with complete tenant, document,
+version, generation, page, region, and profile identity. A query-only visual-intent
+router adds the visual leg to the always-run text path and fuses authorized results
+with deterministic RRF. Missing models, collection failures, malformed points, or
+scope mismatches expose no visual candidate and preserve the authorized text result.
+The feature is accepted by default with `PHASE6_PROFILE=disabled` as rollback.
+
+Milestones 6.3–6.4 add migrations `20260907_0015` and `20260907_0016` for immutable,
+tenant-scoped table regions, columns, cells, and exact-calculation traces.
+Normalized JSON/CSV artifacts preserve raw values beside typed values, spans,
+headers, units, currencies, and cell coordinates. Only validated tables enter the
+closed `lookup`, `count`, `sum`, `average`, `minimum`, `maximum`, `difference`, and
+`ratio` executor. Ambiguous, malformed, unsupported, or mixed-unit requests abstain;
+no generated SQL is accepted.
+
+Migration `20260907_0017` grants the dispatcher role the narrow `SELECT` privilege
+needed to evaluate the existing ingestion-job RLS policy's document relationship.
+Document RLS still returns no document rows to the dispatcher; the grant only lets
+PostgreSQL evaluate the policy so authorized job/outbox dispatch can proceed.
+
+Milestone 6.5 adds the versioned `evidence-v1` descriptor and authorized artifact
+streaming API. Every request rechecks current conversation/document policy, active
+generation, region/table/cell/trace identity, and object size/media type/SHA-256.
+The Streamlit viewer highlights the exact page region and cited cells, shows
+provenance layers and calculation operands, and never exposes storage keys or
+credentials. Lifecycle reconciliation now covers both visual vectors and all
+attempt/final visual artifacts.
 
 ## Prerequisites
 
@@ -224,6 +288,24 @@ uv run python -c "import sys; print(sys.executable)"
 ```
 
 The printed path must be inside this directory's `.venv/`.
+
+Before enabling Phase 6, provision and verify its ignored local Docling and paired
+CLIP model caches:
+
+```bash
+make phase6-models
+make phase6-models-verify
+```
+
+The reviewed structural profile contains only the Docling layout and TableFormer
+artifacts. Its exact 15-file, 701,214,178-byte tree is checksum-bound in code. The
+paired CLIP image/text snapshots are also revision- and checksum-bound. Runtime
+extraction and visual embedding fail closed if required bytes are missing or changed;
+neither request nor worker paths download models.
+
+`PHASE6_PROFILE=visual-table-v1` is the accepted default. Set
+`PHASE6_PROFILE=disabled` for the explicit Phase 6 rollback; this does not change
+the accepted `hybrid-v1` text default or `dense-v1` text rollback.
 
 ## Configure local settings
 
@@ -457,6 +539,8 @@ The same gates are available through stable commands:
 make check       # locked dependencies, lint, types, tests, migration head, diff hygiene
 make check-live  # also checks live services and the SeaweedFS provider contract
 make phase5-evaluation  # validates the free hashed 80-query v4 benchmark contract
+make phase6-models-verify  # verifies pinned local Docling and CLIP trees
+make phase6-evaluation  # validates the free Phase 6 baseline and candidate gate
 make check-acceptance PHASE5_EMBEDDING_COST_USD_PER_MILLION_TOKENS=<current-rate>
 ```
 

@@ -1,7 +1,8 @@
 # ADR 0028: Visual embeddings, indexing, and modality-aware retrieval
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-02
+- Accepted: 2026-09-03
 - Milestone: 6.2 and 6.4
 
 ## Context
@@ -40,7 +41,7 @@ and Qdrant documents the storage and scaling implications of
 | ColPali/ColQwen late-interaction multivectors | Strong document-page matching and fine-grained signals | High memory/storage/compute cost and more complex Qdrant operations |
 | Managed multimodal embedding service | Low local model operations and potentially strong quality | Paid, network/privacy dependent, and provider-specific |
 
-## Proposed decision
+## Decision
 
 ### Initial visual candidate
 
@@ -101,12 +102,12 @@ to justify any SigLIP2, late-interaction, or managed-provider successor.
 - Every new visual embedding revision requires successor generation output and
   measured storage/latency evidence.
 
-## Approval questions
+## Acceptance resolution
 
-1. Approve the pinned FastEmbed CLIP pair as the initial free visual candidate?
-2. Approve one global versioned visual collection separate from the text collection?
-3. Approve deterministic visual-intent routing plus application-owned RRF and text fallback?
-4. Approve a new ADR before adopting SigLIP2, late-interaction, or managed embeddings?
+The user approved all recommendations on 2026-09-03: the pinned FastEmbed CLIP
+pair as the initial free candidate; one versioned global visual collection separate
+from text; deterministic visual routing with application-owned RRF and text
+fallback; and a new ADR before adopting heavier or managed embedding alternatives.
 
 ## Acceptance evidence required after approval
 

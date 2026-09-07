@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from time import perf_counter
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol, cast
 from uuid import UUID
 
 import structlog
@@ -28,6 +28,16 @@ from backend.app.retrieval.sparse import (
     SPARSE_VECTOR_NAME,
     FastEmbedBM25Encoder,
     SparseEncoder,
+)
+from backend.app.visual.embedding import FastEmbedCLIPEncoder
+from backend.app.visual.retrieval import (
+    TEXT_ONLY_ROUTE,
+    VISUAL_ROUTE,
+    QdrantVisualRetriever,
+    VisualDocumentScope,
+    VisualRetriever,
+    VisualSearchRequest,
+    select_visual_route,
 )
 
 logger = structlog.get_logger(__name__)
@@ -64,6 +74,15 @@ class RAGCitation:
     excerpt: str
     page_number: int | None = None
     score: float | None = None
+    evidence_kind: Literal[
+        "text", "figure", "chart", "diagram", "image", "table", "calculation"
+    ] = "text"
+    generation_id: UUID | None = None
+    region_id: UUID | None = None
+    table_id: UUID | None = None
+    cell_ids: tuple[UUID, ...] = ()
+    calculation_trace_id: UUID | None = None
+    evidence_schema_revision: Literal["evidence-v1"] = "evidence-v1"
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,11 +110,13 @@ class QdrantOpenAIRAGEngine:
         qdrant: QdrantClient,
         sparse_encoder: SparseEncoder | None = None,
         reranker: CandidateReranker | None = None,
+        visual_retriever: VisualRetriever | None = None,
     ) -> None:
         self._settings = settings
         self._qdrant = qdrant
         self._sparse_encoder = sparse_encoder
         self._reranker = reranker
+        self._visual_retriever = visual_retriever
 
     def answer(self, request: RAGRequest) -> RAGAnswer:
         if not request.documents:
@@ -211,6 +232,49 @@ class QdrantOpenAIRAGEngine:
                         timeout_seconds=self._settings.rag_rerank_timeout_seconds,
                     )
                     rerank_ms = (perf_counter() - rerank_started) * 1000
+        visual_route = (
+            select_visual_route(request.query)
+            if self._settings.phase6_enabled
+            else TEXT_ONLY_ROUTE
+        )
+        visual: list[RetrievalCandidate] = []
+        visual_attempted = False
+        visual_ms = 0.0
+        if visual_route == VISUAL_ROUTE and self._visual_retriever is not None:
+            visual_attempted = True
+            visual_started = perf_counter()
+            try:
+                visual = self._visual_retriever.retrieve(
+                    VisualSearchRequest(
+                        workspace_id=request.workspace_id,
+                        documents=tuple(
+                            VisualDocumentScope(
+                                scope.document_id,
+                                scope.document_version_id,
+                                scope.generation_id,
+                            )
+                            for scope in request.documents
+                            if scope.generation_id is not None
+                        ),
+                        query=request.query,
+                    )
+                )
+                if visual:
+                    ranked = reciprocal_rank_fusion(
+                        ranked,
+                        visual,
+                        k=self._settings.phase6_visual_fusion_k,
+                    )
+                    ranked = diversify_candidates(
+                        ranked,
+                        document_count=len(request.documents),
+                        max_per_document=self._settings.rag_max_candidates_per_document,
+                        limit=self._settings.rag_rerank_candidate_limit,
+                    )
+            except Exception:
+                # The accepted text result is the safe rollback for every visual failure.
+                visual = []
+            visual_ms = (perf_counter() - visual_started) * 1000
         logger.info(
             "retrieval_ranked",
             ranking_profile=self._settings.rag_retrieval_profile,
@@ -218,6 +282,9 @@ class QdrantOpenAIRAGEngine:
             fusion_policy_revision=fusion_policy_revision,
             sparse_used=bool(sparse),
             reranker_attempted=reranker_attempted,
+            visual_route=visual_route,
+            visual_attempted=visual_attempted,
+            visual_point_ids=[candidate.point_id for candidate in visual],
             dense_point_ids=[candidate.point_id for candidate in dense],
             sparse_point_ids=[candidate.point_id for candidate in sparse],
             ranked_point_ids=[candidate.point_id for candidate in ranked],
@@ -225,6 +292,7 @@ class QdrantOpenAIRAGEngine:
             sparse_ms=round(sparse_ms, 2),
             fusion_ms=round(fusion_ms, 2),
             rerank_ms=round(rerank_ms, 2),
+            visual_ms=round(visual_ms, 2),
             total_retrieval_ms=round((perf_counter() - retrieval_started) * 1000, 2),
         )
         citations = tuple(
@@ -294,6 +362,7 @@ def build_rag_engine(settings: Settings, qdrant: QdrantClient) -> RAGEngine:
         return UnavailableRAGEngine()
     sparse_encoder: SparseEncoder | None = None
     reranker: CandidateReranker | None = None
+    visual_retriever: VisualRetriever | None = None
     if settings.rag_retrieval_profile != "dense-v1":
         try:
             sparse_encoder = FastEmbedBM25Encoder(settings.phase5_model_cache_dir)
@@ -308,7 +377,23 @@ def build_rag_engine(settings: Settings, qdrant: QdrantClient) -> RAGEngine:
             )
         except Exception:
             reranker = None
-    return QdrantOpenAIRAGEngine(settings, qdrant, sparse_encoder, reranker)
+    if settings.phase6_enabled:
+        try:
+            visual_encoder = FastEmbedCLIPEncoder(
+                settings.phase5_model_cache_dir,
+                threads=settings.rag_model_threads,
+                batch_size=settings.phase6_visual_embedding_batch_size,
+            )
+            visual_retriever = QdrantVisualRetriever(settings, qdrant, visual_encoder)
+        except Exception:
+            visual_retriever = None
+    return QdrantOpenAIRAGEngine(
+        settings,
+        qdrant,
+        sparse_encoder,
+        reranker,
+        visual_retriever,
+    )
 
 
 def _retrieval_filter(request: RAGRequest) -> models.Filter:
@@ -350,7 +435,7 @@ def _retrieval_filter(request: RAGRequest) -> models.Filter:
 
 
 def _authorized_citation(point: Any, request: RAGRequest) -> RAGCitation:
-    payload, document_id, version_id, _ = _authorized_payload(point, request)
+    payload, document_id, version_id, generation_id = _authorized_payload(point, request)
     return RAGCitation(
         document_id=document_id,
         document_version_id=version_id,
@@ -359,6 +444,7 @@ def _authorized_citation(point: Any, request: RAGRequest) -> RAGCitation:
         content_type=str(payload.get("content_type", "text")),
         excerpt=str(payload.get("content", ""))[:1000],
         score=float(point.score) if point.score is not None else None,
+        generation_id=generation_id,
     )
 
 
@@ -420,6 +506,21 @@ def _candidate_citation(candidate: RetrievalCandidate) -> RAGCitation:
         excerpt=candidate.content[:1000],
         page_number=candidate.page_number,
         score=candidate.score,
+        evidence_kind=_evidence_kind(candidate.evidence_kind),
+        generation_id=candidate.generation_id,
+        region_id=candidate.region_id,
+    )
+
+
+def _evidence_kind(
+    value: str,
+) -> Literal["text", "figure", "chart", "diagram", "image", "table", "calculation"]:
+    allowed = {"text", "figure", "chart", "diagram", "image", "table", "calculation"}
+    if value not in allowed:
+        raise RAGUnavailableError("Retrieved evidence failed authorization validation")
+    return cast(
+        Literal["text", "figure", "chart", "diagram", "image", "table", "calculation"],
+        value,
     )
 
 

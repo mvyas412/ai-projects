@@ -1,6 +1,6 @@
 # Multimodal RAG architecture handbook
 
-> Living architecture baseline — updated 2026-09-02
+> Living architecture baseline — updated 2026-09-07
 
 This document is the version-controlled architecture source of truth for the
 complete system and Phases 1–9. Update it whenever a component, boundary, data
@@ -24,8 +24,14 @@ attempt on 2026-09-02 passed every evaluated validation gate except the required
 5% relative nDCG@10 gain, achieving 2.28%; holdout and the product proof were
 withheld. `hybrid-v3` remains evaluation-only, `hybrid-v1` remains default, and a
 user-approved closure now ends Phase 5 without candidate promotion. PR #5 was
-squash-merged at `5436614`. Phase 6 decision kickoff is now in progress through
-Proposed ADRs 0025–0030; no Phase 6 runtime behavior has changed.
+squash-merged at `5436614`. Phase 6 kickoff PR #6 was squash-merged at `95d18b3`,
+and ADRs 0025–0030 were accepted on 2026-09-03. Milestones 6.0–6.5 are implemented
+on the review branch, including the free candidate gate, normalized tables, closed
+calculation, and evidence inspection. The authenticated application shell, inherited
+READY library/conversation persistence, readiness, representative visual/table/
+calculation proof, and logout boundary pass. `visual-table-v1` is now the accepted
+default with `disabled` retained as explicit rollback. PR #7 squash merge and release
+tagging remain separate gates.
 
 ## Status legend
 
@@ -175,7 +181,7 @@ flowchart LR
     p3["Phase 3<br/>Async ingestion<br/>Completed"] -->
     p4["Phase 4<br/>Governance foundation<br/>Completed / v4.0.0"] -->
     p5["Phase 5<br/>Hybrid retrieval<br/>Closed / gate not met"] -->
-    p6["Phase 6<br/>Visual/table intelligence<br/>Decision kickoff / Proposed"] -->
+    p6["Phase 6<br/>Visual/table intelligence<br/>Completed / accepted"] -->
     p7["Phase 7<br/>Evaluation/observability<br/>Planned"] -->
     p8["Phase 8<br/>Scalable platform<br/>Planned"] -->
     p9["Phase 9<br/>Enterprise platform<br/>Planned"]
@@ -188,7 +194,7 @@ flowchart LR
 | 3 | Durable asynchronous processing | Streamed async API, durable jobs/outbox, RabbitMQ, dispatcher, fenced worker, immutable generations, progress/control UX | PostgreSQL, S3-compatible SeaweedFS, generation-scoped Qdrant | Completed and accepted at `20260830_0008`; signed-in paid promotion/retrieval proof passed |
 | 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and preserved at `mm-rag-v4.0.0` |
 | 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | Closed without acceptance; v4 nDCG gate missed and no candidate was promoted |
-| 6 | Native image and table understanding | Proposed local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | Decision kickoff in progress; ADRs 0025–0030 Proposed |
+| 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | Completed and accepted; `visual-table-v1` promoted after free/live and signed-in candidate proof |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
 | 8 | Independently scalable deployment | Gateway, API/workers, dedicated frontend TBD, managed services | Managed PostgreSQL, Qdrant, object storage | Planned |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Planned |
@@ -451,10 +457,12 @@ release tag was created.
 
 ## Phase 6 — visual and table intelligence
 
-**Status:** Decision kickoff in progress. ADRs 0025–0030 are Proposed. The diagram
-below is a target design, not implemented behavior; no extractor, model, provider,
-schema, vector collection, calculation engine, evidence API, or paid run has been
-approved by this kickoff.
+**Status:** Completed and accepted. ADRs 0025–0030 and Milestones 6.0–6.5 are
+implemented and verified. Signed-in application-shell/readiness/logout, corrected
+representative visual retrieval, exact evidence inspection, safe abstention, and
+numeric calculation pass. `visual-table-v1` is the accepted default and `disabled`
+is the explicit rollback. Phase 5 text profiles remain unchanged. PR #7 squash merge
+and release tagging remain separate gates.
 
 ```mermaid
 flowchart LR
@@ -469,7 +477,7 @@ flowchart LR
     table --> structure["Cell/structure reconstruction"]
     structure --> validate["Schema/type validation"]
     validate --> tsummary["Table summary + index form"]
-    chunks --> qdrant[("Qdrant multivectors")]
+    chunks --> qdrant[("Qdrant text + visual collections")]
     ivec --> qdrant
     tsummary --> qdrant
     crop --> objects[("Object storage")]
@@ -481,6 +489,10 @@ flowchart LR
     pg --> evidence
     objects --> evidence
     evidence --> answer["Multimodal answer + exact citations"]
+    answer --> viewer["Streamlit evidence viewer"]
+    pg --> evidenceApi["Policy-resolved evidence-v1 API"]
+    objects --> evidenceApi
+    evidenceApi --> viewer
 ```
 
 Every crop, cell, summary, and vector retains document-version, page, bounding
@@ -488,11 +500,119 @@ box, content ID, and extractor-version provenance. Exact calculations use
 validated structure, not generated prose. Exit: figures and tables become
 first-class retrievable, inspectable, and correctly cited evidence.
 
-The proposed decision sequence is evaluation contract (ADR 0025), immutable
+The accepted decision sequence is evaluation contract (ADR 0025), immutable
 provenance (ADR 0026), local-first extraction/enrichment (ADR 0027), visual indexing
 and retrieval (ADR 0028), structured tables and safe calculation (ADR 0029), then
-evidence presentation and rollout (ADR 0030). Each ADR must be accepted before its
-implementation boundary changes.
+evidence presentation and rollout (ADR 0030). All six are accepted; implementation
+must follow those boundaries in milestone order.
+
+The Milestone 6.0 corpus is a committed, synthetic public-safe benchmark with 40
+regions and 80 questions divided 60/20/20 across tune, validation, and holdout.
+Manifest hashes bind all inputs. The baseline exposes only tune/validation
+aggregates, records zero provider calls, and enforces quality, identity, citation,
+calculation, abstention, text-regression, latency, and cost gates before protected
+holdout evaluation can run.
+
+Migration `20260903_0014` makes PostgreSQL canonical for immutable, generation-
+scoped region locators and artifact lineage. Normalized top-left coordinates retain
+source page geometry; composite foreign keys bind workspace, document version,
+generation, and creation attempt. Application/worker roles cannot mutate rows, and
+API reads inherit document authorization through RLS. Binary and text artifacts
+are conditionally written to both attempt and generation namespaces, verified by
+size and SHA-256, and exposed only after the existing generation promotion.
+
+The opt-in `structural-v1` adapter pins Docling `2.124.0`, Tesseract CLI English,
+accurate TableFormer, and a checksum-bound local model tree. It generates page
+renders, crops, captions, OCR/table text, and structured-table artifacts with remote
+services and generated descriptions disabled. Standalone images use deterministic
+Pillow conversion. Missing or changed model bytes fail closed before parsing.
+
+The opt-in `visual-clip-v1` projection uses checksum-verified local FastEmbed CLIP
+vision and text snapshots with fixed 512-dimensional cosine vectors. One global
+visual collection remains separate from the accepted text collection. Region points
+carry no object keys and include complete tenant/workspace/document/version/
+generation/page/region/profile identity. Backend-built filters and returned-payload
+validation enforce that scope before deterministic RRF. Text retrieval still runs
+for every query; only versioned visual-intent syntax adds the visual leg, and every
+visual error safely preserves the authorized text result.
+
+Migrations `20260907_0015` and `20260907_0016` add immutable normalized tables and
+calculation traces. Composite foreign keys bind each region, column, cell, and trace
+to its workspace, document, version, generation, and creation attempt. PostgreSQL
+RLS remains the tenant defense. Raw and normalized values, spans, headers, units,
+currencies, coordinates, validation codes, and normalized JSON/CSV objects are
+retained. Validation—not extractor identity—controls exact-calculation eligibility;
+unusable structure keeps its visual/text evidence and is excluded from arithmetic.
+
+The calculation route recognizes a closed intent vocabulary and resolves only
+currently authorized active-generation tables. The application executes lookup,
+count, sum, average, min/max, difference, or ratio with Decimal arithmetic and
+versioned rounding. Ambiguous or incompatible operands, mixed units, unsupported
+types, and division by zero abstain. Immutable traces record ordered cells and
+results; arbitrary SQL, generated SQL, and request-time analytical engines are not
+accepted.
+
+The `evidence-v1` API resolves persisted citations through current conversation and
+document policy and revalidates active generation, region/table/cell/trace identity,
+plus object size, media type, and SHA-256 before streaming. It returns no bucket or
+object key. The Streamlit viewer renders the page/crop, double-outlined region,
+provenance-labeled text layers, semantic structured table with non-color-only cited
+cells, and exact calculation details. Lifecycle inventory/purge spans both text and
+visual Qdrant collections and all final/attempt artifact objects.
+
+The frozen free synthetic candidate runs validation before holdout and passes both
+with `1.0` Recall/MRR/nDCG@10, source coverage, exact calculation, and safe
+abstention, zero identity/citation failures, zero provider calls, and nominal 2 ms
+p95. These values prove the deterministic fixture contract only; they do not replace
+signed-in browser evidence or establish production-data generalization.
+
+The first bounded representative-product attempt stopped before Phase 6 extraction.
+One tracked-PDF upload and one paid dense-embedding request exposed that Qdrant 1.19
+cannot add the accepted sparse-vector name to the installation's legacy dense-only
+text collection. No question call or automatic retry occurred. Runtime compatibility
+now preserves that collection, emits dense-only points, and records the fallback in
+the immutable generation manifest; retrieval already rejects sparse-incomplete
+manifests and uses the authorized dense path. Newly created text collections still
+receive both schemas. Migrating legacy vectors to a successor collection remains a
+separate reviewed operation, so this fallback does not silently rewrite accepted
+data or claim sparse availability. The corrected full repository and free live gates
+pass with migration head `20260907_0016` and no schema drift.
+
+The next bounded successor ingestion promoted successfully with text, visual, and
+structured-table outputs. Text regression and evidence inspection passed, but an
+explicit heatmap question was intercepted by the broad table lookup phrases
+`which`/`what is` and safely abstained before retrieval. No third question ran.
+Local CLIP/Qdrant diagnostics then returned the authorized page-12 heatmap figure
+first and its companion table third, isolating the failure to routing precedence.
+Conversation routing now gives explicit figure/chart/image intent priority over
+generic lookup language; unsupported or ambiguous actual calculations continue to
+abstain rather than fall through to generated arithmetic. This correction required
+a separately authorized paid browser proof, which subsequently passed before
+profile promotion.
+The corrected repository and free live-service gates pass 263 and 276 tests
+respectively, with no schema drift. Real-role dispatcher verification then exposed
+that PostgreSQL must privilege-check the `documents` table referenced by the
+`ingestion_jobs` RLS policy before evaluating its dispatcher-purpose branch.
+Migration `20260907_0017` grants the dispatcher role narrow read access to satisfy
+that policy dependency. Document RLS still exposes no document rows to that role,
+while authorized ingestion-job selection succeeds and the dispatcher drains its
+outbox normally.
+
+The corrected signed-in browser proof then reused the promoted document and routed
+the heatmap question through both authorized text and visual retrieval. It returned
+Prime Friday with retention score 93, cited page 12, and resolved the exact stored
+region, page crop, and structured companion table through `evidence-v1`. A final
+question intentionally stopped at the safe-calculation boundary because its two
+source cells contain narrative text rather than normalized numeric values; no model
+provider was called for that abstention. A separate validated numeric table must be
+used for the remaining exact-calculation proof.
+
+The follow-up no-provider proof selected normalized integer cells `6904` and `1784`
+from the validated page-23 amount table and returned the exact absolute difference
+`5120`. `evidence-v1` marked both operand cells, resolved the stored region/page/crop,
+and displayed the immutable calculation rule and rounding contract. This completed
+the representative visual/table/calculation proof without an embedding or answer-
+model call. The profile was subsequently promoted after explicit approval.
 
 ## Phase 7 — evaluation and observability
 
@@ -641,12 +761,12 @@ reconcile commercial usage.
 | Reranker | Pinned bounded local FastEmbed cross-encoder implemented as an opt-in profile with fused-order fallback under ADR 0021 |
 | Phase 5 benchmark remediation | Larger v2 confounder corpus, rotated holdout, strict holdout sequencing, and clarified negative metrics implemented under ADR 0022; paid validation exposed a remaining quality/ceiling decision |
 | Phase 5 quality/candidate follow-up | ADR 0023 remains diagnostic; ADR 0024's v4 candidate achieved 2.28% against the preserved 5% gate, and Phase 5 is closed without promotion |
-| Phase 6 evaluation | Proposed ADR 0025 defines the corpus, protected splits, metrics, class gates, and explicit paid-run boundary |
-| Region/artifact provenance | Proposed ADR 0026 makes PostgreSQL canonical for immutable region and artifact lineage while binaries remain in object storage |
-| Visual extraction/enrichment | Proposed ADR 0027 evaluates a local-first structured extractor and keeps generated descriptions non-authoritative; exact models remain unselected |
-| Visual embeddings/retrieval | Proposed ADR 0028 evaluates a free paired visual embedding candidate in an isolated authorized index; exact revision and checksum remain unselected |
-| Structured tables/calculation | Proposed ADR 0029 uses normalized, validated table cells and an application-owned calculation allowlist; no generated SQL or request-time analytical engine |
-| Region evidence/viewer/rollout | Proposed ADR 0030 defines backend-mediated evidence descriptors, accessible inspection, staged validation, and explicit promotion/release gates |
+| Phase 6 evaluation | ADR 0025 implemented with protected splits, deterministic validation-before-holdout gates, and a frozen free `visual-table-v1` candidate; paid/provider work remains explicit |
+| Region/artifact provenance | ADR 0026 implemented at `20260903_0014`; PostgreSQL is canonical for immutable region/artifact lineage while binaries remain in object storage |
+| Visual extraction/enrichment | ADR 0027 implemented local-first with pinned verified Docling/Tesseract/TableFormer and non-authoritative generated descriptions disabled |
+| Visual embeddings/retrieval | ADR 0028 implemented opt-in: pinned checksum-bound FastEmbed CLIP pair, isolated global visual collection, complete scope validation, deterministic routing/RRF, and text fallback |
+| Structured tables/calculation | ADR 0029 implemented at `20260907_0015`/`0016`: normalized validated cells, immutable traces, and a closed Decimal calculation allowlist; no generated SQL |
+| Region evidence/viewer/rollout | ADR 0030 implementation adds backend-mediated `evidence-v1`, integrity-checked streaming, accessible inspection, and a disabled versioned profile; browser/promotion/release gates remain |
 | Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
 
@@ -690,7 +810,7 @@ Accepted Phase 5 follow-ups:
 - [ADR 0023 — Ceiling-aware retrieval quality and deterministic candidate selection](decisions/0023-ceiling-aware-quality-and-candidate-selection.md)
 - [ADR 0024 — Adaptive retrieval and fresh protected evidence](decisions/0024-adaptive-retrieval-and-fresh-protected-evidence.md)
 
-Proposed Phase 6 decisions are:
+Accepted Phase 6 decisions are:
 
 - [ADR 0025 — Phase 6 visual and table evaluation contract](decisions/0025-phase6-visual-table-evaluation-contract.md)
 - [ADR 0026 — Immutable region and derived-artifact provenance](decisions/0026-immutable-region-artifact-provenance.md)

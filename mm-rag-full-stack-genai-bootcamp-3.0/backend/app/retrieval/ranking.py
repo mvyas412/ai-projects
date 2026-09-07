@@ -77,6 +77,8 @@ class RetrievalCandidate:
     page_number: int | None
     chunk_index: int
     score: float
+    evidence_kind: str = "text"
+    region_id: UUID | None = None
 
     @property
     def identity(self) -> tuple[UUID, UUID, UUID, str]:

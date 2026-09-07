@@ -1,0 +1,8 @@
+{
+  "calculation": "unsupported",
+  "dataset_revision": "phase6-visual-table-v1",
+  "profile": "ocr-markdown-baseline-v1",
+  "provider_calls": 0,
+  "representation": "baseline_text",
+  "retrieval": "authorized lexical token overlap"
+}

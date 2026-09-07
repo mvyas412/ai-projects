@@ -76,6 +76,13 @@ class IngestionGeneration(TimestampMixin, Base):
             "workspace_id",
             name="uq_ingestion_generations_id_version_workspace",
         ),
+        UniqueConstraint(
+            "id",
+            "attempt_id",
+            "document_version_id",
+            "workspace_id",
+            name="uq_ingestion_generations_region_scope",
+        ),
         UniqueConstraint("attempt_id", name="uq_ingestion_generations_attempt_id"),
     )
 

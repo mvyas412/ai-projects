@@ -2,13 +2,17 @@
 
 This runbook presents the accepted durable/governed foundation and the closed
 Phase 5 hybrid-retrieval implementation while keeping all release tags immutable.
-PR #5 was squash-merged at `5436614`. Phase 6 is in decision kickoff only, so the
-demonstrated product behavior remains the Phase 5 checkpoint.
+PR #5 was squash-merged at `5436614`. Phase 6 ADRs 0025–0030 and Milestones
+6.0–6.5 are implemented and accepted. The signed-in visual/table/calculation proof
+passes, and `PHASE6_PROFILE=visual-table-v1` is the promoted default;
+`PHASE6_PROFILE=disabled` remains the explicit rollback.
 
 ## Before the session
 
 1. From the `3.0` directory, run `make setup` once. This provisions and verifies
-   the pinned free BM25 and reranker artifacts outside request handling.
+   the pinned free BM25 and reranker artifacts outside request handling. Before a
+   Phase 6 candidate proof, also run `make phase6-models` and
+   `make phase6-models-verify`.
 2. Confirm ignored `.env` and `.streamlit/secrets.toml` contain the local Auth0,
    PostgreSQL, Qdrant, SeaweedFS, RabbitMQ, and OpenAI settings. Never display them.
 3. Run `make services`, `make migrate`, and `make runtime`.
@@ -37,6 +41,28 @@ from every free gate.
 7. **Operations:** show aggregate `make operations-status` output and explain the
    separate dispatcher/worker health, safe alerts, retention preview, and restore proof.
 8. **Logout:** sign out and verify the protected workspace is no longer visible.
+
+## Phase 6 accepted profile and rollback
+
+The default configuration now enables `PHASE6_PROFILE=visual-table-v1`. Provision
+and checksum-verify the pinned local models before starting the worker. To exercise
+the accepted proof with a representative visual/table PDF:
+
+1. Confirm the worker starts only with checksum-verified local Docling and CLIP trees.
+2. Upload once and verify immutable promotion reports visual regions and validated tables.
+3. Ask a visual relationship/table lookup and inspect the exact outlined page region.
+4. Ask one supported exact calculation and inspect cited cells, ordered operands,
+   unit/currency, rounding rule, and result.
+5. Refresh and sign out/in; confirm the evidence persists for the authorized user.
+6. Verify another tenant, stale generation, tombstone, and corrupted artifact receive
+   generic unavailable responses and no bytes.
+7. Check desktop/narrow widths, light/dark themes, keyboard controls, zoom, and
+   non-color-only highlighting.
+8. Stop on any failure; set `PHASE6_PROFILE=disabled` and restart the API/worker to
+   roll back Phase 6 while preserving the accepted text path.
+
+Uploading/indexing or asking through the live model boundary may incur provider cost.
+Obtain fresh explicit authorization before this proof; prior Phase 5 approvals do not apply.
 
 ## Failure-safe talking points
 
@@ -115,6 +141,20 @@ from every free gate.
   product proof remains valid, and dense retrieval remains the rollback path.
 - PR #5 passed its required checks and was squash-merged into `main` at `5436614`;
   the reviewed source tree and merged tree match, and no Phase 5 release tag exists.
-- Phase 6 decision kickoff adds only Proposed ADRs 0025–0030 and synchronized
-  documentation. It does not change runtime behavior, select a model/provider, or
-  authorize a paid Phase 6 run.
+- Phase 6 decision kickoff PR #6 was squash-merged at `95d18b3`. ADRs 0025–0030
+  were accepted on 2026-09-03, authorizing implementation in milestone order.
+- Milestones 6.0–6.5 are implemented behind `visual-table-v1`: immutable visual and
+  table provenance, scoped CLIP retrieval, normalized table/cell storage, closed
+  Decimal calculation, `evidence-v1`, integrity-checked artifact streaming, and the
+  region/table/calculation viewer. The free synthetic candidate passes validation
+  then holdout with zero provider calls. Local schema/RLS, model, Docling, lifecycle,
+  and citation-negative checks pass.
+- On 2026-09-07, the signed-in application-shell check passed: authenticated email
+  and Owner role, Personal workspace, one READY document, its persisted grounded
+  conversation/citation, aggregate Settings readiness, direct PostgreSQL/Qdrant/
+  object-storage API readiness, and logout protection were verified. No token or
+  secret was displayed or persisted.
+- The `visual-table-v1` representative visual/table/calculation proof passes and the
+  profile is accepted and promoted. Its exact evidence and fail-closed behavior are
+  recorded in the project plan and architecture handbook. PR #7 squash merge and
+  any Phase 6 tag remain separate gates.

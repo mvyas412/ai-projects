@@ -105,10 +105,29 @@ class Settings(BaseSettings):
     rag_rerank_max_characters: int = Field(default=4000, ge=256, le=16000)
     rag_model_threads: int = Field(default=2, ge=1, le=16)
     phase5_model_cache_dir: Path = PROJECT_ROOT / "data/runtime/models"
+    phase6_profile: Literal["disabled", "visual-table-v1"] = "visual-table-v1"
+    phase6_extraction_profile: Literal["structural-v1"] = "structural-v1"
+    phase6_docling_artifacts_path: Path = PROJECT_ROOT / "data/runtime/docling-models"
+    phase6_docling_timeout_seconds: int = Field(default=300, ge=30, le=1800)
+    phase6_image_scale: float = Field(default=2.0, ge=1.0, le=4.0)
+    phase6_max_pages: int = Field(default=250, ge=1, le=2000)
+    phase6_visual_collection_name: str = "mm_rag_phase3_visual"
+    phase6_visual_embedding_profile: Literal["visual-clip-v1"] = "visual-clip-v1"
+    phase6_visual_embedding_batch_size: int = Field(default=8, ge=1, le=64)
+    phase6_visual_candidate_limit: int = Field(default=12, ge=1, le=50)
+    phase6_visual_fusion_k: int = Field(default=60, ge=1, le=1000)
+    phase6_table_exact_max_rows: int = Field(default=1000, ge=1, le=10000)
+    phase6_table_max_columns: int = Field(default=100, ge=1, le=500)
 
     openai_api_key: SecretStr | None = None
     openai_chat_model: str = DEFAULT_OPENAI_CHAT_MODEL
     openai_embedding_model: str = DEFAULT_OPENAI_EMBEDDING_MODEL
+
+    @property
+    def phase6_enabled(self) -> bool:
+        """Keep the accepted Phase 6 capability behind one reversible profile gate."""
+
+        return self.phase6_profile == "visual-table-v1"
 
     @field_validator("log_level", mode="before")
     @classmethod
@@ -133,6 +152,14 @@ class Settings(BaseSettings):
         normalized = value.strip().rstrip("/")
         if not normalized.startswith(("http://", "https://")):
             raise ValueError("QDRANT_URL must use http:// or https://")
+        return normalized
+
+    @field_validator("phase6_visual_collection_name")
+    @classmethod
+    def validate_phase6_collection_name(cls, value: str) -> str:
+        normalized = value.strip()
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{2,199}", normalized):
+            raise ValueError("Phase 6 visual collection name is invalid")
         return normalized
 
     @field_validator("s3_endpoint_url", mode="before")

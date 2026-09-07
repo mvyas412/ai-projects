@@ -9,9 +9,12 @@ from backend.app.core.config import get_settings
 from backend.app.db.base import Base
 from backend.app.models import (
     AuditEvent,
+    CalculationTrace,
     Collection,
     CollectionDocument,
     ComplianceExport,
+    ContentArtifact,
+    ContentRegion,
     Conversation,
     ConversationDocument,
     ConversationMessage,
@@ -23,6 +26,9 @@ from backend.app.models import (
     ResourceACLGrant,
     SourcePermissionPrincipal,
     SourcePermissionSnapshot,
+    TableCell,
+    TableColumn,
+    TableRegion,
     User,
     Workspace,
     WorkspaceMembership,
@@ -30,7 +36,13 @@ from backend.app.models import (
 
 _REGISTERED_MODELS = (
     AuditEvent,
+    CalculationTrace,
     ComplianceExport,
+    ContentRegion,
+    ContentArtifact,
+    TableRegion,
+    TableColumn,
+    TableCell,
     User,
     Workspace,
     WorkspaceMembership,

@@ -1,7 +1,8 @@
 # ADR 0029: Structured tables and safe exact calculation
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-02
+- Accepted: 2026-09-03
 - Milestone: 6.3 and 6.4
 
 ## Context
@@ -40,7 +41,7 @@ DuckDB's own [security guidance](https://duckdb.org/docs/current/operations_manu
 warns that untrusted SQL should be treated like arbitrary code. It may remain useful
 for offline analysis but is not the recommended request-time execution boundary.
 
-## Proposed decision
+## Decision
 
 ### Structured representation
 
@@ -84,7 +85,7 @@ table identity + authorized generation
   -> deterministic result and rounding
 ```
 
-The initial proposed operators are `lookup`, `count`, `sum`, `average`, `minimum`,
+The initial accepted operators are `lookup`, `count`, `sum`, `average`, `minimum`,
 `maximum`, `difference`, and `ratio`. The router may map a question to this schema,
 but backend validation resolves all table/cell identities and rejects unknown fields,
 multiple plausible matches, mixed units, invalid types, excessive row counts, or an
@@ -112,12 +113,12 @@ for exact calculation. Do not add request-time DuckDB or generated SQL.
 - Better extraction models can replace the first candidate through successor
   generations without changing the execution safety contract.
 
-## Approval questions
+## Acceptance resolution
 
-1. Approve PostgreSQL normalized tables plus immutable JSON/CSV artifacts?
-2. Approve the proposed logical types, validation rules, and `retrieval_only` fallback?
-3. Approve the eight-operation typed calculation allowlist?
-4. Approve parameterized application queries only, with no generated SQL or request-time DuckDB?
+The user approved all recommendations on 2026-09-03: PostgreSQL normalized tables
+plus immutable JSON/CSV artifacts; the logical types, validation rules, and
+`retrieval_only` fallback; the eight-operation calculation allowlist; and only
+parameterized application queries, with no generated SQL or request-time DuckDB.
 
 ## Acceptance evidence required after approval
 

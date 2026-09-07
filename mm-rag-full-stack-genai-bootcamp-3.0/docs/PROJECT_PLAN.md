@@ -1,6 +1,6 @@
 # Multimodal RAG production project plan
 
-> Living delivery plan — updated 2026-09-02
+> Living delivery plan — updated 2026-09-07
 
 This is the version-controlled planning source of truth for the journey from the
 preserved prototype through the enterprise platform. It defines sequence, scope,
@@ -39,7 +39,9 @@ Rules:
 | Phase 4 source branch | `phase-4/mm-rag-governance` — preserved |
 | Phase 5 source branch | `codex/phase5-hybrid-retrieval` — preserved after squash merge |
 | Phase 5 merge | PR #5 squash-merged into `main` at `5436614`; source and merged trees match |
-| Phase 6 decision branch | `codex/phase6-visual-table-intelligence` from merged Phase 5 |
+| Phase 6 kickoff branch | `codex/phase6-visual-table-intelligence` — preserved after PR #6 squash merge |
+| Phase 6 kickoff merge | PR #6 squash-merged into `main` at `95d18b3`; source and merged trees match |
+| Phase 6 implementation branch | `codex/phase6-visual-table-implementation` from merged kickoff |
 | Phase 1 | Completed and frozen at `mm-rag-v1.0.0` |
 | Phase 2 | Completed and accepted — implementation, live-model, security, and visual gates pass |
 | Phase 2 release | Squash-merged at `52d4cfa`; tagged `mm-rag-v2.0.0` |
@@ -48,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 6 Milestone 6.0 decision review; ADRs 0025–0030 are Proposed |
+| Active milestone | Phase 6 accepted; PR #7 approved for squash merge after refreshed checks |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -57,7 +59,7 @@ Rules:
 | Phase 4 merge | PR #3 squash-merged into `main` at `57ee453`; source branch preserved |
 | Phase 4 release | Annotated `mm-rag-v4.0.0` at closure commit `996898e`; immutable |
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
-| Phase 6 | Decision kickoff in progress; no Phase 6 runtime implementation has started |
+| Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phases 7–9 | Planned |
 
 ## Delivery sequence and gates
@@ -86,7 +88,7 @@ security and data-integrity gates on which it depends.
 | 3 | Durable asynchronous ingestion | Retryable jobs survive service failure | Completed and accepted |
 | 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Completed and accepted |
 | 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Closed without acceptance |
-| 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Decision kickoff in progress |
+| 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Completed and accepted; `visual-table-v1` promoted with explicit rollback |
 | 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Planned |
 | 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Planned |
 | 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Planned |
@@ -741,43 +743,158 @@ then reranking a bounded candidate set.
 
 ## Phase 6 — visual and table intelligence
 
-**Status:** Decision kickoff in progress. ADRs 0025–0030 are Proposed; no Phase 6
-runtime, dependency, model, provider, schema, or paid-evaluation change is authorized
-until the relevant decisions are accepted.
+**Status:** Completed and accepted. ADRs 0025–0030, Milestones 6.0–6.5, free and
+live-service gates, signed-in application-shell checks, corrected representative
+visual retrieval, exact region/table evidence, safe abstention, and immutable numeric
+calculation all pass. On 2026-09-07 the user promoted `visual-table-v1` as the
+accepted default with `disabled` retained as explicit rollback. PR #7 is approved
+for squash merge after refreshed checks; release tagging remains a separate gate.
+A single bounded paid candidate attempt was authorized and executed on 2026-09-07,
+but it stopped before visual/table processing and therefore is not acceptance evidence.
 
 ### Objective
 
 Make figures, diagrams, charts, and tables first-class searchable evidence instead
 of depending mainly on OCR text and Markdown representations.
 
-### Proposed milestones
+### Milestones
 
 | Milestone | Deliverable | Decision status |
 | --- | --- | --- |
-| 6.0 | Visual/table corpus, questions, and baseline quality measures | Proposed — ADR 0025 |
-| 6.1 | Versioned visual crops, provenance, captions, OCR, and summaries | Proposed — ADRs 0026–0027 |
-| 6.2 | Multimodal image embeddings and modality-aware retrieval | Proposed — ADR 0028 |
-| 6.3 | Table structure reconstruction, typing, validation, and normalized storage | Proposed — ADR 0029 |
-| 6.4 | Query routing for semantic retrieval versus safe exact calculation | Proposed — ADRs 0028–0029 |
-| 6.5 | Evidence viewer for page region, figure, table, and calculation provenance | Proposed — ADR 0030 |
+| 6.0 | Visual/table corpus, questions, and baseline quality measures | Completed — 40 regions, 80 questions, protected splits, reproducible free baseline and gates |
+| 6.1 | Versioned visual crops, provenance, captions, OCR, and summaries | Completed — migration `20260903_0014`, immutable objects, Docling/Tesseract/TableFormer local profile |
+| 6.2 | Multimodal image embeddings and modality-aware retrieval | Completed — pinned local CLIP pair, isolated scoped index, deterministic router/RRF, text fallback |
+| 6.3 | Table structure reconstruction, typing, validation, and normalized storage | Implemented — migrations `20260907_0015`/`0016`, immutable JSON/CSV, composite scope and RLS |
+| 6.4 | Query routing for semantic retrieval versus safe exact calculation | Implemented — closed typed executor, deterministic routing, safe ambiguity/unsupported abstention |
+| 6.5 | Evidence viewer for page region, figure, table, and calculation provenance | Implemented — `evidence-v1` API, integrity-checked streams, region/cell/calculation viewer; browser proof pending |
 
-### Proposed decision sequence
+### Accepted decision sequence
 
-1. Accept the corpus, split, metrics, and release gates before changing runtime
+1. Implement the accepted corpus, split, metrics, and release gates before changing runtime
    behavior (ADR 0025).
-2. Accept immutable region/artifact identity and lineage before adding extractors
+2. Implement immutable region/artifact identity and lineage before adding extractors
    or indexes (ADR 0026).
-3. Select the local-first extraction/enrichment contract and explicit provider gate
+3. Implement the local-first extraction/enrichment contract and explicit provider gate
    (ADR 0027).
-4. Select visual embeddings, index isolation, authorization, routing, and fusion
+4. Implement visual embeddings, index isolation, authorization, routing, and fusion
    (ADR 0028).
-5. Accept normalized table storage and the closed safe-calculation allowlist
+5. Implement normalized table storage and the closed safe-calculation allowlist
    (ADR 0029).
-6. Accept the evidence API/viewer and staged rollout/rollback gates (ADR 0030).
+6. Implement the evidence API/viewer and staged rollout/rollback gates (ADR 0030).
 
 This order prevents a parser, model, vector layout, or calculation engine from
 silently defining the public provenance contract. Phase 5's `hybrid-v1` default,
-`dense-v1` rollback, and protected evidence remain unchanged during review.
+`dense-v1` rollback, and protected evidence remain unchanged during implementation
+until a separately approved promotion gate succeeds.
+
+Milestone 6.0 evidence is committed under `evaluation/phase6/v1`. The fixture
+builder verifies stable hashes and exact split/class coverage; the baseline runner
+reports only tune and validation aggregates, makes zero provider calls, and never
+emits protected holdout identities. The intentionally imperfect lexical baseline
+sets the comparison point for later visual/table candidates without changing a
+retrieval profile.
+
+Milestone 6.1 pins Docling `2.124.0` and a 15-file, 701,214,178-byte local layout/
+TableFormer artifact tree. Runtime verifies its SHA-256 before use and disables
+remote services, external plugins, picture descriptions, and request-time model
+downloads. The worker writes attempt and generation copies, verifies stored bytes,
+then commits region/artifact rows under worker RLS before existing fenced promotion.
+Standalone images use the same immutable contract through Pillow. The feature flag
+remains off until the later retrieval, evidence, quality, and browser gates pass.
+
+Milestone 6.2 pins `Qdrant/clip-ViT-B-32-vision` and its paired text encoder to
+immutable revisions, exact local tree checksums, 512 dimensions, RGB preprocessing,
+application L2 normalization, and bounded batches. The worker indexes one immutable
+point per region in a separate global visual collection. Every filter and returned
+payload carries and revalidates tenant, workspace, document, version, active
+generation, region, page, and vector-profile identity. The Phase 5 text profile runs
+for every query; a deterministic query-only router adds the visual leg for visual
+intent, then application-owned RRF fuses bounded results. Any visual dependency or
+validation failure returns to the authorized text order. This remains opt-in and
+does not promote a Phase 6 profile.
+
+Milestone 6.3 persists generation-scoped `table_regions`, `table_columns`, and
+`table_cells` beneath composite workspace/document/version/generation/attempt
+constraints and PostgreSQL RLS. Raw values, normalized typed values, spans, header
+associations, units/currencies, source coordinates, validation codes, and immutable
+normalized JSON/CSV objects remain inspectable. A structurally unusable table keeps
+its visual/text evidence but cannot enter exact calculation.
+
+Milestone 6.4 routes only recognized calculation intent to an application-owned,
+closed operation plan. It supports lookup, count, sum, average, min/max, difference,
+and ratio over currently authorized active-generation cells. `calculation_traces`
+record immutable operator, ordered operands, types, units, rounding, result, and a
+query hash. Ambiguous tables/columns/rows, mixed units, unsupported values, and
+division by zero abstain; no generated SQL or arbitrary analytical runtime exists.
+
+Milestone 6.5 resolves persisted citation labels through current conversation and
+document policy, active generation, and region/table/cell/trace identity. It verifies
+artifact metadata and bytes before streaming, exposes no storage key, and gives the
+Streamlit viewer page/crop highlighting, provenance-labeled layers, semantic tables
+with non-color-only cited-cell markers, and calculation details. Lifecycle purge and
+orphan inventory now cover visual vectors and both attempt/final artifact namespaces.
+
+The frozen free `visual-table-v1` synthetic candidate passes validation before
+holdout and then passes holdout: Recall/MRR/nDCG@10, source coverage, exact
+calculation, and safe abstention are `1.0`; identity/citation errors and provider
+calls are zero; nominal p95 is 2 ms. This verifies the deterministic fixture
+contract, not signed-in product behavior or production-quality generalization.
+
+The first representative-product attempt used the tracked PDF exactly once and
+completed one paid embedding request. It then exposed a pre-existing dense-only
+Qdrant collection compatibility issue before Phase 6 extraction: Qdrant 1.19 rejects
+adding a new sparse-vector name to an existing collection. The worker was stopped,
+the job was canceled before retry, and no question/answer call ran. The compatibility
+fix preserves the existing collection and records an explicit dense-only fallback;
+fresh collections still receive dense and sparse schemas at creation. A future
+reviewed collection migration can restore sparse indexing for legacy collections
+without deleting accepted vectors. This attempt does not satisfy the candidate gate,
+and another paid run requires fresh authorization. The corrected repository gate
+passes 262 tests with 14 expected opt-in skips; the free live-service gate passes
+275 tests with one expected skip, migration head `20260907_0016`, and no schema drift.
+
+The approved successor candidate then succeeded on its first and only attempt. Its
+promoted manifest records 31 dense text vectors with the explicit legacy sparse
+fallback, 33 visual regions/vectors, 193 immutable artifacts, 23 reconstructed
+tables, 21 calculation-eligible tables, and 523 cells. The first question returned
+the correct 30-day Clause 11.4 answer with page-4 evidence. The second, explicitly
+visual heatmap question safely abstained because generic `which`/`what is` table-
+lookup routing ran before visual retrieval. The third question was not submitted.
+Free diagnostics proved the authorized visual index returns the page-12 heatmap as
+its top result. Explicit visual intent now takes precedence over generic lookup
+wording while true table-calculation failures remain fail-closed. A fresh paid run
+is required to validate that correction; the Phase 6 acceptance gate remains open.
+The corrected full repository gate passes 263 tests with 14 expected skips, and the
+free live-service gate passes 276 tests with one expected skip. The persistent-
+database outbox lease proof now uses an isolated synthetic clock so unrelated
+legitimate due events cannot make the concurrency assertion nondeterministic.
+Real-role verification also found that PostgreSQL privilege-checks the `documents`
+table referenced by the ingestion-job RLS policy before evaluating the dispatcher's
+privileged-purpose branch. Migration `20260907_0017` supplies only the required
+`SELECT` grant: document RLS continues to return no rows to the dispatcher, while
+authorized job selection succeeds. After the migration, the dispatcher started
+cleanly and drained all pending terminal-job outbox events.
+
+A third bounded browser proof reused the promoted document without uploading or
+starting the worker. The corrected `text-and-visual` route retrieved authorized text
+and visual candidates, answered that Prime Friday leads the retention heatmap with
+a score of 93, and cited page 12. The evidence viewer resolved the exact stored
+region, page image/crop, and structured companion table without exposing an object
+key or credential. One query embedding and one answer call were made. The second
+and final question asked for arithmetic over two narrative “Supporting value” cells;
+it safely abstained without a provider call because those cells are intentionally
+typed as text rather than numeric values. A validated page-23 numeric table is the
+appropriate subject for the remaining exact-calculation proof. The two-question
+limit was honored and no retry was attempted.
+
+After reauthentication, one separately approved no-provider proof used the validated
+page-23 amount table. The application computed the absolute difference between the
+normalized peak and off-peak amounts, `6904` and `1784`, as `5120` in 156 ms. The
+viewer marked both exact operand cells, resolved the stored region/page/crop, and
+showed the immutable `closed-table-operations-v1` trace with exact-decimal rounding.
+No upload, retry, embedding, or answer-model call occurred. The representative
+visual/table/calculation candidate gate is therefore complete; promotion remains an
+explicit decision.
 
 ### Completion gate
 
@@ -926,12 +1043,12 @@ commercial accounting, and compliance-grade administration.
 | Phase 5 benchmark remediation and negative-query contract | 5.0–5.5 | Accepted — ADR 0022 |
 | Phase 5 response to the failed v2 quality gate | 5.5 | Accepted — ADR 0023; free implementation complete |
 | Phase 5 response to the failed v3 nDCG gate | 5.5 | Accepted — ADR 0024; Phase 5 closed without acceptance after v4 missed only nDCG |
-| Phase 6 visual/table evaluation contract | 6.0 | Proposed — ADR 0025 |
-| Immutable region and derived-artifact provenance | 6.1 | Proposed — ADR 0026 |
-| Local-first visual extraction and enrichment | 6.1 | Proposed — ADR 0027 |
-| Visual embedding, indexing, routing, and fusion | 6.2–6.4 | Proposed — ADR 0028 |
-| Structured tables and safe exact calculation | 6.3–6.4 | Proposed — ADR 0029 |
-| Region evidence, viewer, and Phase 6 rollout | 6.5 | Proposed — ADR 0030 |
+| Phase 6 visual/table evaluation contract | 6.0 | Accepted — ADR 0025 |
+| Immutable region and derived-artifact provenance | 6.1 | Accepted — ADR 0026 |
+| Local-first visual extraction and enrichment | 6.1 | Accepted — ADR 0027 |
+| Visual embedding, indexing, routing, and fusion | 6.2–6.4 | Accepted — ADR 0028 |
+| Structured tables and safe exact calculation | 6.3–6.4 | Accepted — ADR 0029 |
+| Region evidence, viewer, and Phase 6 rollout | 6.5 | Accepted — ADR 0030 |
 | Observability/evaluation backend | 7.0 | TBD |
 | Cloud/orchestration and managed services | 8.0 | TBD |
 | Dedicated frontend framework | 8.0 | TBD |
@@ -941,11 +1058,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Review and explicitly accept, revise, or reject ADRs 0025–0030 in sequence | Phase 6 contracts and unresolved questions have an approved answer before implementation |
-| 2 | Start Milestone 6.0 only after ADR 0025 is accepted | The visual/table benchmark is reproducible without changing product runtime or making a paid call |
-| 3 | Preserve `hybrid-v1` as default, `dense-v1` as rollback, and `hybrid-v3` as evaluation-only | Phase 6 kickoff causes no hidden Phase 5 rollout change |
-| 4 | Keep Phase 5 v4 validation and holdout immutable | No tuning against v4 validation and no v4 holdout inspection |
-| 5 | Require separate explicit approval for any paid evaluation, provider vision call, profile promotion, or release tag | A Proposed ADR or kickoff merge grants none of those actions |
+| 1 | Run refreshed gates and squash-merge approved Phase 6 implementation PR #7 | The accepted reviewed tree is merged to `main`; source branch and prior tags remain preserved |
+| 2 | Record the Phase 6 squash merge without moving prior release tags | Main/source tree identity and merge commit are recorded |
+| 3 | Start Phase 7 decision kickoff only after explicit user direction | Observability/evaluation alternatives and ADR sequence are reviewed before implementation |
+| 5 | Create `mm-rag-v6.0.0` only after a separate explicit tag decision | Accepted merged commit and annotated immutable tag are recorded |
 
 ## Update protocol
 

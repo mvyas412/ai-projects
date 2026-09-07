@@ -34,6 +34,7 @@ dependencies = [
     "aio-pika>=9.5,<10",
     "fastembed==0.8.0",
     "tiktoken==0.14.0",
+    "docling==2.124.0",
 ]
 
 [dependency-groups]

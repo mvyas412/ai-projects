@@ -7,6 +7,7 @@ on:
       - "phase-4/mm-rag-governance"
       - "codex/phase5-hybrid-retrieval"
       - "codex/phase6-visual-table-intelligence"
+      - "codex/phase6-visual-table-implementation"
     paths:
       - "mm-rag-full-stack-genai-bootcamp-3.0/**"
       - ".github/workflows/mm-rag-phase3-ci.yml"
@@ -98,7 +99,7 @@ jobs:
         run: uv run alembic upgrade head
 
       - name: Verify migration head
-        run: test "$(uv run alembic current | tail -1)" = "20260831_0013 (head)"
+        run: test "$(uv run alembic current | tail -1)" = "20260907_0017 (head)"
 
       - name: Detect schema drift
         run: uv run alembic check

@@ -103,4 +103,6 @@ Thumbs.db
 Desktop.ini
 # Raw benchmark output is reproducible but may contain private corpus identities.
 evaluation/phase5/results/
+evaluation/phase6/results/
+evaluation/phase6/representative/
 *.ses

@@ -40,13 +40,31 @@ from backend.app.models.source_permission import (
     SourcePermissionPrincipal,
     SourcePermissionSnapshot,
 )
+from backend.app.models.table import (
+    CalculationOperator,
+    CalculationTrace,
+    TableCell,
+    TableColumn,
+    TableLogicalType,
+    TableRegion,
+    TableValidationState,
+)
 from backend.app.models.user import User
+from backend.app.models.visual import (
+    ArtifactKind,
+    ArtifactValidationState,
+    ContentArtifact,
+    ContentRegion,
+    ContentRegionKind,
+)
 from backend.app.models.workspace import Workspace, WorkspaceMembership, WorkspaceRole
 
 __all__ = [
     "AuditEvent",
     "AuditActorKind",
     "AuditResult",
+    "ArtifactKind",
+    "ArtifactValidationState",
     "Collection",
     "CollectionDocument",
     "Conversation",
@@ -54,6 +72,11 @@ __all__ = [
     "ConversationMessage",
     "ConversationTargetType",
     "ComplianceExport",
+    "CalculationOperator",
+    "CalculationTrace",
+    "ContentArtifact",
+    "ContentRegion",
+    "ContentRegionKind",
     "Document",
     "DocumentVersion",
     "DocumentVersionStatus",
@@ -77,6 +100,11 @@ __all__ = [
     "RetentionHold",
     "SourcePermissionPrincipal",
     "SourcePermissionSnapshot",
+    "TableCell",
+    "TableColumn",
+    "TableLogicalType",
+    "TableRegion",
+    "TableValidationState",
     "User",
     "Workspace",
     "WorkspaceMembership",

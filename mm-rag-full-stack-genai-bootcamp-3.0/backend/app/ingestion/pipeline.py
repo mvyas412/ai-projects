@@ -7,8 +7,10 @@ from importlib.metadata import version
 from backend.app.core.config import Settings
 from backend.app.retrieval.artifacts import SPARSE_MODEL
 from backend.app.retrieval.sparse import SPARSE_VECTOR_NAME
+from backend.app.visual.embedding import visual_embedding_manifest
 
 PIPELINE_PROFILE = "phase5-hybrid-v1"
+PHASE6_PIPELINE_PROFILE = "phase6-visual-table-v1"
 
 
 def pipeline_manifest(settings: Settings, media_type: str) -> dict[str, object]:
@@ -18,9 +20,9 @@ def pipeline_manifest(settings: Settings, media_type: str) -> dict[str, object]:
         "application/pdf": "pypdf",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "python-docx",
     }.get(media_type, "utf8-or-vision")
-    return {
+    manifest: dict[str, object] = {
         "schema_version": 1,
-        "profile": PIPELINE_PROFILE,
+        "profile": PHASE6_PIPELINE_PROFILE if settings.phase6_enabled else PIPELINE_PROFILE,
         "media_type": media_type,
         "extraction": {
             "implementation": extractor,
@@ -59,8 +61,57 @@ def pipeline_manifest(settings: Settings, media_type: str) -> dict[str, object]:
             "payload_schema_revision": 3,
             "generation_filter_required": True,
         },
-        "citation_schema_revision": 1,
+        "citation_schema_revision": (
+            "evidence-v1" if settings.phase6_enabled else 1
+        ),
     }
+    if settings.phase6_enabled and media_type in {
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/tiff",
+        "image/webp",
+    }:
+        manifest["visual_extraction"] = {
+            "profile": settings.phase6_extraction_profile,
+            "implementation": "docling-or-pillow",
+            "library_version": version("docling"),
+            "artifacts_manifest_revision": "docling-structural-v1",
+            "remote_services": False,
+            "picture_description": False,
+            "ocr": "tesseract-cli-eng",
+            "table_structure": "tableformer-accurate",
+            "image_scale": settings.phase6_image_scale,
+            "locator_schema_revision": "region-locator-v1",
+        }
+        manifest["visual_embedding"] = {
+            **visual_embedding_manifest(
+                batch_size=settings.phase6_visual_embedding_batch_size
+            ),
+            "collection": settings.phase6_visual_collection_name,
+            "payload_schema_revision": 1,
+            "active_generation_filter_required": True,
+        }
+        manifest["structured_tables"] = {
+            "schema_revision": "normalized-table-v1",
+            "exact_max_rows": settings.phase6_table_exact_max_rows,
+            "max_columns": settings.phase6_table_max_columns,
+            "type_contract": "table-types-v1",
+            "validation_contract": "rectangular-spans-units-v1",
+            "calculation_contract": "closed-table-operations-v1",
+            "operators": [
+                "lookup",
+                "count",
+                "sum",
+                "average",
+                "minimum",
+                "maximum",
+                "difference",
+                "ratio",
+            ],
+            "generated_sql": False,
+        }
+    return manifest
 
 
 def pipeline_fingerprint(settings: Settings, media_type: str) -> str:
@@ -81,7 +132,7 @@ def manifest_supports_sparse(manifest: dict[str, object] | None) -> bool:
         return False
     sparse = pipeline.get("sparse_embedding")
     return bool(
-        pipeline.get("profile") == PIPELINE_PROFILE
+        pipeline.get("profile") in {PIPELINE_PROFILE, PHASE6_PIPELINE_PROFILE}
         and isinstance(sparse, dict)
         and sparse.get("enabled") is True
         and sparse.get("vector_name") == SPARSE_VECTOR_NAME

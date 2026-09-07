@@ -40,7 +40,9 @@ def test_postgres_skip_locked_prevents_overlapping_outbox_leases() -> None:
     workspace_id = uuid4()
     document_id = uuid4()
     version_id = uuid4()
-    now = datetime.now(UTC)
+    # Keep this lease proof isolated from legitimate due events in a persistent
+    # developer database by placing its synthetic clock safely in the past.
+    now = datetime(2000, 1, 1, tzinfo=UTC)
     pipeline_fingerprint = "b" * 64
 
     try:
