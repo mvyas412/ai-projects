@@ -18,20 +18,14 @@ roadmap view, and one diagram for each phase. The Mermaid diagrams in this
 handbook remain the editable source of truth.
 
 The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
-is the Phase 5 implementation checkpoint. It includes the accepted Phase 3/4
-runtime and governance boundaries plus hybrid retrieval. The single approved v4
-attempt on 2026-09-02 passed every evaluated validation gate except the required
-5% relative nDCG@10 gain, achieving 2.28%; holdout and the product proof were
-withheld. `hybrid-v3` remains evaluation-only, `hybrid-v1` remains default, and a
-user-approved closure now ends Phase 5 without candidate promotion. PR #5 was
-squash-merged at `5436614`. Phase 6 kickoff PR #6 was squash-merged at `95d18b3`,
-and ADRs 0025–0030 were accepted on 2026-09-03. Milestones 6.0–6.5 are implemented
-on the review branch, including the free candidate gate, normalized tables, closed
-calculation, and evidence inspection. The authenticated application shell, inherited
-READY library/conversation persistence, readiness, representative visual/table/
-calculation proof, and logout boundary pass. `visual-table-v1` is now the accepted
+records the accepted Phase 6 implementation: the Phase 3/4 runtime and governance
+boundaries, Phase 5 hybrid retrieval foundation, and Phase 6 visual/table extraction,
+retrieval, calculation, and evidence inspection. `visual-table-v1` is the accepted
 default with `disabled` retained as explicit rollback. PR #7 was squash-merged at
 `0eb0d16`; annotated tag `mm-rag-v6.0.0` marks verified closure commit `d97e8e8`.
+Post-release image refresh PR #10 was squash-merged at `0a69f1b`. Phase 7 has begun
+decision kickoff only; ADRs 0031–0036 remain Proposed and no observability runtime
+or backend has been selected.
 
 ## Status legend
 
@@ -182,7 +176,7 @@ flowchart LR
     p4["Phase 4<br/>Governance foundation<br/>Completed / v4.0.0"] -->
     p5["Phase 5<br/>Hybrid retrieval<br/>Closed / gate not met"] -->
     p6["Phase 6<br/>Visual/table intelligence<br/>Completed / accepted"] -->
-    p7["Phase 7<br/>Evaluation/observability<br/>Planned"] -->
+    p7["Phase 7<br/>Evaluation/observability<br/>Decision kickoff"] -->
     p8["Phase 8<br/>Scalable platform<br/>Planned"] -->
     p9["Phase 9<br/>Enterprise platform<br/>Planned"]
 ```
@@ -617,7 +611,8 @@ model call. The profile was subsequently promoted after explicit approval.
 
 ## Phase 7 — evaluation and observability
 
-**Status:** Planned. Use a vendor-neutral telemetry boundary where practical.
+**Status:** In progress — decision kickoff only. ADRs 0031–0036 are Proposed;
+runtime implementation has not started. Use a vendor-neutral telemetry boundary.
 
 ```mermaid
 flowchart TB
@@ -767,8 +762,8 @@ reconcile commercial usage.
 | Visual extraction/enrichment | ADR 0027 implemented local-first with pinned verified Docling/Tesseract/TableFormer and non-authoritative generated descriptions disabled |
 | Visual embeddings/retrieval | ADR 0028 implemented opt-in: pinned checksum-bound FastEmbed CLIP pair, isolated global visual collection, complete scope validation, deterministic routing/RRF, and text fallback |
 | Structured tables/calculation | ADR 0029 implemented at `20260907_0015`/`0016`: normalized validated cells, immutable traces, and a closed Decimal calculation allowlist; no generated SQL |
-| Region evidence/viewer/rollout | ADR 0030 implementation adds backend-mediated `evidence-v1`, integrity-checked streaming, accessible inspection, and a disabled versioned profile; browser/promotion/release gates remain |
-| Observability backend | OpenTelemetry-compatible boundary; vendor not selected |
+| Region evidence/viewer/rollout | ADR 0030 implementation adds backend-mediated `evidence-v1`, integrity-checked streaming, accessible inspection, and accepted `visual-table-v1`; Phase 6 browser, promotion, and release gates pass |
+| Observability backend | Proposed in ADRs 0031–0032: OpenTelemetry boundary and free local LGTM candidate; not yet accepted or implemented; production provider remains TBD |
 | Deployment platform | Containerized and horizontally scalable; provider not selected |
 
 Accepted Phase 2 decisions are recorded in
@@ -820,12 +815,21 @@ Accepted Phase 6 decisions are:
 - [ADR 0029 — Structured tables and safe exact calculation](decisions/0029-structured-tables-safe-calculation.md)
 - [ADR 0030 — Region evidence, viewer, and Phase 6 rollout](decisions/0030-region-evidence-viewer-rollout.md)
 
+Proposed Phase 7 decisions are:
+
+- [ADR 0031 — Telemetry correlation and privacy contract](decisions/0031-telemetry-correlation-privacy-contract.md)
+- [ADR 0032 — Observability backend and free local stack](decisions/0032-observability-backend-local-stack.md)
+- [ADR 0033 — SLI, SLO, and error-budget contract](decisions/0033-sli-slo-error-budget-contract.md)
+- [ADR 0034 — Unified RAG evaluation and release gates](decisions/0034-unified-rag-evaluation-release-gates.md)
+- [ADR 0035 — User feedback and review governance](decisions/0035-user-feedback-review-governance.md)
+- [ADR 0036 — Dashboards, alerts, runbooks, and incident learning](decisions/0036-dashboards-alerts-runbooks-incident-learning.md)
+
 ## Maintenance checklist
 
 1. Update the affected phase, diagram, status, and technology table.
 2. Update the whole-system diagram when a cross-phase boundary or flow changes.
-3. Record consequential Phase 6 decisions and rationale in the ignored
-   `Phase6_context.md` active context document; keep earlier phase contexts historical.
+3. Record consequential Phase 7 decisions and rationale in the ignored
+   `Phase7_context.md` active context document; keep earlier phase contexts historical.
 4. Keep unapproved technologies labeled **Proposed / TBD**.
 5. Verify Mermaid fences and links before committing.
 6. Never place credentials, tokens, private URLs, customer data, or other secrets

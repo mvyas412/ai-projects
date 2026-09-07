@@ -253,7 +253,7 @@
   <rect x="932" y="814" width="286" height="50" rx="9" fill="#e8f7ef" stroke="#47a477"/>
   <text x="946" y="836" class="card-title" fill="#26805a">Phase 6 · accepted &amp; released</text>
   <text x="946" y="854" class="small">visual-table-v1 · mm-rag-v6.0.0</text>
-  <rect x="1230" y="814" width="332" height="50" rx="9" fill="#f2f5f8" stroke="#64748b"/>
-  <text x="1244" y="836" class="card-title" fill="#64748b">Phase 7 · next planned</text>
-  <text x="1244" y="854" class="small">Evaluation, tracing, observability, SLOs</text>
+  <rect x="1230" y="814" width="332" height="50" rx="9" fill="#fff7df" stroke="#c58a19"/>
+  <text x="1244" y="836" class="card-title" fill="#8a5a00">Phase 7 · decision kickoff</text>
+  <text x="1244" y="854" class="small">ADRs 0031–0036 proposed · runtime unchanged</text>
 </svg>

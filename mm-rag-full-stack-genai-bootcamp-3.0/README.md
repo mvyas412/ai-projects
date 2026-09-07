@@ -48,6 +48,10 @@ commit `d97e8e8`.
 The authenticated application-shell check now passes with the personal workspace,
 READY library state, persisted grounded conversation, service readiness, and logout;
 the opt-in visual and numeric-calculation candidate proof now passes.
+Phase 7 Milestone 7.0 decision kickoff is now in progress. ADRs 0031–0036 are
+Proposed for telemetry/privacy, the free local observability stack, SLOs, unified
+evaluation, feedback governance, and operations. No Phase 7 runtime behavior or
+observability backend has been accepted or implemented.
 
 The current `3.0` lineage contains:
 
@@ -212,11 +216,20 @@ Accepted Phase 6 decisions are:
 - [Structured tables and safe exact calculation](docs/architecture/decisions/0029-structured-tables-safe-calculation.md)
 - [Region evidence, viewer, and Phase 6 rollout](docs/architecture/decisions/0030-region-evidence-viewer-rollout.md)
 
-These ADRs authorize implementation in milestone order, beginning with the free
-evaluation contract. Exact artifacts remain subject to pinned revision, license,
-checksum, and measured acceptance requirements. Provider calls, paid evaluation,
-profile promotion, and release tagging use separate explicit gates; the promotion
-gate has now passed while tagging remains undecided.
+Proposed Phase 7 decisions are:
+
+- [Telemetry correlation and privacy contract](docs/architecture/decisions/0031-telemetry-correlation-privacy-contract.md)
+- [Observability backend and free local stack](docs/architecture/decisions/0032-observability-backend-local-stack.md)
+- [SLI, SLO, and error-budget contract](docs/architecture/decisions/0033-sli-slo-error-budget-contract.md)
+- [Unified RAG evaluation and release gates](docs/architecture/decisions/0034-unified-rag-evaluation-release-gates.md)
+- [User feedback and review governance](docs/architecture/decisions/0035-user-feedback-review-governance.md)
+- [Dashboards, alerts, runbooks, and incident learning](docs/architecture/decisions/0036-dashboards-alerts-runbooks-incident-learning.md)
+
+ADRs 0025–0030 authorized Phase 6 implementation in milestone order. Exact artifacts
+remain subject to pinned revision, license, checksum, and measured acceptance
+requirements. The Phase 6 promotion and separate release-tag gates have passed;
+`mm-rag-v6.0.0` is immutable. Proposed ADRs 0031–0036 do not authorize Phase 7
+implementation until explicitly accepted.
 
 The committed Milestone 6.0 fixture contains 40 synthetic public-safe regions and
 80 questions across figure relationships, charts, table lookup, calculation, and

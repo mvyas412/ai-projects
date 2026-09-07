@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 6 accepted and released; Phase 7 kickoff requires explicit direction |
+| Active milestone | Phase 7.0 decision kickoff in progress; ADRs 0031–0036 proposed |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -61,7 +61,8 @@ Rules:
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
-| Phases 7–9 | Planned |
+| Phase 7 | In progress — decision kickoff; no runtime implementation yet |
+| Phases 8–9 | Planned |
 
 ## Delivery sequence and gates
 
@@ -90,7 +91,7 @@ security and data-integrity gates on which it depends.
 | 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Completed and accepted |
 | 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Closed without acceptance |
 | 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Completed and accepted; `visual-table-v1` promoted with explicit rollback |
-| 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Planned |
+| 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | In progress — decisions proposed |
 | 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Planned |
 | 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Planned |
 
@@ -908,7 +909,8 @@ explicit decision.
 
 ## Phase 7 — evaluation and observability
 
-**Status:** Planned.
+**Status:** In progress — Milestone 7.0 decision kickoff. ADRs 0031–0036 are
+Proposed; no telemetry backend or runtime behavior has been selected or implemented.
 
 ### Objective
 
@@ -1051,7 +1053,12 @@ commercial accounting, and compliance-grade administration.
 | Visual embedding, indexing, routing, and fusion | 6.2–6.4 | Accepted — ADR 0028 |
 | Structured tables and safe exact calculation | 6.3–6.4 | Accepted — ADR 0029 |
 | Region evidence, viewer, and Phase 6 rollout | 6.5 | Accepted — ADR 0030 |
-| Observability/evaluation backend | 7.0 | TBD |
+| Telemetry correlation and privacy | 7.0 | Proposed — ADR 0031 |
+| Free local observability backend | 7.0–7.1 | Proposed — ADR 0032; production backend remains TBD |
+| SLI/SLO and error budgets | 7.0, 7.4–7.5 | Proposed — ADR 0033 |
+| Unified RAG evaluation release gates | 7.2 | Proposed — ADR 0034 |
+| User feedback and review governance | 7.3 | Proposed — ADR 0035 |
+| Dashboards, alerts, runbooks, and incident learning | 7.4–7.5 | Proposed — ADR 0036 |
 | Cloud/orchestration and managed services | 8.0 | TBD |
 | Dedicated frontend framework | 8.0 | TBD |
 | First enterprise connector and billing provider | 9.0 | TBD |
@@ -1060,7 +1067,7 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Start Phase 7 decision kickoff only after explicit user direction | Observability/evaluation alternatives and ADR sequence are reviewed before implementation |
+| 1 | Review and approve, revise, or reject proposed ADRs 0031–0036 | Phase 7 implementation begins only after explicit decisions |
 
 ## Update protocol
 
