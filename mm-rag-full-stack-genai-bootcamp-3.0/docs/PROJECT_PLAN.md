@@ -61,7 +61,7 @@ Rules:
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
-| Phase 7 | In progress — Milestones 7.0–7.5 implemented; seven-day baseline and numeric SLO acceptance pending |
+| Phase 7 | In progress — Milestones 7.0–7.5 implemented; live Collector/LGTM provisioning and metric flow pass; seven-day baseline and numeric SLO acceptance pending |
 | Phases 8–9 | Planned |
 
 ## Delivery sequence and gates

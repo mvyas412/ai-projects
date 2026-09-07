@@ -53,6 +53,8 @@ lineage now includes privacy-bounded correlated telemetry, an optional free loca
 Collector/LGTM stack, a composed deterministic release evaluation, tenant-scoped
 feedback review, dashboards, alerts, and incident runbooks. Numeric pilot SLOs and
 Phase 7 acceptance remain pending the required seven-day representative baseline.
+The optional local Collector/LGTM stack passes live readiness; all four dashboards
+and four alert rules load, and a content-free synthetic metric reaches Prometheus.
 
 The current `3.0` lineage contains:
 
