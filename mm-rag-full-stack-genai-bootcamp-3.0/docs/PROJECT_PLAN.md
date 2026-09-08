@@ -1,6 +1,6 @@
 # Multimodal RAG production project plan
 
-> Living delivery plan — updated 2026-09-07
+> Living delivery plan — updated 2026-09-08
 
 This is the version-controlled planning source of truth for the journey from the
 preserved prototype through the enterprise platform. It defines sequence, scope,
@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 7 acceptance baseline — implementation complete; seven-day numeric SLO review pending |
+| Active milestone | Phase 7 acceptance baseline — duration-routing correction implemented; fresh proof and restarted baseline pending |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -61,7 +61,7 @@ Rules:
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
-| Phase 7 | In progress — Milestones 7.0–7.5 implemented; live Collector/LGTM provisioning and metric flow pass; seven-day baseline and numeric SLO acceptance pending |
+| Phase 7 | In progress — Milestones 7.0–7.5 implemented; duration-routing correction passes the deterministic gate; fresh proof and a restarted seven-day baseline remain |
 | Phases 8–9 | Planned |
 
 ## Delivery sequence and gates
@@ -911,7 +911,11 @@ explicit decision.
 
 **Status:** In progress — ADRs 0031–0036 are Accepted and Milestones 7.0–7.5 are
 implemented. The seven-day representative baseline and numeric pilot SLO review
-remain acceptance gates.
+remain acceptance gates. Two diagnostic pre-fix days are recorded. Visual and exact
+table checks passed on both days, but a Clause 11.4 duration query repeatedly returned
+`3` instead of `30`. The corrected service routing preserves table cardinality for
+explicit count subjects while sending duration-value questions to grounded retrieval;
+fresh browser proof and a restarted baseline are required before acceptance.
 
 ### Objective
 
@@ -1068,9 +1072,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Record one aggregate baseline on seven representative days | Seven distinct daily records spanning at least six elapsed days |
-| 2 | Review and freeze numeric pilot SLOs in ADR 0033 | Approved targets and actionable burn-rate thresholds |
-| 3 | Run the Phase 7 acceptance gate and browser/operator proof | Phase 7 acceptance evidence without a paid provider run |
+| 1 | Run one fresh bounded browser proof of the corrected Clause 11.4 route | Correct 30-day answer with authorized page evidence and no retry |
+| 2 | Restart aggregate baseline recording after proof; retain the 2 pre-fix days as diagnostic history | Seven valid post-fix daily records spanning at least six elapsed days |
+| 3 | Review and freeze numeric pilot SLOs in ADR 0033 | Approved targets and actionable burn-rate thresholds |
+| 4 | Run the Phase 7 acceptance gate and browser/operator proof | Phase 7 acceptance evidence without a paid provider run |
 
 ## Update protocol
 

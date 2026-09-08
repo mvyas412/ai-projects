@@ -1,6 +1,6 @@
 # Multimodal RAG architecture handbook
 
-> Living architecture baseline — updated 2026-09-07
+> Living architecture baseline — updated 2026-09-08
 
 This document is the version-controlled architecture source of truth for the
 complete system and Phases 1–9. Update it whenever a component, boundary, data
@@ -22,7 +22,9 @@ records the accepted Phase 6 product path plus the implemented Phase 7 evaluatio
 and observability layer. `visual-table-v1` remains the accepted product default and
 `disabled` remains its explicit rollback. ADRs 0031–0036 are Accepted; Phase 7
 acceptance remains pending the seven-day representative baseline and numeric pilot
-SLO review.
+SLO review. Two pre-fix days reproduced a duration/cardinality routing defect. The
+service-level correction is implemented; fresh browser proof and a restarted baseline
+remain before the acceptance window can be finalized.
 
 ## Status legend
 
@@ -610,7 +612,11 @@ model call. The profile was subsequently promoted after explicit approval.
 
 **Status:** In progress — ADRs 0031–0036 are Accepted and implementation is
 complete. Acceptance remains pending the seven-day baseline and numeric pilot SLO
-review required by ADR 0033.
+review required by ADR 0033. Diagnostic baseline days 1–2 showed healthy infrastructure,
+content-free telemetry, correct visual evidence, and correct exact table calculation,
+but exposed an incorrect `3`-day answer for a `30`-day Clause 11.4 value. Conversation
+routing now distinguishes duration-value wording from table cardinality without changing
+the accepted calculation engine; fresh proof and post-fix baseline evidence remain.
 
 ```mermaid
 flowchart TB

@@ -68,6 +68,16 @@ def test_explicit_visual_intent_takes_precedence_over_generic_lookup_language() 
     assert should_attempt_table_calculation("What is the value for 2025?") is True
 
 
+def test_duration_value_question_does_not_count_table_rows() -> None:
+    query = (
+        "Under Clause 11.4, for how many days after termination "
+        "can the client export its data?"
+    )
+
+    assert select_calculation_operator(query) == CalculationOperator.COUNT
+    assert should_attempt_table_calculation(query) is False
+
+
 @pytest.mark.parametrize(
     ("operator", "cells", "expected"),
     (

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -68,6 +69,12 @@ class UnsafeCitationError(ConversationError):
     pass
 
 
+_DURATION_QUANTITY_PATTERN = re.compile(
+    r"\bhow many\s+(?:seconds?|minutes?|hours?|days?|weeks?|months?|years?)\b",
+    re.I,
+)
+
+
 def _calculation_answer(evidence: CalculationEvidence | None) -> RAGAnswer:
     if evidence is None:
         return RAGAnswer(content=INSUFFICIENT_EVIDENCE_MESSAGE, citations=())
@@ -97,9 +104,12 @@ def _calculation_answer(evidence: CalculationEvidence | None) -> RAGAnswer:
 
 
 def should_attempt_table_calculation(query: str) -> bool:
-    """Give explicit visual intent precedence over generic lookup wording."""
+    """Keep visual and duration-value questions out of table cardinality routing."""
 
-    return select_visual_route(query) == TEXT_ONLY_ROUTE
+    return (
+        select_visual_route(query) == TEXT_ONLY_ROUTE
+        and _DURATION_QUANTITY_PATTERN.search(query) is None
+    )
 
 
 class ConversationService:
