@@ -22,9 +22,10 @@ records the accepted Phase 6 product path plus the implemented Phase 7 evaluatio
 and observability layer. `visual-table-v1` remains the accepted product default and
 `disabled` remains its explicit rollback. ADRs 0031–0036 are Accepted; Phase 7
 acceptance remains pending the seven-day representative baseline and numeric pilot
-SLO review. Two pre-fix days reproduced a duration/cardinality routing defect. The
-service-level correction is implemented; fresh browser proof and a restarted baseline
-remain before the acceptance window can be finalized.
+SLO review. Two pre-fix days reproduced a duration/cardinality routing defect and are
+retained as diagnostic history. The corrected route passed a post-merge browser proof
+with the grounded 30-day answer and page-4 evidence; the post-fix baseline restarted
+on 2026-09-08 with Day 1 of 7 recorded.
 
 ## Status legend
 
@@ -616,7 +617,9 @@ review required by ADR 0033. Diagnostic baseline days 1–2 showed healthy infra
 content-free telemetry, correct visual evidence, and correct exact table calculation,
 but exposed an incorrect `3`-day answer for a `30`-day Clause 11.4 value. Conversation
 routing now distinguishes duration-value wording from table cardinality without changing
-the accepted calculation engine; fresh proof and post-fix baseline evidence remain.
+the accepted calculation engine. A post-merge browser proof returned the correct 30-day
+answer with authorized page-4 evidence. The pre-fix records remain diagnostic, and the
+post-fix acceptance baseline restarted on 2026-09-08 with Day 1 of 7 recorded.
 
 ```mermaid
 flowchart TB
