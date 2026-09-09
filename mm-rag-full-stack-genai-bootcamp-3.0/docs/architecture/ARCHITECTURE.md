@@ -25,7 +25,9 @@ acceptance remains pending the seven-day representative baseline and numeric pil
 SLO review. Two pre-fix days reproduced a duration/cardinality routing defect and are
 retained as diagnostic history. The corrected route passed a post-merge browser proof
 with the grounded 30-day answer and page-4 evidence; the post-fix baseline restarted
-on 2026-09-08 with Day 1 of 7 recorded.
+on 2026-09-08 with Day 1 of 7 recorded. The 2026-09-09 functional sample passed but is
+not baseline evidence because its API process had telemetry disabled; export was enabled
+and verified before the remaining scheduled days.
 
 ## Status legend
 
@@ -620,6 +622,10 @@ routing now distinguishes duration-value wording from table cardinality without 
 the accepted calculation engine. A post-merge browser proof returned the correct 30-day
 answer with authorized page-4 evidence. The pre-fix records remain diagnostic, and the
 post-fix acceptance baseline restarted on 2026-09-08 with Day 1 of 7 recorded.
+The next scheduled functional sample passed all three representative checks on
+2026-09-09 but was excluded from the numeric window because the API process had
+telemetry disabled. The API now exports metadata-only signals through the Collector,
+verified by a Prometheus metric-flow check; no paid question was repeated.
 
 ```mermaid
 flowchart TB
