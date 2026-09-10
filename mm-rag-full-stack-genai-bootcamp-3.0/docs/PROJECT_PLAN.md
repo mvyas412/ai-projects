@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 7 acceptance baseline — correction proven live; post-fix Day 1 of 7 recorded |
+| Active milestone | Phase 7 acceptance baseline — correction proven live; post-fix Day 2 of 7 recorded |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -61,7 +61,7 @@ Rules:
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
-| Phase 7 | In progress — Milestones 7.0–7.5 implemented; duration-routing correction passes deterministic and live proof; post-fix baseline Day 1 of 7 recorded |
+| Phase 7 | In progress — Milestones 7.0–7.5 implemented; duration-routing correction passes deterministic and live proof; post-fix baseline Day 2 of 7 recorded |
 | Phases 8–9 | Planned |
 
 ## Delivery sequence and gates
@@ -919,8 +919,10 @@ Post-merge browser proof returned the grounded 30-day answer with page-4 evidenc
 the post-fix baseline restarted on 2026-09-08 with Day 1 of 7 recorded. The scheduled
 2026-09-09 functional checks passed, but that day was excluded because the API process
 had telemetry disabled; metadata-only export is now enabled and verified for subsequent
-runs without repeating the consumed questions. The 2026-09-10 run stopped before any
-paid call because the Auth0 browser session had expired; six valid days still remain.
+runs without repeating the consumed questions. The 2026-09-10 run initially stopped
+before paid work because the Auth0 session had expired, then resumed after sign-in and
+passed all three checks with live telemetry. Post-fix Day 2 of 7 is recorded; five valid
+days remain.
 
 ### Objective
 

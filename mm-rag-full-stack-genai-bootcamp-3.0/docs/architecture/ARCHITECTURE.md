@@ -27,8 +27,8 @@ retained as diagnostic history. The corrected route passed a post-merge browser 
 with the grounded 30-day answer and page-4 evidence; the post-fix baseline restarted
 on 2026-09-08 with Day 1 of 7 recorded. The 2026-09-09 functional sample passed but is
 not baseline evidence because its API process had telemetry disabled; export was enabled
-and verified before the remaining scheduled days. The 2026-09-10 scheduled run stopped
-before paid work when the browser session required renewed authentication.
+and verified before the remaining scheduled days. The 2026-09-10 scheduled run paused
+for renewed authentication, then resumed successfully and recorded post-fix Day 2 of 7.
 
 ## Status legend
 
@@ -627,8 +627,9 @@ The next scheduled functional sample passed all three representative checks on
 2026-09-09 but was excluded from the numeric window because the API process had
 telemetry disabled. The API now exports metadata-only signals through the Collector,
 verified by a Prometheus metric-flow check; no paid question was repeated.
-The 2026-09-10 run then stopped safely before paid work because the Auth0 browser session
-had expired; the acceptance window remains at Day 1 of 7 pending renewed authentication.
+The 2026-09-10 run initially stopped safely before paid work because the Auth0 browser
+session had expired. After renewed authentication, all three representative checks
+passed and live metadata-only measurements recorded post-fix Day 2 of 7.
 
 ```mermaid
 flowchart TB
