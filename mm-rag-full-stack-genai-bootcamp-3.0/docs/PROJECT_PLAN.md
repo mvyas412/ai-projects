@@ -919,7 +919,8 @@ Post-merge browser proof returned the grounded 30-day answer with page-4 evidenc
 the post-fix baseline restarted on 2026-09-08 with Day 1 of 7 recorded. The scheduled
 2026-09-09 functional checks passed, but that day was excluded because the API process
 had telemetry disabled; metadata-only export is now enabled and verified for subsequent
-runs without repeating the consumed questions.
+runs without repeating the consumed questions. The 2026-09-10 run stopped before any
+paid call because the Auth0 browser session had expired; six valid days still remain.
 
 ### Objective
 
