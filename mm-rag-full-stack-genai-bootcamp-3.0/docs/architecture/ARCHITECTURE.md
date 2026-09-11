@@ -1,6 +1,6 @@
 # Multimodal RAG architecture handbook
 
-> Living architecture baseline — updated 2026-09-08
+> Living architecture baseline — updated 2026-09-11
 
 This document is the version-controlled architecture source of truth for the
 complete system and Phases 1–9. Update it whenever a component, boundary, data
@@ -29,6 +29,9 @@ on 2026-09-08 with Day 1 of 7 recorded. The 2026-09-09 functional sample passed 
 not baseline evidence because its API process had telemetry disabled; export was enabled
 and verified before the remaining scheduled days. The 2026-09-10 scheduled run paused
 for renewed authentication, then resumed successfully and recorded post-fix Day 2 of 7.
+The 2026-09-11 attempt passed service and telemetry preflight but stopped before paid
+work because the browser session was invalid after an API restart; no baseline row or
+provider request was created, and five valid daily records remain.
 
 ## Status legend
 
@@ -630,6 +633,9 @@ verified by a Prometheus metric-flow check; no paid question was repeated.
 The 2026-09-10 run initially stopped safely before paid work because the Auth0 browser
 session had expired. After renewed authentication, all three representative checks
 passed and live metadata-only measurements recorded post-fix Day 2 of 7.
+The 2026-09-11 attempt again stopped before document access or paid work when an API
+restart invalidated the browser session. Service and telemetry preflight passed, no
+provider request ran, and five valid daily records remain scheduled.
 
 ```mermaid
 flowchart TB

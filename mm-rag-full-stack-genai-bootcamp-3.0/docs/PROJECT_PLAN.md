@@ -1,6 +1,6 @@
 # Multimodal RAG production project plan
 
-> Living delivery plan — updated 2026-09-08
+> Living delivery plan — updated 2026-09-11
 
 This is the version-controlled planning source of truth for the journey from the
 preserved prototype through the enterprise platform. It defines sequence, scope,
@@ -922,7 +922,9 @@ had telemetry disabled; metadata-only export is now enabled and verified for sub
 runs without repeating the consumed questions. The 2026-09-10 run initially stopped
 before paid work because the Auth0 session had expired, then resumed after sign-in and
 passed all three checks with live telemetry. Post-fix Day 2 of 7 is recorded; five valid
-days remain.
+days remain. The 2026-09-11 attempt passed service and telemetry preflight but stopped
+before paid work when the browser session became invalid after an API restart; no
+question ran and the five remaining daily opportunities were preserved.
 
 ### Objective
 
@@ -1079,7 +1081,7 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Collect the remaining six post-fix daily baseline records; retain the 2 pre-fix days as diagnostic history | Seven valid post-fix daily records spanning at least six elapsed days |
+| 1 | Collect the remaining five post-fix daily baseline records; retain the 2 pre-fix days and excluded 2026-09-09 row as diagnostic history | Seven valid post-fix daily records spanning at least six elapsed days |
 | 2 | Review and freeze numeric pilot SLOs in ADR 0033 | Approved targets and actionable burn-rate thresholds |
 | 3 | Run the Phase 7 acceptance gate and browser/operator proof | Phase 7 acceptance evidence without a paid provider run |
 
