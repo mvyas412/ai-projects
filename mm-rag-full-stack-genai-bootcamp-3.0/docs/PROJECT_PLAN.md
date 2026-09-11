@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 7 acceptance baseline — correction proven live; post-fix Day 2 of 7 recorded |
+| Active milestone | Phase 7 acceptance baseline — correction proven live; post-fix Day 3 of 7 recorded |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -61,7 +61,7 @@ Rules:
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
-| Phase 7 | In progress — Milestones 7.0–7.5 implemented; duration-routing correction passes deterministic and live proof; post-fix baseline Day 2 of 7 recorded |
+| Phase 7 | In progress — Milestones 7.0–7.5 implemented; duration-routing correction passes deterministic and live proof; post-fix baseline Day 3 of 7 recorded |
 | Phases 8–9 | Planned |
 
 ## Delivery sequence and gates
@@ -924,7 +924,9 @@ before paid work because the Auth0 session had expired, then resumed after sign-
 passed all three checks with live telemetry. Post-fix Day 2 of 7 is recorded; five valid
 days remain. The 2026-09-11 attempt passed service and telemetry preflight but stopped
 before paid work when the browser session became invalid after an API restart; no
-question ran and the five remaining daily opportunities were preserved.
+question ran before renewed sign-in. It then resumed on the same day and all three
+representative checks passed without upload or retry. Post-fix Day 3 of 7 is recorded
+with zero operational and telemetry-export failures; four valid days remain.
 
 ### Objective
 
@@ -1081,7 +1083,7 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Collect the remaining five post-fix daily baseline records; retain the 2 pre-fix days and excluded 2026-09-09 row as diagnostic history | Seven valid post-fix daily records spanning at least six elapsed days |
+| 1 | Collect the remaining four post-fix daily baseline records; retain the 2 pre-fix days and excluded 2026-09-09 row as diagnostic history | Seven valid post-fix daily records spanning at least six elapsed days |
 | 2 | Review and freeze numeric pilot SLOs in ADR 0033 | Approved targets and actionable burn-rate thresholds |
 | 3 | Run the Phase 7 acceptance gate and browser/operator proof | Phase 7 acceptance evidence without a paid provider run |
 

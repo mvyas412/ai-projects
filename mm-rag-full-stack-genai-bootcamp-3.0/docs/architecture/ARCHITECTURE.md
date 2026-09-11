@@ -30,8 +30,9 @@ not baseline evidence because its API process had telemetry disabled; export was
 and verified before the remaining scheduled days. The 2026-09-10 scheduled run paused
 for renewed authentication, then resumed successfully and recorded post-fix Day 2 of 7.
 The 2026-09-11 attempt passed service and telemetry preflight but stopped before paid
-work because the browser session was invalid after an API restart; no baseline row or
-provider request was created, and five valid daily records remain.
+work because the browser session was invalid after an API restart. After renewed sign-in,
+the same-day session passed visual, exact-table, and corrected duration checks without
+upload or retry. Post-fix Day 3 of 7 is recorded; four valid daily records remain.
 
 ## Status legend
 
@@ -634,8 +635,9 @@ The 2026-09-10 run initially stopped safely before paid work because the Auth0 b
 session had expired. After renewed authentication, all three representative checks
 passed and live metadata-only measurements recorded post-fix Day 2 of 7.
 The 2026-09-11 attempt again stopped before document access or paid work when an API
-restart invalidated the browser session. Service and telemetry preflight passed, no
-provider request ran, and five valid daily records remain scheduled.
+restart invalidated the browser session. After renewed sign-in, all three representative
+checks passed without upload or retry. Post-fix Day 3 of 7 recorded zero operational
+and telemetry-export failures; four valid daily records remain scheduled.
 
 ```mermaid
 flowchart TB
