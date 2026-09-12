@@ -1,6 +1,6 @@
 # Multimodal RAG production project plan
 
-> Living delivery plan — updated 2026-09-11
+> Living delivery plan — updated 2026-09-12
 
 This is the version-controlled planning source of truth for the journey from the
 preserved prototype through the enterprise platform. It defines sequence, scope,
@@ -927,6 +927,9 @@ before paid work when the browser session became invalid after an API restart; n
 question ran before renewed sign-in. It then resumed on the same day and all three
 representative checks passed without upload or retry. Post-fix Day 3 of 7 is recorded
 with zero operational and telemetry-export failures; four valid days remain.
+The 2026-09-12 attempt passed service and telemetry preflight but stopped before paid
+work when the authoritative Overview check rejected the expired browser session. No
+question ran, and the four remaining daily opportunities were preserved.
 
 ### Objective
 
