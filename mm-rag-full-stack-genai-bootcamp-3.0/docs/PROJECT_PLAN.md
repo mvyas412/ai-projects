@@ -62,7 +62,8 @@ Rules:
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
-| Phases 8–9 | Planned |
+| Phase 8 | Decision kickoff in progress — OCI learning constraints and ADRs 0037–0042 proposed; no cloud resources provisioned |
+| Phase 9 | Planned |
 
 ## Delivery sequence and gates
 
@@ -92,7 +93,7 @@ security and data-integrity gates on which it depends.
 | 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Closed without acceptance |
 | 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Completed and accepted; `visual-table-v1` promoted with explicit rollback |
 | 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | In progress — decisions proposed |
-| 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Planned |
+| 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Decision kickoff in progress — ADRs proposed |
 | 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Planned |
 
 ## Phase 1 — working prototype
@@ -974,7 +975,8 @@ enough to support release decisions and production operations.
 
 ## Phase 8 — scalable production platform
 
-**Status:** Planned.
+**Status:** Decision kickoff in progress. OCI is the approved learning-provider
+direction; ADRs 0037–0042 are Proposed and no cloud resources are provisioned.
 
 ### Objective
 
@@ -985,7 +987,7 @@ can scale independently under representative production load.
 
 | Milestone | Deliverable |
 | --- | --- |
-| 8.0 | Cloud/orchestration, managed-service, and dedicated-frontend ADRs |
+| 8.0 | In progress — OCI learning constraints plus deployment, data, frontend, delivery, and recovery ADRs 0037–0042 proposed |
 | 8.1 | Environment promotion, immutable artifacts, secrets, and migration-aware CI/CD |
 | 8.2 | Dedicated frontend and gateway/WAF/rate-limit boundary |
 | 8.3 | Horizontally scaled stateless API and autoscaled workers |

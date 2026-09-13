@@ -192,7 +192,7 @@ flowchart LR
     p5["Phase 5<br/>Hybrid retrieval<br/>Closed / gate not met"] -->
     p6["Phase 6<br/>Visual/table intelligence<br/>Completed / accepted"] -->
     p7["Phase 7<br/>Evaluation/observability<br/>Decision kickoff"] -->
-    p8["Phase 8<br/>Scalable platform<br/>Planned"] -->
+    p8["Phase 8<br/>Scalable platform<br/>Decision kickoff"] -->
     p9["Phase 9<br/>Enterprise platform<br/>Planned"]
 ```
 
@@ -700,7 +700,9 @@ changes before release, and manage reliability, quality, latency, and cost.
 
 ## Phase 8 — scalable production platform
 
-**Status:** Planned. Cloud, orchestration, and frontend framework are TBD.
+**Status:** Decision kickoff in progress. OCI is the approved learning-provider
+direction; deployment, data-plane, frontend, delivery, and recovery contracts remain
+Proposed in ADRs 0037–0042. No cloud resource has been provisioned.
 
 ```mermaid
 flowchart TB
@@ -794,7 +796,7 @@ reconcile commercial usage.
 | Topic | Current position |
 | --- | --- |
 | Phase 2 UI | Streamlit multipage application |
-| Dedicated Phase 8 UI | Candidate only; framework not selected |
+| Dedicated Phase 8 UI | Next.js/TypeScript candidate proposed in ADR 0040; not selected or promoted |
 | Queue / broker | Open-source RabbitMQ quorum queue/DLQ implemented under ADR 0010; production hosting deferred |
 | Object storage | S3-compatible adapter plus open-source SeaweedFS local/CI implemented under ADR 0011; production provider deferred |
 | Transactional outbox | PostgreSQL events plus confirmed leased dispatcher, retry/alert/retention operations implemented under ADR 0009 |
@@ -817,7 +819,7 @@ reconcile commercial usage.
 | Structured tables/calculation | ADR 0029 implemented at `20260907_0015`/`0016`: normalized validated cells, immutable traces, and a closed Decimal calculation allowlist; no generated SQL |
 | Region evidence/viewer/rollout | ADR 0030 implementation adds backend-mediated `evidence-v1`, integrity-checked streaming, accessible inspection, and accepted `visual-table-v1`; Phase 6 browser, promotion, and release gates pass |
 | Observability backend | Accepted ADRs 0031–0032: OTLP through an OpenTelemetry Collector to optional free local Grafana LGTM; production provider remains TBD |
-| Deployment platform | Containerized and horizontally scalable; provider not selected |
+| Deployment platform | OCI learning direction approved; single Always Free-eligible ARM VM and Docker Compose proposed in ADRs 0037–0038; no resource provisioned |
 
 Accepted Phase 2 decisions are recorded in
 [`docs/architecture/decisions`](decisions/):
@@ -876,6 +878,15 @@ Accepted Phase 7 decisions are:
 - [ADR 0034 — Unified RAG evaluation and release gates](decisions/0034-unified-rag-evaluation-release-gates.md)
 - [ADR 0035 — User feedback and review governance](decisions/0035-user-feedback-review-governance.md)
 - [ADR 0036 — Dashboards, alerts, runbooks, and incident learning](decisions/0036-dashboards-alerts-runbooks-incident-learning.md)
+
+Proposed Phase 8 decisions are:
+
+- [ADR 0037 — OCI learning deployment constraints](decisions/0037-oci-learning-deployment-constraints.md)
+- [ADR 0038 — OCI container runtime boundary](decisions/0038-oci-container-runtime-boundary.md)
+- [ADR 0039 — OCI learning data plane and backups](decisions/0039-oci-learning-data-plane.md)
+- [ADR 0040 — Dedicated frontend and edge boundary](decisions/0040-dedicated-frontend-edge-boundary.md)
+- [ADR 0041 — Immutable delivery, secrets, and migrations](decisions/0041-immutable-delivery-secrets-migrations.md)
+- [ADR 0042 — Scaling, recovery, and release evidence](decisions/0042-scaling-recovery-release-evidence.md)
 
 ## Maintenance checklist
 
