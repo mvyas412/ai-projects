@@ -1,6 +1,6 @@
 # Multimodal RAG architecture handbook
 
-> Living architecture baseline — updated 2026-09-12
+> Living architecture baseline — updated 2026-09-13
 
 This document is the version-controlled architecture source of truth for the
 complete system and Phases 1–9. Update it whenever a component, boundary, data
@@ -37,6 +37,9 @@ The 2026-09-12 attempt passed service and telemetry preflight but stopped before
 work when the authoritative Overview check rejected the expired browser session. After
 renewed sign-in, the same-day session passed visual, exact-table, and corrected duration
 checks without upload or retry. Post-fix Day 4 of 7 is recorded; three valid days remain.
+The 2026-09-13 attempt passed service and telemetry preflight but stopped before paid
+work when the authoritative Overview check rejected the expired browser session; no
+baseline row or provider request was created.
 
 ## Status legend
 
@@ -646,6 +649,9 @@ The 2026-09-12 attempt likewise stopped before document access or paid work beca
 the authoritative Overview check rejected the expired browser session. After renewed
 sign-in, all three representative checks passed without upload or retry. Post-fix Day 4
 of 7 recorded zero operational and telemetry-export failures; three valid days remain.
+The 2026-09-13 attempt likewise stopped before document access or paid work because
+the authoritative Overview check rejected the expired browser session. Infrastructure
+and telemetry preflight passed, and the three remaining daily opportunities were kept.
 
 ```mermaid
 flowchart TB
