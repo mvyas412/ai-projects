@@ -20,5 +20,9 @@ describe("backend boundary", () => {
     expect(hasTrustedMutationOrigin("https://rag.example/api/backend/x", "https://evil.example")).toBe(false);
     expect(hasTrustedMutationOrigin("https://rag.example/api/backend/x", null)).toBe(false);
     expect(hasTrustedMutationOrigin("https://rag.example/api/backend/x", "https://rag.example:444")).toBe(false);
+    expect(hasTrustedMutationOrigin("https://rag.example/api/backend/x", "not-a-url")).toBe(false);
+    expect(hasTrustedMutationOrigin("https://rag.example/api/backend/x", "https://rag.example/path")).toBe(false);
+    expect(hasTrustedMutationOrigin("https://rag.example/api/backend/x", "https://user@rag.example")).toBe(false);
+    expect(hasTrustedMutationOrigin("not-a-url", "https://rag.example")).toBe(false);
   });
 });

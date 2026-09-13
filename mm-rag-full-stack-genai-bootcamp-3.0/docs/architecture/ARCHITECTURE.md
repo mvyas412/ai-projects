@@ -706,7 +706,7 @@ remain gated on Phase 7 closure and separate approval. No cloud resource has bee
 
 Local hardening now also proves fixable high/critical vulnerability scans for both app
 images, tracked-source secret and OCI configuration scans, automated candidate
-accessibility/non-disclosure behavior, and a real synthetic age-encrypted backup/restore
+accessibility/non-disclosure behavior, fail-closed malformed-origin handling, and a real synthetic age-encrypted backup/restore
 round trip. GitHub Actions are commit-pinned and repeat these checks. The
 [OCI onboarding checklist](../PHASE8_OCI_ONBOARDING.md) keeps remaining account inputs and
 explicit mutation approvals separate from code readiness.

@@ -61,7 +61,7 @@ backup-bucket module, production-shaped Compose limits and graceful drains, the
 Streamlit-first HTTPS edge, an unpromoted token-mediating Next.js candidate, encrypted
 backup integrity tooling, bounded capacity probes, immutable release manifests, and a
 ten-scenario release-evidence gate. Local security hardening adds commit-pinned CI,
-source/IaC/image scanning, candidate accessibility checks, and a real synthetic encrypted
+source/IaC/image scanning, candidate accessibility and malformed-origin checks, and a real synthetic encrypted
 backup/restore round trip. The [OCI onboarding checklist](docs/PHASE8_OCI_ONBOARDING.md)
 records the remaining non-secret inputs and approval gates. No OCI resource, public deployment, registry image,
 or paid model run has been created by this work; cloud acceptance waits for Phase 7.

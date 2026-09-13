@@ -19,5 +19,12 @@ export function isAllowedBackendRoute(method: string, path: string): boolean {
 
 export function hasTrustedMutationOrigin(expectedBaseUrl: string, origin: string | null): boolean {
   if (!origin) return false;
-  return new URL(expectedBaseUrl).origin === new URL(origin).origin;
+  try {
+    const expectedOrigin = new URL(expectedBaseUrl).origin;
+    const suppliedOrigin = new URL(origin);
+    // Browser Origin headers contain only the serialized origin, never a path or user info.
+    return origin === suppliedOrigin.origin && expectedOrigin === suppliedOrigin.origin;
+  } catch {
+    return false;
+  }
 }
