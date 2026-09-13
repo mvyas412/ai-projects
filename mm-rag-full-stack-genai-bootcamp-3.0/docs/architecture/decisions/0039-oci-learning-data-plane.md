@@ -1,6 +1,6 @@
 # ADR 0039: OCI learning data plane and backups
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-13
 - Milestone: 8.0 and 8.4
 
@@ -47,3 +47,8 @@ services only if the free resource envelope or recovery evidence is inadequate.
 - Backup and restore evidence becomes mandatory, not optional documentation.
 - Production managed-service choices remain open for a future funded environment.
 
+## Decision record
+
+Accepted by the user on 2026-09-13. PostgreSQL, Qdrant, and RabbitMQ remain
+self-hosted for the free pilot; OCI Object Storage must pass the existing S3 contract
+before storing application objects and serves as the approved off-host backup target.

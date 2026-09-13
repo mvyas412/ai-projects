@@ -1,6 +1,6 @@
 # ADR 0040: Dedicated frontend and edge boundary
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-13
 - Milestone: 8.0 and 8.2
 
@@ -21,10 +21,12 @@ boundary while FastAPI remains the authorization authority.
 
 ## Proposed decision
 
-Use a dedicated Next.js/TypeScript frontend as the recommended candidate, with Auth0
-authorization-code flow, secure server-managed session cookies, CSRF protection, and
-FastAPI as the final authorization boundary. Preserve Streamlit as a temporary rollback
-and operator/demo surface until feature parity and accessibility checks pass.
+Deploy the existing Streamlit application first. Then build a bounded
+Next.js/TypeScript vertical-slice candidate with Auth0 authorization-code flow, secure
+server-managed session cookies, CSRF protection, and FastAPI as the final authorization
+boundary. The first slice covers sign-in, workspace overview, library, job progress,
+chat, and evidence. Preserve Streamlit as the working interface, rollback, and
+operator/demo surface until the candidate passes feature-parity and accessibility gates.
 
 Terminate TLS and apply bounded request-size, timeout, security-header, and rate-limit
 controls at the reverse proxy. Use a free stable hostname for the learning deployment;
@@ -32,9 +34,8 @@ do not require a purchased domain.
 
 ## Recommendation
 
-Approve Next.js as the candidate, not yet the promoted frontend. Implement one vertical
-slice first—sign-in, workspace overview, library, job progress, chat, and evidence—then
-decide whether it is ready to replace Streamlit.
+Approve Next.js as a candidate, not the promoted frontend. Deploy Streamlit first,
+measure the bounded vertical slice, and promote only after a separate evidence review.
 
 ## Approval questions
 
@@ -48,3 +49,8 @@ decide whether it is ready to replace Streamlit.
 - The project temporarily maintains two user interfaces during migration.
 - No frontend may derive tenant scope or bypass backend policy.
 
+## Decision record
+
+Accepted by the user on 2026-09-13 after reviewing why Next.js is useful and where
+Streamlit remains sufficient. Streamlit deploys first and stays authoritative until a
+bounded Next.js candidate passes parity, security, accessibility, and resource checks.

@@ -1,6 +1,6 @@
 # ADR 0037: OCI learning deployment constraints
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-13
 - Milestone: 8.0
 
@@ -52,3 +52,8 @@ account shows Always Free ARM capacity because the home-region choice is consequ
 - A future real production environment requires a new cost, availability, and data-
   residency decision.
 
+## Decision record
+
+Accepted by the user on 2026-09-13. OCI, the zero-cost guardrail, US placement,
+two-to-three-user learning scope, no purchased domain, RPO 24 hours, and RTO 8 hours
+are approved. No cloud resource or paid service was authorized by this decision.

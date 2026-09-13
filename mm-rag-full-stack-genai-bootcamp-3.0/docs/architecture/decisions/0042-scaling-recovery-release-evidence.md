@@ -1,6 +1,6 @@
 # ADR 0042: Scaling, recovery, and release evidence
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-13
 - Milestone: 8.0 and 8.3–8.5
 
@@ -47,3 +47,7 @@ paid or multi-node decision rather than pre-provisioning complexity.
 - The single-host ceiling is documented rather than hidden.
 - Any scale-out decision will be based on measured demand and an explicit budget.
 
+## Decision record
+
+Accepted by the user on 2026-09-13. Phase 8 must prove bounded load, safe failure,
+rollback, cost, and clean restore without claiming high availability for the free pilot.

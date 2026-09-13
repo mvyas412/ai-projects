@@ -1,6 +1,6 @@
 # ADR 0038: OCI container runtime boundary
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-13
 - Milestone: 8.0–8.3
 
@@ -50,3 +50,9 @@ highly available.
   the free pilot.
 - Host loss is recovered from code, immutable images, and off-host backups.
 - Multi-node and Kubernetes work remains a future evidence-driven decision.
+
+## Decision record
+
+Accepted by the user on 2026-09-13. The learning deployment uses one OCI ARM VM
+with private Compose-managed services; Kubernetes and multi-node deployment remain
+out of scope unless later evidence and budget support them.

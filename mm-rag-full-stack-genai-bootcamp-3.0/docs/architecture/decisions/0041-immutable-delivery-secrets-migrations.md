@@ -1,6 +1,6 @@
 # ADR 0041: Immutable delivery, secrets, and migrations
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-13
 - Milestone: 8.0–8.1
 
@@ -48,3 +48,7 @@ Do not automate unattended cloud changes while the project has one learning oper
 - Initial delivery setup is larger than copying files to a VM.
 - Release rollback cannot depend on an unproven destructive database downgrade.
 
+## Decision record
+
+Accepted by the user on 2026-09-13. Immutable multi-architecture artifacts, protected
+secrets, explicit deployment approval, and migration-safe promotion/rollback are binding.
