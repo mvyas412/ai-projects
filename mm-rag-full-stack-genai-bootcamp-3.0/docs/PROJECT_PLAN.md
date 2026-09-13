@@ -62,7 +62,7 @@ Rules:
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
-| Phase 8 | Decisions accepted — OCI learning deployment and ADRs 0037–0042 approved; implementation is unblocked by Phase 7 closure |
+| Phase 8 | Decisions accepted — isolated Milestone 8.1 image/deployment preparation implemented and unblocked by Phase 7 closure; no cloud resources provisioned |
 | Phase 9 | Planned |
 
 ## Delivery sequence and gates
@@ -92,8 +92,8 @@ security and data-integrity gates on which it depends.
 | 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Completed and accepted |
 | 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Closed without acceptance |
 | 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Completed and accepted; `visual-table-v1` promoted with explicit rollback |
-| 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | In progress — decisions proposed |
-| 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Decisions accepted; implementation pending Phase 7 closure |
+| 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Implemented; post-fix acceptance baseline in progress |
+| 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Milestone 8.1 preparation in progress; provisioning pending Phase 7 closure |
 | 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Planned |
 
 ## Phase 1 — working prototype
@@ -975,23 +975,25 @@ enough to support release decisions and production operations.
 
 ## Phase 8 — scalable production platform
 
-**Status:** Decisions accepted. ADRs 0037–0042 define the OCI learning deployment;
-implementation waits for Phase 7 closure and no cloud resources are provisioned.
+**Status:** Decisions accepted. Isolated Milestone 8.1 preparation has implemented and
+locally verified the CPU-only ARM64 image plus deployment/delivery contracts. OCI
+provisioning waits for Phase 7 closure and separate approval.
 
 ### Objective
 
-Deploy a secure, recoverable platform whose frontend, API, and ingestion workers
-can scale independently under representative production load.
+Deploy a secure, recoverable learning platform whose frontend, API, and ingestion
+workers retain separable runtime boundaries, then prove the capacity and recovery limits
+of the accepted single-VM topology under representative bounded load.
 
 ### Proposed milestones
 
 | Milestone | Deliverable |
 | --- | --- |
 | 8.0 | Completed — OCI learning constraints plus deployment, data, frontend, delivery, and recovery ADRs 0037–0042 accepted |
-| 8.1 | Environment promotion, immutable artifacts, secrets, and migration-aware CI/CD |
-| 8.2 | Dedicated frontend and gateway/WAF/rate-limit boundary |
-| 8.3 | Horizontally scaled stateless API and autoscaled workers |
-| 8.4 | Managed PostgreSQL, Qdrant, queue, object storage, backup, and restore |
+| 8.1 | In progress — CPU-only multiarch image, SBOM/scan/sign workflow, secret templates, migration ordering, HTTPS edge, and private Compose contract implemented; registry publication and OCI provisioning deferred |
+| 8.2 | Streamlit-first HTTPS edge and bounded Next.js parity candidate; no promotion without evidence |
+| 8.3 | Single-VM resource limits, backpressure, graceful shutdown, and measured scale-up threshold |
+| 8.4 | Self-hosted PostgreSQL/Qdrant/RabbitMQ/SeaweedFS, OCI object-contract proof, encrypted off-host backup, and restore |
 | 8.5 | Load, resilience, disaster-recovery, security, and release validation |
 
 ### Completion gate
@@ -1000,7 +1002,7 @@ can scale independently under representative production load.
 - Deployments and migrations are reversible without tenant-data loss.
 - Dependency failure triggers timeouts, backpressure, and safe degradation.
 - Backups restore successfully in an exercised recovery procedure.
-- Production security review and operational readiness review pass.
+- Learning-deployment security and operational readiness reviews pass without claiming a production SLA.
 
 ## Phase 9 — enterprise integrations and commercial controls
 

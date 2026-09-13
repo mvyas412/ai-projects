@@ -204,8 +204,8 @@ flowchart LR
 | 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and preserved at `mm-rag-v4.0.0` |
 | 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | Closed without acceptance; v4 nDCG gate missed and no candidate was promoted |
 | 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | Completed and accepted; `visual-table-v1` promoted after free/live and signed-in candidate proof |
-| 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
-| 8 | Independently scalable deployment | Gateway, API/workers, dedicated frontend TBD, managed services | Managed PostgreSQL, Qdrant, object storage | Planned |
+| 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Local telemetry and protected evaluation evidence | Implemented; acceptance baseline in progress |
+| 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; off-host OCI backup planned | Milestone 8.1 preparation in progress |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Planned |
 
 ## Phase 1 — working prototype
@@ -698,45 +698,42 @@ stores. Do not log tokens, secrets, raw documents, or unreviewed sensitive
 content. Exit: the team can explain requests, detect failures, compare RAG
 changes before release, and manage reliability, quality, latency, and cost.
 
-## Phase 8 — scalable production platform
+## Phase 8 — production-shaped learning platform
 
-**Status:** Decisions accepted. ADRs 0037–0042 define the OCI learning deployment,
-data plane, Streamlit-first frontend path, delivery controls, and recovery evidence.
-Implementation waits for Phase 7 closure; no cloud resource has been provisioned.
+**Status:** Decisions accepted; Milestone 8.1 preparation is in progress on an isolated
+branch. The CPU-only ARM64 image and production-shaped Compose/delivery contracts are
+implemented and locally verified. No cloud resource has been provisioned.
 
 ```mermaid
 flowchart TB
-    user["Users"] --> edge["DNS + TLS + CDN / edge"]
-    edge --> web["Dedicated frontend<br/>framework TBD"]
-    web --> gateway["Gateway / WAF / rate limiting"]
-    gateway --> api["Stateless FastAPI replicas"]
-    api --> oidc["OIDC provider"]
-    api --> pg[("Managed PostgreSQL<br/>HA + backup + PITR")]
-    api --> qd[("Managed / clustered Qdrant")]
-    api --> objects[("Managed object storage")]
-    api --> queue["Managed queue"]
-    queue --> workers["Autoscaled workers"]
-    workers --> pg
-    workers --> qd
-    workers --> objects
-    api --> models["Model providers"]
-    workers --> models
-    secrets["Secrets / key management"] -.-> api
-    secrets -.-> workers
-    deploy["CI/CD + registry + migrations"] -.-> web
-    deploy -.-> api
-    deploy -.-> workers
-    api -.-> observe["Telemetry + SLOs + alerts"]
-    workers -.-> observe
-    pg -.-> recovery["Backup / restore / disaster recovery"]
-    qd -.-> recovery
-    objects -.-> recovery
+    user["2–3 learning users"] --> edge["Free hostname + Caddy HTTPS<br/>ports 80/443 only"]
+    edge --> ui["Streamlit<br/>authoritative frontend"]
+    edge --> api["FastAPI"]
+    auth["Auth0"] --> ui
+    subgraph vm["One Always Free-eligible OCI ARM VM"]
+        ui --> api
+        api --> pg[("PostgreSQL")]
+        api --> qd[("Qdrant")]
+        api --> objects[("SeaweedFS S3")]
+        api --> models["Accepted model providers"]
+        dispatcher["Outbox dispatcher"] --> queue["RabbitMQ"]
+        queue --> worker["Ingestion worker"]
+        worker --> pg
+        worker --> qd
+        worker --> objects
+        provision["One-shot CPU model provisioner"] -.-> api
+        provision -.-> worker
+    end
+    delivery["GitHub Actions<br/>multiarch + SBOM + scan + signature"] -.-> vm
+    pg -.-> backup["Encrypted off-host OCI backup<br/>after contract proof"]
+    objects -.-> backup
 ```
 
-Frontend, API, and workers deploy and scale independently; durable state remains
-in managed services. Timeouts, backpressure, graceful shutdown, reversible
-releases, and tested restoration are mandatory. Microservices or multi-region
-deployment require measured scale, reliability, ownership, or regulatory need.
+The learning topology intentionally preserves independently runnable application roles
+inside one Compose host; it does not claim high availability or horizontal scaling.
+Managed services, Kubernetes, multiple VMs, and a Next.js promotion require measured
+need and later evidence. Digest-pinned releases, secret-safe configuration, migration
+ordering, timeouts, backpressure, rollback, and tested restoration remain mandatory.
 
 ## Phase 9 — enterprise integrations and commercial controls
 
@@ -892,8 +889,8 @@ Accepted Phase 8 decisions are:
 
 1. Update the affected phase, diagram, status, and technology table.
 2. Update the whole-system diagram when a cross-phase boundary or flow changes.
-3. Record consequential Phase 7 decisions and rationale in the ignored
-   `Phase7_context.md` active context document; keep earlier phase contexts historical.
+3. Record consequential active-phase decisions and rationale in the ignored
+   `Phase7_context.md` or `Phase8_context.md`; keep earlier phase contexts historical.
 4. Keep unapproved technologies labeled **Proposed / TBD**.
 5. Verify Mermaid fences and links before committing.
 6. Never place credentials, tokens, private URLs, customer data, or other secrets

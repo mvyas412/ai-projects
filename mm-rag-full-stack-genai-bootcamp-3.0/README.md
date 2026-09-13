@@ -617,4 +617,7 @@ authorized real-OpenAI asynchronous browser proof. The immutable accepted releas
 is tagged `mm-rag-v3.0.0` at `9ebe767`. Phase 4 is completed, accepted, and
 squash-merged through PR #3 at `57ee453`; its documentation closure is preserved by
 annotated tag `mm-rag-v4.0.0` at `996898e`.
-Production providers and deployment remain future Phase 8 decisions.
+Phase 8 decisions are accepted. Its isolated OCI learning checkpoint now includes a
+CPU-only ARM64-capable image, a private single-VM Compose topology, an HTTPS edge,
+secret-safe templates, and guarded image delivery. Cloud provisioning remains deferred
+until Phase 7 acceptance and separate approval.
