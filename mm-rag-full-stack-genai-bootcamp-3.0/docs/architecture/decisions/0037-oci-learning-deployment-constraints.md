@@ -57,3 +57,16 @@ account shows Always Free ARM capacity because the home-region choice is consequ
 Accepted by the user on 2026-09-13. OCI, the zero-cost guardrail, US placement,
 two-to-three-user learning scope, no purchased domain, RPO 24 hours, and RTO 8 hours
 are approved. No cloud resource or paid service was authorized by this decision.
+
+## Capacity amendment — 2026-09-13
+
+The user subsequently approved a free-first ten-user objective. The effective pilot
+contract now supports at least ten registered authorized users, normal concurrency of
+three to five active users, and an acceptance burst of ten simultaneous users. The
+original two-to-three-user decision above remains the historical starting point.
+
+The USD 0 target is unchanged. The single Always Free-eligible host must first be tested
+against this workload; this amendment does not claim that unmeasured free capacity is
+sufficient and does not authorize paid resources. If the free host misses the approved
+SLOs, optimize within the free envelope first and present any paid or multi-node option
+for separate approval.

@@ -51,3 +51,17 @@ paid or multi-node decision rather than pre-provisioning complexity.
 
 Accepted by the user on 2026-09-13. Phase 8 must prove bounded load, safe failure,
 rollback, cost, and clean restore without claiming high availability for the free pilot.
+
+## Capacity amendment — 2026-09-13
+
+The user approved replacing the original two-to-three-user acceptance profile with a
+free-first progressive profile: at least ten registered users, normal concurrency of
+three to five users, and measured stages at 1, 3, 5, and 10 simultaneous users. The
+ten-user stage is the required burst gate.
+
+Sustained load uses free simulated provider responses so application, authorization,
+queue, persistence, and resource behavior can be measured without uncontrolled model
+cost. A small real-provider smoke remains separately approved and bounded. Every stage
+must preserve tenant isolation and integrity and report latency, errors, CPU, memory,
+disk, and queue behavior against the frozen Phase 7 SLOs. Failure on the free host
+triggers optimization and an evidence review, never an automatic paid upgrade.

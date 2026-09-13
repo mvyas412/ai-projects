@@ -39,21 +39,24 @@ switch are for a separately approved parity test only. Revert the edge upstream 
 
 ## 3. Capacity and safe-degradation evidence
 
-Run the read-only probe with 1, 2, then 3 users. It makes no model calls and has no retry:
+Run the read-only progressive probe at 1, 3, 5, and 10 simultaneous users. It makes no
+model calls and has no retry:
 
 ```bash
 uv run python -m scripts.phase8_evidence probe \
   --base-url https://HOST \
   --path /api/v1/health/ready \
   --path /api/v1/users/me \
-  --users 3 --requests 30
+  --requests-per-stage 30
 ```
 
 Keep the access token in `MM_RAG_ACCESS_TOKEN`; the script never prints it or response
-bodies. Compare observed p95/error data with the frozen Phase 7 SLO rather than inventing
-a threshold. Record CPU, memory, disk, queue age/depth, active jobs, model latency and
-cost. Scale-up review is triggered by repeated SLO breach, sustained >80% memory/disk,
-queue age beyond the approved SLO, or resource exhaustion under only three users.
+bodies. Compare every stage's p95/error data with the frozen Phase 7 SLO rather than
+inventing a threshold. Record CPU, memory, disk, queue age/depth, active jobs, model
+latency and cost. Use free simulated provider responses for sustained mixed-workload
+testing; any real-provider smoke remains separately approved and bounded. Scale-up review
+is triggered by repeated SLO breach, sustained >80% memory/disk, queue age beyond the
+approved SLO, or resource exhaustion at or below ten simultaneous users.
 
 Exercise each failure one at a time against the learning host: worker restart, broker,
 PostgreSQL, Qdrant, SeaweedFS and telemetry unavailability, plus bounded disk pressure.

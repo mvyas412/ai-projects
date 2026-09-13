@@ -713,7 +713,7 @@ explicit mutation approvals separate from code readiness.
 
 ```mermaid
 flowchart TB
-    user["2–3 learning users"] --> edge["Free hostname + Caddy HTTPS<br/>ports 80/443 only"]
+    user["10 registered users<br/>3–5 normal / 10 burst"] --> edge["Free hostname + Caddy HTTPS<br/>ports 80/443 only"]
     edge --> ui["Streamlit<br/>authoritative frontend"]
     edge --> api["FastAPI"]
     auth["Auth0"] --> ui
@@ -741,7 +741,8 @@ flowchart TB
     evidence["10-scenario release gate<br/>load + failure + restore + rollback"] -.-> vm
 ```
 
-The learning topology intentionally preserves independently runnable application roles
+The learning topology targets ten registered users, normal concurrency of three to five,
+and a measured burst of ten simultaneous users. It intentionally preserves independently runnable application roles
 inside one Compose host; it does not claim high availability or horizontal scaling.
 Managed services, Kubernetes, multiple VMs, and a Next.js promotion require measured
 need and later evidence. Digest-pinned releases, secret-safe configuration, migration

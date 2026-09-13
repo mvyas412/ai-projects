@@ -65,6 +65,9 @@ source/IaC/image scanning, candidate accessibility and malformed-origin checks, 
 backup/restore round trip. The [OCI onboarding checklist](docs/PHASE8_OCI_ONBOARDING.md)
 records the remaining non-secret inputs and approval gates. No OCI resource, public deployment, registry image,
 or paid model run has been created by this work; cloud acceptance waits for Phase 7.
+The amended free-first capacity contract requires ten registered users, 3–5 normally
+concurrent users, and progressive 1/3/5/10-user measurements with a required 10-user burst.
+Missing the gate triggers optimization and review, not an automatic paid upgrade.
 
 The current `3.0` lineage contains:
 

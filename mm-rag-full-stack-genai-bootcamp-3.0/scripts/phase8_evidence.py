@@ -12,7 +12,8 @@ from typing import Any
 
 import httpx
 
-SCHEMA = "mm-rag-phase8-evidence-v1"
+SCHEMA = "mm-rag-phase8-evidence-v2"
+PROGRESSIVE_USER_STAGES = (1, 3, 5, 10)
 REQUIRED_SCENARIOS = {
     "bounded-load",
     "worker-restart",
@@ -30,8 +31,8 @@ REQUIRED_SCENARIOS = {
 async def run_bounded_probe(
     *, base_url: str, token: str, paths: Sequence[str], users: int, requests: int
 ) -> dict[str, Any]:
-    if users < 1 or users > 3:
-        raise ValueError("users must be between 1 and 3")
+    if users < 1 or users > 10:
+        raise ValueError("users must be between 1 and 10")
     if requests < 1 or requests > 300:
         raise ValueError("requests must be between 1 and 300")
     if not paths or any(not path.startswith("/api/v1/") for path in paths):
@@ -62,13 +63,32 @@ async def run_bounded_probe(
     latencies = sorted(latency for latency, _ in observations)
     errors = sum(1 for _, status in observations if not 200 <= status < 400)
     return {
-        "schema": SCHEMA,
-        "scenario": "bounded-load",
         "users": users,
         "requests": len(observations),
         "error_count": errors,
         "p50_ms": _percentile(latencies, 0.50),
         "p95_ms": _percentile(latencies, 0.95),
+        "status": "observed",
+    }
+
+
+async def run_progressive_probe(
+    *, base_url: str, token: str, paths: Sequence[str], requests_per_stage: int
+) -> dict[str, Any]:
+    stages = [
+        await run_bounded_probe(
+            base_url=base_url,
+            token=token,
+            paths=paths,
+            users=users,
+            requests=requests_per_stage,
+        )
+        for users in PROGRESSIVE_USER_STAGES
+    ]
+    return {
+        "schema": SCHEMA,
+        "scenario": "bounded-load",
+        "stages": stages,
         "status": "observed",
     }
 
@@ -94,8 +114,21 @@ def validate_release_evidence(directory: Path) -> dict[str, Any]:
         raise ValueError(f"Phase 8 evidence has non-passing outcomes: {', '.join(failed)}")
 
     load = scenarios["bounded-load"]
-    if int(load.get("users", 0)) not in range(1, 4) or int(load.get("error_count", -1)) != 0:
-        raise ValueError("Bounded-load evidence violates the 1–3 user or zero-error contract")
+    stages = load.get("stages")
+    if (
+        not isinstance(stages, list)
+        or any(not isinstance(stage, dict) for stage in stages)
+        or [stage.get("users") for stage in stages] != list(PROGRESSIVE_USER_STAGES)
+    ):
+        raise ValueError("Bounded-load evidence must contain the 1/3/5/10-user stages")
+    for stage in stages:
+        if (
+            stage.get("error_count") != 0
+            or not _valid_latency(stage.get("p50_ms"))
+            or not _valid_latency(stage.get("p95_ms"))
+            or float(stage["p50_ms"]) > float(stage["p95_ms"])
+        ):
+            raise ValueError("Bounded-load evidence violates the progressive zero-error contract")
     restore = scenarios["backup-restore"]
     if float(restore.get("rpo_hours", math.inf)) > 24 or float(
         restore.get("rto_hours", math.inf)
@@ -114,14 +147,22 @@ def _percentile(values: Sequence[float], percentile: float) -> float:
     return round(values[index], 3)
 
 
+def _valid_latency(value: object) -> bool:
+    return (
+        not isinstance(value, bool)
+        and isinstance(value, (int, float))
+        and math.isfinite(value)
+        and value >= 0
+    )
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Collect or validate bounded Phase 8 evidence")
     subparsers = parser.add_subparsers(dest="command", required=True)
     probe = subparsers.add_parser("probe", help="run a read-only HTTP capacity probe")
     probe.add_argument("--base-url", required=True)
     probe.add_argument("--path", action="append", required=True)
-    probe.add_argument("--users", type=int, default=3)
-    probe.add_argument("--requests", type=int, default=30)
+    probe.add_argument("--requests-per-stage", type=int, default=30)
     probe.add_argument("--token-env", default="MM_RAG_ACCESS_TOKEN")
     gate = subparsers.add_parser("gate", help="validate a completed evidence directory")
     gate.add_argument("directory", type=Path)
@@ -132,12 +173,11 @@ def main() -> None:
     args = _parser().parse_args()
     if args.command == "probe":
         payload = asyncio.run(
-            run_bounded_probe(
+            run_progressive_probe(
                 base_url=args.base_url,
                 token=os.environ.get(args.token_env, ""),
                 paths=args.path,
-                users=args.users,
-                requests=args.requests,
+                requests_per_stage=args.requests_per_stage,
             )
         )
     else:

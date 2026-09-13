@@ -57,7 +57,8 @@ backend is a future decision, not an implicit addition.
 - [ ] Deploy only digest-pinned service images and the reviewed release manifest.
 - [ ] Verify HTTPS, sign-in, authenticated email, personal workspace, readiness, upload,
       durable ingestion, grounded chat/citations, and logout.
-- [ ] Run the bounded 1–3-user capacity and dependency-failure scenarios.
+- [ ] Confirm at least ten registered users can be represented, then run the progressive
+      1/3/5/10-user capacity and dependency-failure scenarios.
 - [ ] Create an encrypted backup, restore it into a clean target, and verify database,
       vector, object, authorization, checksum, readiness, RPO, and RTO evidence.
 - [ ] Exercise rollback to the previous immutable manifest without tenant-data loss.
