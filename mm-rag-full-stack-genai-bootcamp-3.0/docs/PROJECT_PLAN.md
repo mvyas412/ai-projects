@@ -1093,7 +1093,7 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Collect the remaining three post-fix daily baseline records; retain the 2 pre-fix days and excluded 2026-09-09 row as diagnostic history | Seven valid post-fix daily records spanning at least six elapsed days |
+| 1 | Collect the remaining two post-fix daily baseline records; retain the 2 pre-fix days and excluded 2026-09-09 row as diagnostic history | Seven valid post-fix daily records spanning at least six elapsed days |
 | 2 | Review and freeze numeric pilot SLOs in ADR 0033 | Approved targets and actionable burn-rate thresholds |
 | 3 | Run the Phase 7 acceptance gate and browser/operator proof | Phase 7 acceptance evidence without a paid provider run |
 
