@@ -36,6 +36,7 @@ The Phase 7 telemetry stack is optional during bootstrap. Set `TELEMETRY_ENABLED
 and include `--profile observability` once its memory budget and private SSH-tunnel
 operator access have been reviewed; Grafana and Collector ports are never public.
 
-The OCI host, free DNS name, firewall, backup upload, and clean restore are later
-Milestone 8.1–8.5 steps. Never run `docker compose up` from this bundle until Phase 7
-is accepted and the OCI provisioning action is separately approved.
+The plan-only Terraform module, release manifest, Next.js candidate, capacity probe,
+encrypted backup bundler, and evidence gate are documented in
+`docs/PHASE8_OCI_OPERATIONS.md`. Never run `terraform apply` or `docker compose up` from
+this bundle until Phase 7 is accepted and the OCI provisioning action is separately approved.

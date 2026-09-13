@@ -14,9 +14,9 @@ def test_phase8_oci_deployment_contract_is_safe_and_complete() -> None:
     result = validate_phase8_deployment()
 
     assert result == {
-        "image_contracts": 8,
+        "image_contracts": 9,
         "public_tcp_ports": [80, 443],
-        "schema_revision": "phase8-oci-deployment-contract-v1",
+        "schema_revision": "phase8-oci-deployment-contract-v2",
         "status": "valid",
     }
 

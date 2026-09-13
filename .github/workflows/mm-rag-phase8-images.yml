@@ -5,6 +5,7 @@ on:
     paths:
       - "mm-rag-full-stack-genai-bootcamp-3.0/Dockerfile"
       - "mm-rag-full-stack-genai-bootcamp-3.0/deploy/oci/**"
+      - "mm-rag-full-stack-genai-bootcamp-3.0/frontend-next/**"
       - ".github/workflows/mm-rag-phase8-images.yml"
   workflow_dispatch:
 
@@ -16,6 +17,44 @@ permissions:
   contents: read
 
 jobs:
+  validate-terraform-and-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: mm-rag-full-stack-genai-bootcamp-3.0
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.16.2
+
+      - name: Validate plan-only OCI module
+        working-directory: mm-rag-full-stack-genai-bootcamp-3.0/deploy/oci/terraform
+        run: |
+          terraform fmt -check
+          terraform init -backend=false
+          terraform validate
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: mm-rag-full-stack-genai-bootcamp-3.0/frontend-next/package-lock.json
+
+      - name: Validate Next.js candidate
+        working-directory: mm-rag-full-stack-genai-bootcamp-3.0/frontend-next
+        run: |
+          npm ci
+          npm audit
+          npm test
+          npm run typecheck
+          npm run build
+
   validate-multi-platform-image:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -40,6 +79,15 @@ jobs:
             PREFETCH_PHASE5_MODELS=0
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Build Next.js candidate for AMD64 and ARM64 without publishing
+        uses: docker/build-push-action@v7
+        with:
+          context: mm-rag-full-stack-genai-bootcamp-3.0/frontend-next
+          platforms: linux/amd64,linux/arm64
+          push: false
+          cache-from: type=gha,scope=phase8-next
+          cache-to: type=gha,mode=max,scope=phase8-next
 
   publish-approved-image:
     if: github.event_name == 'workflow_dispatch'

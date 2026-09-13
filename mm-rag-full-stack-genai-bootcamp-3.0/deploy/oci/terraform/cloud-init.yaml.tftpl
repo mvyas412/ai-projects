@@ -1,0 +1,23 @@
+#cloud-config
+package_update: true
+packages:
+  - git
+  - jq
+  - firewalld
+runcmd:
+  - [sh, -c, "dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"]
+  - [dnf, install, -y, docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin]
+  - [systemctl, enable, --now, docker]
+  - [systemctl, enable, --now, firewalld]
+  - [firewall-cmd, --permanent, --add-service=http]
+  - [firewall-cmd, --permanent, --add-service=https]
+  - [firewall-cmd, --reload]
+  - [usermod, -aG, docker, opc]
+  - [install, -d, -o, opc, -g, opc, -m, "0750", /opt/mm-rag]
+write_files:
+  - path: /opt/mm-rag/BOOTSTRAP.md
+    owner: opc:opc
+    permissions: "0644"
+    content: |
+      Host bootstrap only. Clone ${repository_url} and deploy an approved digest manifest
+      through the operator runbook. Never put runtime secrets in Terraform or cloud-init.

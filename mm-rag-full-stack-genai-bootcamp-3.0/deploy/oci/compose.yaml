@@ -150,6 +150,8 @@ services:
     image: ${MM_RAG_IMAGE:?Set a digest-pinned MM_RAG_IMAGE}
     command: ["uv", "run", "--no-sync", "uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8003", "--proxy-headers", "--forwarded-allow-ips", "*"]
     restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
     environment: *app-environment
     depends_on:
       migrate:
@@ -176,6 +178,8 @@ services:
     image: ${MM_RAG_IMAGE:?Set a digest-pinned MM_RAG_IMAGE}
     command: ["uv", "run", "--no-sync", "python", "-m", "backend.app.workers.outbox_dispatcher"]
     restart: unless-stopped
+    init: true
+    stop_grace_period: 45s
     environment: *app-environment
     depends_on:
       migrate:
@@ -192,6 +196,8 @@ services:
     image: ${MM_RAG_IMAGE:?Set a digest-pinned MM_RAG_IMAGE}
     command: ["uv", "run", "--no-sync", "python", "-m", "backend.app.workers.ingestion_worker"]
     restart: unless-stopped
+    init: true
+    stop_grace_period: 130s
     environment: *app-environment
     depends_on:
       migrate:
@@ -216,6 +222,8 @@ services:
     image: ${MM_RAG_IMAGE:?Set a digest-pinned MM_RAG_IMAGE}
     command: ["uv", "run", "--no-sync", "streamlit", "run", "frontend/streamlit_app.py", "--server.address=0.0.0.0", "--server.port=8503", "--server.headless=true"]
     restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
     depends_on:
       api:
         condition: service_healthy
@@ -230,12 +238,34 @@ services:
     mem_limit: 768m
     cpus: 0.40
 
+  next-candidate:
+    profiles: ["nextjs-candidate"]
+    image: ${NEXT_CANDIDATE_IMAGE:?Set a digest-pinned NEXT_CANDIDATE_IMAGE}
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    environment:
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+      AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
+      AUTH0_SECRET: ${AUTH0_SECRET}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      APP_BASE_URL: https://${MM_RAG_HOSTNAME}
+      MM_RAG_INTERNAL_API_URL: http://api:8003
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [private]
+    mem_limit: 512m
+    cpus: 0.35
+
   edge:
     image: ${CADDY_IMAGE:?Set a digest-pinned CADDY_IMAGE}
     restart: unless-stopped
     environment:
       ACME_EMAIL: ${ACME_EMAIL}
       MM_RAG_HOSTNAME: ${MM_RAG_HOSTNAME}
+      MM_RAG_UI_UPSTREAM: ${MM_RAG_UI_UPSTREAM:-ui:8503}
     ports:
       - "80:80"
       - "443:443"

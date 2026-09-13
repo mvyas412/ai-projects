@@ -11,6 +11,10 @@ REQUIRED_FILES = (
     DEPLOY_ROOT / "compose.yaml",
     DEPLOY_ROOT / "runtime.env.example",
     DEPLOY_ROOT / "streamlit-secrets.toml.example",
+    DEPLOY_ROOT / "terraform" / "main.tf",
+    DEPLOY_ROOT / "terraform" / ".terraform.lock.hcl",
+    PROJECT_ROOT / "frontend-next" / "package-lock.json",
+    PROJECT_ROOT / "frontend-next" / "Dockerfile",
 )
 LOCKFILE = PROJECT_ROOT / "uv.lock"
 SENSITIVE_KEYS = {
@@ -20,11 +24,14 @@ SENSITIVE_KEYS = {
     "RABBITMQ_PASSWORD",
     "S3_ACCESS_KEY_ID",
     "S3_SECRET_ACCESS_KEY",
+    "AUTH0_CLIENT_SECRET",
+    "AUTH0_SECRET",
 }
 IMAGE_KEYS = {
     "CADDY_IMAGE",
     "LGTM_IMAGE",
     "MM_RAG_IMAGE",
+    "NEXT_CANDIDATE_IMAGE",
     "OTEL_COLLECTOR_IMAGE",
     "POSTGRES_IMAGE",
     "QDRANT_IMAGE",
@@ -58,6 +65,12 @@ def validate_phase8_deployment() -> dict[str, object]:
         raise ValueError("Only the HTTPS edge service may publish host ports")
     if "admin off" not in caddy or "reverse_proxy api:8003" not in caddy:
         raise ValueError("Caddy must disable its admin endpoint and proxy the API privately")
+    if 'profiles: ["nextjs-candidate"]' not in compose:
+        raise ValueError("Next.js must remain an opt-in candidate profile")
+    if "MM_RAG_UI_UPSTREAM=ui:8503" not in (DEPLOY_ROOT / "runtime.env.example").read_text(
+        encoding="utf-8"
+    ):
+        raise ValueError("Streamlit must remain the default Phase 8 frontend")
 
     missing_images = sorted(IMAGE_KEYS - environment.keys())
     if missing_images:
@@ -73,7 +86,7 @@ def validate_phase8_deployment() -> dict[str, object]:
     result: dict[str, object] = {
         "image_contracts": len(IMAGE_KEYS),
         "public_tcp_ports": [80, 443],
-        "schema_revision": "phase8-oci-deployment-contract-v1",
+        "schema_revision": "phase8-oci-deployment-contract-v2",
         "status": "valid",
     }
     return result

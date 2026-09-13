@@ -700,9 +700,9 @@ changes before release, and manage reliability, quality, latency, and cost.
 
 ## Phase 8 — production-shaped learning platform
 
-**Status:** Decisions accepted; Milestone 8.1 preparation is in progress on an isolated
-branch. The CPU-only ARM64 image and production-shaped Compose/delivery contracts are
-implemented and locally verified. No cloud resource has been provisioned.
+**Status:** Decisions accepted; non-provisioning Milestones 8.1–8.5 contracts are
+implemented on an isolated branch. Cloud provisioning and exercised acceptance evidence
+remain gated on Phase 7 closure and separate approval. No cloud resource has been provisioned.
 
 ```mermaid
 flowchart TB
@@ -710,6 +710,8 @@ flowchart TB
     edge --> ui["Streamlit<br/>authoritative frontend"]
     edge --> api["FastAPI"]
     auth["Auth0"] --> ui
+    candidate["Next.js BFF candidate<br/>opt-in / unpromoted"] -.-> api
+    auth -.-> candidate
     subgraph vm["One Always Free-eligible OCI ARM VM"]
         ui --> api
         api --> pg[("PostgreSQL")]
@@ -724,9 +726,12 @@ flowchart TB
         provision["One-shot CPU model provisioner"] -.-> api
         provision -.-> worker
     end
+    terraform["Plan-only Terraform<br/>A1 VM + network + budget"] -.-> vm
     delivery["GitHub Actions<br/>multiarch + SBOM + scan + signature"] -.-> vm
-    pg -.-> backup["Encrypted off-host OCI backup<br/>after contract proof"]
+    pg -.-> backup["Age-encrypted off-host OCI backup<br/>private + versioned"]
+    qd -.-> backup
     objects -.-> backup
+    evidence["10-scenario release gate<br/>load + failure + restore + rollback"] -.-> vm
 ```
 
 The learning topology intentionally preserves independently runnable application roles
@@ -734,6 +739,9 @@ inside one Compose host; it does not claim high availability or horizontal scali
 Managed services, Kubernetes, multiple VMs, and a Next.js promotion require measured
 need and later evidence. Digest-pinned releases, secret-safe configuration, migration
 ordering, timeouts, backpressure, rollback, and tested restoration remain mandatory.
+Terraform state remains local and ignored until a reviewed remote-state boundary exists;
+runtime secrets never enter Terraform or cloud-init. The candidate frontend uses an
+allowlisted same-origin BFF and disables browser access-token delivery.
 
 ## Phase 9 — enterprise integrations and commercial controls
 

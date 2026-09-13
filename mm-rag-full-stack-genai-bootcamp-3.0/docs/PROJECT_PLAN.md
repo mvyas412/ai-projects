@@ -975,9 +975,10 @@ enough to support release decisions and production operations.
 
 ## Phase 8 — scalable production platform
 
-**Status:** Decisions accepted. Isolated Milestone 8.1 preparation has implemented and
-locally verified the CPU-only ARM64 image plus deployment/delivery contracts. OCI
-provisioning waits for Phase 7 closure and separate approval.
+**Status:** Decisions accepted. All non-provisioning implementation contracts for
+Milestones 8.1–8.5 are now present on the isolated Phase 8 branch. OCI provisioning,
+public browser proof, measured cloud capacity/failure evidence, and clean restore remain
+gated on Phase 7 closure and separate cloud authorization.
 
 ### Objective
 
@@ -990,11 +991,11 @@ of the accepted single-VM topology under representative bounded load.
 | Milestone | Deliverable |
 | --- | --- |
 | 8.0 | Completed — OCI learning constraints plus deployment, data, frontend, delivery, and recovery ADRs 0037–0042 accepted |
-| 8.1 | In progress — CPU-only multiarch image, SBOM/scan/sign workflow, secret templates, migration ordering, HTTPS edge, and private Compose contract implemented; registry publication and OCI provisioning deferred |
-| 8.2 | Streamlit-first HTTPS edge and bounded Next.js parity candidate; no promotion without evidence |
-| 8.3 | Single-VM resource limits, backpressure, graceful shutdown, and measured scale-up threshold |
-| 8.4 | Self-hosted PostgreSQL/Qdrant/RabbitMQ/SeaweedFS, OCI object-contract proof, encrypted off-host backup, and restore |
-| 8.5 | Load, resilience, disaster-recovery, security, and release validation |
+| 8.1 | Local contract complete — CPU-only multiarch image, guarded delivery, secret templates, Terraform plan, private Compose and HTTPS edge; publication/provisioning pending |
+| 8.2 | Candidate implemented — Streamlit remains default; token-mediating Next.js parity candidate is opt-in and unpromoted; browser/accessibility evidence pending |
+| 8.3 | Local contract complete — resource limits, prefetch-1 backpressure, graceful drains, bounded 1–3-user probe and evidence-defined scale-up review; cloud measurements pending |
+| 8.4 | Local contract complete — self-hosted state topology, private versioned OCI backup-bucket plan, encrypted backup manifest/bundler and restore runbook; provider/restore proof pending |
+| 8.5 | Local contract complete — immutable release manifest and ten-scenario load/resilience/DR/rollback gate; exercised cloud evidence pending |
 
 ### Completion gate
 

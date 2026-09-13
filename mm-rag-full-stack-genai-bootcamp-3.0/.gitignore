@@ -109,6 +109,9 @@ Desktop.ini
 evaluation/phase5/results/
 evaluation/phase6/results/
 evaluation/phase6/representative/
+evaluation/phase8/results/
 deploy/oci/runtime.env
 deploy/oci/streamlit-secrets.toml
+deploy/oci/terraform/terraform.tfvars
+deploy/oci/terraform/*.auto.tfvars
 *.ses

@@ -1,4 +1,4 @@
-# Multimodal RAG Production — Phase 7 evaluation and observability
+# Multimodal RAG Production — Phase 7 evidence and Phase 8 deployment preparation
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
@@ -55,6 +55,13 @@ feedback review, dashboards, alerts, and incident runbooks. The seven-day repres
 baseline and final free gate pass; approved pilot SLOs are frozen and Phase 7 is accepted.
 The optional local Collector/LGTM stack passes live readiness; all four dashboards
 and four alert rules load, and a content-free synthetic metric reaches Prometheus.
+Phase 8 ADRs 0037–0042 are accepted. Its isolated branch now contains all
+non-provisioning contracts: CPU-only multiarch delivery, a plan-only OCI A1 host/private
+backup-bucket module, production-shaped Compose limits and graceful drains, the
+Streamlit-first HTTPS edge, an unpromoted token-mediating Next.js candidate, encrypted
+backup integrity tooling, bounded capacity probes, immutable release manifests, and a
+ten-scenario release-evidence gate. No OCI resource, public deployment, registry image,
+or paid model run has been created by this work; cloud acceptance waits for Phase 7.
 
 The current `3.0` lineage contains:
 

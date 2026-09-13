@@ -12,7 +12,7 @@
     }
 
     handle {
-        reverse_proxy ui:8503
+        reverse_proxy {$MM_RAG_UI_UPSTREAM:ui:8503}
     }
 
     header {

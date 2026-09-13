@@ -1,0 +1,14 @@
+region              = "us-REPLACE-1"
+compartment_ocid    = "ocid1.compartment.oc1..REPLACE"
+tenancy_ocid        = "ocid1.tenancy.oc1..REPLACE"
+availability_domain = "REPLACE:US-REPLACE-AD-1"
+ssh_public_key      = "ssh-ed25519 REPLACE_WITH_PUBLIC_KEY_ONLY"
+operator_cidr       = "203.0.113.8/32"
+backup_bucket_name  = "mm-rag-learning-backups-REPLACE"
+budget_alert_email  = "REPLACE@example.invalid"
+
+# Keep these values inside the currently published Always Free aggregate limits.
+instance_ocpus      = 2
+instance_memory_gbs = 12
+boot_volume_gbs     = 100
+monthly_budget_usd  = 1
