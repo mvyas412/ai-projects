@@ -45,6 +45,10 @@ __pycache__/
 .tox/
 .nox/
 .uv-cache/
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
 
 # Test coverage
 .coverage
@@ -105,4 +109,6 @@ Desktop.ini
 evaluation/phase5/results/
 evaluation/phase6/results/
 evaluation/phase6/representative/
+deploy/oci/runtime.env
+deploy/oci/streamlit-secrets.toml
 *.ses

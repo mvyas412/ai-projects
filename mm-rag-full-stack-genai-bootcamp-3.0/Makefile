@@ -1,4 +1,4 @@
-.PHONY: setup models models-verify phase6-models phase6-models-verify services observability observability-stop observability-status observability-baseline observability-baseline-status runtime runtime-stop services-stop migrate api ui dispatcher worker operations-status operations-retention-preview backup phase5-evaluation phase6-evaluation phase7-evaluation check check-live check-acceptance
+.PHONY: setup models models-verify phase6-models phase6-models-verify services observability observability-stop observability-status observability-baseline observability-baseline-status runtime runtime-stop services-stop migrate api ui dispatcher worker operations-status operations-retention-preview backup phase5-evaluation phase6-evaluation phase7-evaluation phase8-deployment-validate check check-live check-acceptance
 
 setup:
 	uv python install 3.12
@@ -83,6 +83,9 @@ phase6-evaluation:
 
 phase7-evaluation:
 	uv run python -m scripts.run_phase7_evaluation --check
+
+phase8-deployment-validate:
+	uv run python -m scripts.validate_phase8_deployment
 
 check:
 	./scripts/verify_phase3.sh
