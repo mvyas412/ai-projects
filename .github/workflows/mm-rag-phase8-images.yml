@@ -73,8 +73,29 @@ jobs:
           npm run typecheck
           npm run build
 
-  validate-multi-platform-image:
-    runs-on: ubuntu-latest
+  validate-platform-image:
+    name: validate-platform-image (${{ matrix.component }}, ${{ matrix.architecture }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: app
+            architecture: amd64
+            runner: ubuntu-24.04
+            platform: linux/amd64
+          - component: app
+            architecture: arm64
+            runner: ubuntu-24.04-arm
+            platform: linux/arm64
+          - component: next
+            architecture: amd64
+            runner: ubuntu-24.04
+            platform: linux/amd64
+          - component: next
+            architecture: arm64
+            runner: ubuntu-24.04-arm
+            platform: linux/arm64
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
     steps:
       - name: Check out repository
@@ -82,32 +103,42 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a # v4
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
 
-      - name: Build AMD64 and ARM64 images without publishing
+      - name: Build application image without publishing
+        if: matrix.component == 'app'
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
           context: mm-rag-full-stack-genai-bootcamp-3.0
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.platform }}
           push: false
           build-args: |
             BUILD_REVISION=${{ github.sha }}
             PREFETCH_PHASE5_MODELS=0
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=phase8-app-${{ matrix.architecture }}
+          cache-to: type=gha,mode=max,scope=phase8-app-${{ matrix.architecture }}
 
-      - name: Build Next.js candidate for AMD64 and ARM64 without publishing
+      - name: Build Next.js candidate without publishing
+        if: matrix.component == 'next'
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
           context: mm-rag-full-stack-genai-bootcamp-3.0/frontend-next
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.platform }}
           push: false
-          cache-from: type=gha,scope=phase8-next
-          cache-to: type=gha,mode=max,scope=phase8-next
+          cache-from: type=gha,scope=phase8-next-${{ matrix.architecture }}
+          cache-to: type=gha,mode=max,scope=phase8-next-${{ matrix.architecture }}
+
+  validate-multi-platform-image:
+    needs: validate-platform-image
+    if: always()
+    runs-on: ubuntu-slim
+    timeout-minutes: 2
+    steps:
+      - name: Require every native architecture build
+        env:
+          MATRIX_RESULT: ${{ needs.validate-platform-image.result }}
+        run: test "${MATRIX_RESULT}" = "success"
 
   validate-native-image-security:
     runs-on: ubuntu-latest

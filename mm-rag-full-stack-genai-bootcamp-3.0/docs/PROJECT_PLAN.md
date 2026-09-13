@@ -980,6 +980,11 @@ Milestones 8.1–8.5 are now present on the isolated Phase 8 branch. OCI provisi
 public browser proof, measured cloud capacity/failure evidence, and clean restore remain
 gated on Phase 7 closure and separate cloud authorization.
 
+The image gate runs application and Next.js builds independently on native AMD64 and
+ARM64 GitHub runners, then reports one stable aggregate result. This avoids QEMU-only
+dependency-install failures and prevents one sequential build from consuming the entire
+job timeout; image publication remains a separate manually approved action.
+
 ### Objective
 
 Deploy a secure, recoverable learning platform whose frontend, API, and ingestion
@@ -991,7 +996,7 @@ of the accepted single-VM topology under representative bounded load.
 | Milestone | Deliverable |
 | --- | --- |
 | 8.0 | Completed — OCI learning constraints plus deployment, data, frontend, delivery, and recovery ADRs 0037–0042 accepted |
-| 8.1 | Local contract complete — CPU-only multiarch image, pinned guarded delivery, source/IaC/image security gates, secret templates, Terraform plan, private Compose and HTTPS edge; publication/provisioning pending |
+| 8.1 | Local contract complete — CPU-only multiarch image, native AMD64/ARM64 parallel validation with a stable aggregate gate, pinned guarded delivery, source/IaC/image security gates, secret templates, Terraform plan, private Compose and HTTPS edge; publication/provisioning pending |
 | 8.2 | Candidate implemented — Streamlit remains default; token-mediating Next.js parity candidate is opt-in and unpromoted; automated accessibility, malformed-origin rejection, and non-disclosure checks pass, browser parity evidence pending |
 | 8.3 | Local contract complete — resource limits, prefetch-1 backpressure, graceful drains, and a free progressive 1/3/5/10-user probe; ten registered users, 3–5 normal concurrency, and a 10-user burst are the accepted capacity target; cloud measurements pending |
 | 8.4 | Local contract complete — self-hosted state topology, private versioned OCI backup-bucket plan, encrypted backup/restore tooling and runbook; synthetic encrypted round trip passes, provider restore pending |

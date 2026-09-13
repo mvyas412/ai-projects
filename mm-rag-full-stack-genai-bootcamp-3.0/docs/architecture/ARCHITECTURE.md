@@ -711,6 +711,11 @@ round trip. GitHub Actions are commit-pinned and repeat these checks. The
 [OCI onboarding checklist](../PHASE8_OCI_ONBOARDING.md) keeps remaining account inputs and
 explicit mutation approvals separate from code readiness.
 
+Multi-architecture validation fans out application and Next.js builds across native
+AMD64 and ARM64 runners and folds them into one stable required result. Native execution
+keeps architecture-specific Node and image dependencies out of QEMU emulation while the
+manual publication boundary remains unchanged.
+
 ```mermaid
 flowchart TB
     user["10 registered users<br/>3–5 normal / 10 burst"] --> edge["Free hostname + Caddy HTTPS<br/>ports 80/443 only"]
