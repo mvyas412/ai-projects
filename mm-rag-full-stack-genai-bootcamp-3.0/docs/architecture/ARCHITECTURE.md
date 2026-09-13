@@ -38,8 +38,9 @@ work when the authoritative Overview check rejected the expired browser session.
 renewed sign-in, the same-day session passed visual, exact-table, and corrected duration
 checks without upload or retry. Post-fix Day 4 of 7 is recorded; three valid days remain.
 The 2026-09-13 attempt passed service and telemetry preflight but stopped before paid
-work when the authoritative Overview check rejected the expired browser session; no
-baseline row or provider request was created.
+work when the authoritative Overview check rejected the expired browser session. After
+renewed sign-in, the same-day session passed visual, exact-table, and corrected duration
+checks without upload or retry. Post-fix Day 5 of 7 is recorded; two valid days remain.
 
 ## Status legend
 
@@ -651,7 +652,9 @@ sign-in, all three representative checks passed without upload or retry. Post-fi
 of 7 recorded zero operational and telemetry-export failures; three valid days remain.
 The 2026-09-13 attempt likewise stopped before document access or paid work because
 the authoritative Overview check rejected the expired browser session. Infrastructure
-and telemetry preflight passed, and the three remaining daily opportunities were kept.
+and telemetry preflight passed. After renewed sign-in, all three representative checks
+passed without upload or retry. Post-fix Day 5 of 7 recorded zero operational and
+telemetry-export failures; two valid days remain.
 
 ```mermaid
 flowchart TB
