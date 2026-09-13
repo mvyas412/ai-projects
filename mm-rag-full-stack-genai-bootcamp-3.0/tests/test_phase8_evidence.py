@@ -51,3 +51,34 @@ def test_release_evidence_gate_enforces_recovery_objectives(tmp_path: Path) -> N
 
     with pytest.raises(ValueError, match="RPO/RTO"):
         validate_release_evidence(tmp_path)
+
+
+def test_release_evidence_gate_rejects_duplicate_scenarios(tmp_path: Path) -> None:
+    _write_evidence(tmp_path)
+    duplicate = json.loads((tmp_path / "worker-restart.json").read_text(encoding="utf-8"))
+    (tmp_path / "duplicate.json").write_text(json.dumps(duplicate), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="duplicate"):
+        validate_release_evidence(tmp_path)
+
+
+def test_release_evidence_gate_requires_zero_load_errors(tmp_path: Path) -> None:
+    _write_evidence(tmp_path)
+    path = tmp_path / "bounded-load.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["error_count"] = 1
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="zero-error"):
+        validate_release_evidence(tmp_path)
+
+
+def test_release_evidence_gate_requires_rollback_integrity(tmp_path: Path) -> None:
+    _write_evidence(tmp_path)
+    path = tmp_path / "rollback.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["data_integrity_verified"] = False
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="data integrity"):
+        validate_release_evidence(tmp_path)

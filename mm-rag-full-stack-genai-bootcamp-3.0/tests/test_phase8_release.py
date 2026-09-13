@@ -50,3 +50,23 @@ def test_release_manifest_rejects_secret_fields(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="forbidden fields"):
         validate_release_manifest(path)
+
+
+def test_release_manifest_requires_full_commit_sha(tmp_path: Path) -> None:
+    payload = _manifest()
+    payload["git_revision"] = "abc123"
+    path = tmp_path / "release.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="full Git commit SHA"):
+        validate_release_manifest(path)
+
+
+def test_release_manifest_requires_previous_manifest(tmp_path: Path) -> None:
+    payload = _manifest()
+    payload["rollback_manifest"] = ""
+    path = tmp_path / "release.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="rollback_manifest"):
+        validate_release_manifest(path)

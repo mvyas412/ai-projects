@@ -10,11 +10,15 @@ describe("backend boundary", () => {
     expect(isAllowedBackendRoute("GET", `/api/v1/workspaces/${workspace}/documents`)).toBe(true);
     expect(isAllowedBackendRoute("DELETE", `/api/v1/workspaces/${workspace}/documents`)).toBe(false);
     expect(isAllowedBackendRoute("GET", "/api/v1/admin/secrets")).toBe(false);
+    expect(isAllowedBackendRoute("GET", "/api/v1/users/me/../admin")).toBe(false);
+    expect(isAllowedBackendRoute("GET", "/api/v1/workspaces/not-a-uuid/documents")).toBe(false);
+    expect(isAllowedBackendRoute("GET", `/api/v1/workspaces/${workspace}/documents/extra`)).toBe(false);
   });
 
   it("requires an exact same-origin mutation", () => {
     expect(hasTrustedMutationOrigin("https://rag.example/api/backend/x", "https://rag.example")).toBe(true);
     expect(hasTrustedMutationOrigin("https://rag.example/api/backend/x", "https://evil.example")).toBe(false);
     expect(hasTrustedMutationOrigin("https://rag.example/api/backend/x", null)).toBe(false);
+    expect(hasTrustedMutationOrigin("https://rag.example/api/backend/x", "https://rag.example:444")).toBe(false);
   });
 });
