@@ -191,7 +191,7 @@ flowchart LR
     p4["Phase 4<br/>Governance foundation<br/>Completed / v4.0.0"] -->
     p5["Phase 5<br/>Hybrid retrieval<br/>Closed / gate not met"] -->
     p6["Phase 6<br/>Visual/table intelligence<br/>Completed / accepted"] -->
-    p7["Phase 7<br/>Evaluation/observability<br/>Decision kickoff"] -->
+    p7["Phase 7<br/>Evaluation/observability<br/>Acceptance baseline"] -->
     p8["Phase 8<br/>Scalable platform<br/>Decisions accepted"] -->
     p9["Phase 9<br/>Enterprise platform<br/>Planned"]
 ```
@@ -205,7 +205,7 @@ flowchart LR
 | 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | Closed without acceptance; v4 nDCG gate missed and no candidate was promoted |
 | 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | Completed and accepted; `visual-table-v1` promoted after free/live and signed-in candidate proof |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Local telemetry and protected evaluation evidence | Implemented; acceptance baseline in progress |
-| 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; off-host OCI backup planned | Milestone 8.1 preparation in progress |
+| 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; off-host OCI backup planned | Non-provisioning implementation and local hardening complete |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Planned |
 
 ## Phase 1 — working prototype
@@ -703,6 +703,13 @@ changes before release, and manage reliability, quality, latency, and cost.
 **Status:** Decisions accepted; non-provisioning Milestones 8.1–8.5 contracts are
 implemented on an isolated branch. Cloud provisioning and exercised acceptance evidence
 remain gated on Phase 7 closure and separate approval. No cloud resource has been provisioned.
+
+Local hardening now also proves fixable high/critical vulnerability scans for both app
+images, tracked-source secret and OCI configuration scans, automated candidate
+accessibility/non-disclosure behavior, and a real synthetic age-encrypted backup/restore
+round trip. GitHub Actions are commit-pinned and repeat these checks. The
+[OCI onboarding checklist](../PHASE8_OCI_ONBOARDING.md) keeps remaining account inputs and
+explicit mutation approvals separate from code readiness.
 
 ```mermaid
 flowchart TB

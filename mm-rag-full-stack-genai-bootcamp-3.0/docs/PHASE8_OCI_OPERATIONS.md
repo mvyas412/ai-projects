@@ -6,6 +6,9 @@ frontend promotion. Use synthetic/non-sensitive learning data only.
 
 ## 1. Pre-provision review
 
+Use the [OCI onboarding checklist](PHASE8_OCI_ONBOARDING.md) to collect the exact
+non-secret inputs and approvals without placing credentials in Terraform.
+
 1. Confirm Phase 7 is accepted and its SLO thresholds are frozen.
 2. Confirm OCI home region, compartment and tenancy OCIDs, an availability domain with
    A1 capacity, an exact operator `/32`, public SSH key, unique backup bucket, and alert
@@ -77,8 +80,15 @@ Upload only the `.age` bundle to the private versioned OCI bucket. Do not upload
 plaintext staging directory. Delete plaintext staging after checksum/upload verification.
 
 For the restore exercise, use a clean isolated host or clean temporary Compose project.
-Decrypt with the offline age identity, extract with path traversal protection, run
-`python -m scripts.phase8_backup verify EXTRACTED_DIR`, restore
+Decrypt, safely extract, and verify into a destination that does not already exist:
+
+```bash
+uv run python -m scripts.phase8_backup restore phase8-YYYYMMDD.tar.gz.age \
+  RESTORED_DIR --identity-file /offline/path/to/age-identity.txt
+```
+
+The restore command rejects absolute paths, traversal, links, duplicate archive members,
+unmanifested files, missing service exports, and checksum mismatches. Then restore
 PostgreSQL/Qdrant/objects, migrate forward only if the release
 manifest requires it, then verify row/vector/object counts, tenant isolation, content
 checksums, ingestion state, citation retrieval and readiness. Record measured data age

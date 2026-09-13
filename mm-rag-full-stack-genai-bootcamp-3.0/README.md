@@ -60,7 +60,10 @@ non-provisioning contracts: CPU-only multiarch delivery, a plan-only OCI A1 host
 backup-bucket module, production-shaped Compose limits and graceful drains, the
 Streamlit-first HTTPS edge, an unpromoted token-mediating Next.js candidate, encrypted
 backup integrity tooling, bounded capacity probes, immutable release manifests, and a
-ten-scenario release-evidence gate. No OCI resource, public deployment, registry image,
+ten-scenario release-evidence gate. Local security hardening adds commit-pinned CI,
+source/IaC/image scanning, candidate accessibility checks, and a real synthetic encrypted
+backup/restore round trip. The [OCI onboarding checklist](docs/PHASE8_OCI_ONBOARDING.md)
+records the remaining non-secret inputs and approval gates. No OCI resource, public deployment, registry image,
 or paid model run has been created by this work; cloud acceptance waits for Phase 7.
 
 The current `3.0` lineage contains:
@@ -167,14 +170,12 @@ future capabilities have already been implemented.
 The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
-shows the Phase 5 runtime checkpoint, including hybrid retrieval and the failed v4
-paid nDCG gate. Phase 5 is closed without candidate promotion. Phase 6 decision
-kickoff PR #6 was squash-merged at `95d18b3`, and ADRs 0025–0030 were accepted on
-2026-09-03. Milestones 6.0–6.5 now provide the deterministic visual/table corpus,
-immutable local extraction and visual retrieval, normalized tables, exact
-calculation, and backend-mediated evidence inspection. The Phase 5 text path remains
-the default, so the current poster remains the accepted default-runtime view until
-Phase 6 rollout is approved.
+shows the accepted Phase 6 product path and implemented Phase 7 evaluation and
+observability layer. Phase 5 is closed without candidate promotion. Phase 6
+Milestones 6.0–6.5 provide the deterministic visual/table corpus, immutable local
+extraction and visual retrieval, normalized tables, exact calculation, and
+backend-mediated evidence inspection; `visual-table-v1` is the accepted default.
+Phase 7 acceptance remains pending its representative post-fix baseline review.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,

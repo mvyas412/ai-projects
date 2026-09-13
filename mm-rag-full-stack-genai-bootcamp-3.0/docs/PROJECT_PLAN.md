@@ -62,7 +62,7 @@ Rules:
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
-| Phase 8 | Decisions accepted — isolated Milestone 8.1 image/deployment preparation implemented and unblocked by Phase 7 closure; no cloud resources provisioned |
+| Phase 8 | Decisions accepted — non-provisioning contracts and local hardening evidence implemented and unblocked by Phase 7 closure; no cloud resources provisioned |
 | Phase 9 | Planned |
 
 ## Delivery sequence and gates
@@ -93,7 +93,7 @@ security and data-integrity gates on which it depends.
 | 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Closed without acceptance |
 | 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Completed and accepted; `visual-table-v1` promoted with explicit rollback |
 | 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Implemented; post-fix acceptance baseline in progress |
-| 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Milestone 8.1 preparation in progress; provisioning pending Phase 7 closure |
+| 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Non-provisioning implementation and local hardening complete; cloud acceptance pending Phase 7 closure and explicit provisioning approval |
 | 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Planned |
 
 ## Phase 1 — working prototype
@@ -986,15 +986,15 @@ Deploy a secure, recoverable learning platform whose frontend, API, and ingestio
 workers retain separable runtime boundaries, then prove the capacity and recovery limits
 of the accepted single-VM topology under representative bounded load.
 
-### Proposed milestones
+### Milestones
 
 | Milestone | Deliverable |
 | --- | --- |
 | 8.0 | Completed — OCI learning constraints plus deployment, data, frontend, delivery, and recovery ADRs 0037–0042 accepted |
-| 8.1 | Local contract complete — CPU-only multiarch image, guarded delivery, secret templates, Terraform plan, private Compose and HTTPS edge; publication/provisioning pending |
-| 8.2 | Candidate implemented — Streamlit remains default; token-mediating Next.js parity candidate is opt-in and unpromoted; browser/accessibility evidence pending |
+| 8.1 | Local contract complete — CPU-only multiarch image, pinned guarded delivery, source/IaC/image security gates, secret templates, Terraform plan, private Compose and HTTPS edge; publication/provisioning pending |
+| 8.2 | Candidate implemented — Streamlit remains default; token-mediating Next.js parity candidate is opt-in and unpromoted; automated accessibility and non-disclosure checks pass, browser parity evidence pending |
 | 8.3 | Local contract complete — resource limits, prefetch-1 backpressure, graceful drains, bounded 1–3-user probe and evidence-defined scale-up review; cloud measurements pending |
-| 8.4 | Local contract complete — self-hosted state topology, private versioned OCI backup-bucket plan, encrypted backup manifest/bundler and restore runbook; provider/restore proof pending |
+| 8.4 | Local contract complete — self-hosted state topology, private versioned OCI backup-bucket plan, encrypted backup/restore tooling and runbook; synthetic encrypted round trip passes, provider restore pending |
 | 8.5 | Local contract complete — immutable release manifest and ten-scenario load/resilience/DR/rollback gate; exercised cloud evidence pending |
 
 ### Completion gate
