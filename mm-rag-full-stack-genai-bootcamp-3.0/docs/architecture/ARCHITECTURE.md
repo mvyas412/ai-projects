@@ -655,6 +655,11 @@ the authoritative Overview check rejected the expired browser session. Infrastru
 and telemetry preflight passed. After renewed sign-in, all three representative checks
 passed without upload or retry. Post-fix Day 5 of 7 recorded zero operational and
 telemetry-export failures; two valid days remain.
+The 2026-09-14 attempt passed infrastructure and telemetry preflight but initially
+stopped before paid work when chat navigation rejected the expired browser session.
+After renewed sign-in, all three representative checks passed with authorized evidence
+and no upload or retry. Post-fix Day 6 of 7 recorded zero operational and telemetry-
+export failures; one valid day remains.
 
 ```mermaid
 flowchart TB
