@@ -6,8 +6,8 @@ PR #5 was squash-merged at `5436614`. Phase 6 ADRs 0025–0030 and Milestones
 6.0–6.5 are implemented and accepted. The signed-in visual/table/calculation proof
 passes, and `PHASE6_PROFILE=visual-table-v1` is the promoted default;
 `PHASE6_PROFILE=disabled` remains the explicit rollback.
-Phase 7 ADRs 0031–0036 are accepted and the evaluation/observability implementation
-is available; final Phase 7 acceptance waits for its seven-day SLO baseline.
+Phase 7 ADRs 0031–0036, the evaluation/observability implementation, seven-day
+baseline, and numeric pilot SLOs are accepted.
 
 ## Before the session
 

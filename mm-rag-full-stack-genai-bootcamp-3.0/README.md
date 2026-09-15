@@ -51,8 +51,8 @@ the opt-in visual and numeric-calculation candidate proof now passes.
 Phase 7 ADRs 0031–0036 are accepted and Milestones 7.0–7.5 are implemented. The
 lineage now includes privacy-bounded correlated telemetry, an optional free local
 Collector/LGTM stack, a composed deterministic release evaluation, tenant-scoped
-feedback review, dashboards, alerts, and incident runbooks. Numeric pilot SLOs and
-Phase 7 acceptance remain pending the required seven-day representative baseline.
+feedback review, dashboards, alerts, and incident runbooks. The seven-day representative
+baseline and final free gate pass; approved pilot SLOs are frozen and Phase 7 is accepted.
 The optional local Collector/LGTM stack passes live readiness; all four dashboards
 and four alert rules load, and a content-free synthetic metric reaches Prometheus.
 

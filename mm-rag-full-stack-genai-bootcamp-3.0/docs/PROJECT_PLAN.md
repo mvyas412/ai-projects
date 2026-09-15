@@ -1,6 +1,6 @@
 # Multimodal RAG production project plan
 
-> Living delivery plan — updated 2026-09-08
+> Living delivery plan — updated 2026-09-15
 
 This is the version-controlled planning source of truth for the journey from the
 preserved prototype through the enterprise platform. It defines sequence, scope,
@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 7 acceptance baseline — duration-routing correction implemented; fresh proof and restarted baseline pending |
+| Active milestone | Phase 8 production-platform preparation; Phase 7 accepted |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -61,7 +61,7 @@ Rules:
 | Phase 5 | Closed without acceptance — implementation complete and merged, nDCG gate missed, no candidate promoted or release tag created |
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
-| Phase 7 | In progress — Milestones 7.0–7.5 implemented; duration-routing correction passes the deterministic gate; fresh proof and a restarted seven-day baseline remain |
+| Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
 | Phases 8–9 | Planned |
 
 ## Delivery sequence and gates
@@ -909,13 +909,44 @@ explicit decision.
 
 ## Phase 7 — evaluation and observability
 
-**Status:** In progress — ADRs 0031–0036 are Accepted and Milestones 7.0–7.5 are
-implemented. The seven-day representative baseline and numeric pilot SLO review
-remain acceptance gates. Two diagnostic pre-fix days are recorded. Visual and exact
+**Status:** Completed and accepted — ADRs 0031–0036, Milestones 7.0–7.5, the
+seven-day representative baseline, numeric pilot SLOs, and final free gate pass.
+Two diagnostic pre-fix days are retained. Visual and exact
 table checks passed on both days, but a Clause 11.4 duration query repeatedly returned
 `3` instead of `30`. The corrected service routing preserves table cardinality for
-explicit count subjects while sending duration-value questions to grounded retrieval;
-fresh browser proof and a restarted baseline are required before acceptance.
+explicit count subjects while sending duration-value questions to grounded retrieval.
+Post-merge browser proof returned the grounded 30-day answer with page-4 evidence, and
+the post-fix baseline restarted on 2026-09-08 with Day 1 of 7 recorded. The scheduled
+2026-09-09 functional checks passed, but that day was excluded because the API process
+had telemetry disabled; metadata-only export is now enabled and verified for subsequent
+runs without repeating the consumed questions. The 2026-09-10 run initially stopped
+before paid work because the Auth0 session had expired, then resumed after sign-in and
+passed all three checks with live telemetry. Post-fix Day 2 of 7 is recorded; five valid
+days remain. The 2026-09-11 attempt passed service and telemetry preflight but stopped
+before paid work when the browser session became invalid after an API restart; no
+question ran before renewed sign-in. It then resumed on the same day and all three
+representative checks passed without upload or retry. Post-fix Day 3 of 7 is recorded
+with zero operational and telemetry-export failures; four valid days remain.
+The 2026-09-12 attempt passed service and telemetry preflight but stopped before paid
+work when the authoritative Overview check rejected the expired browser session. No
+question ran before renewed sign-in. It then resumed on the same day and all three
+representative checks passed without upload or retry. Post-fix Day 4 of 7 is recorded
+with zero operational and telemetry-export failures; three valid days remain.
+The 2026-09-13 attempt passed service and telemetry preflight but stopped before paid
+work when the authoritative Overview check rejected the expired browser session. No
+question ran before renewed sign-in. It then resumed on the same day and all three
+representative checks passed without upload or retry. Post-fix Day 5 of 7 is recorded
+with zero operational and telemetry-export failures; two valid days remain.
+The 2026-09-14 attempt passed service and telemetry preflight but stopped before paid
+work when chat navigation rejected the expired browser session. After renewed sign-in,
+all three representative checks passed with authorized evidence and no upload or retry.
+Post-fix Day 6 of 7 is recorded with zero operational and telemetry-export failures;
+one valid day remained at that checkpoint.
+The 2026-09-15 final-day attempt first paused before paid work because the restarted
+runtime exported no live MM-RAG count/latency series. After telemetry-enabled startup
+and renewed authentication, live series appeared and all three bounded checks passed
+with authorized evidence. No upload or retry occurred. Post-fix Day 7 of 7 recorded
+zero operational and telemetry-export failures; the baseline is ready for SLO review.
 
 ### Objective
 
@@ -930,8 +961,8 @@ enough to support release decisions and production operations.
 | 7.1 | Implemented — correlated structured logs, metrics, and distributed traces |
 | 7.2 | Implemented — versioned composed evaluation harness, fixtures, and release summary |
 | 7.3 | Implemented — tenant-scoped feedback capture and owner/admin review workflow |
-| 7.4 | Implemented — reliability, quality, latency, failure, and cost dashboards; numeric targets pending baseline |
-| 7.5 | Implemented — alerts, runbooks, incident template, and free CI gates; acceptance pending baseline review |
+| 7.4 | Completed — reliability, quality, latency, failure, and cost dashboards with approved pilot targets |
+| 7.5 | Completed — alerts, runbooks, incident template, free CI gates, and accepted baseline evidence |
 
 ### Completion gate
 
@@ -1060,7 +1091,7 @@ commercial accounting, and compliance-grade administration.
 | Region evidence, viewer, and Phase 6 rollout | 6.5 | Accepted — ADR 0030 |
 | Telemetry correlation and privacy | 7.0 | Accepted and implemented — ADR 0031 |
 | Free local observability backend | 7.0–7.1 | Accepted and implemented — ADR 0032; production backend remains TBD |
-| SLI/SLO and error budgets | 7.0, 7.4–7.5 | Accepted — ADR 0033; numeric pilot targets pending seven-day baseline |
+| SLI/SLO and error budgets | 7.0, 7.4–7.5 | Accepted — ADR 0033; seven-day baseline and numeric pilot targets approved |
 | Unified RAG evaluation release gates | 7.2 | Accepted and implemented — ADR 0034 |
 | User feedback and review governance | 7.3 | Accepted and implemented — ADR 0035 |
 | Dashboards, alerts, runbooks, and incident learning | 7.4–7.5 | Accepted and implemented — ADR 0036; external paging remains disabled |
@@ -1072,10 +1103,8 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Run one fresh bounded browser proof of the corrected Clause 11.4 route | Correct 30-day answer with authorized page evidence and no retry |
-| 2 | Restart aggregate baseline recording after proof; retain the 2 pre-fix days as diagnostic history | Seven valid post-fix daily records spanning at least six elapsed days |
-| 3 | Review and freeze numeric pilot SLOs in ADR 0033 | Approved targets and actionable burn-rate thresholds |
-| 4 | Run the Phase 7 acceptance gate and browser/operator proof | Phase 7 acceptance evidence without a paid provider run |
+| 1 | Prepare the accepted Phase 7 closure for review | Small completion commit and passing required checks |
+| 2 | Continue reviewed Phase 8 work without changing accepted Phase 7 evidence | Isolated, reversible production-platform milestones |
 
 ## Update protocol
 

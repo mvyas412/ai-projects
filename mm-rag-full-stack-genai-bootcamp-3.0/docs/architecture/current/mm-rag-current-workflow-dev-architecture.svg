@@ -27,7 +27,7 @@
 
   <rect width="1600" height="900" fill="#f8fafc"/>
   <text x="800" y="40" text-anchor="middle" class="title">MM-RAG Platform — Current Workflow &amp; DEV Architecture</text>
-  <text x="800" y="68" text-anchor="middle" class="subtitle">Phase 7 · Evaluation &amp; observability · Implementation complete · Acceptance baseline pending</text>
+  <text x="800" y="68" text-anchor="middle" class="subtitle">Phase 7 · Evaluation &amp; observability · Accepted · Seven-day baseline and pilot SLOs approved</text>
 
   <text x="22" y="101" class="small" font-weight="700">Status snapshot</text>
   <rect x="116" y="84" width="116" height="26" rx="13" fill="#e8f7ef" stroke="#47a477"/>

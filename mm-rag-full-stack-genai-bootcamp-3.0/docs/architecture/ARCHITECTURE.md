@@ -1,6 +1,6 @@
 # Multimodal RAG architecture handbook
 
-> Living architecture baseline — updated 2026-09-08
+> Living architecture baseline — updated 2026-09-15
 
 This document is the version-controlled architecture source of truth for the
 complete system and Phases 1–9. Update it whenever a component, boundary, data
@@ -20,11 +20,27 @@ handbook remain the editable source of truth.
 The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 records the accepted Phase 6 product path plus the implemented Phase 7 evaluation
 and observability layer. `visual-table-v1` remains the accepted product default and
-`disabled` remains its explicit rollback. ADRs 0031–0036 are Accepted; Phase 7
-acceptance remains pending the seven-day representative baseline and numeric pilot
-SLO review. Two pre-fix days reproduced a duration/cardinality routing defect. The
-service-level correction is implemented; fresh browser proof and a restarted baseline
-remain before the acceptance window can be finalized.
+`disabled` remains its explicit rollback. ADRs 0031–0036 are Accepted; Phase 7 is
+accepted with its approved numeric pilot SLOs and complete seven-day representative
+baseline. Two pre-fix days reproduced a duration/cardinality routing defect and are
+retained as diagnostic history. The corrected route passed a post-merge browser proof
+with the grounded 30-day answer and page-4 evidence; the post-fix baseline restarted
+on 2026-09-08 with Day 1 of 7 recorded. The 2026-09-09 functional sample passed but is
+not baseline evidence because its API process had telemetry disabled; export was enabled
+and verified before the remaining scheduled days. The 2026-09-10 scheduled run paused
+for renewed authentication, then resumed successfully and recorded post-fix Day 2 of 7.
+The 2026-09-11 attempt passed service and telemetry preflight but stopped before paid
+work because the browser session was invalid after an API restart. After renewed sign-in,
+the same-day session passed visual, exact-table, and corrected duration checks without
+upload or retry. Post-fix Day 3 of 7 is recorded; four valid daily records remain.
+The 2026-09-12 attempt passed service and telemetry preflight but stopped before paid
+work when the authoritative Overview check rejected the expired browser session. After
+renewed sign-in, the same-day session passed visual, exact-table, and corrected duration
+checks without upload or retry. Post-fix Day 4 of 7 is recorded; three valid days remain.
+The 2026-09-13 attempt passed service and telemetry preflight but stopped before paid
+work when the authoritative Overview check rejected the expired browser session. After
+renewed sign-in, the same-day session passed visual, exact-table, and corrected duration
+checks without upload or retry. Post-fix Day 5 of 7 is recorded; two valid days remain.
 
 ## Status legend
 
@@ -610,13 +626,46 @@ model call. The profile was subsequently promoted after explicit approval.
 
 ## Phase 7 — evaluation and observability
 
-**Status:** In progress — ADRs 0031–0036 are Accepted and implementation is
-complete. Acceptance remains pending the seven-day baseline and numeric pilot SLO
-review required by ADR 0033. Diagnostic baseline days 1–2 showed healthy infrastructure,
+**Status:** Completed and accepted — ADRs 0031–0036, implementation, the seven-day
+baseline, approved numeric pilot SLOs, and final free gate pass. Diagnostic baseline
+days 1–2 showed healthy infrastructure,
 content-free telemetry, correct visual evidence, and correct exact table calculation,
 but exposed an incorrect `3`-day answer for a `30`-day Clause 11.4 value. Conversation
 routing now distinguishes duration-value wording from table cardinality without changing
-the accepted calculation engine; fresh proof and post-fix baseline evidence remain.
+the accepted calculation engine. A post-merge browser proof returned the correct 30-day
+answer with authorized page-4 evidence. The pre-fix records remain diagnostic, and the
+post-fix acceptance baseline restarted on 2026-09-08 with Day 1 of 7 recorded.
+The next scheduled functional sample passed all three representative checks on
+2026-09-09 but was excluded from the numeric window because the API process had
+telemetry disabled. The API now exports metadata-only signals through the Collector,
+verified by a Prometheus metric-flow check; no paid question was repeated.
+The 2026-09-10 run initially stopped safely before paid work because the Auth0 browser
+session had expired. After renewed authentication, all three representative checks
+passed and live metadata-only measurements recorded post-fix Day 2 of 7.
+The 2026-09-11 attempt again stopped before document access or paid work when an API
+restart invalidated the browser session. After renewed sign-in, all three representative
+checks passed without upload or retry. Post-fix Day 3 of 7 recorded zero operational
+and telemetry-export failures; four valid daily records remain scheduled.
+The 2026-09-12 attempt likewise stopped before document access or paid work because
+the authoritative Overview check rejected the expired browser session. After renewed
+sign-in, all three representative checks passed without upload or retry. Post-fix Day 4
+of 7 recorded zero operational and telemetry-export failures; three valid days remain.
+The 2026-09-13 attempt likewise stopped before document access or paid work because
+the authoritative Overview check rejected the expired browser session. Infrastructure
+and telemetry preflight passed. After renewed sign-in, all three representative checks
+passed without upload or retry. Post-fix Day 5 of 7 recorded zero operational and
+telemetry-export failures; two valid days remain.
+The 2026-09-14 attempt passed infrastructure and telemetry preflight but initially
+stopped before paid work when chat navigation rejected the expired browser session.
+After renewed sign-in, all three representative checks passed with authorized evidence
+and no upload or retry. Post-fix Day 6 of 7 recorded zero operational and telemetry-
+export failures; one valid day remained at that checkpoint.
+The 2026-09-15 final-day attempt first paused before paid work because the restarted
+API exported no application metrics. After telemetry-enabled startup and renewed
+authentication, live count/latency series appeared and all three bounded checks passed
+with authorized evidence. No upload or retry occurred. Post-fix Day 7 of 7 recorded
+zero operational and telemetry-export failures. The user approved the numeric SLO
+amendment and Phase 7 acceptance after the final free gate passed.
 
 ```mermaid
 flowchart TB

@@ -9,7 +9,7 @@
 This current implementation view shows the Phase 3/4 runtime and governance
 boundaries, Phase 5 hybrid retrieval foundation, Phase 6 visual/table extraction,
 and the Phase 7 evaluation and observability layer. Phase 6 remains released at
-`mm-rag-v6.0.0`; Phase 7 acceptance waits for its seven-day SLO baseline.
+`mm-rag-v6.0.0`; Phase 7 is accepted with its seven-day baseline and pilot SLOs.
 
 ![MM-RAG current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 
