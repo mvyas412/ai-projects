@@ -64,7 +64,8 @@ ten-scenario release-evidence gate. Local security hardening adds commit-pinned 
 source/IaC/image scanning, candidate accessibility and malformed-origin checks, and a real synthetic encrypted
 backup/restore round trip. The [OCI onboarding checklist](docs/PHASE8_OCI_ONBOARDING.md)
 records the remaining non-secret inputs and approval gates. No OCI resource, public deployment, registry image,
-or paid model run has been created by this work; cloud acceptance waits for Phase 7.
+or paid model run has been created by this work. Phase 7 is accepted, so cloud acceptance
+can proceed after the onboarding inputs and cloud mutation review are complete.
 The amended free-first capacity contract requires ten registered users, 3–5 normally
 concurrent users, and progressive 1/3/5/10-user measurements with a required 10-user burst.
 Missing the gate triggers optimization and review, not an automatic paid upgrade.

@@ -978,7 +978,7 @@ enough to support release decisions and production operations.
 **Status:** Decisions accepted. All non-provisioning implementation contracts for
 Milestones 8.1–8.5 are now present on the isolated Phase 8 branch. OCI provisioning,
 public browser proof, measured cloud capacity/failure evidence, and clean restore remain
-gated on Phase 7 closure and separate cloud authorization.
+gated on the OCI onboarding inputs and explicit review of the Terraform apply plan.
 
 The image gate runs application and Next.js builds independently on native AMD64 and
 ARM64 GitHub runners, then reports one stable aggregate result. This avoids QEMU-only
@@ -1105,16 +1105,17 @@ commercial accounting, and compliance-grade administration.
 | Unified RAG evaluation release gates | 7.2 | Accepted and implemented — ADR 0034 |
 | User feedback and review governance | 7.3 | Accepted and implemented — ADR 0035 |
 | Dashboards, alerts, runbooks, and incident learning | 7.4–7.5 | Accepted and implemented — ADR 0036; external paging remains disabled |
-| Cloud/orchestration and managed services | 8.0 | TBD |
-| Dedicated frontend framework | 8.0 | TBD |
+| Cloud/orchestration and managed services | 8.0 | Accepted — OCI Always Free-eligible single ARM host with private Docker Compose data plane under ADRs 0037–0039; provisioning pending |
+| Dedicated frontend framework | 8.0 | Accepted — Streamlit remains authoritative; bounded Next.js candidate remains unpromoted under ADR 0040 |
 | First enterprise connector and billing provider | 9.0 | TBD |
 
 ## Immediate next actions
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Prepare the accepted Phase 7 closure for review | Small completion commit and passing required checks |
-| 2 | Continue reviewed Phase 8 work without changing accepted Phase 7 evidence | Isolated, reversible production-platform milestones |
+| 1 | Reconcile the Phase 8 branch with accepted Phase 7 `main` and rerun the complete free gate | Phase 8-only PR diff and passing local/required checks |
+| 2 | Complete the OCI onboarding inputs, review the exact free-tier Terraform plan, and apply only with the approved zero-cost guardrails | Reviewed plan, no unapproved paid resource, and recorded OCI resource inventory |
+| 3 | Exercise deployment, Auth0 browser parity, 1/3/5/10-user capacity, dependency failures, encrypted backup/clean restore, and rollback | Complete ten-scenario Phase 8 evidence set meeting frozen SLO and integrity gates |
 
 ## Update protocol
 

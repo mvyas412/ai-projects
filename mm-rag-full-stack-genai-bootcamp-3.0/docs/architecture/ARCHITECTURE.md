@@ -702,7 +702,8 @@ changes before release, and manage reliability, quality, latency, and cost.
 
 **Status:** Decisions accepted; non-provisioning Milestones 8.1–8.5 contracts are
 implemented on an isolated branch. Cloud provisioning and exercised acceptance evidence
-remain gated on Phase 7 closure and separate approval. No cloud resource has been provisioned.
+remain gated on the OCI onboarding inputs and explicit Terraform apply review. Phase 7 is
+accepted; no cloud resource has been provisioned.
 
 Local hardening now also proves fixable high/critical vulnerability scans for both app
 images, tracked-source secret and OCI configuration scans, automated candidate
