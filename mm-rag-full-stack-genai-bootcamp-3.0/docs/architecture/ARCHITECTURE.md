@@ -1,6 +1,6 @@
 # Multimodal RAG architecture handbook
 
-> Living architecture baseline — updated 2026-09-13
+> Living architecture baseline — updated 2026-09-15
 
 This document is the version-controlled architecture source of truth for the
 complete system and Phases 1–9. Update it whenever a component, boundary, data
@@ -20,9 +20,9 @@ handbook remain the editable source of truth.
 The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 records the accepted Phase 6 product path plus the implemented Phase 7 evaluation
 and observability layer. `visual-table-v1` remains the accepted product default and
-`disabled` remains its explicit rollback. ADRs 0031–0036 are Accepted; Phase 7
-acceptance remains pending the seven-day representative baseline and numeric pilot
-SLO review. Two pre-fix days reproduced a duration/cardinality routing defect and are
+`disabled` remains its explicit rollback. ADRs 0031–0036 are Accepted; Phase 7 is
+accepted with its approved numeric pilot SLOs and complete seven-day representative
+baseline. Two pre-fix days reproduced a duration/cardinality routing defect and are
 retained as diagnostic history. The corrected route passed a post-merge browser proof
 with the grounded 30-day answer and page-4 evidence; the post-fix baseline restarted
 on 2026-09-08 with Day 1 of 7 recorded. The 2026-09-09 functional sample passed but is
@@ -626,9 +626,9 @@ model call. The profile was subsequently promoted after explicit approval.
 
 ## Phase 7 — evaluation and observability
 
-**Status:** In progress — ADRs 0031–0036 are Accepted and implementation is
-complete. Acceptance remains pending the seven-day baseline and numeric pilot SLO
-review required by ADR 0033. Diagnostic baseline days 1–2 showed healthy infrastructure,
+**Status:** Completed and accepted — ADRs 0031–0036, implementation, the seven-day
+baseline, approved numeric pilot SLOs, and final free gate pass. Diagnostic baseline
+days 1–2 showed healthy infrastructure,
 content-free telemetry, correct visual evidence, and correct exact table calculation,
 but exposed an incorrect `3`-day answer for a `30`-day Clause 11.4 value. Conversation
 routing now distinguishes duration-value wording from table cardinality without changing
@@ -659,7 +659,13 @@ The 2026-09-14 attempt passed infrastructure and telemetry preflight but initial
 stopped before paid work when chat navigation rejected the expired browser session.
 After renewed sign-in, all three representative checks passed with authorized evidence
 and no upload or retry. Post-fix Day 6 of 7 recorded zero operational and telemetry-
-export failures; one valid day remains.
+export failures; one valid day remained at that checkpoint.
+The 2026-09-15 final-day attempt first paused before paid work because the restarted
+API exported no application metrics. After telemetry-enabled startup and renewed
+authentication, live count/latency series appeared and all three bounded checks passed
+with authorized evidence. No upload or retry occurred. Post-fix Day 7 of 7 recorded
+zero operational and telemetry-export failures. The user approved the numeric SLO
+amendment and Phase 7 acceptance after the final free gate passed.
 
 ```mermaid
 flowchart TB

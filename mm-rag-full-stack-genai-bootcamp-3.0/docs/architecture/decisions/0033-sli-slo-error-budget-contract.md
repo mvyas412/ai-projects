@@ -62,3 +62,24 @@ Milestone 7.4 dashboards and alerts are accepted.
 Accepted by the user on 2026-09-07. The SLI contract and seven-day evidence window
 are binding; numeric pilot SLOs remain deliberately open until that baseline is
 complete and reviewed.
+
+## Accepted numeric pilot amendment
+
+The post-fix baseline contains seven distinct daily rows spanning 2026-09-08 through
+2026-09-15. All measured operational-failure ratios and telemetry-export failures were
+zero. Non-zero daily p95 operation latency ranged from about 229 ms to 3.56 seconds;
+the zero first-day sample is retained but is not used as latency evidence.
+
+For the small learning deployment, use these initial 30-day rolling objectives:
+
+- at least 99% successful unexpected-operation outcomes;
+- p95 measured operation latency no greater than 5 seconds;
+- at least 99% telemetry-delivery success when the application is serving traffic;
+- zero authorization escape, secret leakage, invalid citation identity, or unsafe
+  exact calculation; and
+- retain the existing protected quality gates as release authority rather than
+  averaging them into an availability percentage.
+
+Use the existing multi-window burn alerts at 14.4x over one hour and 6x over six hours
+against the 1% reliability budget. The user approved this numeric amendment on
+2026-09-15 after the seven-day baseline and final free gate passed.
