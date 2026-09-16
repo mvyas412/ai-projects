@@ -18,6 +18,8 @@ x-app-environment: &app-environment
   OPENAI_CHAT_MODEL: ${OPENAI_CHAT_MODEL:-gpt-4.1-mini}
   OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
   PHASE6_PROFILE: visual-table-v1
+  AUTH0_ISSUER: https://${AUTH0_DOMAIN}/
+  AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
   TELEMETRY_ENABLED: ${TELEMETRY_ENABLED:-false}
   OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
   RUNTIME_HEALTH_DIRECTORY: /app/data/runtime/health

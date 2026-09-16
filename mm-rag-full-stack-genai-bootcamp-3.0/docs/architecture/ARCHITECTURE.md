@@ -726,6 +726,10 @@ The first OCI release is represented explicitly as an initial baseline with no i
 predecessor. All subsequent manifests must name a real previous manifest, and Phase 8
 acceptance still requires an exercised follow-up rollback to that baseline.
 
+The private application network receives the approved Auth0 issuer and audience through
+the shared API/worker environment. Streamlit keeps the browser client secret in its
+read-only secrets mount; FastAPI remains the final token-validation authority.
+
 ```mermaid
 flowchart TB
     user["10 registered users<br/>3–5 normal / 10 burst"] --> edge["Free hostname + Caddy HTTPS<br/>ports 80/443 only"]

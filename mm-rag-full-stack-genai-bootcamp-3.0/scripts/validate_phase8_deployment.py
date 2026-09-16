@@ -64,6 +64,11 @@ def validate_phase8_deployment() -> dict[str, object]:
         raise ValueError("OCI CPU image dependency lock must not contain NVIDIA CUDA packages")
     if "APP_ENV: staging" not in compose:
         raise ValueError("Learning deployment must not claim the production environment")
+    if (
+        "AUTH0_ISSUER: https://${AUTH0_DOMAIN}/" not in compose
+        or "AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}" not in compose
+    ):
+        raise ValueError("FastAPI must receive the approved Auth0 issuer and audience")
     if "  models:" not in compose or "service_completed_successfully" not in compose:
         raise ValueError("Application startup must wait for one-shot model provisioning")
     if _services_with_published_ports(compose) != {"edge"}:
@@ -100,7 +105,7 @@ def validate_phase8_deployment() -> dict[str, object]:
     result: dict[str, object] = {
         "image_contracts": len(IMAGE_KEYS),
         "public_tcp_ports": [80, 443],
-        "schema_revision": "phase8-oci-deployment-contract-v3",
+        "schema_revision": "phase8-oci-deployment-contract-v4",
         "status": "valid",
     }
     return result
