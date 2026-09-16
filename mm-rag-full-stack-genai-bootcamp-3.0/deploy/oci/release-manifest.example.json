@@ -1,5 +1,6 @@
 {
   "schema": "mm-rag-phase8-release-v1",
+  "initial_release": true,
   "git_revision": "0000000000000000000000000000000000000000",
   "migration_revision": "20260907_0018",
   "images": {
@@ -10,5 +11,5 @@
     "rabbitmq": "rabbitmq@sha256:0000000000000000000000000000000000000000000000000000000000000000",
     "seaweedfs": "chrislusf/seaweedfs@sha256:0000000000000000000000000000000000000000000000000000000000000000"
   },
-  "rollback_manifest": "previous-release.json"
+  "rollback_manifest": null
 }

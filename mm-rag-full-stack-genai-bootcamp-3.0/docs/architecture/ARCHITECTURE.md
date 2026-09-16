@@ -722,6 +722,10 @@ manual publication boundary remains unchanged. The Next.js candidate remains opt
 unpromoted, and unpublished; its artifact requires a separate reviewed publication and
 parity proof before the candidate profile can be enabled.
 
+The first OCI release is represented explicitly as an initial baseline with no invented
+predecessor. All subsequent manifests must name a real previous manifest, and Phase 8
+acceptance still requires an exercised follow-up rollback to that baseline.
+
 ```mermaid
 flowchart TB
     user["10 registered users<br/>3–5 normal / 10 burst"] --> edge["Free hostname + Caddy HTTPS<br/>ports 80/443 only"]

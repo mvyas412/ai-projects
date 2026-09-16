@@ -70,3 +70,35 @@ def test_release_manifest_requires_previous_manifest(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="rollback_manifest"):
         validate_release_manifest(path)
+
+
+def test_release_manifest_accepts_explicit_initial_baseline(tmp_path: Path) -> None:
+    payload = _manifest()
+    payload["initial_release"] = True
+    payload["rollback_manifest"] = None
+    path = tmp_path / "release.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    result = validate_release_manifest(path)
+
+    assert result["initial_release"] is True
+
+
+def test_initial_release_rejects_fabricated_predecessor(tmp_path: Path) -> None:
+    payload = _manifest()
+    payload["initial_release"] = True
+    path = tmp_path / "release.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="cannot name a rollback_manifest"):
+        validate_release_manifest(path)
+
+
+def test_release_manifest_rejects_non_boolean_initial_flag(tmp_path: Path) -> None:
+    payload = _manifest()
+    payload["initial_release"] = "yes"
+    path = tmp_path / "release.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="initial_release must be a boolean"):
+        validate_release_manifest(path)

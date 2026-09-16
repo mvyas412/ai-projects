@@ -39,10 +39,12 @@ to finish at `status: done` before release deployment.
 5. Verify HTTPS, Auth0 callback/logout, authenticated email/workspace, API readiness,
    tenant isolation, upload/job completion, grounded chat, citations, and logout.
 
-The first cloud release has no earlier cloud release to restore. Record that limitation
-explicitly; do not fabricate a previous release manifest. Establish the first deployed
-manifest as the rollback baseline, then use a separately reviewed follow-up release to
-exercise manifest rollback before Phase 8 acceptance.
+The first cloud release has no earlier cloud release to restore. Set
+`initial_release` to `true` and `rollback_manifest` to `null`; do not fabricate a
+previous release manifest. Establish the first deployed manifest as the rollback
+baseline. Every later manifest must set `initial_release` to `false` and name a real
+previous manifest, and a separately reviewed follow-up release must exercise rollback
+before Phase 8 acceptance.
 
 Streamlit remains the default upstream. The `nextjs-candidate` profile and upstream
 switch are for a separately approved parity test only. Revert the edge upstream to

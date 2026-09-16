@@ -1003,7 +1003,7 @@ of the accepted single-VM topology under representative bounded load.
 | 8.2 | Candidate implemented — Streamlit remains default; token-mediating Next.js parity candidate is opt-in and unpromoted; automated accessibility, malformed-origin rejection, and non-disclosure checks pass, browser parity evidence pending |
 | 8.3 | Local contract complete — resource limits, prefetch-1 backpressure, graceful drains, and a free progressive 1/3/5/10-user probe; ten registered users, 3–5 normal concurrency, and a 10-user burst are the accepted capacity target; cloud measurements pending |
 | 8.4 | Local contract complete — self-hosted state topology, private versioned OCI backup-bucket plan, encrypted backup/restore tooling and runbook; synthetic encrypted round trip passes, provider restore pending |
-| 8.5 | Local contract complete — immutable release manifest and ten-scenario load/resilience/DR/rollback gate; exercised cloud evidence pending |
+| 8.5 | Local contract complete — immutable release manifest, explicit first-release baseline semantics, and ten-scenario load/resilience/DR/rollback gate; exercised cloud evidence pending |
 
 ### Completion gate
 

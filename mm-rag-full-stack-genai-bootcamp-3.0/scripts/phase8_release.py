@@ -39,8 +39,14 @@ def validate_release_manifest(path: Path) -> dict[str, Any]:
     if invalid:
         raise ValueError(f"Release images are not digest-pinned: {', '.join(invalid)}")
 
+    initial_release = payload.get("initial_release", False)
+    if not isinstance(initial_release, bool):
+        raise ValueError("initial_release must be a boolean")
     rollback = payload.get("rollback_manifest")
-    if not isinstance(rollback, str) or not rollback.endswith(".json"):
+    if initial_release:
+        if rollback is not None:
+            raise ValueError("An initial release cannot name a rollback_manifest")
+    elif not isinstance(rollback, str) or not rollback.endswith(".json"):
         raise ValueError("A previous digest-pinned rollback_manifest is required")
     forbidden = {"secret", "password", "token", "private_key"}
     exposed = sorted(forbidden & _all_keys(payload))
@@ -48,6 +54,7 @@ def validate_release_manifest(path: Path) -> dict[str, Any]:
         raise ValueError(f"Release manifest contains forbidden fields: {', '.join(exposed)}")
     return {
         "images": len(images),
+        "initial_release": initial_release,
         "migration_revision": migration,
         "schema": SCHEMA,
         "status": "valid",
