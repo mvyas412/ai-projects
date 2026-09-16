@@ -62,7 +62,7 @@ Rules:
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
-| Phase 8 | In progress — local contracts complete; approved Phoenix A1/network/private-bucket/budget infrastructure provisioned, bootstrap repaired, and zero drift verified; application deployment and cloud evidence pending |
+| Phase 8 | In progress — local contracts complete; Phoenix infrastructure is verified and the signed/scanned multiarch application digest is published; application deployment and cloud evidence pending |
 | Phase 9 | Planned |
 
 ## Delivery sequence and gates
@@ -978,8 +978,10 @@ enough to support release decisions and production operations.
 **Status:** In progress. All local implementation contracts for Milestones 8.1–8.5
 are present. The explicitly reviewed Phoenix plan provisioned the A1 host, network,
 private versioned backup bucket, and budget alerts. Clean bootstrap and zero Terraform
-drift are verified; image publication, application deployment, public browser proof,
-measured cloud capacity/failure evidence, and clean restore remain gated.
+drift are verified. The approved application image is published by immutable digest
+with native AMD64/ARM64, scan, SBOM, provenance, signature, and anonymous-pull evidence;
+application deployment, public browser proof, measured cloud capacity/failure evidence,
+and clean restore remain gated.
 
 The image gate runs application and Next.js builds independently on native AMD64 and
 ARM64 GitHub runners, then reports one stable aggregate result. This avoids QEMU-only
@@ -997,7 +999,7 @@ of the accepted single-VM topology under representative bounded load.
 | Milestone | Deliverable |
 | --- | --- |
 | 8.0 | Completed — OCI learning constraints plus deployment, data, frontend, delivery, and recovery ADRs 0037–0042 accepted |
-| 8.1 | Infrastructure provisioned — CPU-only multiarch image and native architecture gates pass; reviewed Phoenix A1/network/private-bucket/budget plan applied; clean cloud-init, host services, firewall, and zero drift verified; image publication and application deployment pending |
+| 8.1 | Infrastructure and application artifact ready — CPU-only multiarch image and native architecture gates pass; reviewed Phoenix A1/network/private-bucket/budget plan applied; clean cloud-init, host services, firewall, and zero drift verified; signed/scanned application digest published and publicly pullable; application deployment pending |
 | 8.2 | Candidate implemented — Streamlit remains default; token-mediating Next.js parity candidate is opt-in and unpromoted; automated accessibility, malformed-origin rejection, and non-disclosure checks pass, browser parity evidence pending |
 | 8.3 | Local contract complete — resource limits, prefetch-1 backpressure, graceful drains, and a free progressive 1/3/5/10-user probe; ten registered users, 3–5 normal concurrency, and a 10-user burst are the accepted capacity target; cloud measurements pending |
 | 8.4 | Local contract complete — self-hosted state topology, private versioned OCI backup-bucket plan, encrypted backup/restore tooling and runbook; synthetic encrypted round trip passes, provider restore pending |
@@ -1114,9 +1116,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Publish the approved immutable multiarch image and deploy the secret-safe Streamlit-first stack to the verified OCI host | Signed digest/SBOM/scan evidence, validated release manifest, private services, and HTTPS readiness |
-| 2 | Configure the free hostname and Auth0 public URLs, then prove authenticated Streamlit and opt-in Next.js parity | Login/logout, workspace, library, ingestion, chat/citations, and candidate parity evidence |
-| 3 | Exercise 1/3/5/10-user capacity, dependency failures, encrypted backup/clean restore, and rollback | Complete ten-scenario Phase 8 evidence set meeting frozen SLO and integrity gates |
+| 1 | Complete the private release/runtime configuration and deploy the published Streamlit-first application digest to the verified OCI host | Validated baseline manifest, private services, and HTTPS readiness |
+| 2 | Configure the free hostname and Auth0 public URLs, then prove authenticated Streamlit behavior | Login/logout, workspace, library, ingestion, and chat/citations evidence |
+| 3 | Publish and prove the opt-in Next.js candidate through its separate review boundary | Signed candidate digest plus security, accessibility, resource, and browser-parity evidence |
+| 4 | Exercise 1/3/5/10-user capacity, dependency failures, encrypted backup/clean restore, and rollback | Complete ten-scenario Phase 8 evidence set meeting frozen SLO and integrity gates |
 
 ## Update protocol
 

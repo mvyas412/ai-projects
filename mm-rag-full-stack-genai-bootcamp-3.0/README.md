@@ -66,10 +66,12 @@ backup/restore round trip. The approved Phoenix plan has now provisioned one run
 Always Free-eligible 2-OCPU/12-GB A1 host, its reviewed network, a private versioned
 backup bucket, and USD 1 forecast/actual budget alerts. First-boot verification exposed
 and fixed an `opc` ordering defect; the host now reports clean cloud-init completion,
-the expected firewall/services, and zero Terraform drift. No registry image, application
-secret, public application deployment, Auth0 production update, or paid model run has
-occurred. The [OCI onboarding checklist](docs/PHASE8_OCI_ONBOARDING.md) records the
-remaining approval gates.
+the expected firewall/services, and zero Terraform drift. The manually protected
+publisher produced the signed, scanned, SBOM-attested multiarchitecture application
+image for commit `7c8993d`; its immutable digest and anonymous pull are verified. No
+application secret, public application deployment, Auth0 production update, or paid
+model run has occurred. The [OCI onboarding checklist](docs/PHASE8_OCI_ONBOARDING.md)
+records the remaining approval gates.
 The amended free-first capacity contract requires ten registered users, 3–5 normally
 concurrent users, and progressive 1/3/5/10-user measurements with a required 10-user burst.
 Missing the gate triggers optimization and review, not an automatic paid upgrade.
@@ -636,5 +638,6 @@ annotated tag `mm-rag-v4.0.0` at `996898e`.
 Phase 8 decisions are accepted. Its isolated OCI learning checkpoint now includes a
 CPU-only ARM64-capable image, a private single-VM Compose topology, an HTTPS edge,
 secret-safe templates, and guarded image delivery. The approved Phoenix infrastructure
-is provisioned and verified; immutable image publication, application deployment, and
+is provisioned and verified, and the immutable application image is published with scan,
+SBOM, provenance, signature, and public-pull evidence. Application deployment and
 exercised cloud acceptance evidence remain gated.

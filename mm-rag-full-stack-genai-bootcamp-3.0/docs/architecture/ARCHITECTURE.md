@@ -703,8 +703,10 @@ changes before release, and manage reliability, quality, latency, and cost.
 **Status:** In progress. Milestones 8.1–8.5 local contracts are implemented on an
 isolated branch. The reviewed Phoenix plan provisioned the single A1 host, network,
 private versioned backup bucket, and budget alerts. Clean cloud-init, host services,
-firewall policy, and zero Terraform drift are verified. Image/application deployment
-and exercised acceptance evidence remain gated.
+firewall policy, and zero Terraform drift are verified. The protected publisher has
+produced a signed, scanned, SBOM-attested AMD64/ARM64 application image at an immutable
+digest, and anonymous pull is verified. Application deployment and exercised acceptance
+evidence remain gated.
 
 Local hardening now also proves fixable high/critical vulnerability scans for both app
 images, tracked-source secret and OCI configuration scans, automated candidate
@@ -716,7 +718,9 @@ explicit mutation approvals separate from code readiness.
 Multi-architecture validation fans out application and Next.js builds across native
 AMD64 and ARM64 runners and folds them into one stable required result. Native execution
 keeps architecture-specific Node and image dependencies out of QEMU emulation while the
-manual publication boundary remains unchanged.
+manual publication boundary remains unchanged. The Next.js candidate remains opt-in,
+unpromoted, and unpublished; its artifact requires a separate reviewed publication and
+parity proof before the candidate profile can be enabled.
 
 ```mermaid
 flowchart TB
