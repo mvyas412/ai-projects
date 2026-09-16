@@ -1,0 +1,19 @@
+name: MM-RAG Phase 8 images
+
+# GitHub exposes manual dispatch only when the workflow exists on the default
+# branch. Select the reviewed Phase 8 branch when running the real publisher.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  default-branch-safety-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Explain the bootstrap entry point
+        run: |
+          echo "This default-branch workflow only enables manual dispatch."
+          echo "Select the reviewed Phase 8 branch to run its publication jobs."
