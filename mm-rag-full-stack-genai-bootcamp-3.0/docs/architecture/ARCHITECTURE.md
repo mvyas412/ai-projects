@@ -700,10 +700,11 @@ changes before release, and manage reliability, quality, latency, and cost.
 
 ## Phase 8 — production-shaped learning platform
 
-**Status:** Decisions accepted; non-provisioning Milestones 8.1–8.5 contracts are
-implemented on an isolated branch. Cloud provisioning and exercised acceptance evidence
-remain gated on the OCI onboarding inputs and explicit Terraform apply review. Phase 7 is
-accepted; no cloud resource has been provisioned.
+**Status:** In progress. Milestones 8.1–8.5 local contracts are implemented on an
+isolated branch. The reviewed Phoenix plan provisioned the single A1 host, network,
+private versioned backup bucket, and budget alerts. Clean cloud-init, host services,
+firewall policy, and zero Terraform drift are verified. Image/application deployment
+and exercised acceptance evidence remain gated.
 
 Local hardening now also proves fixable high/critical vulnerability scans for both app
 images, tracked-source secret and OCI configuration scans, automated candidate
@@ -739,7 +740,7 @@ flowchart TB
         provision["One-shot CPU model provisioner"] -.-> api
         provision -.-> worker
     end
-    terraform["Plan-only Terraform<br/>A1 VM + network + budget"] -.-> vm
+    terraform["Reviewed Terraform<br/>A1 VM + network + budget"] -.-> vm
     delivery["GitHub Actions<br/>multiarch + SBOM + scan + signature"] -.-> vm
     pg -.-> backup["Age-encrypted off-host OCI backup<br/>private + versioned"]
     qd -.-> backup
@@ -756,6 +757,14 @@ ordering, timeouts, backpressure, rollback, and tested restoration remain mandat
 Terraform state remains local and ignored until a reviewed remote-state boundary exists;
 runtime secrets never enter Terraform or cloud-init. The candidate frontend uses an
 allowlisted same-origin BFF and disables browser access-token delivery.
+
+OCI treats instance `user_data` as create-only. Terraform therefore ignores implicit
+`user_data` updates so a documentation/bootstrap adjustment cannot silently replace the
+only A1 host; a rebuild requires an explicit reviewed replacement plan. The first live
+bootstrap exposed an early `opc` ownership dependency, now fixed by staging files as
+root and promoting them during `runcmd`. A controlled clean/reboot verified the host at
+clean cloud-init status with Docker, Compose, firewalld, HTTP/HTTPS rules, and 65% free
+root-disk headroom.
 
 ## Phase 9 — enterprise integrations and commercial controls
 

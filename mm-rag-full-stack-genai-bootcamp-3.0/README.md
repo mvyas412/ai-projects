@@ -56,16 +56,20 @@ baseline and final free gate pass; approved pilot SLOs are frozen and Phase 7 is
 The optional local Collector/LGTM stack passes live readiness; all four dashboards
 and four alert rules load, and a content-free synthetic metric reaches Prometheus.
 Phase 8 ADRs 0037–0042 are accepted. Its isolated branch now contains all
-non-provisioning contracts: CPU-only multiarch delivery, a plan-only OCI A1 host/private
+local contracts: CPU-only multiarch delivery, an OCI A1 host/private
 backup-bucket module, production-shaped Compose limits and graceful drains, the
 Streamlit-first HTTPS edge, an unpromoted token-mediating Next.js candidate, encrypted
 backup integrity tooling, bounded capacity probes, immutable release manifests, and a
 ten-scenario release-evidence gate. Local security hardening adds commit-pinned CI,
 source/IaC/image scanning, candidate accessibility and malformed-origin checks, and a real synthetic encrypted
-backup/restore round trip. The [OCI onboarding checklist](docs/PHASE8_OCI_ONBOARDING.md)
-records the remaining non-secret inputs and approval gates. No OCI resource, public deployment, registry image,
-or paid model run has been created by this work. Phase 7 is accepted, so cloud acceptance
-can proceed after the onboarding inputs and cloud mutation review are complete.
+backup/restore round trip. The approved Phoenix plan has now provisioned one running
+Always Free-eligible 2-OCPU/12-GB A1 host, its reviewed network, a private versioned
+backup bucket, and USD 1 forecast/actual budget alerts. First-boot verification exposed
+and fixed an `opc` ordering defect; the host now reports clean cloud-init completion,
+the expected firewall/services, and zero Terraform drift. No registry image, application
+secret, public application deployment, Auth0 production update, or paid model run has
+occurred. The [OCI onboarding checklist](docs/PHASE8_OCI_ONBOARDING.md) records the
+remaining approval gates.
 The amended free-first capacity contract requires ten registered users, 3–5 normally
 concurrent users, and progressive 1/3/5/10-user measurements with a required 10-user burst.
 Missing the gate triggers optimization and review, not an automatic paid upgrade.
@@ -631,5 +635,6 @@ squash-merged through PR #3 at `57ee453`; its documentation closure is preserved
 annotated tag `mm-rag-v4.0.0` at `996898e`.
 Phase 8 decisions are accepted. Its isolated OCI learning checkpoint now includes a
 CPU-only ARM64-capable image, a private single-VM Compose topology, an HTTPS edge,
-secret-safe templates, and guarded image delivery. Cloud provisioning remains deferred
-until Phase 7 acceptance and separate approval.
+secret-safe templates, and guarded image delivery. The approved Phoenix infrastructure
+is provisioned and verified; immutable image publication, application deployment, and
+exercised cloud acceptance evidence remain gated.

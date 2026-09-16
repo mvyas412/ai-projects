@@ -123,6 +123,11 @@ resource "oci_core_instance" "app" {
     source_type             = "image"
     boot_volume_size_in_gbs = var.boot_volume_gbs
   }
+
+  lifecycle {
+    # OCI user_data is create-only; replacements require an explicit rebuild decision.
+    ignore_changes = [metadata["user_data"]]
+  }
 }
 
 resource "oci_objectstorage_bucket" "backups" {
@@ -151,7 +156,6 @@ resource "oci_budget_alert_rule" "forecast" {
   threshold      = 1
   threshold_type = "ABSOLUTE"
   recipients     = var.budget_alert_email
-  freeform_tags  = var.freeform_tags
 }
 
 resource "oci_budget_alert_rule" "actual" {
@@ -161,5 +165,4 @@ resource "oci_budget_alert_rule" "actual" {
   threshold      = 1
   threshold_type = "ABSOLUTE"
   recipients     = var.budget_alert_email
-  freeform_tags  = var.freeform_tags
 }

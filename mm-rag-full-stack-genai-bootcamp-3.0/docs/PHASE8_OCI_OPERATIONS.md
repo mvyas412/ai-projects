@@ -19,6 +19,12 @@ non-secret inputs and approvals without placing credentials in Terraform.
 5. Obtain separate approval before `terraform apply`. The USD 1 OCI budget alerts but
    cannot stop spend.
 
+OCI instance `user_data` is create-only. Terraform ignores subsequent `user_data`
+differences to prevent an implicit replacement of the only A1 host. Treat every rebuild
+as a separate reviewed replacement plan. On a clean host, bootstrap files must be staged
+as root and promoted to `opc` during `runcmd`; require `cloud-init status --wait --long`
+to finish at `status: done` before release deployment.
+
 ## 2. Release preparation and deployment
 
 1. Publish the approved multiarch app image through the manually protected GitHub

@@ -14,9 +14,12 @@ runcmd:
   - [firewall-cmd, --reload]
   - [usermod, -aG, docker, opc]
   - [install, -d, -o, opc, -g, opc, -m, "0750", /opt/mm-rag]
+  - [install, -o, opc, -g, opc, -m, "0644", /var/tmp/mm-rag-BOOTSTRAP.md, /opt/mm-rag/BOOTSTRAP.md]
+  - [rm, -f, /var/tmp/mm-rag-BOOTSTRAP.md]
 write_files:
-  - path: /opt/mm-rag/BOOTSTRAP.md
-    owner: opc:opc
+  # write_files runs before the image's default opc user is guaranteed to exist.
+  - path: /var/tmp/mm-rag-BOOTSTRAP.md
+    owner: root:root
     permissions: "0644"
     content: |
       Host bootstrap only. Clone ${repository_url} and deploy an approved digest manifest

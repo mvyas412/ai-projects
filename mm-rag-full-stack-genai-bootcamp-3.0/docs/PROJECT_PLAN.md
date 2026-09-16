@@ -62,7 +62,7 @@ Rules:
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
-| Phase 8 | Decisions accepted — non-provisioning contracts and local hardening evidence implemented and unblocked by Phase 7 closure; no cloud resources provisioned |
+| Phase 8 | In progress — local contracts complete; approved Phoenix A1/network/private-bucket/budget infrastructure provisioned, bootstrap repaired, and zero drift verified; application deployment and cloud evidence pending |
 | Phase 9 | Planned |
 
 ## Delivery sequence and gates
@@ -975,10 +975,11 @@ enough to support release decisions and production operations.
 
 ## Phase 8 — scalable production platform
 
-**Status:** Decisions accepted. All non-provisioning implementation contracts for
-Milestones 8.1–8.5 are now present on the isolated Phase 8 branch. OCI provisioning,
-public browser proof, measured cloud capacity/failure evidence, and clean restore remain
-gated on the OCI onboarding inputs and explicit review of the Terraform apply plan.
+**Status:** In progress. All local implementation contracts for Milestones 8.1–8.5
+are present. The explicitly reviewed Phoenix plan provisioned the A1 host, network,
+private versioned backup bucket, and budget alerts. Clean bootstrap and zero Terraform
+drift are verified; image publication, application deployment, public browser proof,
+measured cloud capacity/failure evidence, and clean restore remain gated.
 
 The image gate runs application and Next.js builds independently on native AMD64 and
 ARM64 GitHub runners, then reports one stable aggregate result. This avoids QEMU-only
@@ -996,7 +997,7 @@ of the accepted single-VM topology under representative bounded load.
 | Milestone | Deliverable |
 | --- | --- |
 | 8.0 | Completed — OCI learning constraints plus deployment, data, frontend, delivery, and recovery ADRs 0037–0042 accepted |
-| 8.1 | Local contract complete — CPU-only multiarch image, native AMD64/ARM64 parallel validation with a stable aggregate gate, pinned guarded delivery, source/IaC/image security gates, secret templates, Terraform plan, private Compose and HTTPS edge; publication/provisioning pending |
+| 8.1 | Infrastructure provisioned — CPU-only multiarch image and native architecture gates pass; reviewed Phoenix A1/network/private-bucket/budget plan applied; clean cloud-init, host services, firewall, and zero drift verified; image publication and application deployment pending |
 | 8.2 | Candidate implemented — Streamlit remains default; token-mediating Next.js parity candidate is opt-in and unpromoted; automated accessibility, malformed-origin rejection, and non-disclosure checks pass, browser parity evidence pending |
 | 8.3 | Local contract complete — resource limits, prefetch-1 backpressure, graceful drains, and a free progressive 1/3/5/10-user probe; ten registered users, 3–5 normal concurrency, and a 10-user burst are the accepted capacity target; cloud measurements pending |
 | 8.4 | Local contract complete — self-hosted state topology, private versioned OCI backup-bucket plan, encrypted backup/restore tooling and runbook; synthetic encrypted round trip passes, provider restore pending |
@@ -1105,7 +1106,7 @@ commercial accounting, and compliance-grade administration.
 | Unified RAG evaluation release gates | 7.2 | Accepted and implemented — ADR 0034 |
 | User feedback and review governance | 7.3 | Accepted and implemented — ADR 0035 |
 | Dashboards, alerts, runbooks, and incident learning | 7.4–7.5 | Accepted and implemented — ADR 0036; external paging remains disabled |
-| Cloud/orchestration and managed services | 8.0 | Accepted — OCI Always Free-eligible single ARM host with private Docker Compose data plane under ADRs 0037–0039; provisioning pending |
+| Cloud/orchestration and managed services | 8.0 | Accepted — OCI Always Free-eligible single ARM host with private Docker Compose data plane under ADRs 0037–0039; Phoenix infrastructure provisioned and verified |
 | Dedicated frontend framework | 8.0 | Accepted — Streamlit remains authoritative; bounded Next.js candidate remains unpromoted under ADR 0040 |
 | First enterprise connector and billing provider | 9.0 | TBD |
 
@@ -1113,9 +1114,9 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Reconcile the Phase 8 branch with accepted Phase 7 `main` and rerun the complete free gate | Phase 8-only PR diff and passing local/required checks |
-| 2 | Complete the OCI onboarding inputs, review the exact free-tier Terraform plan, and apply only with the approved zero-cost guardrails | Reviewed plan, no unapproved paid resource, and recorded OCI resource inventory |
-| 3 | Exercise deployment, Auth0 browser parity, 1/3/5/10-user capacity, dependency failures, encrypted backup/clean restore, and rollback | Complete ten-scenario Phase 8 evidence set meeting frozen SLO and integrity gates |
+| 1 | Publish the approved immutable multiarch image and deploy the secret-safe Streamlit-first stack to the verified OCI host | Signed digest/SBOM/scan evidence, validated release manifest, private services, and HTTPS readiness |
+| 2 | Configure the free hostname and Auth0 public URLs, then prove authenticated Streamlit and opt-in Next.js parity | Login/logout, workspace, library, ingestion, chat/citations, and candidate parity evidence |
+| 3 | Exercise 1/3/5/10-user capacity, dependency failures, encrypted backup/clean restore, and rollback | Complete ten-scenario Phase 8 evidence set meeting frozen SLO and integrity gates |
 
 ## Update protocol
 

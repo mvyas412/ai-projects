@@ -1,4 +1,4 @@
-# Plan-only OCI infrastructure
+# OCI learning infrastructure
 
 This module describes one production-shaped learning host and a private, versioned
 off-host backup bucket. It is intentionally not wired to an automatic `terraform apply`.
@@ -25,3 +25,7 @@ off-host backup bucket. It is intentionally not wired to an automatic `terraform
 
 The cloud-init phase installs and hardens the container host only. It does not clone,
 start, or configure the application and cannot contain runtime credentials.
+OCI treats instance `user_data` as create-only, so Terraform ignores later changes to
+that metadata field rather than replacing the VM implicitly. Apply corrected cloud-init
+to future rebuilds through a separately reviewed replacement plan, and require clean
+cloud-init completion before deploying application artifacts.

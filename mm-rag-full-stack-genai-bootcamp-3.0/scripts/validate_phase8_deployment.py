@@ -12,6 +12,7 @@ REQUIRED_FILES = (
     DEPLOY_ROOT / "runtime.env.example",
     DEPLOY_ROOT / "streamlit-secrets.toml.example",
     DEPLOY_ROOT / "terraform" / "main.tf",
+    DEPLOY_ROOT / "terraform" / "cloud-init.yaml.tftpl",
     DEPLOY_ROOT / "terraform" / ".terraform.lock.hcl",
     PROJECT_ROOT / "frontend-next" / "package-lock.json",
     PROJECT_ROOT / "frontend-next" / "Dockerfile",
@@ -49,6 +50,10 @@ def validate_phase8_deployment() -> dict[str, object]:
     lockfile = LOCKFILE.read_text(encoding="utf-8")
     compose = (DEPLOY_ROOT / "compose.yaml").read_text(encoding="utf-8")
     caddy = (DEPLOY_ROOT / "Caddyfile").read_text(encoding="utf-8")
+    terraform = (DEPLOY_ROOT / "terraform" / "main.tf").read_text(encoding="utf-8")
+    cloud_init = (DEPLOY_ROOT / "terraform" / "cloud-init.yaml.tftpl").read_text(
+        encoding="utf-8"
+    )
     environment = _parse_example_environment(DEPLOY_ROOT / "runtime.env.example")
 
     if "COPY frontend ./frontend" not in dockerfile:
@@ -71,6 +76,15 @@ def validate_phase8_deployment() -> dict[str, object]:
         encoding="utf-8"
     ):
         raise ValueError("Streamlit must remain the default Phase 8 frontend")
+    if "path: /var/tmp/mm-rag-BOOTSTRAP.md" not in cloud_init or "owner: root:root" not in cloud_init:
+        raise ValueError("cloud-init must stage bootstrap files before the opc user is guaranteed")
+    if (
+        "/var/tmp/mm-rag-BOOTSTRAP.md, /opt/mm-rag/BOOTSTRAP.md" not in cloud_init
+        or "- [rm, -f, /var/tmp/mm-rag-BOOTSTRAP.md]" not in cloud_init
+    ):
+        raise ValueError("cloud-init must promote and remove the staged bootstrap file")
+    if 'ignore_changes = [metadata["user_data"]]' not in terraform:
+        raise ValueError("OCI create-only user_data must not trigger an implicit VM replacement")
 
     missing_images = sorted(IMAGE_KEYS - environment.keys())
     if missing_images:
@@ -86,7 +100,7 @@ def validate_phase8_deployment() -> dict[str, object]:
     result: dict[str, object] = {
         "image_contracts": len(IMAGE_KEYS),
         "public_tcp_ports": [80, 443],
-        "schema_revision": "phase8-oci-deployment-contract-v2",
+        "schema_revision": "phase8-oci-deployment-contract-v3",
         "status": "valid",
     }
     return result
