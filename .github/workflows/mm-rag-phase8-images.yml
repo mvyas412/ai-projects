@@ -12,7 +12,6 @@ on:
 concurrency:
   group: mm-rag-phase8-images-${{ github.ref }}
   cancel-in-progress: true
-
 permissions:
   contents: read
 
