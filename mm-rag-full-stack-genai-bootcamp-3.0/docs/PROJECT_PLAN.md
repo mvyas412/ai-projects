@@ -62,7 +62,7 @@ Rules:
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
-| Phase 8 | In progress — Phoenix infrastructure and signed/scanned Streamlit baseline are deployed; authenticated shell/readiness/logout pass; data-path, capacity, resilience, restore, rollback, and candidate evidence pending |
+| Phase 8 | In progress — Phoenix infrastructure and corrected signed/scanned Streamlit release are deployed; authenticated shell/readiness/logout, first-attempt ingestion, resilience, encrypted off-host backup, and isolated restore pass; chat fallback correction, capacity, rollback, and candidate evidence remain pending |
 | Phase 9 | Planned |
 
 ## Delivery sequence and gates
@@ -976,21 +976,20 @@ enough to support release decisions and production operations.
 ## Phase 8 — scalable production platform
 
 **Status:** In progress. All local implementation contracts for Milestones 8.1–8.5
-are present. The explicitly reviewed Phoenix plan provisioned the A1 host, network,
-private versioned backup bucket, and budget alerts. Clean bootstrap and zero Terraform
-drift are verified. The approved application image is published by immutable digest
-with native AMD64/ARM64, scan, SBOM, provenance, signature, and anonymous-pull evidence;
-the default Streamlit release is deployed behind public HTTPS and its authenticated
-workspace/readiness/logout shell passes. The first bounded cloud upload exposed a
-missing `libGL.so.1` runtime dependency before visual extraction could complete; the
-job was cancelled after two worker-managed attempts and is not acceptance evidence.
-The minimal `libgl1` image fix and regression check pass locally, but a corrected
-signed image and a newly approved bounded run are still required. Deterministic visual
-extraction failures are now terminal and non-disclosing, preventing repeat embedding
-spend while transient dependency failures retain the accepted retry policy. An actual encrypted
-PostgreSQL/Qdrant/object export now passes clean local decrypt and manifest validation;
-private OCI upload and service-level restore remain gated. Measured authenticated
-capacity, rollback, and candidate proof also remain gated.
+are present. The reviewed Phoenix infrastructure and corrected signed/scanned image are
+deployed by immutable digest behind public HTTPS. Authenticated shell, readiness, logout,
+and one-attempt ingestion pass with 31 promoted text vectors and 33 visual regions. The
+approved three-question check then exposed a deterministic routing defect: ordinary
+text questions matched the closed table-calculation vocabulary, and a calculation miss
+abstained instead of continuing to authorized RAG retrieval. The narrow fallback fix and
+regression test pass locally; corrected publication, deployment, and a separately
+approved paid recheck remain required. The worker is stopped with zero active jobs.
+
+The private versioned OCI bucket now holds the age ciphertext only. Provider download,
+safe decrypt, manifest verification, and isolated PostgreSQL/Qdrant/SeaweedFS restore
+pass with a conservative 0.75-hour RTO and effectively zero quiesced-export RPO, inside
+the accepted 8-hour/24-hour targets. Measured authenticated capacity, exercised rollback,
+and candidate parity proof remain gated.
 
 The image gate runs application and Next.js builds independently on native AMD64 and
 ARM64 GitHub runners, then reports one stable aggregate result. This avoids QEMU-only
@@ -1008,10 +1007,10 @@ of the accepted single-VM topology under representative bounded load.
 | Milestone | Deliverable |
 | --- | --- |
 | 8.0 | Completed — OCI learning constraints plus deployment, data, frontend, delivery, and recovery ADRs 0037–0042 accepted |
-| 8.1 | Streamlit baseline deployed — CPU-only multiarch image and native architecture gates pass; reviewed Phoenix A1/network/private-bucket/budget plan applied; root filesystem expanded into the provisioned boot volume; signed/scanned digest deployed behind HTTPS; migration, pinned models, API readiness, authenticated workspace, Library, and logout pass |
+| 8.1 | Streamlit baseline deployed — CPU-only multiarch image and native architecture gates pass; reviewed Phoenix A1/network/private-bucket/budget plan applied; root filesystem expanded; corrected signed/scanned digest deployed behind HTTPS; migration, pinned models, API readiness, authenticated workspace, Library, logout, and first-attempt ingestion pass; chat fallback correction awaits publication and recheck |
 | 8.2 | Candidate implemented — Streamlit remains default; token-mediating Next.js parity candidate is opt-in and unpromoted; automated accessibility, malformed-origin rejection, and non-disclosure checks pass, browser parity evidence pending |
 | 8.3 | Partial cloud evidence — resource limits, prefetch-1 backpressure, and graceful drains are active; a public-readiness 1/3/5/10-user observation has zero errors and seven reversible resilience scenarios pass; authenticated mixed-workload capacity remains pending |
-| 8.4 | Partial cloud proof — self-hosted state topology and encrypted backup tooling are active; a quiesced PostgreSQL dump, Qdrant snapshot, and object export pass ciphertext transfer plus clean local decrypt/integrity validation; private OCI upload and service-level restore remain pending |
+| 8.4 | Cloud recovery proof complete — private versioned OCI ciphertext round-trip, safe decrypt/integrity checks, and isolated PostgreSQL/Qdrant/SeaweedFS restore pass inside the accepted RPO/RTO targets |
 | 8.5 | Local contract complete — immutable release manifest, explicit first-release baseline semantics, and ten-scenario load/resilience/DR/rollback gate; exercised cloud evidence pending |
 
 ### Completion gate
