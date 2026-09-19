@@ -710,10 +710,24 @@ public HTTPS; migration/model provisioning, API readiness, authenticated identit
 Personal workspace, Library, and logout pass. Data-path, capacity/failure, restore,
 rollback, and candidate evidence remain gated.
 
+The first bounded cloud data-path attempt made two successful embedding requests but
+failed in the pinned local visual extractor because the slim runtime image omitted
+`libGL.so.1`, which OpenCV/TableFormer requires. The durable job was cancelled before
+attempt 3 and the worker remains stopped. The corrected image contract installs Debian
+`libgl1` and validates its presence; it must pass protected publication and deployment
+before another bounded acceptance run. Visual-extraction failures are now classified
+as permanent with a non-disclosing public error, preventing paid embedding repetition;
+transient dependency failures retain the accepted retry policy. This is a runtime-
+packaging failure, not model-quality evidence.
+
 The first public-readiness 1/3/5/10-user observation has zero errors. Worker restart,
 broker loss, fail-closed PostgreSQL/Qdrant/object-store loss and recovery,
 telemetry-disabled operation, and bounded disk pressure pass. These checks establish
 infrastructure behavior but do not replace the authenticated mixed-workload capacity gate.
+The first real quiesced backup contains a PostgreSQL custom dump, one Qdrant collection
+snapshot, and the stored original object. Its age-encrypted bundle matches across the
+host boundary and passes clean local decrypt plus manifest/checksum validation. Upload
+to the private versioned OCI bucket and an isolated service-level restore remain required.
 
 Local hardening now also proves fixable high/critical vulnerability scans for both app
 images, tracked-source secret and OCI configuration scans, automated candidate

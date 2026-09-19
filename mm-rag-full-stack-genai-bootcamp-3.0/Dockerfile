@@ -19,7 +19,7 @@ WORKDIR /app
 
 RUN apt-get update \
     && apt-get upgrade --yes \
-    && apt-get install --yes --no-install-recommends curl tesseract-ocr \
+    && apt-get install --yes --no-install-recommends curl libgl1 tesseract-ocr \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml uv.lock ./

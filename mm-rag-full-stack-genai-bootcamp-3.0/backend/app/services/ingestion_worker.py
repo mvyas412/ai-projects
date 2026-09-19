@@ -48,6 +48,7 @@ from backend.app.storage.base import (
     ObjectStorageUnavailableError,
 )
 from backend.app.storage.keys import attempt_artifact_key, generation_artifact_key
+from backend.app.visual.extraction import VisualExtractionError
 
 
 class DeliveryDisposition(StrEnum):
@@ -475,4 +476,6 @@ def _classify_failure(exc: Exception) -> tuple[bool, str, str]:
         return False, "original_invalid", "The stored original could not be verified."
     if isinstance(exc, (IndexingUnavailableError, ObjectStorageUnavailableError)):
         return True, "dependency_unavailable", "A processing dependency is unavailable."
+    if isinstance(exc, VisualExtractionError):
+        return False, "visual_extraction_failed", "Visual content could not be extracted."
     return True, "worker_execution_failed", "Document processing could not be completed."

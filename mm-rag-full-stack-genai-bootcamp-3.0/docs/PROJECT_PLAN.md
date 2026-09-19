@@ -981,8 +981,16 @@ private versioned backup bucket, and budget alerts. Clean bootstrap and zero Ter
 drift are verified. The approved application image is published by immutable digest
 with native AMD64/ARM64, scan, SBOM, provenance, signature, and anonymous-pull evidence;
 the default Streamlit release is deployed behind public HTTPS and its authenticated
-workspace/readiness/logout shell passes. Upload/chat, measured cloud capacity/failure
-evidence, clean restore, rollback, and candidate proof remain gated.
+workspace/readiness/logout shell passes. The first bounded cloud upload exposed a
+missing `libGL.so.1` runtime dependency before visual extraction could complete; the
+job was cancelled after two worker-managed attempts and is not acceptance evidence.
+The minimal `libgl1` image fix and regression check pass locally, but a corrected
+signed image and a newly approved bounded run are still required. Deterministic visual
+extraction failures are now terminal and non-disclosing, preventing repeat embedding
+spend while transient dependency failures retain the accepted retry policy. An actual encrypted
+PostgreSQL/Qdrant/object export now passes clean local decrypt and manifest validation;
+private OCI upload and service-level restore remain gated. Measured authenticated
+capacity, rollback, and candidate proof also remain gated.
 
 The image gate runs application and Next.js builds independently on native AMD64 and
 ARM64 GitHub runners, then reports one stable aggregate result. This avoids QEMU-only
@@ -1003,7 +1011,7 @@ of the accepted single-VM topology under representative bounded load.
 | 8.1 | Streamlit baseline deployed — CPU-only multiarch image and native architecture gates pass; reviewed Phoenix A1/network/private-bucket/budget plan applied; root filesystem expanded into the provisioned boot volume; signed/scanned digest deployed behind HTTPS; migration, pinned models, API readiness, authenticated workspace, Library, and logout pass |
 | 8.2 | Candidate implemented — Streamlit remains default; token-mediating Next.js parity candidate is opt-in and unpromoted; automated accessibility, malformed-origin rejection, and non-disclosure checks pass, browser parity evidence pending |
 | 8.3 | Partial cloud evidence — resource limits, prefetch-1 backpressure, and graceful drains are active; a public-readiness 1/3/5/10-user observation has zero errors and seven reversible resilience scenarios pass; authenticated mixed-workload capacity remains pending |
-| 8.4 | Local contract complete — self-hosted state topology, private versioned OCI backup-bucket plan, encrypted backup/restore tooling and runbook; synthetic encrypted round trip passes, provider restore pending |
+| 8.4 | Partial cloud proof — self-hosted state topology and encrypted backup tooling are active; a quiesced PostgreSQL dump, Qdrant snapshot, and object export pass ciphertext transfer plus clean local decrypt/integrity validation; private OCI upload and service-level restore remain pending |
 | 8.5 | Local contract complete — immutable release manifest, explicit first-release baseline semantics, and ten-scenario load/resilience/DR/rollback gate; exercised cloud evidence pending |
 
 ### Completion gate

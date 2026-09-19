@@ -58,6 +58,8 @@ def validate_phase8_deployment() -> dict[str, object]:
 
     if "COPY frontend ./frontend" not in dockerfile:
         raise ValueError("Runtime image must contain the Streamlit frontend")
+    if "libgl1" not in dockerfile:
+        raise ValueError("Runtime image must provide libGL for pinned visual extraction")
     if "USER mmrag" not in dockerfile:
         raise ValueError("Runtime image must use the unprivileged application user")
     if 'name = "nvidia-cuda-' in lockfile or 'name = "nvidia-cudnn-' in lockfile:
@@ -105,7 +107,7 @@ def validate_phase8_deployment() -> dict[str, object]:
     result: dict[str, object] = {
         "image_contracts": len(IMAGE_KEYS),
         "public_tcp_ports": [80, 443],
-        "schema_revision": "phase8-oci-deployment-contract-v4",
+        "schema_revision": "phase8-oci-deployment-contract-v5",
         "status": "valid",
     }
     return result
