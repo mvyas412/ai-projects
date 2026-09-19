@@ -1,4 +1,4 @@
-.PHONY: setup models models-verify phase6-models phase6-models-verify services observability observability-stop observability-status observability-baseline observability-baseline-status runtime runtime-stop services-stop migrate api ui dispatcher worker operations-status operations-retention-preview backup phase5-evaluation phase6-evaluation phase7-evaluation phase8-deployment-validate phase8-next-check check check-live check-acceptance
+.PHONY: setup models models-verify phase6-models phase6-models-verify services observability observability-stop observability-status observability-baseline observability-baseline-status runtime runtime-stop services-stop migrate api ui dispatcher worker operations-status operations-retention-preview backup google-drive-authorize google-drive-probe phase5-evaluation phase6-evaluation phase7-evaluation phase8-deployment-validate phase8-next-check check check-live check-acceptance
 
 setup:
 	uv python install 3.12
@@ -71,6 +71,14 @@ operations-retention-preview:
 
 backup:
 	./scripts/backup_phase3_postgres.sh
+
+google-drive-authorize:
+	@test -n "$(GOOGLE_DRIVE_CLIENT_CONFIG)" || (echo "Set GOOGLE_DRIVE_CLIENT_CONFIG to the private Desktop OAuth client JSON path" && exit 2)
+	uv run python -m scripts.google_drive_oauth --client-config "$(GOOGLE_DRIVE_CLIENT_CONFIG)"
+
+google-drive-probe:
+	@test -n "$(GOOGLE_DRIVE_CLIENT_CONFIG)" || (echo "Set GOOGLE_DRIVE_CLIENT_CONFIG to the private Desktop OAuth client JSON path" && exit 2)
+	uv run python -m scripts.google_drive_probe --client-config "$(GOOGLE_DRIVE_CLIENT_CONFIG)"
 
 phase5-evaluation:
 	uv run python -m scripts.build_phase5_v4_fixture --check

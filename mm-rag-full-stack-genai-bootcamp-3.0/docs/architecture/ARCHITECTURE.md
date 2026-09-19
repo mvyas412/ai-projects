@@ -828,7 +828,13 @@ The Milestone 9.0 threat model and provider scorecard are tracked in
 9.1 slice adds a provider-neutral connector protocol, canonical discovery/change/version/
 permission values, explicit adapter registry, and a tenant/connector-bound credential
 reference resolved only inside a short-lived runtime context. ADR 0050 adds a read-only
-Google Drive API v3 adapter with deterministic mocked coverage. Migration
+Google Drive API v3 adapter with deterministic mocked coverage. Its private learning
+bootstrap uses a Desktop OAuth client, loopback PKCE/state validation, mode-`0600`
+ignored credential files, runtime token refresh, and an aggregate-only metadata probe.
+The bounded live probe passes provider health, initial checkpoint, discovery sampling,
+and opaque permission counting without content download. Permission/deletion
+propagation remains the connector acceptance gate.
+Migration
 `20260919_0019` and tenant-scoped services add fenced delta sync, deny-first source
 visibility, ordered SCIM-compatible lifecycle records, immutable usage and reservations,
 simulated signed billing reconciliation, and stable-scope compliance workflows. A live

@@ -18,6 +18,11 @@ jobs, logs, evidence, or support output. Real billing is prohibited in this phas
 Revoke an installation by setting it to `revoked`, invalidating its external credential,
 and leaving prior evidence intact. A revoked connector cannot create a new sync run.
 
+The private Google Drive learning setup and aggregate-only live probe are documented in
+[`PHASE9_GOOGLE_DRIVE_OAUTH.md`](PHASE9_GOOGLE_DRIVE_OAUTH.md). The helper accepts only a
+Desktop OAuth client, uses loopback PKCE/state validation, stores credentials in private
+ignored files, and requests Drive read-only access.
+
 ## Identity operations
 
 OIDC remains authentication. SCIM-compatible lifecycle events map opaque external IDs to
@@ -55,5 +60,6 @@ MM_RAG_RUN_INTEGRATION_TESTS=1 uv run pytest -q \
   tests/backend/test_phase9_rls_integration.py
 ```
 
-Before commit or release, run `make check`. Live Google OAuth, provider propagation,
-external SCIM, and billing-sandbox proofs require separate credentials and approval.
+Before commit or release, run `make check`. The bounded Google OAuth health/checkpoint
+probe has passed. Provider permission/deletion propagation, external SCIM, and any
+billing-sandbox proof still require separate credentials, fixtures, and approval.

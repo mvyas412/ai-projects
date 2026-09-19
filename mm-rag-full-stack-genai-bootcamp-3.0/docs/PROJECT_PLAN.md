@@ -1042,8 +1042,11 @@ The provider-neutral portion of Milestone 9.1 implements typed discovery, change
 version, streamed-content, permission, health, and rate-limit contracts; an explicit
 registry; tenant/connector-bound opaque credential references; and runtime-only secret
 resolution. Focused lint, typing, and contract tests pass. ADR 0050 now selects and
-implements the read-only Google Drive adapter with mocked provider coverage; live OAuth
-and source evidence remain pending. Migration `20260919_0019` adds tenant-isolated
+implements the read-only Google Drive adapter with mocked provider coverage. Its secure
+Desktop OAuth bootstrap, file-backed runtime resolver, and aggregate-only live probe
+pass with the read-only scope; permission/deletion propagation evidence remains gated.
+Migration
+`20260919_0019` adds tenant-isolated
 connector/sync, identity, entitlement, usage, simulated-billing, and compliance records.
 The durable services enforce fenced checkpoint promotion, deny-first source changes,
 ordered identity lifecycle, allowlisted role mapping, transactional quota reservation,
@@ -1060,7 +1063,7 @@ commercial accounting, and compliance-grade administration.
 | Milestone | Deliverable |
 | --- | --- |
 | 9.0 | Complete — enterprise requirements, threat model, and provider priorities |
-| 9.1 | Implemented — connector SDK and tested read-only Google Drive adapter; live OAuth pending |
+| 9.1 | Verified — connector SDK, read-only Google Drive adapter, secret-safe OAuth, and bounded aggregate-only live probe |
 | 9.2 | Implemented — durable fenced delta sync and deny-first ACL/deletion state; live propagation objective pending |
 | 9.3 | Implemented — SCIM-compatible ordered lifecycle and allowlisted mapping; provider proof pending |
 | 9.4 | Implemented — immutable usage, transactional reserve/settle, corrections; product quota values pending |
@@ -1150,7 +1153,7 @@ commercial accounting, and compliance-grade administration.
 | Immutable usage ledger, quotas, and entitlements | 9.4 | Accepted — ADR 0047; initial meters/quotas TBD |
 | Billing, subscription, and reconciliation boundary | 9.5 | Accepted — ADR 0048; provider TBD |
 | Compliance lifecycle and administrative evidence | 9.6 | Accepted — ADR 0049; automatic schedule disabled |
-| First enterprise connector | 9.1–9.2 | Accepted — read-only Google Drive API v3 in ADR 0050; live OAuth proof pending |
+| First enterprise connector | 9.1–9.2 | Accepted — read-only Google Drive API v3 in ADR 0050; OAuth health/checkpoint proof passes, propagation proof pending |
 
 ## Immediate next actions
 
