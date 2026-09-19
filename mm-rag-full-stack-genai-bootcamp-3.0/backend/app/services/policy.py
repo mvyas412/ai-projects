@@ -5,10 +5,12 @@ from enum import StrEnum
 from typing import Protocol
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from backend.app.db.rls import DatabasePurpose, set_rls_context
 from backend.app.models.access import ResourceVisibility
+from backend.app.models.enterprise import EnterpriseIdentity
 from backend.app.models.user import User
 from backend.app.models.workspace import WorkspaceRole
 from backend.app.repositories.access import ResourceACLRepository
@@ -187,6 +189,16 @@ class PolicyService:
         except ValueError:
             return self._deny(False, "unknown_action")
 
+        blocked_identity = self._session.scalar(
+            select(EnterpriseIdentity.id).where(
+                EnterpriseIdentity.workspace_id == workspace_id,
+                EnterpriseIdentity.user_id == user.id,
+                EnterpriseIdentity.state.in_(("suspended", "deleted")),
+            )
+        )
+        if blocked_identity is not None:
+            return self._deny(False, "enterprise_identity_inactive")
+
         membership = self._workspaces.get_for_user(workspace_id, user.id)
         if membership is None:
             return self._deny(False, "workspace_membership_required")
@@ -212,10 +224,10 @@ class PolicyService:
         else:
             allowed = normalized_action in _VIEWER_ACTIONS
 
-        if (
-            normalized_action in {PolicyAction.JOB_CANCEL, PolicyAction.JOB_RETRY}
-            and role not in {WorkspaceRole.OWNER, WorkspaceRole.ADMIN}
-        ):
+        if normalized_action in {PolicyAction.JOB_CANCEL, PolicyAction.JOB_RETRY} and role not in {
+            WorkspaceRole.OWNER,
+            WorkspaceRole.ADMIN,
+        }:
             allowed = allowed and role == WorkspaceRole.MEMBER and requester_user_id == user.id
 
         if not allowed:
@@ -292,14 +304,10 @@ class PolicyService:
                         actor_user_id=user.id,
                         action="policy.denied",
                         resource_type=(
-                            resource.resource_type.value
-                            if resource is not None
-                            else "workspace"
+                            resource.resource_type.value if resource is not None else "workspace"
                         ),
                         resource_id=(
-                            resource.resource_id
-                            if resource is not None
-                            else workspace_id
+                            resource.resource_id if resource is not None else workspace_id
                         ),
                         result=AuditResult.DENIED,
                         policy_revision=decision.policy_revision,
@@ -325,9 +333,7 @@ class PolicyService:
             resource=resource,
         ).allowed
 
-    def _is_visible(
-        self, user: User, role: WorkspaceRole, resource: ResourceContext
-    ) -> bool:
+    def _is_visible(self, user: User, role: WorkspaceRole, resource: ResourceContext) -> bool:
         if role in {WorkspaceRole.OWNER, WorkspaceRole.ADMIN}:
             return True
         if resource.visibility == ResourceVisibility.WORKSPACE:
@@ -352,9 +358,7 @@ class PolicyService:
         return role == WorkspaceRole.MEMBER
 
     @staticmethod
-    def _deny(
-        discoverable: bool, reason: str, role: WorkspaceRole | None = None
-    ) -> PolicyDecision:
+    def _deny(discoverable: bool, reason: str, role: WorkspaceRole | None = None) -> PolicyDecision:
         return PolicyDecision(False, discoverable, POLICY_REVISION, reason, role)
 
 

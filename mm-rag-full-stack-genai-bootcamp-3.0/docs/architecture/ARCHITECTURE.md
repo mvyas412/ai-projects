@@ -206,7 +206,7 @@ flowchart LR
 | 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | Completed and accepted; `visual-table-v1` promoted after free/live and signed-in candidate proof |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Local telemetry and protected evaluation evidence | Completed and accepted |
 | 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; encrypted OCI backup | Completed and accepted on the free-first Phoenix learning deployment |
-| 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | In progress; ADRs 0043–0049 accepted, providers TBD |
+| 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Provider-neutral implementation complete; live/provider proofs pending |
 
 ## Phase 1 — working prototype
 
@@ -820,16 +820,19 @@ root-disk headroom.
 
 ## Phase 9 — enterprise integrations and commercial controls
 
-**Status:** In progress. ADRs 0043–0049 are accepted and provider-neutral implementation
-is authorized. Connector, identity, billing, and compliance providers remain TBD.
+**Status:** Provider-neutral implementation-complete candidate. ADRs 0043–0050 are
+accepted. Live connector and external identity/billing acceptance remain gated.
 
 The Milestone 9.0 threat model and provider scorecard are tracked in
 [`PHASE9_ENTERPRISE_KICKOFF.md`](../PHASE9_ENTERPRISE_KICKOFF.md). The first Milestone
 9.1 slice adds a provider-neutral connector protocol, canonical discovery/change/version/
 permission values, explicit adapter registry, and a tenant/connector-bound credential
 reference resolved only inside a short-lived runtime context. ADR 0050 adds a read-only
-Google Drive API v3 adapter with deterministic mocked coverage. No credential store,
-live provider call, or product-store write is present yet.
+Google Drive API v3 adapter with deterministic mocked coverage. Migration
+`20260919_0019` and tenant-scoped services add fenced delta sync, deny-first source
+visibility, ordered SCIM-compatible lifecycle records, immutable usage and reservations,
+simulated signed billing reconciliation, and stable-scope compliance workflows. A live
+credential store/provider call is not configured.
 
 ```mermaid
 flowchart LR

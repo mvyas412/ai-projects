@@ -2,10 +2,10 @@
 
 ## Status
 
-ADRs 0043–0049 are accepted. Milestone 9.0 requirements and threat boundaries are
-defined, and the provider-neutral connector SDK contract is implemented. The first
-connector, external credentials, propagation objective, identity/billing providers,
-initial meters/quotas, and automatic retention schedule remain unselected.
+ADRs 0043–0050 are accepted. Provider-neutral milestones 9.0–9.6 are implemented and
+tested. Google Drive is the selected first connector; external credentials, live
+propagation evidence, identity/billing providers, product meter/quota values, and any
+automatic retention schedule remain separately gated.
 
 ## Scope and requirements
 
@@ -72,3 +72,17 @@ ADR 0050. Live OAuth configuration and acceptance remain separately gated.
 - identity and billing provider/sandbox choice;
 - initial meter names, quota quantities, and settlement rules; and
 - automatic retention schedule, which remains disabled.
+
+## Implemented learning boundary
+
+- Migration `20260919_0019` adds tenant-scoped connector, sync, identity, entitlement,
+  immutable usage, reservation, simulated billing-event, and compliance-workflow state.
+- Delta runs use idempotent keys, immutable attempts, fencing tokens, and transactional
+  checkpoint promotion. Permission contraction and deletion change visibility first.
+- Enterprise identity events are ordered; suspension blocks policy evaluation immediately;
+  group mappings cannot grant owner or exceed the central role ceiling.
+- Quotas reserve and settle transactionally; corrections are additive ledger entries.
+- Simulated billing uses signed, content-minimal, idempotent envelopes and cannot collect
+  payment data. Compliance apply requires unchanged scope and honors retention holds.
+- The operational boundaries and acceptance commands are in
+  [`PHASE9_OPERATIONS.md`](PHASE9_OPERATIONS.md).

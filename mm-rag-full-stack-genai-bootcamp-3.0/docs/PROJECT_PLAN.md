@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 9 decision kickoff; Phase 8 accepted |
+| Active milestone | Phase 9 acceptance; provider-neutral implementation complete |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -63,7 +63,7 @@ Rules:
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
 | Phase 8 | Completed and accepted — OCI Streamlit deployment, authenticated data path, progressive capacity, resilience, encrypted backup/restore, rollback, and all ten evidence scenarios pass; Next.js remains deferred and unpromoted |
-| Phase 9 | In progress — ADRs 0043–0049 accepted; Milestone 9.0 requirements/threat model and the provider-neutral connector SDK pass focused tests; providers and policy values remain TBD |
+| Phase 9 | Implementation-complete candidate — ADRs 0043–0050 accepted; provider-neutral milestones 9.0–9.6 pass focused tests and PostgreSQL tenant-isolation proof; live/provider-specific acceptance remains gated |
 
 ## Delivery sequence and gates
 
@@ -1033,17 +1033,22 @@ of the accepted single-VM topology under representative bounded load.
 
 ## Phase 9 — enterprise integrations and commercial controls
 
-**Status:** In progress. ADRs 0043–0049 are accepted. Provider-neutral implementation
-may proceed; providers, credentials, paid services, initial meters/quotas, and
+**Status:** Provider-neutral implementation-complete candidate. ADRs 0043–0050 are
+accepted. Providers, credentials, paid services, initial production meters/quotas, and
 provider-specific propagation targets remain separately gated.
 
 Milestone 9.0 now has a tracked requirements/threat model and first-connector scorecard.
 The provider-neutral portion of Milestone 9.1 implements typed discovery, change-page,
 version, streamed-content, permission, health, and rate-limit contracts; an explicit
 registry; tenant/connector-bound opaque credential references; and runtime-only secret
-resolution. Focused lint, typing, and six unit tests pass. ADR 0050 now selects and
+resolution. Focused lint, typing, and contract tests pass. ADR 0050 now selects and
 implements the read-only Google Drive adapter with mocked provider coverage; live OAuth
-and source evidence remain pending.
+and source evidence remain pending. Migration `20260919_0019` adds tenant-isolated
+connector/sync, identity, entitlement, usage, simulated-billing, and compliance records.
+The durable services enforce fenced checkpoint promotion, deny-first source changes,
+ordered identity lifecycle, allowlisted role mapping, transactional quota reservation,
+additive corrections, signed idempotent billing events, and stable-scope compliance
+reauthorization. Focused tests and a live PostgreSQL RLS isolation proof pass.
 
 ### Objective
 
@@ -1054,13 +1059,13 @@ commercial accounting, and compliance-grade administration.
 
 | Milestone | Deliverable |
 | --- | --- |
-| 9.0 | Enterprise requirements, threat model, and provider/connector priorities |
-| 9.1 | Connector SDK plus first demand-validated enterprise source |
-| 9.2 | Incremental sync, checkpoints, source ACL/deletion propagation, and operations |
-| 9.3 | Enterprise SSO/SCIM provisioning and group/role mapping |
-| 9.4 | Immutable usage ledger, quotas, entitlements, and rate limits |
-| 9.5 | Billing/subscription integration and reconciliation |
-| 9.6 | Retention, legal hold, export/deletion, compliance reporting, and audit review |
+| 9.0 | Complete — enterprise requirements, threat model, and provider priorities |
+| 9.1 | Implemented — connector SDK and tested read-only Google Drive adapter; live OAuth pending |
+| 9.2 | Implemented — durable fenced delta sync and deny-first ACL/deletion state; live propagation objective pending |
+| 9.3 | Implemented — SCIM-compatible ordered lifecycle and allowlisted mapping; provider proof pending |
+| 9.4 | Implemented — immutable usage, transactional reserve/settle, corrections; product quota values pending |
+| 9.5 | Implemented — signed simulated provider and entitlement reconciliation; real billing prohibited |
+| 9.6 | Implemented — stable-scope reauthorization, hold precedence, content-free evidence; automatic retention disabled |
 
 ### Completion gate
 
