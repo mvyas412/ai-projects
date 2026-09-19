@@ -1128,7 +1128,13 @@ commercial accounting, and compliance-grade administration.
 | Dashboards, alerts, runbooks, and incident learning | 7.4–7.5 | Accepted and implemented — ADR 0036; external paging remains disabled |
 | Cloud/orchestration and managed services | 8.0 | Accepted — OCI Always Free-eligible single ARM host with private Docker Compose data plane under ADRs 0037–0039; Phoenix infrastructure provisioned and verified |
 | Dedicated frontend framework | 8.0 | Accepted — Streamlit remains authoritative; bounded Next.js candidate remains unpromoted under ADR 0040 |
-| First enterprise connector and billing provider | 9.0 | TBD |
+| Phase 9 scope and trust boundaries | 9.0 | Proposed — ADR 0043 |
+| Connector SDK and credential envelope | 9.0–9.1 | Proposed — ADR 0044; first source TBD |
+| Incremental sync, source ACL, and deletion propagation | 9.2 | Proposed — ADR 0045 |
+| Enterprise identity lifecycle and group mapping | 9.3 | Proposed — ADR 0046; provider TBD |
+| Immutable usage ledger, quotas, and entitlements | 9.4 | Proposed — ADR 0047 |
+| Billing, subscription, and reconciliation boundary | 9.5 | Proposed — ADR 0048; provider TBD |
+| Compliance lifecycle and administrative evidence | 9.6 | Proposed — ADR 0049 |
 
 ## Immediate next actions
 

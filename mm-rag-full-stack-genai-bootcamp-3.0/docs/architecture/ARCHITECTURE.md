@@ -191,9 +191,9 @@ flowchart LR
     p4["Phase 4<br/>Governance foundation<br/>Completed / v4.0.0"] -->
     p5["Phase 5<br/>Hybrid retrieval<br/>Closed / gate not met"] -->
     p6["Phase 6<br/>Visual/table intelligence<br/>Completed / accepted"] -->
-    p7["Phase 7<br/>Evaluation/observability<br/>Acceptance baseline"] -->
-    p8["Phase 8<br/>Scalable platform<br/>Decisions accepted"] -->
-    p9["Phase 9<br/>Enterprise platform<br/>Planned"]
+    p7["Phase 7<br/>Evaluation/observability<br/>Accepted"] -->
+    p8["Phase 8<br/>Scalable platform<br/>Accepted"] -->
+    p9["Phase 9<br/>Enterprise platform<br/>Decision kickoff"]
 ```
 
 | Phase | Capability | Main technologies/components | Stores | Status |
@@ -204,9 +204,9 @@ flowchart LR
 | 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and preserved at `mm-rag-v4.0.0` |
 | 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | Closed without acceptance; v4 nDCG gate missed and no candidate was promoted |
 | 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | Completed and accepted; `visual-table-v1` promoted after free/live and signed-in candidate proof |
-| 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Local telemetry and protected evaluation evidence | Implemented; acceptance baseline in progress |
-| 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; off-host OCI backup planned | Non-provisioning implementation and local hardening complete |
-| 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Planned |
+| 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Local telemetry and protected evaluation evidence | Completed and accepted |
+| 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; encrypted OCI backup | Completed and accepted on the free-first Phoenix learning deployment |
+| 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Decision kickoff; ADRs 0043–0049 Proposed |
 
 ## Phase 1 — working prototype
 
@@ -968,6 +968,16 @@ Accepted Phase 8 decisions are:
 - [ADR 0040 — Dedicated frontend and edge boundary](decisions/0040-dedicated-frontend-edge-boundary.md)
 - [ADR 0041 — Immutable delivery, secrets, and migrations](decisions/0041-immutable-delivery-secrets-migrations.md)
 - [ADR 0042 — Scaling, recovery, and release evidence](decisions/0042-scaling-recovery-release-evidence.md)
+
+Proposed Phase 9 decisions are:
+
+- [ADR 0043 — Phase 9 enterprise scope and trust boundaries](decisions/0043-phase9-enterprise-scope-trust-boundaries.md)
+- [ADR 0044 — Connector SDK and credential envelope](decisions/0044-connector-sdk-credential-envelope.md)
+- [ADR 0045 — Incremental sync, source ACL, and deletion contract](decisions/0045-incremental-sync-acl-deletion-contract.md)
+- [ADR 0046 — Enterprise identity lifecycle and group mapping](decisions/0046-enterprise-identity-lifecycle.md)
+- [ADR 0047 — Immutable usage ledger, quotas, and entitlements](decisions/0047-usage-ledger-quotas-entitlements.md)
+- [ADR 0048 — Billing, subscription, and reconciliation boundary](decisions/0048-billing-subscription-reconciliation.md)
+- [ADR 0049 — Compliance lifecycle and administrative evidence](decisions/0049-compliance-lifecycle-admin-evidence.md)
 
 ## Maintenance checklist
 

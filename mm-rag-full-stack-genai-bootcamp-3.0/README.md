@@ -68,6 +68,11 @@ Commit-pinned CI, source/IaC/lockfile/image scans, SBOM/provenance/signature che
 least-privilege networking, private versioned backup storage, and USD 1 budget alerts
 remain active. No paid capacity upgrade was introduced.
 
+Phase 9 is now in decision kickoff. Proposed ADRs 0043–0049 define provider-neutral
+contracts for enterprise scope, connectors and sync, identity lifecycle, immutable
+usage controls, billing reconciliation, and compliance administration. No enterprise
+provider, paid service, credential, or Phase 9 implementation is selected or authorized.
+
 The current `3.0` lineage contains:
 
 - The verified V1 parsing, ingestion, retrieval, generation, and Streamlit flow.
