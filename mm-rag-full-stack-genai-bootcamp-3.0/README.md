@@ -76,7 +76,10 @@ provider-specific policy value is selected.
 The [Phase 9 enterprise kickoff contract](docs/PHASE9_ENTERPRISE_KICKOFF.md) records
 the requirements, threat model, provider scorecard, and remaining approval boundaries.
 Its provider-neutral connector SDK defines canonical discovery/change/content/permission
-contracts and runtime-only opaque credential resolution; no provider adapter exists yet.
+contracts and runtime-only opaque credential resolution.
+ADR 0050 selects a read-only Google Drive API v3 adapter as the first connector. Mocked
+change-token, permission, download/export, discovery, and cursor-expiry coverage may run
+without credentials; live OAuth setup and source proof remain separately gated.
 
 The current `3.0` lineage contains:
 

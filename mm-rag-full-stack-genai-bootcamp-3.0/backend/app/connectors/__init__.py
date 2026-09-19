@@ -19,6 +19,7 @@ from backend.app.connectors.credentials import (
     CredentialState,
     ResolvedCredential,
 )
+from backend.app.connectors.google_drive import GoogleDriveConnector
 
 __all__ = [
     "ChangeKind",
@@ -33,6 +34,7 @@ __all__ = [
     "CredentialReference",
     "CredentialResolver",
     "CredentialState",
+    "GoogleDriveConnector",
     "PermissionSnapshot",
     "Principal",
     "PrincipalKind",

@@ -55,6 +55,11 @@ def test_change_page_requires_consistent_cursor_state(next_cursor, has_more) -> 
         ConnectorPage((), next_cursor, has_more)
 
 
+def test_intermediate_change_page_cannot_promote_checkpoint() -> None:
+    with pytest.raises(ValueError, match="cannot promote"):
+        ConnectorPage((), "next-page", True, checkpoint_cursor="future-start")
+
+
 class _FakeConnector:
     kind = "fake"
 

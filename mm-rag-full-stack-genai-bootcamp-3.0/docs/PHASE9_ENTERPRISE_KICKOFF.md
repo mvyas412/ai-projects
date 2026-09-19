@@ -61,12 +61,13 @@ the user reviews the result and confirms access to a free sandbox/account.
 | Operational burden | 2 | Rate limits, webhooks, and reconciliation fit the learning deployment |
 | Portability value | 1 | Adapter exercises the canonical contract without provider leakage |
 
-Candidate set: Google Drive, Microsoft SharePoint/OneDrive, Box, and a generic
-authenticated web/API adapter. Selection is intentionally TBD.
+Candidate set considered Google Drive, Microsoft SharePoint/OneDrive, Box, and a generic
+authenticated web/API adapter. The user selected the recommended Google Drive path under
+ADR 0050. Live OAuth configuration and acceptance remain separately gated.
 
 ## Approval boundaries still open
 
-- first connector and provider-specific propagation objective;
+- Google Drive provider-specific propagation objective and live OAuth proof;
 - credential-vault implementation and external tenant configuration;
 - identity and billing provider/sandbox choice;
 - initial meter names, quota quantities, and settlement rules; and

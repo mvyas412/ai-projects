@@ -57,10 +57,14 @@ class ConnectorContext:
 class Principal:
     kind: PrincipalKind
     external_id: str
+    role: str
+    inherited: bool = False
 
     def __post_init__(self) -> None:
         if not self.external_id.strip():
             raise ValueError("Principal external identity must not be empty")
+        if not self.role.strip():
+            raise ValueError("Principal role must not be empty")
 
 
 @dataclass(frozen=True, slots=True)
@@ -118,6 +122,7 @@ class ConnectorPage:
     changes: tuple[ConnectorChange, ...]
     next_cursor: str | None
     has_more: bool
+    checkpoint_cursor: str | None = None
     rate_limit: RateLimitHint | None = None
 
     def __post_init__(self) -> None:
@@ -125,6 +130,10 @@ class ConnectorPage:
             raise ValueError("A non-terminal page requires an opaque next cursor")
         if not self.has_more and self.next_cursor is not None:
             raise ValueError("A terminal page must not expose a next cursor")
+        if self.has_more and self.checkpoint_cursor is not None:
+            raise ValueError("An intermediate page cannot promote a checkpoint")
+        if self.checkpoint_cursor is not None and not self.checkpoint_cursor.strip():
+            raise ValueError("A checkpoint cursor must not be empty")
 
 
 @dataclass(frozen=True, slots=True)

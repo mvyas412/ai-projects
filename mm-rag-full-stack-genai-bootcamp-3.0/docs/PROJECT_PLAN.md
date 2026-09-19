@@ -1041,8 +1041,9 @@ Milestone 9.0 now has a tracked requirements/threat model and first-connector sc
 The provider-neutral portion of Milestone 9.1 implements typed discovery, change-page,
 version, streamed-content, permission, health, and rate-limit contracts; an explicit
 registry; tenant/connector-bound opaque credential references; and runtime-only secret
-resolution. Focused lint, typing, and six unit tests pass. A first provider adapter is
-not selected or implemented.
+resolution. Focused lint, typing, and six unit tests pass. ADR 0050 now selects and
+implements the read-only Google Drive adapter with mocked provider coverage; live OAuth
+and source evidence remain pending.
 
 ### Objective
 
@@ -1138,21 +1139,22 @@ commercial accounting, and compliance-grade administration.
 | Cloud/orchestration and managed services | 8.0 | Accepted — OCI Always Free-eligible single ARM host with private Docker Compose data plane under ADRs 0037–0039; Phoenix infrastructure provisioned and verified |
 | Dedicated frontend framework | 8.0 | Accepted — Streamlit remains authoritative; bounded Next.js candidate remains unpromoted under ADR 0040 |
 | Phase 9 scope and trust boundaries | 9.0 | Accepted — ADR 0043 |
-| Connector SDK and credential envelope | 9.0–9.1 | Accepted — ADR 0044; first source TBD |
+| Connector SDK and credential envelope | 9.0–9.1 | Accepted — ADR 0044; Google Drive selected in ADR 0050 |
 | Incremental sync, source ACL, and deletion propagation | 9.2 | Accepted — ADR 0045; timing target TBD |
 | Enterprise identity lifecycle and group mapping | 9.3 | Accepted — ADR 0046; provider TBD |
 | Immutable usage ledger, quotas, and entitlements | 9.4 | Accepted — ADR 0047; initial meters/quotas TBD |
 | Billing, subscription, and reconciliation boundary | 9.5 | Accepted — ADR 0048; provider TBD |
 | Compliance lifecycle and administrative evidence | 9.6 | Accepted — ADR 0049; automatic schedule disabled |
+| First enterprise connector | 9.1–9.2 | Accepted — read-only Google Drive API v3 in ADR 0050; live OAuth proof pending |
 
 ## Immediate next actions
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Define Phase 9 enterprise requirements, threat model, scope, and decision sequence | Proposed ADRs with explicit invariants, alternatives, approval questions, and provider-neutral boundaries |
-| 2 | Decide the connector SDK, credential envelope, source ACL/deletion semantics, and first-source selection criteria | Reviewed connector and incremental-sync ADRs; first provider remains TBD until approved |
-| 3 | Decide enterprise identity lifecycle, immutable usage accounting, quotas, billing reconciliation, and compliance lifecycle | Reviewed provider-neutral ADRs with concurrency, audit, retention, and failure contracts |
-| 4 | Begin Phase 9 implementation only after the corresponding decisions are accepted | Small milestone commits with focused tests and synchronized plan, architecture, and private context |
+| 1 | Implement durable connector installations, sync runs/attempts, checkpoints, and source mappings | Migration, RLS, repositories, replay/fencing tests, and deny-first visibility evidence |
+| 2 | Complete the read-only Google Drive adapter and deterministic provider tests | Change-token, deletion, permission, blob/export, cursor-expiry, and privacy coverage |
+| 3 | Implement provider-neutral identity, usage/quota, simulated billing, and compliance contracts | Milestone migrations/services with concurrency, audit, reconciliation, and lifecycle tests |
+| 4 | Run separately authorized live proofs after account setup | Google OAuth first; identity/billing sandbox only after explicit provider configuration |
 
 ## Update protocol
 

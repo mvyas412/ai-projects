@@ -827,8 +827,9 @@ The Milestone 9.0 threat model and provider scorecard are tracked in
 [`PHASE9_ENTERPRISE_KICKOFF.md`](../PHASE9_ENTERPRISE_KICKOFF.md). The first Milestone
 9.1 slice adds a provider-neutral connector protocol, canonical discovery/change/version/
 permission values, explicit adapter registry, and a tenant/connector-bound credential
-reference resolved only inside a short-lived runtime context. No provider adapter,
-credential store, external call, or product-store write is present.
+reference resolved only inside a short-lived runtime context. ADR 0050 adds a read-only
+Google Drive API v3 adapter with deterministic mocked coverage. No credential store,
+live provider call, or product-store write is present yet.
 
 ```mermaid
 flowchart LR
@@ -985,6 +986,7 @@ Accepted Phase 9 decisions are:
 - [ADR 0047 — Immutable usage ledger, quotas, and entitlements](decisions/0047-usage-ledger-quotas-entitlements.md)
 - [ADR 0048 — Billing, subscription, and reconciliation boundary](decisions/0048-billing-subscription-reconciliation.md)
 - [ADR 0049 — Compliance lifecycle and administrative evidence](decisions/0049-compliance-lifecycle-admin-evidence.md)
+- [ADR 0050 — Google Drive as the first enterprise connector](decisions/0050-google-drive-first-connector.md)
 
 ## Maintenance checklist
 
