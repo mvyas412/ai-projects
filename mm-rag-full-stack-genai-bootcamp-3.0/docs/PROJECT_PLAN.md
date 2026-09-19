@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 9 decision kickoff; Phase 8 accepted |
+| Active milestone | Phase 9 acceptance; provider-neutral implementation complete |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -63,7 +63,7 @@ Rules:
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
 | Phase 8 | Completed and accepted — OCI Streamlit deployment, authenticated data path, progressive capacity, resilience, encrypted backup/restore, rollback, and all ten evidence scenarios pass; Next.js remains deferred and unpromoted |
-| Phase 9 | Decision kickoff — requirements, threat model, provider-neutral contracts, and priorities remain Proposed/TBD |
+| Phase 9 | Implementation-complete candidate — ADRs 0043–0050 accepted; provider-neutral milestones 9.0–9.6 pass focused tests and PostgreSQL tenant-isolation proof; live/provider-specific acceptance remains gated |
 
 ## Delivery sequence and gates
 
@@ -1033,7 +1033,22 @@ of the accepted single-VM topology under representative bounded load.
 
 ## Phase 9 — enterprise integrations and commercial controls
 
-**Status:** Decision kickoff. No provider or implementation is selected.
+**Status:** Provider-neutral implementation-complete candidate. ADRs 0043–0050 are
+accepted. Providers, credentials, paid services, initial production meters/quotas, and
+provider-specific propagation targets remain separately gated.
+
+Milestone 9.0 now has a tracked requirements/threat model and first-connector scorecard.
+The provider-neutral portion of Milestone 9.1 implements typed discovery, change-page,
+version, streamed-content, permission, health, and rate-limit contracts; an explicit
+registry; tenant/connector-bound opaque credential references; and runtime-only secret
+resolution. Focused lint, typing, and contract tests pass. ADR 0050 now selects and
+implements the read-only Google Drive adapter with mocked provider coverage; live OAuth
+and source evidence remain pending. Migration `20260919_0019` adds tenant-isolated
+connector/sync, identity, entitlement, usage, simulated-billing, and compliance records.
+The durable services enforce fenced checkpoint promotion, deny-first source changes,
+ordered identity lifecycle, allowlisted role mapping, transactional quota reservation,
+additive corrections, signed idempotent billing events, and stable-scope compliance
+reauthorization. Focused tests and a live PostgreSQL RLS isolation proof pass.
 
 ### Objective
 
@@ -1044,13 +1059,13 @@ commercial accounting, and compliance-grade administration.
 
 | Milestone | Deliverable |
 | --- | --- |
-| 9.0 | Enterprise requirements, threat model, and provider/connector priorities |
-| 9.1 | Connector SDK plus first demand-validated enterprise source |
-| 9.2 | Incremental sync, checkpoints, source ACL/deletion propagation, and operations |
-| 9.3 | Enterprise SSO/SCIM provisioning and group/role mapping |
-| 9.4 | Immutable usage ledger, quotas, entitlements, and rate limits |
-| 9.5 | Billing/subscription integration and reconciliation |
-| 9.6 | Retention, legal hold, export/deletion, compliance reporting, and audit review |
+| 9.0 | Complete — enterprise requirements, threat model, and provider priorities |
+| 9.1 | Implemented — connector SDK and tested read-only Google Drive adapter; live OAuth pending |
+| 9.2 | Implemented — durable fenced delta sync and deny-first ACL/deletion state; live propagation objective pending |
+| 9.3 | Implemented — SCIM-compatible ordered lifecycle and allowlisted mapping; provider proof pending |
+| 9.4 | Implemented — immutable usage, transactional reserve/settle, corrections; product quota values pending |
+| 9.5 | Implemented — signed simulated provider and entitlement reconciliation; real billing prohibited |
+| 9.6 | Implemented — stable-scope reauthorization, hold precedence, content-free evidence; automatic retention disabled |
 
 ### Completion gate
 
@@ -1128,16 +1143,23 @@ commercial accounting, and compliance-grade administration.
 | Dashboards, alerts, runbooks, and incident learning | 7.4–7.5 | Accepted and implemented — ADR 0036; external paging remains disabled |
 | Cloud/orchestration and managed services | 8.0 | Accepted — OCI Always Free-eligible single ARM host with private Docker Compose data plane under ADRs 0037–0039; Phoenix infrastructure provisioned and verified |
 | Dedicated frontend framework | 8.0 | Accepted — Streamlit remains authoritative; bounded Next.js candidate remains unpromoted under ADR 0040 |
-| First enterprise connector and billing provider | 9.0 | TBD |
+| Phase 9 scope and trust boundaries | 9.0 | Accepted — ADR 0043 |
+| Connector SDK and credential envelope | 9.0–9.1 | Accepted — ADR 0044; Google Drive selected in ADR 0050 |
+| Incremental sync, source ACL, and deletion propagation | 9.2 | Accepted — ADR 0045; timing target TBD |
+| Enterprise identity lifecycle and group mapping | 9.3 | Accepted — ADR 0046; provider TBD |
+| Immutable usage ledger, quotas, and entitlements | 9.4 | Accepted — ADR 0047; initial meters/quotas TBD |
+| Billing, subscription, and reconciliation boundary | 9.5 | Accepted — ADR 0048; provider TBD |
+| Compliance lifecycle and administrative evidence | 9.6 | Accepted — ADR 0049; automatic schedule disabled |
+| First enterprise connector | 9.1–9.2 | Accepted — read-only Google Drive API v3 in ADR 0050; live OAuth proof pending |
 
 ## Immediate next actions
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Define Phase 9 enterprise requirements, threat model, scope, and decision sequence | Proposed ADRs with explicit invariants, alternatives, approval questions, and provider-neutral boundaries |
-| 2 | Decide the connector SDK, credential envelope, source ACL/deletion semantics, and first-source selection criteria | Reviewed connector and incremental-sync ADRs; first provider remains TBD until approved |
-| 3 | Decide enterprise identity lifecycle, immutable usage accounting, quotas, billing reconciliation, and compliance lifecycle | Reviewed provider-neutral ADRs with concurrency, audit, retention, and failure contracts |
-| 4 | Begin Phase 9 implementation only after the corresponding decisions are accepted | Small milestone commits with focused tests and synchronized plan, architecture, and private context |
+| 1 | Implement durable connector installations, sync runs/attempts, checkpoints, and source mappings | Migration, RLS, repositories, replay/fencing tests, and deny-first visibility evidence |
+| 2 | Complete the read-only Google Drive adapter and deterministic provider tests | Change-token, deletion, permission, blob/export, cursor-expiry, and privacy coverage |
+| 3 | Implement provider-neutral identity, usage/quota, simulated billing, and compliance contracts | Milestone migrations/services with concurrency, audit, reconciliation, and lifecycle tests |
+| 4 | Run separately authorized live proofs after account setup | Google OAuth first; identity/billing sandbox only after explicit provider configuration |
 
 ## Update protocol
 

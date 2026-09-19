@@ -68,6 +68,24 @@ Commit-pinned CI, source/IaC/lockfile/image scans, SBOM/provenance/signature che
 least-privilege networking, private versioned backup storage, and USD 1 budget alerts
 remain active. No paid capacity upgrade was introduced.
 
+Phase 9 is now implementation-complete at the provider-neutral learning boundary.
+Accepted ADRs 0043–0049 define provider-neutral
+contracts for enterprise scope, connectors and sync, identity lifecycle, immutable
+usage controls, billing reconciliation, and compliance administration. Provider-neutral
+implementation is authorized; no enterprise provider, paid service, credential, or
+provider-specific policy value is selected.
+The Google Drive adapter, durable fenced sync, SCIM-compatible lifecycle contracts,
+immutable usage reservations/settlement, simulated signed billing, and governed
+compliance workflows are implemented on migration `20260919_0019`. Live Google OAuth,
+an external SCIM provider, and any billing sandbox remain separate acceptance proofs.
+The [Phase 9 enterprise kickoff contract](docs/PHASE9_ENTERPRISE_KICKOFF.md) records
+the requirements, threat model, provider scorecard, and remaining approval boundaries.
+Its provider-neutral connector SDK defines canonical discovery/change/content/permission
+contracts and runtime-only opaque credential resolution.
+ADR 0050 selects a read-only Google Drive API v3 adapter as the first connector. Mocked
+change-token, permission, download/export, discovery, and cursor-expiry coverage may run
+without credentials; live OAuth setup and source proof remain separately gated.
+
 The current `3.0` lineage contains:
 
 - The verified V1 parsing, ingestion, retrieval, generation, and Streamlit flow.

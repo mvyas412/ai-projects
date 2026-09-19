@@ -19,6 +19,19 @@ from backend.app.models.document import (
     DocumentVersion,
     DocumentVersionStatus,
 )
+from backend.app.models.enterprise import (
+    BillingEvent,
+    ComplianceWorkflow,
+    ConnectorInstallation,
+    ConnectorSourceObject,
+    ConnectorSyncAttempt,
+    ConnectorSyncRun,
+    EnterpriseGroupMapping,
+    EnterpriseIdentity,
+    EntitlementPolicy,
+    UsageLedgerEntry,
+    UsageReservation,
+)
 from backend.app.models.feedback import AnswerFeedback, FeedbackReason, FeedbackReviewStatus
 from backend.app.models.generation import IngestionGeneration, IngestionGenerationState
 from backend.app.models.ingestion import (
@@ -82,6 +95,15 @@ __all__ = [
     "Document",
     "DocumentVersion",
     "DocumentVersionStatus",
+    "BillingEvent",
+    "ComplianceWorkflow",
+    "ConnectorInstallation",
+    "ConnectorSourceObject",
+    "ConnectorSyncAttempt",
+    "ConnectorSyncRun",
+    "EnterpriseGroupMapping",
+    "EnterpriseIdentity",
+    "EntitlementPolicy",
     "FeedbackReason",
     "FeedbackReviewStatus",
     "IngestionAttempt",
@@ -110,6 +132,8 @@ __all__ = [
     "TableRegion",
     "TableValidationState",
     "User",
+    "UsageLedgerEntry",
+    "UsageReservation",
     "Workspace",
     "WorkspaceMembership",
     "WorkspaceRole",
