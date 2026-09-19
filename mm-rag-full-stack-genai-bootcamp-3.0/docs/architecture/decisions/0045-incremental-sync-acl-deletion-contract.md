@@ -1,6 +1,6 @@
 # ADR 0045: Incremental sync, source ACL, and deletion contract
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-19
 - Milestone: 9.2
 
@@ -46,3 +46,9 @@ deletion propagation.
 - Stale source access fails closed.
 - Rescans are expected recovery operations, not exceptional migrations.
 - Exact timing targets remain to be approved with the first provider.
+
+## Decision record
+
+Accepted by the user on 2026-09-19. Durable delta sync, webhook hints, authoritative
+reconciliation, transactional checkpoints, and deny-first permission/deletion behavior
+are approved. The provider-specific propagation objective remains TBD.

@@ -1,6 +1,6 @@
 # ADR 0049: Compliance lifecycle and administrative evidence
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-19
 - Milestone: 9.6
 
@@ -44,3 +44,9 @@ Approve product-owned orchestration first and defer an external compliance vendo
 - Enterprise lifecycle evidence builds on existing tested controls.
 - Jurisdiction-specific policy is not implied and needs legal review for real use.
 - Provider integrations must expose deletion/export capabilities through adapters.
+
+## Decision record
+
+Accepted by the user on 2026-09-19. Product-owned preview/reauthorize/apply lifecycle
+orchestration, hold precedence, and content-free evidence are approved. Automatic
+retention remains disabled until a schedule is separately reviewed.

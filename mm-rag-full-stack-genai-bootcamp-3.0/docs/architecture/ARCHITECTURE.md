@@ -193,7 +193,7 @@ flowchart LR
     p6["Phase 6<br/>Visual/table intelligence<br/>Completed / accepted"] -->
     p7["Phase 7<br/>Evaluation/observability<br/>Accepted"] -->
     p8["Phase 8<br/>Scalable platform<br/>Accepted"] -->
-    p9["Phase 9<br/>Enterprise platform<br/>Decision kickoff"]
+    p9["Phase 9<br/>Enterprise platform<br/>In progress"]
 ```
 
 | Phase | Capability | Main technologies/components | Stores | Status |
@@ -206,7 +206,7 @@ flowchart LR
 | 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | Completed and accepted; `visual-table-v1` promoted after free/live and signed-in candidate proof |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Local telemetry and protected evaluation evidence | Completed and accepted |
 | 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; encrypted OCI backup | Completed and accepted on the free-first Phoenix learning deployment |
-| 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Decision kickoff; ADRs 0043–0049 Proposed |
+| 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | In progress; ADRs 0043–0049 accepted, providers TBD |
 
 ## Phase 1 — working prototype
 
@@ -820,8 +820,8 @@ root-disk headroom.
 
 ## Phase 9 — enterprise integrations and commercial controls
 
-**Status:** Decision kickoff. Connector, identity, metering, billing, and compliance
-providers remain Proposed/TBD; no Phase 9 implementation is authorized.
+**Status:** In progress. ADRs 0043–0049 are accepted and provider-neutral implementation
+is authorized. Connector, identity, billing, and compliance providers remain TBD.
 
 ```mermaid
 flowchart LR
@@ -969,7 +969,7 @@ Accepted Phase 8 decisions are:
 - [ADR 0041 — Immutable delivery, secrets, and migrations](decisions/0041-immutable-delivery-secrets-migrations.md)
 - [ADR 0042 — Scaling, recovery, and release evidence](decisions/0042-scaling-recovery-release-evidence.md)
 
-Proposed Phase 9 decisions are:
+Accepted Phase 9 decisions are:
 
 - [ADR 0043 — Phase 9 enterprise scope and trust boundaries](decisions/0043-phase9-enterprise-scope-trust-boundaries.md)
 - [ADR 0044 — Connector SDK and credential envelope](decisions/0044-connector-sdk-credential-envelope.md)

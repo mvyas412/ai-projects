@@ -1,6 +1,6 @@
 # ADR 0043: Phase 9 enterprise scope and trust boundaries
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-19
 - Milestone: 9.0
 
@@ -47,3 +47,9 @@ Approve the provider-neutral, milestone-gated approach and retain the modular mo
 - Phase 9 can start without prematurely selecting vendors.
 - Every later ADR must preserve existing authorization and audit invariants.
 - Implementation remains blocked until the relevant ADR is accepted.
+
+## Decision record
+
+Accepted by the user on 2026-09-19. The provider-neutral milestone order, existing
+trust boundaries, modular-monolith default, free-first guardrail, and separate approval
+for provider-specific or paid activity are binding.

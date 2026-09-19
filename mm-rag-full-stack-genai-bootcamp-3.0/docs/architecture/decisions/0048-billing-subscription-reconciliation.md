@@ -1,6 +1,6 @@
 # ADR 0048: Billing, subscription, and reconciliation boundary
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-19
 - Milestone: 9.5
 
@@ -46,3 +46,9 @@ sandbox, and a fully simulated provider against free access and learning goals l
 - Product access remains explainable during provider outages.
 - Real-money launch requires a separate legal, tax, privacy, and operational review.
 - Provider selection remains open.
+
+## Decision record
+
+Accepted by the user on 2026-09-19. Usage, entitlement, and provider subscription truth
+remain separate; provider events are signed, idempotent, asynchronous, and reconciled.
+Only simulated or sandbox billing is permitted and the provider remains TBD.

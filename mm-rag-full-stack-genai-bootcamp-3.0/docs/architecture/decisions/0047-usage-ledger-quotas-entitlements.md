@@ -1,6 +1,6 @@
 # ADR 0047: Immutable usage ledger, quotas, and entitlements
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-19
 - Milestone: 9.4
 
@@ -43,3 +43,9 @@ metering vendors until evidence shows a need.
 - Usage can be audited and replayed without treating telemetry as money.
 - Meter definitions become versioned product contracts.
 - Billing remains downstream and cannot mutate usage truth.
+
+## Decision record
+
+Accepted by the user on 2026-09-19. PostgreSQL is the initial append-only usage and
+balance authority, corrections remain additive, and quota enforcement uses transactional
+reserve/settle semantics. Initial meters and quota values remain TBD.

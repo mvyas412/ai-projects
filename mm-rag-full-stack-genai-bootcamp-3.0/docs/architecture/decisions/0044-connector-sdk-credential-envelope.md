@@ -1,6 +1,6 @@
 # ADR 0044: Connector SDK and credential envelope
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-19
 - Milestone: 9.0–9.1
 
@@ -48,3 +48,9 @@ the same scorecard before selecting one.
 - Provider quirks stay behind adapters.
 - A credential-vault implementation remains a separate deployment decision.
 - Connector implementation waits for first-source approval.
+
+## Decision record
+
+Accepted by the user on 2026-09-19. The provider-neutral SDK, runtime-only opaque
+credential references, and provider scorecard are approved. The first source remains
+TBD and requires a separate selection.

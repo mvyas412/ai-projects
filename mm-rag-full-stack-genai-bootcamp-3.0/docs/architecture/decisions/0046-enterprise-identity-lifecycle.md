@@ -1,6 +1,6 @@
 # ADR 0046: Enterprise identity lifecycle and group mapping
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-19
 - Milestone: 9.3
 
@@ -45,3 +45,9 @@ deprovisioning.
 - Existing Auth0 login can remain while lifecycle providers stay replaceable.
 - Group mappings require administrative review and reconciliation evidence.
 - Provider choice and external tenant configuration remain separate approvals.
+
+## Decision record
+
+Accepted by the user on 2026-09-19. OIDC remains the authentication boundary; the
+SCIM-compatible lifecycle adapter, explicit allowlisted group mappings, and immediate
+deny-first suspension/deprovisioning behavior are approved. Provider choice remains TBD.

@@ -63,7 +63,7 @@ Rules:
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
 | Phase 8 | Completed and accepted — OCI Streamlit deployment, authenticated data path, progressive capacity, resilience, encrypted backup/restore, rollback, and all ten evidence scenarios pass; Next.js remains deferred and unpromoted |
-| Phase 9 | Decision kickoff — requirements, threat model, provider-neutral contracts, and priorities remain Proposed/TBD |
+| Phase 9 | In progress — ADRs 0043–0049 accepted; provider-neutral Milestone 9.0/9.1 foundation next, providers and policy values remain TBD |
 
 ## Delivery sequence and gates
 
@@ -1033,7 +1033,9 @@ of the accepted single-VM topology under representative bounded load.
 
 ## Phase 9 — enterprise integrations and commercial controls
 
-**Status:** Decision kickoff. No provider or implementation is selected.
+**Status:** In progress. ADRs 0043–0049 are accepted. Provider-neutral implementation
+may proceed; providers, credentials, paid services, initial meters/quotas, and
+provider-specific propagation targets remain separately gated.
 
 ### Objective
 
@@ -1128,13 +1130,13 @@ commercial accounting, and compliance-grade administration.
 | Dashboards, alerts, runbooks, and incident learning | 7.4–7.5 | Accepted and implemented — ADR 0036; external paging remains disabled |
 | Cloud/orchestration and managed services | 8.0 | Accepted — OCI Always Free-eligible single ARM host with private Docker Compose data plane under ADRs 0037–0039; Phoenix infrastructure provisioned and verified |
 | Dedicated frontend framework | 8.0 | Accepted — Streamlit remains authoritative; bounded Next.js candidate remains unpromoted under ADR 0040 |
-| Phase 9 scope and trust boundaries | 9.0 | Proposed — ADR 0043 |
-| Connector SDK and credential envelope | 9.0–9.1 | Proposed — ADR 0044; first source TBD |
-| Incremental sync, source ACL, and deletion propagation | 9.2 | Proposed — ADR 0045 |
-| Enterprise identity lifecycle and group mapping | 9.3 | Proposed — ADR 0046; provider TBD |
-| Immutable usage ledger, quotas, and entitlements | 9.4 | Proposed — ADR 0047 |
-| Billing, subscription, and reconciliation boundary | 9.5 | Proposed — ADR 0048; provider TBD |
-| Compliance lifecycle and administrative evidence | 9.6 | Proposed — ADR 0049 |
+| Phase 9 scope and trust boundaries | 9.0 | Accepted — ADR 0043 |
+| Connector SDK and credential envelope | 9.0–9.1 | Accepted — ADR 0044; first source TBD |
+| Incremental sync, source ACL, and deletion propagation | 9.2 | Accepted — ADR 0045; timing target TBD |
+| Enterprise identity lifecycle and group mapping | 9.3 | Accepted — ADR 0046; provider TBD |
+| Immutable usage ledger, quotas, and entitlements | 9.4 | Accepted — ADR 0047; initial meters/quotas TBD |
+| Billing, subscription, and reconciliation boundary | 9.5 | Accepted — ADR 0048; provider TBD |
+| Compliance lifecycle and administrative evidence | 9.6 | Accepted — ADR 0049; automatic schedule disabled |
 
 ## Immediate next actions
 
