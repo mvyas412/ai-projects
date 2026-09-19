@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 8 production-platform preparation; Phase 7 accepted |
+| Active milestone | Phase 9 decision kickoff; Phase 8 accepted |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -62,8 +62,8 @@ Rules:
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
-| Phase 8 | In progress — Phoenix infrastructure and corrected signed/scanned Streamlit release are deployed; authenticated data path, progressive 1/3/5/10-user capacity, resilience, encrypted backup/restore, rollback, and all ten release-evidence scenarios pass; the optional candidate disposition and final acceptance remain pending |
-| Phase 9 | Planned |
+| Phase 8 | Completed and accepted — OCI Streamlit deployment, authenticated data path, progressive capacity, resilience, encrypted backup/restore, rollback, and all ten evidence scenarios pass; Next.js remains deferred and unpromoted |
+| Phase 9 | Decision kickoff — requirements, threat model, provider-neutral contracts, and priorities remain Proposed/TBD |
 
 ## Delivery sequence and gates
 
@@ -975,7 +975,7 @@ enough to support release decisions and production operations.
 
 ## Phase 8 — scalable production platform
 
-**Status:** In progress. All local implementation contracts for Milestones 8.1–8.5
+**Status:** Completed and accepted. All implementation contracts for Milestones 8.1–8.5
 are present. The reviewed Phoenix infrastructure and corrected signed/scanned image are
 deployed by immutable digest behind public HTTPS. Authenticated shell, readiness, logout,
 and one-attempt ingestion pass with 31 promoted text vectors and 33 visual regions. The
@@ -995,7 +995,8 @@ to `f5af5a1` and forward again with readiness preserved and identical aggregate 
 vector, and object-store integrity evidence. The authenticated 1/3/5/10-user probe then
 completed 30 requests per stage with zero errors; its highest p95 was 300.721 ms against
 the accepted 5-second objective. All ten release-evidence scenarios now pass. Candidate
-parity remains optional and unpromoted pending an explicit promote-or-defer decision.
+parity is explicitly deferred and remains unpublished and unpromoted. Streamlit is the
+accepted Phase 8 frontend.
 
 The image gate runs application and Next.js builds independently on native AMD64 and
 ARM64 GitHub runners, then reports one stable aggregate result. This avoids QEMU-only
@@ -1032,7 +1033,7 @@ of the accepted single-VM topology under representative bounded load.
 
 ## Phase 9 — enterprise integrations and commercial controls
 
-**Status:** Planned.
+**Status:** Decision kickoff. No provider or implementation is selected.
 
 ### Objective
 
@@ -1133,10 +1134,10 @@ commercial accounting, and compliance-grade administration.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Run the explicitly bounded paid Streamlit data-path proof | Upload/job completion, grounded chat, citations, and tenant-scoped persistence evidence |
-| 2 | Exercise free 1/3/5/10-user capacity, dependency failures, encrypted off-host backup, and clean restore | Cloud measurements and integrity evidence meeting frozen SLO/recovery gates |
-| 3 | Deploy a reviewed follow-up manifest and prove rollback to the initial baseline | Previous-manifest, data-integrity, readiness, and rollback timing evidence |
-| 4 | Publish and prove the opt-in Next.js candidate through its separate review boundary | Signed candidate digest plus security, accessibility, resource, and browser-parity evidence |
+| 1 | Define Phase 9 enterprise requirements, threat model, scope, and decision sequence | Proposed ADRs with explicit invariants, alternatives, approval questions, and provider-neutral boundaries |
+| 2 | Decide the connector SDK, credential envelope, source ACL/deletion semantics, and first-source selection criteria | Reviewed connector and incremental-sync ADRs; first provider remains TBD until approved |
+| 3 | Decide enterprise identity lifecycle, immutable usage accounting, quotas, billing reconciliation, and compliance lifecycle | Reviewed provider-neutral ADRs with concurrency, audit, retention, and failure contracts |
+| 4 | Begin Phase 9 implementation only after the corresponding decisions are accepted | Small milestone commits with focused tests and synchronized plan, architecture, and private context |
 
 ## Update protocol
 

@@ -54,15 +54,15 @@ backend is a future decision, not an implicit addition.
 
 ## 5. Post-provision acceptance
 
-- [ ] Deploy only digest-pinned service images and the reviewed release manifest.
-- [ ] Verify HTTPS, sign-in, authenticated email, personal workspace, readiness, upload,
+- [x] Deploy only digest-pinned service images and the reviewed release manifest.
+- [x] Verify HTTPS, sign-in, authenticated email, personal workspace, readiness, upload,
       durable ingestion, grounded chat/citations, and logout.
-- [ ] Confirm at least ten registered users can be represented, then run the progressive
+- [x] Confirm at least ten registered users can be represented, then run the progressive
       1/3/5/10-user capacity and dependency-failure scenarios.
-- [ ] Create an encrypted backup, restore it into a clean target, and verify database,
+- [x] Create an encrypted backup, restore it into a clean target, and verify database,
       vector, object, authorization, checksum, readiness, RPO, and RTO evidence.
-- [ ] Exercise rollback to the previous immutable manifest without tenant-data loss.
-- [ ] Confirm all ten release-evidence scenarios pass before Phase 8 acceptance.
+- [x] Exercise rollback to the previous immutable manifest without tenant-data loss.
+- [x] Confirm all ten release-evidence scenarios pass before Phase 8 acceptance.
 
 This topology is a low-cost learning system with no high-availability or production SLA
 claim. Stop and review rather than silently adding paid capacity when free capacity is

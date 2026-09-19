@@ -700,8 +700,8 @@ changes before release, and manage reliability, quality, latency, and cost.
 
 ## Phase 8 — production-shaped learning platform
 
-**Status:** In progress. Milestones 8.1–8.5 local contracts are implemented on an
-isolated branch. The reviewed Phoenix plan provisioned the single A1 host, network,
+**Status:** Completed and accepted. Milestones 8.1–8.5 are implemented and evidenced.
+The reviewed Phoenix plan provisioned the single A1 host, network,
 private versioned backup bucket, and budget alerts. Clean cloud-init, host services,
 firewall policy, and zero Terraform drift are verified. The protected publisher has
 produced and deployed the corrected signed, scanned, SBOM-attested AMD64/ARM64 image by
@@ -710,8 +710,8 @@ authenticated identity, Personal workspace, Library, logout, and first-attempt
 ingestion pass. Reversible rollback to the prior signed release and roll-forward to the
 current release preserve readiness and tenant-data integrity. Authenticated progressive
 capacity passes at 1/3/5/10 concurrent sessions with zero errors and a maximum observed
-p95 of 300.721 ms. All ten release-evidence scenarios pass; candidate promotion remains
-optional and separately gated.
+p95 of 300.721 ms. All ten release-evidence scenarios pass. Streamlit is accepted;
+the Next.js candidate is deferred, unpublished, and unpromoted.
 
 The replacement bounded upload succeeded on attempt 1 and promoted 31 text vectors and
 33 visual regions. Its initial three-question check safely abstained before retrieval because
@@ -820,7 +820,8 @@ root-disk headroom.
 
 ## Phase 9 — enterprise integrations and commercial controls
 
-**Status:** Planned. Connector and billing providers are TBD.
+**Status:** Decision kickoff. Connector, identity, metering, billing, and compliance
+providers remain Proposed/TBD; no Phase 9 implementation is authorized.
 
 ```mermaid
 flowchart LR
@@ -899,7 +900,7 @@ reconcile commercial usage.
 | Structured tables/calculation | ADR 0029 implemented at `20260907_0015`/`0016`: normalized validated cells, immutable traces, and a closed Decimal calculation allowlist; no generated SQL |
 | Region evidence/viewer/rollout | ADR 0030 implementation adds backend-mediated `evidence-v1`, integrity-checked streaming, accessible inspection, and accepted `visual-table-v1`; Phase 6 browser, promotion, and release gates pass |
 | Observability backend | Accepted ADRs 0031–0032: OTLP through an OpenTelemetry Collector to optional free local Grafana LGTM; production provider remains TBD |
-| Deployment platform | Accepted OCI learning path with one Always Free-eligible ARM VM and Docker Compose under ADRs 0037–0038; no resource provisioned |
+| Deployment platform | Accepted OCI learning path with one Always Free-eligible ARM VM and Docker Compose under ADRs 0037–0038; Phoenix deployment and Phase 8 evidence pass |
 
 Accepted Phase 2 decisions are recorded in
 [`docs/architecture/decisions`](decisions/):
@@ -972,8 +973,8 @@ Accepted Phase 8 decisions are:
 
 1. Update the affected phase, diagram, status, and technology table.
 2. Update the whole-system diagram when a cross-phase boundary or flow changes.
-3. Record consequential active-phase decisions and rationale in the ignored
-   `Phase7_context.md` or `Phase8_context.md`; keep earlier phase contexts historical.
+3. Record consequential active-phase decisions and rationale in the ignored active-phase
+   context; keep earlier phase contexts historical.
 4. Keep unapproved technologies labeled **Proposed / TBD**.
 5. Verify Mermaid fences and links before committing.
 6. Never place credentials, tokens, private URLs, customer data, or other secrets

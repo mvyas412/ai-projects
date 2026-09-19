@@ -1,4 +1,4 @@
-# Multimodal RAG Production — Phase 7 evidence and Phase 8 deployment preparation
+# Multimodal RAG Production — Phase 8 accepted OCI learning deployment
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
@@ -55,30 +55,18 @@ feedback review, dashboards, alerts, and incident runbooks. The seven-day repres
 baseline and final free gate pass; approved pilot SLOs are frozen and Phase 7 is accepted.
 The optional local Collector/LGTM stack passes live readiness; all four dashboards
 and four alert rules load, and a content-free synthetic metric reaches Prometheus.
-Phase 8 ADRs 0037–0042 are accepted. Its isolated branch now contains all
-local contracts: CPU-only multiarch delivery, an OCI A1 host/private
-backup-bucket module, production-shaped Compose limits and graceful drains, the
-Streamlit-first HTTPS edge, an unpromoted token-mediating Next.js candidate, encrypted
-backup integrity tooling, bounded capacity probes, immutable release manifests, and a
-ten-scenario release-evidence gate. Local security hardening adds commit-pinned CI,
-source/IaC/image scanning, candidate accessibility and malformed-origin checks, and a real synthetic encrypted
-backup/restore round trip. The approved Phoenix plan has now provisioned one running
-Always Free-eligible 2-OCPU/12-GB A1 host, its reviewed network, a private versioned
-backup bucket, and USD 1 forecast/actual budget alerts. First-boot verification exposed
-and fixed an `opc` ordering defect; the host now reports clean cloud-init completion,
-the expected firewall/services, and zero Terraform drift. The manually protected
-publisher produced the signed, scanned, SBOM-attested multiarchitecture application
-image for commit `7c8993d`; its immutable digest and anonymous pull are verified. No
-paid model run has occurred. The first Streamlit release is now deployed through the
-free HTTPS hostname: migration/model provisioning, API readiness, authenticated identity,
-Personal workspace, Library, service readiness, and logout pass. Upload, grounded chat,
-full authenticated capacity, restore, rollback, and candidate evidence remain gated.
-A preliminary public-readiness 1/3/5/10-user probe has zero errors, and seven reversible
-worker/dependency/telemetry/disk-pressure scenarios pass. The
-[OCI onboarding checklist](docs/PHASE8_OCI_ONBOARDING.md) records the remaining gates.
-The amended free-first capacity contract requires ten registered users, 3–5 normally
-concurrent users, and progressive 1/3/5/10-user measurements with a required 10-user burst.
-Missing the gate triggers optimization and review, not an automatic paid upgrade.
+Phase 8 ADRs 0037–0042 and Milestones 8.0–8.5 are accepted. The Phoenix OCI learning
+deployment runs the signed/scanned multiarchitecture application behind HTTPS on the
+reviewed free-first A1 topology with zero Terraform drift. Authenticated identity,
+workspace/library/chat, first-attempt visual ingestion, grounded citations, progressive
+1/3/5/10-user capacity, seven reversible degradation scenarios, encrypted off-host
+backup and isolated restore, and immutable release rollback/roll-forward all pass.
+The ten-scenario release-evidence gate passes. The accepted frontend remains Streamlit;
+the implemented Next.js candidate is deliberately deferred, unpublished, unpromoted,
+and available for a future parity decision without changing the current product path.
+Commit-pinned CI, source/IaC/lockfile/image scans, SBOM/provenance/signature checks,
+least-privilege networking, private versioned backup storage, and USD 1 budget alerts
+remain active. No paid capacity upgrade was introduced.
 
 The current `3.0` lineage contains:
 
@@ -639,10 +627,7 @@ authorized real-OpenAI asynchronous browser proof. The immutable accepted releas
 is tagged `mm-rag-v3.0.0` at `9ebe767`. Phase 4 is completed, accepted, and
 squash-merged through PR #3 at `57ee453`; its documentation closure is preserved by
 annotated tag `mm-rag-v4.0.0` at `996898e`.
-Phase 8 decisions are accepted. Its isolated OCI learning checkpoint now includes a
-CPU-only ARM64-capable image, a private single-VM Compose topology, an HTTPS edge,
-secret-safe templates, and guarded image delivery. The approved Phoenix infrastructure
-is provisioned and verified, and the immutable application image is published with scan,
-SBOM, provenance, signature, and public-pull evidence. The default Streamlit deployment
-and authenticated shell/logout proof pass; exercised data-path and cloud resilience
-evidence remain gated.
+Phase 8 is accepted. The OCI learning deployment, Streamlit product path, immutable
+delivery, authenticated data path, ten-user capacity, resilience, recovery, rollback,
+and all ten release-evidence scenarios pass. The Next.js candidate remains deferred and
+unpromoted.
