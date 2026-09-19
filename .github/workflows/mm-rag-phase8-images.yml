@@ -66,8 +66,17 @@ jobs:
       - name: Validate Next.js candidate
         working-directory: mm-rag-full-stack-genai-bootcamp-3.0/frontend-next
         run: |
-          npm ci
-          npm audit
+          npm ci --no-audit
+          # Keep security enforcement explicit while tolerating a short registry outage.
+          for attempt in 1 2 3; do
+            if npm audit; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            sleep $((attempt * 10))
+          done
           npm test
           npm run typecheck
           npm run build
