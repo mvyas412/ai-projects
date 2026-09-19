@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 8 production-platform preparation; Phase 7 accepted |
+| Active milestone | Phase 9 decision kickoff; Phase 8 accepted |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -62,7 +62,8 @@ Rules:
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
-| Phases 8–9 | Planned |
+| Phase 8 | Completed and accepted — OCI Streamlit deployment, authenticated data path, progressive capacity, resilience, encrypted backup/restore, rollback, and all ten evidence scenarios pass; Next.js remains deferred and unpromoted |
+| Phase 9 | Decision kickoff — requirements, threat model, provider-neutral contracts, and priorities remain Proposed/TBD |
 
 ## Delivery sequence and gates
 
@@ -91,8 +92,8 @@ security and data-integrity gates on which it depends.
 | 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Completed and accepted |
 | 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Closed without acceptance |
 | 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Completed and accepted; `visual-table-v1` promoted with explicit rollback |
-| 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | In progress — decisions proposed |
-| 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Planned |
+| 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Implemented; post-fix acceptance baseline in progress |
+| 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Non-provisioning implementation and local hardening complete; cloud acceptance pending Phase 7 closure and explicit provisioning approval |
 | 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Planned |
 
 ## Phase 1 — working prototype
@@ -974,23 +975,53 @@ enough to support release decisions and production operations.
 
 ## Phase 8 — scalable production platform
 
-**Status:** Planned.
+**Status:** Completed and accepted. All implementation contracts for Milestones 8.1–8.5
+are present. The reviewed Phoenix infrastructure and corrected signed/scanned image are
+deployed by immutable digest behind public HTTPS. Authenticated shell, readiness, logout,
+and one-attempt ingestion pass with 31 promoted text vectors and 33 visual regions. The
+initial three-question check then exposed a deterministic routing defect: ordinary
+text questions matched the closed table-calculation vocabulary, and a calculation miss
+abstained instead of continuing to authorized RAG retrieval. The narrow fallback fix,
+regression test, protected publication, immutable-digest deployment, and separately
+approved paid recheck now pass. The existing PDF returned grounded answers for the
+7-day refund window, Clause 9.1 data residency requirement, and 15-minute P1 API target,
+each with page-level citations. The worker remains stopped with zero active jobs.
+
+The private versioned OCI bucket now holds the age ciphertext only. Provider download,
+safe decrypt, manifest verification, and isolated PostgreSQL/Qdrant/SeaweedFS restore
+pass with a conservative 0.75-hour RTO and effectively zero quiesced-export RPO, inside
+the accepted 8-hour/24-hour targets. A follow-up release was rolled back from `3de5b3c`
+to `f5af5a1` and forward again with readiness preserved and identical aggregate database,
+vector, and object-store integrity evidence. The authenticated 1/3/5/10-user probe then
+completed 30 requests per stage with zero errors; its highest p95 was 300.721 ms against
+the accepted 5-second objective. All ten release-evidence scenarios now pass. Candidate
+parity is explicitly deferred and remains unpublished and unpromoted. Streamlit is the
+accepted Phase 8 frontend.
+
+The image gate runs application and Next.js builds independently on native AMD64 and
+ARM64 GitHub runners, then reports one stable aggregate result. This avoids QEMU-only
+dependency-install failures and prevents one sequential build from consuming the entire
+job timeout. Candidate installation disables npm's implicit audit request; a pinned
+Trivy lockfile scan rejects fixable high/critical dependency findings, and the native
+candidate-image scan independently enforces the same release threshold. Image publication
+remains a separate manually approved action.
 
 ### Objective
 
-Deploy a secure, recoverable platform whose frontend, API, and ingestion workers
-can scale independently under representative production load.
+Deploy a secure, recoverable learning platform whose frontend, API, and ingestion
+workers retain separable runtime boundaries, then prove the capacity and recovery limits
+of the accepted single-VM topology under representative bounded load.
 
-### Proposed milestones
+### Milestones
 
 | Milestone | Deliverable |
 | --- | --- |
-| 8.0 | Cloud/orchestration, managed-service, and dedicated-frontend ADRs |
-| 8.1 | Environment promotion, immutable artifacts, secrets, and migration-aware CI/CD |
-| 8.2 | Dedicated frontend and gateway/WAF/rate-limit boundary |
-| 8.3 | Horizontally scaled stateless API and autoscaled workers |
-| 8.4 | Managed PostgreSQL, Qdrant, queue, object storage, backup, and restore |
-| 8.5 | Load, resilience, disaster-recovery, security, and release validation |
+| 8.0 | Completed — OCI learning constraints plus deployment, data, frontend, delivery, and recovery ADRs 0037–0042 accepted |
+| 8.1 | Streamlit baseline deployed — CPU-only multiarch image and native architecture gates pass; reviewed Phoenix A1/network/private-bucket/budget plan applied; root filesystem expanded; corrected signed/scanned digest deployed behind HTTPS; migration, pinned models, API readiness, authenticated workspace, Library, logout, first-attempt ingestion, and grounded three-question data-path proof pass |
+| 8.2 | Candidate implemented — Streamlit remains default; token-mediating Next.js parity candidate is opt-in and unpromoted; automated accessibility, malformed-origin rejection, and non-disclosure checks pass, browser parity evidence pending |
+| 8.3 | Cloud capacity evidence complete — resource limits, prefetch-1 backpressure, graceful drains, seven reversible resilience scenarios, and authenticated 1/3/5/10-user readiness/current-user traffic pass with zero errors and p95 below the accepted 5-second objective |
+| 8.4 | Cloud recovery proof complete — private versioned OCI ciphertext round-trip, safe decrypt/integrity checks, and isolated PostgreSQL/Qdrant/SeaweedFS restore pass inside the accepted RPO/RTO targets |
+| 8.5 | Cloud release gate complete — immutable release manifests, resilience, recovery, rollback, and authenticated progressive load satisfy all ten required evidence scenarios |
 
 ### Completion gate
 
@@ -998,11 +1029,11 @@ can scale independently under representative production load.
 - Deployments and migrations are reversible without tenant-data loss.
 - Dependency failure triggers timeouts, backpressure, and safe degradation.
 - Backups restore successfully in an exercised recovery procedure.
-- Production security review and operational readiness review pass.
+- Learning-deployment security and operational readiness reviews pass without claiming a production SLA.
 
 ## Phase 9 — enterprise integrations and commercial controls
 
-**Status:** Planned.
+**Status:** Decision kickoff. No provider or implementation is selected.
 
 ### Objective
 
@@ -1095,16 +1126,18 @@ commercial accounting, and compliance-grade administration.
 | Unified RAG evaluation release gates | 7.2 | Accepted and implemented — ADR 0034 |
 | User feedback and review governance | 7.3 | Accepted and implemented — ADR 0035 |
 | Dashboards, alerts, runbooks, and incident learning | 7.4–7.5 | Accepted and implemented — ADR 0036; external paging remains disabled |
-| Cloud/orchestration and managed services | 8.0 | TBD |
-| Dedicated frontend framework | 8.0 | TBD |
+| Cloud/orchestration and managed services | 8.0 | Accepted — OCI Always Free-eligible single ARM host with private Docker Compose data plane under ADRs 0037–0039; Phoenix infrastructure provisioned and verified |
+| Dedicated frontend framework | 8.0 | Accepted — Streamlit remains authoritative; bounded Next.js candidate remains unpromoted under ADR 0040 |
 | First enterprise connector and billing provider | 9.0 | TBD |
 
 ## Immediate next actions
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Prepare the accepted Phase 7 closure for review | Small completion commit and passing required checks |
-| 2 | Continue reviewed Phase 8 work without changing accepted Phase 7 evidence | Isolated, reversible production-platform milestones |
+| 1 | Define Phase 9 enterprise requirements, threat model, scope, and decision sequence | Proposed ADRs with explicit invariants, alternatives, approval questions, and provider-neutral boundaries |
+| 2 | Decide the connector SDK, credential envelope, source ACL/deletion semantics, and first-source selection criteria | Reviewed connector and incremental-sync ADRs; first provider remains TBD until approved |
+| 3 | Decide enterprise identity lifecycle, immutable usage accounting, quotas, billing reconciliation, and compliance lifecycle | Reviewed provider-neutral ADRs with concurrency, audit, retention, and failure contracts |
+| 4 | Begin Phase 9 implementation only after the corresponding decisions are accepted | Small milestone commits with focused tests and synchronized plan, architecture, and private context |
 
 ## Update protocol
 

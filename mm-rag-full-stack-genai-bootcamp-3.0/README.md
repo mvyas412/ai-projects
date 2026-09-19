@@ -1,4 +1,4 @@
-# Multimodal RAG Production — Phase 7 evaluation and observability
+# Multimodal RAG Production — Phase 8 accepted OCI learning deployment
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
@@ -55,6 +55,18 @@ feedback review, dashboards, alerts, and incident runbooks. The seven-day repres
 baseline and final free gate pass; approved pilot SLOs are frozen and Phase 7 is accepted.
 The optional local Collector/LGTM stack passes live readiness; all four dashboards
 and four alert rules load, and a content-free synthetic metric reaches Prometheus.
+Phase 8 ADRs 0037–0042 and Milestones 8.0–8.5 are accepted. The Phoenix OCI learning
+deployment runs the signed/scanned multiarchitecture application behind HTTPS on the
+reviewed free-first A1 topology with zero Terraform drift. Authenticated identity,
+workspace/library/chat, first-attempt visual ingestion, grounded citations, progressive
+1/3/5/10-user capacity, seven reversible degradation scenarios, encrypted off-host
+backup and isolated restore, and immutable release rollback/roll-forward all pass.
+The ten-scenario release-evidence gate passes. The accepted frontend remains Streamlit;
+the implemented Next.js candidate is deliberately deferred, unpublished, unpromoted,
+and available for a future parity decision without changing the current product path.
+Commit-pinned CI, source/IaC/lockfile/image scans, SBOM/provenance/signature checks,
+least-privilege networking, private versioned backup storage, and USD 1 budget alerts
+remain active. No paid capacity upgrade was introduced.
 
 The current `3.0` lineage contains:
 
@@ -160,14 +172,12 @@ future capabilities have already been implemented.
 The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
-shows the Phase 5 runtime checkpoint, including hybrid retrieval and the failed v4
-paid nDCG gate. Phase 5 is closed without candidate promotion. Phase 6 decision
-kickoff PR #6 was squash-merged at `95d18b3`, and ADRs 0025–0030 were accepted on
-2026-09-03. Milestones 6.0–6.5 now provide the deterministic visual/table corpus,
-immutable local extraction and visual retrieval, normalized tables, exact
-calculation, and backend-mediated evidence inspection. The Phase 5 text path remains
-the default, so the current poster remains the accepted default-runtime view until
-Phase 6 rollout is approved.
+shows the accepted Phase 6 product path and implemented Phase 7 evaluation and
+observability layer. Phase 5 is closed without candidate promotion. Phase 6
+Milestones 6.0–6.5 provide the deterministic visual/table corpus, immutable local
+extraction and visual retrieval, normalized tables, exact calculation, and
+backend-mediated evidence inspection; `visual-table-v1` is the accepted default.
+Phase 7 acceptance remains pending its representative post-fix baseline review.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
@@ -617,4 +627,7 @@ authorized real-OpenAI asynchronous browser proof. The immutable accepted releas
 is tagged `mm-rag-v3.0.0` at `9ebe767`. Phase 4 is completed, accepted, and
 squash-merged through PR #3 at `57ee453`; its documentation closure is preserved by
 annotated tag `mm-rag-v4.0.0` at `996898e`.
-Production providers and deployment remain future Phase 8 decisions.
+Phase 8 is accepted. The OCI learning deployment, Streamlit product path, immutable
+delivery, authenticated data path, ten-user capacity, resilience, recovery, rollback,
+and all ten release-evidence scenarios pass. The Next.js candidate remains deferred and
+unpromoted.

@@ -53,7 +53,11 @@ from backend.app.services.ingestion_jobs import (
     IngestionJobStateMachine,
 )
 from backend.app.services.ingestion_operations import IngestionOperationsService
-from backend.app.services.ingestion_worker import DeliveryDisposition, IngestionWorkerService
+from backend.app.services.ingestion_worker import (
+    DeliveryDisposition,
+    IngestionWorkerService,
+    _classify_failure,
+)
 from backend.app.services.lifecycle import LifecycleService
 from backend.app.services.visual_ingestion import LocalVisualIngestionProcessor
 from backend.app.storage.keys import attempt_artifact_key, original_object_key
@@ -63,7 +67,12 @@ from backend.app.tables.calculation import (
     TableCalculationRequest,
     TableCalculationScope,
 )
-from backend.app.visual.extraction import ExtractedRegion, ExtractedTable, ExtractionResult
+from backend.app.visual.extraction import (
+    ExtractedRegion,
+    ExtractedTable,
+    ExtractionResult,
+    VisualExtractionError,
+)
 from backend.app.visual.provenance import NormalizedBoundingBox
 from backend.app.workers.health import ProcessHealth
 from backend.app.workers.ingestion_worker import _recover_expired_and_heartbeat
@@ -97,6 +106,14 @@ class SuccessfulIndexer:
 class UnavailableIndexer:
     def index(self, request: IndexingRequest, *, progress=None) -> IndexingResult:
         raise IndexingUnavailableError("do not disclose dependency details")
+
+
+def test_visual_extraction_failure_is_permanent_and_non_disclosing() -> None:
+    assert _classify_failure(VisualExtractionError("private runtime detail")) == (
+        False,
+        "visual_extraction_failed",
+        "Visual content could not be extracted.",
+    )
 
 
 class RecordingPublisher:

@@ -273,9 +273,11 @@ class ConversationService:
             and should_attempt_table_calculation(content)
             else None
         )
+        # A deterministic miss is not an evidence verdict; preserve the normal
+        # authorized RAG path when no validated table cells support the operation.
         answer = (
             _calculation_answer(calculation.evidence)
-            if calculation is not None and calculation.attempted
+            if calculation is not None and calculation.evidence is not None
             else self._rag_engine.answer(rag_request)
         )
         # Treat model citations as untrusted output and revalidate every source

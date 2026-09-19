@@ -10,6 +10,7 @@ uv run python -m scripts.run_phase6_evaluation --check
 uv run python -m scripts.run_phase6_candidate --check
 uv run python -m scripts.run_phase7_evaluation --check
 uv run python -m scripts.phase7_observability validate
+uv run python -m scripts.validate_phase8_deployment
 uv run alembic current
 uv run alembic check
 

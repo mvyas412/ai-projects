@@ -191,8 +191,8 @@ flowchart LR
     p4["Phase 4<br/>Governance foundation<br/>Completed / v4.0.0"] -->
     p5["Phase 5<br/>Hybrid retrieval<br/>Closed / gate not met"] -->
     p6["Phase 6<br/>Visual/table intelligence<br/>Completed / accepted"] -->
-    p7["Phase 7<br/>Evaluation/observability<br/>Decision kickoff"] -->
-    p8["Phase 8<br/>Scalable platform<br/>Planned"] -->
+    p7["Phase 7<br/>Evaluation/observability<br/>Acceptance baseline"] -->
+    p8["Phase 8<br/>Scalable platform<br/>Decisions accepted"] -->
     p9["Phase 9<br/>Enterprise platform<br/>Planned"]
 ```
 
@@ -204,8 +204,8 @@ flowchart LR
 | 4 | Fine-grained isolation and governance | Central RBAC/ACL, RLS, vector/object enforcement, permission snapshots, security audit/export, and durable lifecycle | PostgreSQL, Qdrant, object storage | Completed and preserved at `mm-rag-v4.0.0` |
 | 5 | Higher-quality retrieval | Versioned evaluation, dense baseline, sparse BM25, deterministic RRF, bounded reranker | Qdrant plus pinned local FastEmbed inference | Closed without acceptance; v4 nDCG gate missed and no candidate was promoted |
 | 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | Completed and accepted; `visual-table-v1` promoted after free/live and signed-in candidate proof |
-| 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Telemetry/eval stores TBD | Planned |
-| 8 | Independently scalable deployment | Gateway, API/workers, dedicated frontend TBD, managed services | Managed PostgreSQL, Qdrant, object storage | Planned |
+| 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Local telemetry and protected evaluation evidence | Implemented; acceptance baseline in progress |
+| 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; off-host OCI backup planned | Non-provisioning implementation and local hardening complete |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Planned |
 
 ## Phase 1 — working prototype
@@ -698,47 +698,130 @@ stores. Do not log tokens, secrets, raw documents, or unreviewed sensitive
 content. Exit: the team can explain requests, detect failures, compare RAG
 changes before release, and manage reliability, quality, latency, and cost.
 
-## Phase 8 — scalable production platform
+## Phase 8 — production-shaped learning platform
 
-**Status:** Planned. Cloud, orchestration, and frontend framework are TBD.
+**Status:** Completed and accepted. Milestones 8.1–8.5 are implemented and evidenced.
+The reviewed Phoenix plan provisioned the single A1 host, network,
+private versioned backup bucket, and budget alerts. Clean cloud-init, host services,
+firewall policy, and zero Terraform drift are verified. The protected publisher has
+produced and deployed the corrected signed, scanned, SBOM-attested AMD64/ARM64 image by
+immutable digest. Public HTTPS, migration/model provisioning, API readiness,
+authenticated identity, Personal workspace, Library, logout, and first-attempt
+ingestion pass. Reversible rollback to the prior signed release and roll-forward to the
+current release preserve readiness and tenant-data integrity. Authenticated progressive
+capacity passes at 1/3/5/10 concurrent sessions with zero errors and a maximum observed
+p95 of 300.721 ms. All ten release-evidence scenarios pass. Streamlit is accepted;
+the Next.js candidate is deferred, unpublished, and unpromoted.
+
+The replacement bounded upload succeeded on attempt 1 and promoted 31 text vectors and
+33 visual regions. Its initial three-question check safely abstained before retrieval because
+ordinary text questions matched the closed table-calculation vocabulary and an
+unsupported calculation returned an evidence verdict instead of falling through to
+authorized RAG. The correction preserves exact answers when validated table cells exist
+and otherwise continues through the normal scoped retrieval path. Focused regression
+tests, protected publication, immutable-digest deployment, and a separately approved
+paid recheck pass. The accepted recheck reused the existing PDF and returned grounded,
+page-cited answers for the refund window, data-residency clause, and P1 response target.
+
+The first public-readiness 1/3/5/10-user observation has zero errors. The final
+authenticated probe also has zero errors across 30 readiness/current-user requests at
+each 1/3/5/10-user stage; observed p95 values are 300.721, 145.225, 267.64, and
+217.697 ms, all below the accepted 5-second objective. Worker restart,
+broker loss, fail-closed PostgreSQL/Qdrant/object-store loss and recovery,
+telemetry-disabled operation, and bounded disk pressure pass. These checks establish
+infrastructure and authenticated read-capacity behavior without making paid model calls.
+The first real quiesced backup contains a PostgreSQL custom dump, one Qdrant collection
+snapshot, and the stored original object. Its age-encrypted bundle is retained in the
+private versioned OCI bucket without the key or plaintext. Provider download, safe
+decrypt, manifest/checksum validation, and isolated PostgreSQL/Qdrant/SeaweedFS restore
+pass inside the accepted RPO/RTO targets.
+
+The bounded-load, seven resilience, backup/restore, and rollback records satisfy all ten
+required Phase 8 release-evidence scenarios. The token used for the authenticated probe
+was short-lived, stored only in a protected temporary file, and securely removed after
+the run; response bodies and identity values were not retained.
+
+Local hardening now also proves fixable high/critical vulnerability scans for both app
+images, tracked-source secret and OCI configuration scans, automated candidate
+accessibility/non-disclosure behavior, fail-closed malformed-origin handling, and a real synthetic age-encrypted backup/restore
+round trip. GitHub Actions are commit-pinned and repeat these checks. The
+[OCI onboarding checklist](../PHASE8_OCI_ONBOARDING.md) keeps remaining account inputs and
+explicit mutation approvals separate from code readiness.
+
+Multi-architecture validation fans out application and Next.js builds across native
+AMD64 and ARM64 runners and folds them into one stable required result. Native execution
+keeps architecture-specific Node and image dependencies out of QEMU emulation while the
+manual publication boundary remains unchanged. Candidate dependency installation does
+not invoke npm's audit service implicitly. A pinned Trivy filesystem scan covers the
+candidate lockfile and a separate native-image scan covers the deployable artifact; both
+reject fixable high/critical findings. The Next.js candidate remains opt-in, unpromoted,
+and unpublished; its artifact requires a separate reviewed publication and parity proof
+before the candidate profile can be enabled.
+
+The first OCI release is represented explicitly as an initial baseline with no invented
+predecessor. All subsequent manifests must name a real previous manifest, and Phase 8
+acceptance requires an exercised follow-up rollback to that baseline. That drill now
+passes: only API, dispatcher, and Streamlit were switched from `3de5b3c` to `f5af5a1`
+and back; durable services remained in place, the worker remained stopped, all readiness
+checks passed, and aggregate PostgreSQL, Qdrant, and object counts and fingerprints were
+unchanged before, during, and after the transition.
+
+The private application network receives the approved Auth0 issuer and audience through
+the shared API/worker environment. Streamlit keeps the browser client secret in its
+read-only secrets mount; FastAPI remains the final token-validation authority.
 
 ```mermaid
 flowchart TB
-    user["Users"] --> edge["DNS + TLS + CDN / edge"]
-    edge --> web["Dedicated frontend<br/>framework TBD"]
-    web --> gateway["Gateway / WAF / rate limiting"]
-    gateway --> api["Stateless FastAPI replicas"]
-    api --> oidc["OIDC provider"]
-    api --> pg[("Managed PostgreSQL<br/>HA + backup + PITR")]
-    api --> qd[("Managed / clustered Qdrant")]
-    api --> objects[("Managed object storage")]
-    api --> queue["Managed queue"]
-    queue --> workers["Autoscaled workers"]
-    workers --> pg
-    workers --> qd
-    workers --> objects
-    api --> models["Model providers"]
-    workers --> models
-    secrets["Secrets / key management"] -.-> api
-    secrets -.-> workers
-    deploy["CI/CD + registry + migrations"] -.-> web
-    deploy -.-> api
-    deploy -.-> workers
-    api -.-> observe["Telemetry + SLOs + alerts"]
-    workers -.-> observe
-    pg -.-> recovery["Backup / restore / disaster recovery"]
-    qd -.-> recovery
-    objects -.-> recovery
+    user["10 registered users<br/>3–5 normal / 10 burst"] --> edge["Free hostname + Caddy HTTPS<br/>ports 80/443 only"]
+    edge --> ui["Streamlit<br/>authoritative frontend"]
+    edge --> api["FastAPI"]
+    auth["Auth0"] --> ui
+    candidate["Next.js BFF candidate<br/>opt-in / unpromoted"] -.-> api
+    auth -.-> candidate
+    subgraph vm["One Always Free-eligible OCI ARM VM"]
+        ui --> api
+        api --> pg[("PostgreSQL")]
+        api --> qd[("Qdrant")]
+        api --> objects[("SeaweedFS S3")]
+        api --> models["Accepted model providers"]
+        dispatcher["Outbox dispatcher"] --> queue["RabbitMQ"]
+        queue --> worker["Ingestion worker"]
+        worker --> pg
+        worker --> qd
+        worker --> objects
+        provision["One-shot CPU model provisioner"] -.-> api
+        provision -.-> worker
+    end
+    terraform["Reviewed Terraform<br/>A1 VM + network + budget"] -.-> vm
+    delivery["GitHub Actions<br/>multiarch + SBOM + scan + signature"] -.-> vm
+    pg -.-> backup["Age-encrypted off-host OCI backup<br/>private + versioned"]
+    qd -.-> backup
+    objects -.-> backup
+    evidence["10-scenario release gate<br/>load + failure + restore + rollback"] -.-> vm
 ```
 
-Frontend, API, and workers deploy and scale independently; durable state remains
-in managed services. Timeouts, backpressure, graceful shutdown, reversible
-releases, and tested restoration are mandatory. Microservices or multi-region
-deployment require measured scale, reliability, ownership, or regulatory need.
+The learning topology targets ten registered users, normal concurrency of three to five,
+and a measured burst of ten simultaneous users. It intentionally preserves independently runnable application roles
+inside one Compose host; it does not claim high availability or horizontal scaling.
+Managed services, Kubernetes, multiple VMs, and a Next.js promotion require measured
+need and later evidence. Digest-pinned releases, secret-safe configuration, migration
+ordering, timeouts, backpressure, rollback, and tested restoration remain mandatory.
+Terraform state remains local and ignored until a reviewed remote-state boundary exists;
+runtime secrets never enter Terraform or cloud-init. The candidate frontend uses an
+allowlisted same-origin BFF and disables browser access-token delivery.
+
+OCI treats instance `user_data` as create-only. Terraform therefore ignores implicit
+`user_data` updates so a documentation/bootstrap adjustment cannot silently replace the
+only A1 host; a rebuild requires an explicit reviewed replacement plan. The first live
+bootstrap exposed an early `opc` ownership dependency, now fixed by staging files as
+root and promoting them during `runcmd`. A controlled clean/reboot verified the host at
+clean cloud-init status with Docker, Compose, firewalld, HTTP/HTTPS rules, and 65% free
+root-disk headroom.
 
 ## Phase 9 — enterprise integrations and commercial controls
 
-**Status:** Planned. Connector and billing providers are TBD.
+**Status:** Decision kickoff. Connector, identity, metering, billing, and compliance
+providers remain Proposed/TBD; no Phase 9 implementation is authorized.
 
 ```mermaid
 flowchart LR
@@ -794,7 +877,7 @@ reconcile commercial usage.
 | Topic | Current position |
 | --- | --- |
 | Phase 2 UI | Streamlit multipage application |
-| Dedicated Phase 8 UI | Candidate only; framework not selected |
+| Dedicated Phase 8 UI | Accepted Streamlit-first path with a bounded Next.js/TypeScript candidate under ADR 0040; Next.js is not promoted |
 | Queue / broker | Open-source RabbitMQ quorum queue/DLQ implemented under ADR 0010; production hosting deferred |
 | Object storage | S3-compatible adapter plus open-source SeaweedFS local/CI implemented under ADR 0011; production provider deferred |
 | Transactional outbox | PostgreSQL events plus confirmed leased dispatcher, retry/alert/retention operations implemented under ADR 0009 |
@@ -817,7 +900,7 @@ reconcile commercial usage.
 | Structured tables/calculation | ADR 0029 implemented at `20260907_0015`/`0016`: normalized validated cells, immutable traces, and a closed Decimal calculation allowlist; no generated SQL |
 | Region evidence/viewer/rollout | ADR 0030 implementation adds backend-mediated `evidence-v1`, integrity-checked streaming, accessible inspection, and accepted `visual-table-v1`; Phase 6 browser, promotion, and release gates pass |
 | Observability backend | Accepted ADRs 0031–0032: OTLP through an OpenTelemetry Collector to optional free local Grafana LGTM; production provider remains TBD |
-| Deployment platform | Containerized and horizontally scalable; provider not selected |
+| Deployment platform | Accepted OCI learning path with one Always Free-eligible ARM VM and Docker Compose under ADRs 0037–0038; Phoenix deployment and Phase 8 evidence pass |
 
 Accepted Phase 2 decisions are recorded in
 [`docs/architecture/decisions`](decisions/):
@@ -877,12 +960,21 @@ Accepted Phase 7 decisions are:
 - [ADR 0035 — User feedback and review governance](decisions/0035-user-feedback-review-governance.md)
 - [ADR 0036 — Dashboards, alerts, runbooks, and incident learning](decisions/0036-dashboards-alerts-runbooks-incident-learning.md)
 
+Accepted Phase 8 decisions are:
+
+- [ADR 0037 — OCI learning deployment constraints](decisions/0037-oci-learning-deployment-constraints.md)
+- [ADR 0038 — OCI container runtime boundary](decisions/0038-oci-container-runtime-boundary.md)
+- [ADR 0039 — OCI learning data plane and backups](decisions/0039-oci-learning-data-plane.md)
+- [ADR 0040 — Dedicated frontend and edge boundary](decisions/0040-dedicated-frontend-edge-boundary.md)
+- [ADR 0041 — Immutable delivery, secrets, and migrations](decisions/0041-immutable-delivery-secrets-migrations.md)
+- [ADR 0042 — Scaling, recovery, and release evidence](decisions/0042-scaling-recovery-release-evidence.md)
+
 ## Maintenance checklist
 
 1. Update the affected phase, diagram, status, and technology table.
 2. Update the whole-system diagram when a cross-phase boundary or flow changes.
-3. Record consequential Phase 7 decisions and rationale in the ignored
-   `Phase7_context.md` active context document; keep earlier phase contexts historical.
+3. Record consequential active-phase decisions and rationale in the ignored active-phase
+   context; keep earlier phase contexts historical.
 4. Keep unapproved technologies labeled **Proposed / TBD**.
 5. Verify Mermaid fences and links before committing.
 6. Never place credentials, tokens, private URLs, customer data, or other secrets

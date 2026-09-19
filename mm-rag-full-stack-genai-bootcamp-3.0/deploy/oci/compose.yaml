@@ -1,0 +1,300 @@
+name: mm-rag-phase8-learning
+
+x-app-environment: &app-environment
+  APP_ENV: staging
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+  QDRANT_URL: http://qdrant:6333
+  OBJECT_STORAGE_BACKEND: s3
+  S3_ENDPOINT_URL: http://seaweedfs:8333
+  S3_REGION: ${S3_REGION}
+  S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+  S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+  S3_ORIGINALS_BUCKET: ${S3_ORIGINALS_BUCKET}
+  S3_ARTIFACTS_BUCKET: ${S3_ARTIFACTS_BUCKET}
+  S3_PATH_STYLE: "true"
+  RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/${RABBITMQ_VHOST}
+  OPENAI_API_KEY: ${OPENAI_API_KEY}
+  OPENAI_CHAT_MODEL: ${OPENAI_CHAT_MODEL:-gpt-4.1-mini}
+  OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+  PHASE6_PROFILE: visual-table-v1
+  AUTH0_ISSUER: https://${AUTH0_DOMAIN}/
+  AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+  TELEMETRY_ENABLED: ${TELEMETRY_ENABLED:-false}
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+  RUNTIME_HEALTH_DIRECTORY: /app/data/runtime/health
+  PHASE5_MODEL_CACHE_DIR: /app/data/runtime/models
+  PHASE6_DOCLING_ARTIFACTS_PATH: /app/data/runtime/docling-models
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:?Set a digest-pinned POSTGRES_IMAGE}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [private]
+    mem_limit: 768m
+    cpus: 0.50
+
+  qdrant:
+    image: ${QDRANT_IMAGE:?Set a digest-pinned QDRANT_IMAGE}
+    restart: unless-stopped
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks: [private]
+    mem_limit: 1536m
+    cpus: 0.75
+
+  seaweedfs:
+    image: ${SEAWEEDFS_IMAGE:?Set a digest-pinned SEAWEEDFS_IMAGE}
+    restart: unless-stopped
+    command: ["mini", "-dir=/data", "-ip=seaweedfs", "-ip.bind=0.0.0.0"]
+    environment:
+      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_BUCKET: ${S3_ORIGINALS_BUCKET},${S3_ARTIFACTS_BUCKET}
+    volumes:
+      - seaweedfs_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:9333/cluster/status >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [private]
+    mem_limit: 768m
+    cpus: 0.40
+
+  rabbitmq:
+    image: ${RABBITMQ_IMAGE:?Set a digest-pinned RABBITMQ_IMAGE}
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [private]
+    mem_limit: 768m
+    cpus: 0.40
+
+  lgtm:
+    profiles: ["observability"]
+    image: ${LGTM_IMAGE:?Set a digest-pinned LGTM_IMAGE}
+    restart: unless-stopped
+    environment:
+      ENABLE_LOGS_GRAFANA: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_USERS_DEFAULT_THEME: light
+    volumes:
+      - ../../observability/grafana/provisioning/dashboards/mm-rag.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/mm-rag.yaml:ro
+      - ../../observability/grafana/dashboards:/otel-lgtm/grafana/conf/provisioning/dashboards/mm-rag:ro
+      - ../../observability/prometheus.yaml:/otel-lgtm/prometheus.yaml:ro
+      - ../../observability/alerts:/otel-lgtm/prometheus-rules:ro
+      - observability_data:/data
+    networks: [private]
+    mem_limit: 1536m
+    cpus: 0.50
+
+  otel-collector:
+    profiles: ["observability"]
+    image: ${OTEL_COLLECTOR_IMAGE:?Set a digest-pinned OTEL_COLLECTOR_IMAGE}
+    restart: unless-stopped
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ../../observability/otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro
+    depends_on: [lgtm]
+    networks: [private]
+    mem_limit: 512m
+    cpus: 0.25
+
+  migrate:
+    image: ${MM_RAG_IMAGE:?Set a digest-pinned MM_RAG_IMAGE}
+    command: ["uv", "run", "--no-sync", "alembic", "upgrade", "head"]
+    environment: *app-environment
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [private]
+    restart: "no"
+
+  models:
+    image: ${MM_RAG_IMAGE:?Set a digest-pinned MM_RAG_IMAGE}
+    command:
+      - /bin/sh
+      - -c
+      - >-
+        uv run --no-sync python -m scripts.prefetch_phase5_models &&
+        uv run --no-sync python -m scripts.prefetch_phase6_models
+        --artifacts-path /app/data/runtime/docling-models
+        --embedding-cache-dir /app/data/runtime/models
+    volumes:
+      - model_cache:/app/data/runtime/models
+      - docling_models:/app/data/runtime/docling-models
+    networks: [private]
+    restart: "no"
+
+  api:
+    image: ${MM_RAG_IMAGE:?Set a digest-pinned MM_RAG_IMAGE}
+    command: ["uv", "run", "--no-sync", "uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8003", "--proxy-headers", "--forwarded-allow-ips", "*"]
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    environment: *app-environment
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      models:
+        condition: service_completed_successfully
+      qdrant:
+        condition: service_started
+      seaweedfs:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8003/api/v1/health/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+    volumes:
+      - model_cache:/app/data/runtime/models
+      - docling_models:/app/data/runtime/docling-models
+    networks: [private]
+    mem_limit: 1536m
+    cpus: 0.75
+
+  dispatcher:
+    image: ${MM_RAG_IMAGE:?Set a digest-pinned MM_RAG_IMAGE}
+    command: ["uv", "run", "--no-sync", "python", "-m", "backend.app.workers.outbox_dispatcher"]
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 45s
+    environment: *app-environment
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - runtime_health:/app/data/runtime/health
+    networks: [private]
+    mem_limit: 512m
+    cpus: 0.25
+
+  worker:
+    image: ${MM_RAG_IMAGE:?Set a digest-pinned MM_RAG_IMAGE}
+    command: ["uv", "run", "--no-sync", "python", "-m", "backend.app.workers.ingestion_worker"]
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 130s
+    environment: *app-environment
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      models:
+        condition: service_completed_successfully
+      qdrant:
+        condition: service_started
+      seaweedfs:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - runtime_health:/app/data/runtime/health
+      - model_cache:/app/data/runtime/models
+      - docling_models:/app/data/runtime/docling-models
+    networks: [private]
+    mem_limit: 4g
+    cpus: 1.50
+
+  ui:
+    image: ${MM_RAG_IMAGE:?Set a digest-pinned MM_RAG_IMAGE}
+    command: ["uv", "run", "--no-sync", "streamlit", "run", "frontend/streamlit_app.py", "--server.address=0.0.0.0", "--server.port=8503", "--server.headless=true"]
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - ${STREAMLIT_SECRETS_FILE:?Set STREAMLIT_SECRETS_FILE}:/app/.streamlit/secrets.toml:ro
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8503/_stcore/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+    networks: [private]
+    mem_limit: 768m
+    cpus: 0.40
+
+  next-candidate:
+    profiles: ["nextjs-candidate"]
+    image: ${NEXT_CANDIDATE_IMAGE:?Set a digest-pinned NEXT_CANDIDATE_IMAGE}
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    environment:
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+      AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
+      AUTH0_SECRET: ${AUTH0_SECRET}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      APP_BASE_URL: https://${MM_RAG_HOSTNAME}
+      MM_RAG_INTERNAL_API_URL: http://api:8003
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [private]
+    mem_limit: 512m
+    cpus: 0.35
+
+  edge:
+    image: ${CADDY_IMAGE:?Set a digest-pinned CADDY_IMAGE}
+    restart: unless-stopped
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL}
+      MM_RAG_HOSTNAME: ${MM_RAG_HOSTNAME}
+      MM_RAG_UI_UPSTREAM: ${MM_RAG_UI_UPSTREAM:-ui:8503}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      ui:
+        condition: service_healthy
+    networks: [private]
+    mem_limit: 256m
+    cpus: 0.25
+
+networks:
+  private:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  seaweedfs_data:
+  rabbitmq_data:
+  runtime_health:
+  model_cache:
+  docling_models:
+  caddy_data:
+  caddy_config:
+  observability_data:

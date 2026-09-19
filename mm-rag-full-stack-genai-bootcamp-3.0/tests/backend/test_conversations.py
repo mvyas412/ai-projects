@@ -155,6 +155,36 @@ def test_conversation_persists_messages_and_authorized_citations(client: TestCli
     )
 
 
+def test_table_calculation_miss_falls_back_to_authorized_rag(test_settings) -> None:
+    settings = test_settings.model_copy(update={"phase6_profile": "visual-table-v1"})
+    app = create_app(settings)
+    with TestClient(app) as test_client:
+        Base.metadata.create_all(app.state.database_engine)
+        app.dependency_overrides[get_current_identity] = _identity
+        app.state.document_indexer = FakeIndexer()
+        app.state.rag_engine = FakeRAGEngine()
+        workspace_id = _workspace_id(test_client)
+        document_id, _ = _ready_document(test_client, workspace_id)
+        created = test_client.post(
+            f"/api/v1/workspaces/{workspace_id}/conversations",
+            json={
+                "title": "Fallback questions",
+                "target_type": "documents",
+                "document_ids": [document_id],
+            },
+        )
+
+        exchange = test_client.post(
+            f"/api/v1/workspaces/{workspace_id}/conversations/{created.json()['id']}/messages",
+            json={"content": "What is the refund window?"},
+        )
+
+        assert exchange.status_code == 200
+        assistant = exchange.json()["assistant_message"]
+        assert assistant["model_name"] == "fake-production-model"
+        assert len(assistant["citations"]) == 1
+
+
 def test_conversation_survives_application_restart(test_settings) -> None:
     app = create_app(test_settings)
     with TestClient(app) as first:
