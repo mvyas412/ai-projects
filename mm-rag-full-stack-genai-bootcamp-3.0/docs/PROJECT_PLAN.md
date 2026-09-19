@@ -62,7 +62,7 @@ Rules:
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
-| Phase 8 | In progress — Phoenix infrastructure and corrected signed/scanned Streamlit release are deployed; authenticated shell/readiness/logout, first-attempt ingestion, grounded three-question data path, resilience, encrypted off-host backup, isolated restore, and reversible application rollback pass; authenticated capacity and candidate evidence remain pending |
+| Phase 8 | In progress — Phoenix infrastructure and corrected signed/scanned Streamlit release are deployed; authenticated data path, progressive 1/3/5/10-user capacity, resilience, encrypted backup/restore, rollback, and all ten release-evidence scenarios pass; the optional candidate disposition and final acceptance remain pending |
 | Phase 9 | Planned |
 
 ## Delivery sequence and gates
@@ -992,8 +992,10 @@ safe decrypt, manifest verification, and isolated PostgreSQL/Qdrant/SeaweedFS re
 pass with a conservative 0.75-hour RTO and effectively zero quiesced-export RPO, inside
 the accepted 8-hour/24-hour targets. A follow-up release was rolled back from `3de5b3c`
 to `f5af5a1` and forward again with readiness preserved and identical aggregate database,
-vector, and object-store integrity evidence. Measured authenticated capacity and candidate
-parity proof remain gated.
+vector, and object-store integrity evidence. The authenticated 1/3/5/10-user probe then
+completed 30 requests per stage with zero errors; its highest p95 was 300.721 ms against
+the accepted 5-second objective. All ten release-evidence scenarios now pass. Candidate
+parity remains optional and unpromoted pending an explicit promote-or-defer decision.
 
 The image gate runs application and Next.js builds independently on native AMD64 and
 ARM64 GitHub runners, then reports one stable aggregate result. This avoids QEMU-only
@@ -1016,9 +1018,9 @@ of the accepted single-VM topology under representative bounded load.
 | 8.0 | Completed — OCI learning constraints plus deployment, data, frontend, delivery, and recovery ADRs 0037–0042 accepted |
 | 8.1 | Streamlit baseline deployed — CPU-only multiarch image and native architecture gates pass; reviewed Phoenix A1/network/private-bucket/budget plan applied; root filesystem expanded; corrected signed/scanned digest deployed behind HTTPS; migration, pinned models, API readiness, authenticated workspace, Library, logout, first-attempt ingestion, and grounded three-question data-path proof pass |
 | 8.2 | Candidate implemented — Streamlit remains default; token-mediating Next.js parity candidate is opt-in and unpromoted; automated accessibility, malformed-origin rejection, and non-disclosure checks pass, browser parity evidence pending |
-| 8.3 | Partial cloud evidence — resource limits, prefetch-1 backpressure, and graceful drains are active; a public-readiness 1/3/5/10-user observation has zero errors and seven reversible resilience scenarios pass; authenticated mixed-workload capacity remains pending |
+| 8.3 | Cloud capacity evidence complete — resource limits, prefetch-1 backpressure, graceful drains, seven reversible resilience scenarios, and authenticated 1/3/5/10-user readiness/current-user traffic pass with zero errors and p95 below the accepted 5-second objective |
 | 8.4 | Cloud recovery proof complete — private versioned OCI ciphertext round-trip, safe decrypt/integrity checks, and isolated PostgreSQL/Qdrant/SeaweedFS restore pass inside the accepted RPO/RTO targets |
-| 8.5 | Partial cloud evidence — immutable release manifests, explicit first-release baseline semantics, resilience/DR evidence, and reversible application rollback pass; authenticated 1/3/5/10-user evidence remains before the ten-scenario gate can pass |
+| 8.5 | Cloud release gate complete — immutable release manifests, resilience, recovery, rollback, and authenticated progressive load satisfy all ten required evidence scenarios |
 
 ### Completion gate
 

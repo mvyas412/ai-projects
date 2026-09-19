@@ -708,8 +708,10 @@ produced and deployed the corrected signed, scanned, SBOM-attested AMD64/ARM64 i
 immutable digest. Public HTTPS, migration/model provisioning, API readiness,
 authenticated identity, Personal workspace, Library, logout, and first-attempt
 ingestion pass. Reversible rollback to the prior signed release and roll-forward to the
-current release preserve readiness and tenant-data integrity. Authenticated capacity and
-candidate evidence remain gated.
+current release preserve readiness and tenant-data integrity. Authenticated progressive
+capacity passes at 1/3/5/10 concurrent sessions with zero errors and a maximum observed
+p95 of 300.721 ms. All ten release-evidence scenarios pass; candidate promotion remains
+optional and separately gated.
 
 The replacement bounded upload succeeded on attempt 1 and promoted 31 text vectors and
 33 visual regions. Its initial three-question check safely abstained before retrieval because
@@ -721,15 +723,23 @@ tests, protected publication, immutable-digest deployment, and a separately appr
 paid recheck pass. The accepted recheck reused the existing PDF and returned grounded,
 page-cited answers for the refund window, data-residency clause, and P1 response target.
 
-The first public-readiness 1/3/5/10-user observation has zero errors. Worker restart,
+The first public-readiness 1/3/5/10-user observation has zero errors. The final
+authenticated probe also has zero errors across 30 readiness/current-user requests at
+each 1/3/5/10-user stage; observed p95 values are 300.721, 145.225, 267.64, and
+217.697 ms, all below the accepted 5-second objective. Worker restart,
 broker loss, fail-closed PostgreSQL/Qdrant/object-store loss and recovery,
 telemetry-disabled operation, and bounded disk pressure pass. These checks establish
-infrastructure behavior but do not replace the authenticated mixed-workload capacity gate.
+infrastructure and authenticated read-capacity behavior without making paid model calls.
 The first real quiesced backup contains a PostgreSQL custom dump, one Qdrant collection
 snapshot, and the stored original object. Its age-encrypted bundle is retained in the
 private versioned OCI bucket without the key or plaintext. Provider download, safe
 decrypt, manifest/checksum validation, and isolated PostgreSQL/Qdrant/SeaweedFS restore
 pass inside the accepted RPO/RTO targets.
+
+The bounded-load, seven resilience, backup/restore, and rollback records satisfy all ten
+required Phase 8 release-evidence scenarios. The token used for the authenticated probe
+was short-lived, stored only in a protected temporary file, and securely removed after
+the run; response bodies and identity values were not retained.
 
 Local hardening now also proves fixable high/critical vulnerability scans for both app
 images, tracked-source secret and OCI configuration scans, automated candidate
