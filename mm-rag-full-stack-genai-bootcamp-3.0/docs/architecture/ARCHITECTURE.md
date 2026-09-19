@@ -707,7 +707,9 @@ firewall policy, and zero Terraform drift are verified. The protected publisher 
 produced and deployed the corrected signed, scanned, SBOM-attested AMD64/ARM64 image by
 immutable digest. Public HTTPS, migration/model provisioning, API readiness,
 authenticated identity, Personal workspace, Library, logout, and first-attempt
-ingestion pass. Capacity, rollback, and candidate evidence remain gated.
+ingestion pass. Reversible rollback to the prior signed release and roll-forward to the
+current release preserve readiness and tenant-data integrity. Authenticated capacity and
+candidate evidence remain gated.
 
 The replacement bounded upload succeeded on attempt 1 and promoted 31 text vectors and
 33 visual regions. Its initial three-question check safely abstained before retrieval because
@@ -745,7 +747,11 @@ parity proof before the candidate profile can be enabled.
 
 The first OCI release is represented explicitly as an initial baseline with no invented
 predecessor. All subsequent manifests must name a real previous manifest, and Phase 8
-acceptance still requires an exercised follow-up rollback to that baseline.
+acceptance requires an exercised follow-up rollback to that baseline. That drill now
+passes: only API, dispatcher, and Streamlit were switched from `3de5b3c` to `f5af5a1`
+and back; durable services remained in place, the worker remained stopped, all readiness
+checks passed, and aggregate PostgreSQL, Qdrant, and object counts and fingerprints were
+unchanged before, during, and after the transition.
 
 The private application network receives the approved Auth0 issuer and audience through
 the shared API/worker environment. Streamlit keeps the browser client secret in its

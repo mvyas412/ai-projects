@@ -62,7 +62,7 @@ Rules:
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
-| Phase 8 | In progress — Phoenix infrastructure and corrected signed/scanned Streamlit release are deployed; authenticated shell/readiness/logout, first-attempt ingestion, grounded three-question data path, resilience, encrypted off-host backup, and isolated restore pass; capacity, rollback, and candidate evidence remain pending |
+| Phase 8 | In progress — Phoenix infrastructure and corrected signed/scanned Streamlit release are deployed; authenticated shell/readiness/logout, first-attempt ingestion, grounded three-question data path, resilience, encrypted off-host backup, isolated restore, and reversible application rollback pass; authenticated capacity and candidate evidence remain pending |
 | Phase 9 | Planned |
 
 ## Delivery sequence and gates
@@ -990,8 +990,10 @@ each with page-level citations. The worker remains stopped with zero active jobs
 The private versioned OCI bucket now holds the age ciphertext only. Provider download,
 safe decrypt, manifest verification, and isolated PostgreSQL/Qdrant/SeaweedFS restore
 pass with a conservative 0.75-hour RTO and effectively zero quiesced-export RPO, inside
-the accepted 8-hour/24-hour targets. Measured authenticated capacity, exercised rollback,
-and candidate parity proof remain gated.
+the accepted 8-hour/24-hour targets. A follow-up release was rolled back from `3de5b3c`
+to `f5af5a1` and forward again with readiness preserved and identical aggregate database,
+vector, and object-store integrity evidence. Measured authenticated capacity and candidate
+parity proof remain gated.
 
 The image gate runs application and Next.js builds independently on native AMD64 and
 ARM64 GitHub runners, then reports one stable aggregate result. This avoids QEMU-only
@@ -1013,7 +1015,7 @@ of the accepted single-VM topology under representative bounded load.
 | 8.2 | Candidate implemented — Streamlit remains default; token-mediating Next.js parity candidate is opt-in and unpromoted; automated accessibility, malformed-origin rejection, and non-disclosure checks pass, browser parity evidence pending |
 | 8.3 | Partial cloud evidence — resource limits, prefetch-1 backpressure, and graceful drains are active; a public-readiness 1/3/5/10-user observation has zero errors and seven reversible resilience scenarios pass; authenticated mixed-workload capacity remains pending |
 | 8.4 | Cloud recovery proof complete — private versioned OCI ciphertext round-trip, safe decrypt/integrity checks, and isolated PostgreSQL/Qdrant/SeaweedFS restore pass inside the accepted RPO/RTO targets |
-| 8.5 | Local contract complete — immutable release manifest, explicit first-release baseline semantics, and ten-scenario load/resilience/DR/rollback gate; exercised cloud evidence pending |
+| 8.5 | Partial cloud evidence — immutable release manifests, explicit first-release baseline semantics, resilience/DR evidence, and reversible application rollback pass; authenticated 1/3/5/10-user evidence remains before the ten-scenario gate can pass |
 
 ### Completion gate
 
