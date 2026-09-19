@@ -742,10 +742,11 @@ Multi-architecture validation fans out application and Next.js builds across nat
 AMD64 and ARM64 runners and folds them into one stable required result. Native execution
 keeps architecture-specific Node and image dependencies out of QEMU emulation while the
 manual publication boundary remains unchanged. Candidate dependency installation does
-not invoke npm's audit service implicitly; a separate mandatory audit retries only two
-times when the registry is temporarily unavailable and still fails closed. The Next.js
-candidate remains opt-in, unpromoted, and unpublished; its artifact requires a separate
-reviewed publication and parity proof before the candidate profile can be enabled.
+not invoke npm's audit service implicitly. A pinned Trivy filesystem scan covers the
+candidate lockfile and a separate native-image scan covers the deployable artifact; both
+reject fixable high/critical findings. The Next.js candidate remains opt-in, unpromoted,
+and unpublished; its artifact requires a separate reviewed publication and parity proof
+before the candidate profile can be enabled.
 
 The first OCI release is represented explicitly as an initial baseline with no invented
 predecessor. All subsequent manifests must name a real previous manifest, and Phase 8

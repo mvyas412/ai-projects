@@ -56,6 +56,16 @@ jobs:
           terraform init -backend=false
           terraform validate
 
+      - name: Reject fixable candidate dependency vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: mm-rag-full-stack-genai-bootcamp-3.0/frontend-next
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
       - name: Set up Node
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
@@ -67,16 +77,6 @@ jobs:
         working-directory: mm-rag-full-stack-genai-bootcamp-3.0/frontend-next
         run: |
           npm ci --no-audit
-          # Keep security enforcement explicit while tolerating a short registry outage.
-          for attempt in 1 2 3; do
-            if npm audit; then
-              break
-            fi
-            if [ "$attempt" -eq 3 ]; then
-              exit 1
-            fi
-            sleep $((attempt * 10))
-          done
           npm test
           npm run typecheck
           npm run build

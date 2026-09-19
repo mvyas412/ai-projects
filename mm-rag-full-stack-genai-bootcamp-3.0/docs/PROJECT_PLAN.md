@@ -998,9 +998,10 @@ parity proof remain gated.
 The image gate runs application and Next.js builds independently on native AMD64 and
 ARM64 GitHub runners, then reports one stable aggregate result. This avoids QEMU-only
 dependency-install failures and prevents one sequential build from consuming the entire
-job timeout. Candidate installation disables npm's implicit audit request; the explicit
-audit remains mandatory and retries at most twice after transient registry failure.
-Image publication remains a separate manually approved action.
+job timeout. Candidate installation disables npm's implicit audit request; a pinned
+Trivy lockfile scan rejects fixable high/critical dependency findings, and the native
+candidate-image scan independently enforces the same release threshold. Image publication
+remains a separate manually approved action.
 
 ### Objective
 
