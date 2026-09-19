@@ -710,12 +710,14 @@ authenticated identity, Personal workspace, Library, logout, and first-attempt
 ingestion pass. Capacity, rollback, and candidate evidence remain gated.
 
 The replacement bounded upload succeeded on attempt 1 and promoted 31 text vectors and
-33 visual regions. Its three-question check safely abstained before retrieval because
+33 visual regions. Its initial three-question check safely abstained before retrieval because
 ordinary text questions matched the closed table-calculation vocabulary and an
 unsupported calculation returned an evidence verdict instead of falling through to
 authorized RAG. The correction preserves exact answers when validated table cells exist
 and otherwise continues through the normal scoped retrieval path. Focused regression
-tests pass; publication, deployment, and a separately approved paid recheck remain.
+tests, protected publication, immutable-digest deployment, and a separately approved
+paid recheck pass. The accepted recheck reused the existing PDF and returned grounded,
+page-cited answers for the refund window, data-residency clause, and P1 response target.
 
 The first public-readiness 1/3/5/10-user observation has zero errors. Worker restart,
 broker loss, fail-closed PostgreSQL/Qdrant/object-store loss and recovery,

@@ -62,7 +62,7 @@ Rules:
 | Phase 6 | Completed and accepted — Milestones 6.0–6.5 and representative visual/table/calculation proof pass; `visual-table-v1` promoted |
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
-| Phase 8 | In progress — Phoenix infrastructure and corrected signed/scanned Streamlit release are deployed; authenticated shell/readiness/logout, first-attempt ingestion, resilience, encrypted off-host backup, and isolated restore pass; chat fallback correction, capacity, rollback, and candidate evidence remain pending |
+| Phase 8 | In progress — Phoenix infrastructure and corrected signed/scanned Streamlit release are deployed; authenticated shell/readiness/logout, first-attempt ingestion, grounded three-question data path, resilience, encrypted off-host backup, and isolated restore pass; capacity, rollback, and candidate evidence remain pending |
 | Phase 9 | Planned |
 
 ## Delivery sequence and gates
@@ -979,11 +979,13 @@ enough to support release decisions and production operations.
 are present. The reviewed Phoenix infrastructure and corrected signed/scanned image are
 deployed by immutable digest behind public HTTPS. Authenticated shell, readiness, logout,
 and one-attempt ingestion pass with 31 promoted text vectors and 33 visual regions. The
-approved three-question check then exposed a deterministic routing defect: ordinary
+initial three-question check then exposed a deterministic routing defect: ordinary
 text questions matched the closed table-calculation vocabulary, and a calculation miss
-abstained instead of continuing to authorized RAG retrieval. The narrow fallback fix and
-regression test pass locally; corrected publication, deployment, and a separately
-approved paid recheck remain required. The worker is stopped with zero active jobs.
+abstained instead of continuing to authorized RAG retrieval. The narrow fallback fix,
+regression test, protected publication, immutable-digest deployment, and separately
+approved paid recheck now pass. The existing PDF returned grounded answers for the
+7-day refund window, Clause 9.1 data residency requirement, and 15-minute P1 API target,
+each with page-level citations. The worker remains stopped with zero active jobs.
 
 The private versioned OCI bucket now holds the age ciphertext only. Provider download,
 safe decrypt, manifest verification, and isolated PostgreSQL/Qdrant/SeaweedFS restore
@@ -1007,7 +1009,7 @@ of the accepted single-VM topology under representative bounded load.
 | Milestone | Deliverable |
 | --- | --- |
 | 8.0 | Completed — OCI learning constraints plus deployment, data, frontend, delivery, and recovery ADRs 0037–0042 accepted |
-| 8.1 | Streamlit baseline deployed — CPU-only multiarch image and native architecture gates pass; reviewed Phoenix A1/network/private-bucket/budget plan applied; root filesystem expanded; corrected signed/scanned digest deployed behind HTTPS; migration, pinned models, API readiness, authenticated workspace, Library, logout, and first-attempt ingestion pass; chat fallback correction awaits publication and recheck |
+| 8.1 | Streamlit baseline deployed — CPU-only multiarch image and native architecture gates pass; reviewed Phoenix A1/network/private-bucket/budget plan applied; root filesystem expanded; corrected signed/scanned digest deployed behind HTTPS; migration, pinned models, API readiness, authenticated workspace, Library, logout, first-attempt ingestion, and grounded three-question data-path proof pass |
 | 8.2 | Candidate implemented — Streamlit remains default; token-mediating Next.js parity candidate is opt-in and unpromoted; automated accessibility, malformed-origin rejection, and non-disclosure checks pass, browser parity evidence pending |
 | 8.3 | Partial cloud evidence — resource limits, prefetch-1 backpressure, and graceful drains are active; a public-readiness 1/3/5/10-user observation has zero errors and seven reversible resilience scenarios pass; authenticated mixed-workload capacity remains pending |
 | 8.4 | Cloud recovery proof complete — private versioned OCI ciphertext round-trip, safe decrypt/integrity checks, and isolated PostgreSQL/Qdrant/SeaweedFS restore pass inside the accepted RPO/RTO targets |
