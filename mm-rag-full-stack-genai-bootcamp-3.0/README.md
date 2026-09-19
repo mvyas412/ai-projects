@@ -72,7 +72,9 @@ image for commit `7c8993d`; its immutable digest and anonymous pull are verified
 paid model run has occurred. The first Streamlit release is now deployed through the
 free HTTPS hostname: migration/model provisioning, API readiness, authenticated identity,
 Personal workspace, Library, service readiness, and logout pass. Upload, grounded chat,
-capacity/failure, restore, rollback, and candidate evidence remain gated. The
+full authenticated capacity, restore, rollback, and candidate evidence remain gated.
+A preliminary public-readiness 1/3/5/10-user probe has zero errors, and seven reversible
+worker/dependency/telemetry/disk-pressure scenarios pass. The
 [OCI onboarding checklist](docs/PHASE8_OCI_ONBOARDING.md) records the remaining gates.
 The amended free-first capacity contract requires ten registered users, 3–5 normally
 concurrent users, and progressive 1/3/5/10-user measurements with a required 10-user burst.

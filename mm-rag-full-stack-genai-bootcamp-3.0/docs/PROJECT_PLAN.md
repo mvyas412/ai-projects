@@ -1002,7 +1002,7 @@ of the accepted single-VM topology under representative bounded load.
 | 8.0 | Completed — OCI learning constraints plus deployment, data, frontend, delivery, and recovery ADRs 0037–0042 accepted |
 | 8.1 | Streamlit baseline deployed — CPU-only multiarch image and native architecture gates pass; reviewed Phoenix A1/network/private-bucket/budget plan applied; root filesystem expanded into the provisioned boot volume; signed/scanned digest deployed behind HTTPS; migration, pinned models, API readiness, authenticated workspace, Library, and logout pass |
 | 8.2 | Candidate implemented — Streamlit remains default; token-mediating Next.js parity candidate is opt-in and unpromoted; automated accessibility, malformed-origin rejection, and non-disclosure checks pass, browser parity evidence pending |
-| 8.3 | Local contract complete — resource limits, prefetch-1 backpressure, graceful drains, and a free progressive 1/3/5/10-user probe; ten registered users, 3–5 normal concurrency, and a 10-user burst are the accepted capacity target; cloud measurements pending |
+| 8.3 | Partial cloud evidence — resource limits, prefetch-1 backpressure, and graceful drains are active; a public-readiness 1/3/5/10-user observation has zero errors and seven reversible resilience scenarios pass; authenticated mixed-workload capacity remains pending |
 | 8.4 | Local contract complete — self-hosted state topology, private versioned OCI backup-bucket plan, encrypted backup/restore tooling and runbook; synthetic encrypted round trip passes, provider restore pending |
 | 8.5 | Local contract complete — immutable release manifest, explicit first-release baseline semantics, and ten-scenario load/resilience/DR/rollback gate; exercised cloud evidence pending |
 

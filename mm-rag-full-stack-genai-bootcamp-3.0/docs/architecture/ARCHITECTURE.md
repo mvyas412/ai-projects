@@ -710,6 +710,11 @@ public HTTPS; migration/model provisioning, API readiness, authenticated identit
 Personal workspace, Library, and logout pass. Data-path, capacity/failure, restore,
 rollback, and candidate evidence remain gated.
 
+The first public-readiness 1/3/5/10-user observation has zero errors. Worker restart,
+broker loss, fail-closed PostgreSQL/Qdrant/object-store loss and recovery,
+telemetry-disabled operation, and bounded disk pressure pass. These checks establish
+infrastructure behavior but do not replace the authenticated mixed-workload capacity gate.
+
 Local hardening now also proves fixable high/critical vulnerability scans for both app
 images, tracked-source secret and OCI configuration scans, automated candidate
 accessibility/non-disclosure behavior, fail-closed malformed-origin handling, and a real synthetic age-encrypted backup/restore
