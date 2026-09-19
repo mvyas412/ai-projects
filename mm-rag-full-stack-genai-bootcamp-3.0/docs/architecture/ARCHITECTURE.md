@@ -823,6 +823,13 @@ root-disk headroom.
 **Status:** In progress. ADRs 0043–0049 are accepted and provider-neutral implementation
 is authorized. Connector, identity, billing, and compliance providers remain TBD.
 
+The Milestone 9.0 threat model and provider scorecard are tracked in
+[`PHASE9_ENTERPRISE_KICKOFF.md`](../PHASE9_ENTERPRISE_KICKOFF.md). The first Milestone
+9.1 slice adds a provider-neutral connector protocol, canonical discovery/change/version/
+permission values, explicit adapter registry, and a tenant/connector-bound credential
+reference resolved only inside a short-lived runtime context. No provider adapter,
+credential store, external call, or product-store write is present.
+
 ```mermaid
 flowchart LR
     directory["Enterprise SSO / SCIM"] --> identity["Identity + provisioning"]

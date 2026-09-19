@@ -63,7 +63,7 @@ Rules:
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
 | Phase 8 | Completed and accepted — OCI Streamlit deployment, authenticated data path, progressive capacity, resilience, encrypted backup/restore, rollback, and all ten evidence scenarios pass; Next.js remains deferred and unpromoted |
-| Phase 9 | In progress — ADRs 0043–0049 accepted; provider-neutral Milestone 9.0/9.1 foundation next, providers and policy values remain TBD |
+| Phase 9 | In progress — ADRs 0043–0049 accepted; Milestone 9.0 requirements/threat model and the provider-neutral connector SDK pass focused tests; providers and policy values remain TBD |
 
 ## Delivery sequence and gates
 
@@ -1036,6 +1036,13 @@ of the accepted single-VM topology under representative bounded load.
 **Status:** In progress. ADRs 0043–0049 are accepted. Provider-neutral implementation
 may proceed; providers, credentials, paid services, initial meters/quotas, and
 provider-specific propagation targets remain separately gated.
+
+Milestone 9.0 now has a tracked requirements/threat model and first-connector scorecard.
+The provider-neutral portion of Milestone 9.1 implements typed discovery, change-page,
+version, streamed-content, permission, health, and rate-limit contracts; an explicit
+registry; tenant/connector-bound opaque credential references; and runtime-only secret
+resolution. Focused lint, typing, and six unit tests pass. A first provider adapter is
+not selected or implemented.
 
 ### Objective
 
