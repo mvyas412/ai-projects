@@ -8,7 +8,9 @@ frontend and uses private Compose networking behind Caddy HTTPS.
 
 - Use only synthetic or non-sensitive learning data.
 - Set every image to an immutable `@sha256:` digest.
-- Keep `runtime.env` and `streamlit-secrets.toml` mode `0600`; both are ignored.
+- Keep `runtime.env` and `streamlit-secrets.toml` mode `0600`; both are ignored. On
+  the host, own the Streamlit file as application UID/GID `10001:10001` so the
+  non-root image can read the bind mount without broadening permissions.
 - Expose only ports 80 and 443. Keep database, vector, broker, object-storage, and
   observability administration private.
 - Do not enable a paid OCI shape or exceed an Always Free allowance without approval.
@@ -31,6 +33,10 @@ frontend and uses private Compose networking behind Caddy HTTPS.
 The one-shot `models` service downloads the accepted Phase 5 and Phase 6 CPU model
 artifacts into persistent volumes before the API and worker start. Budget disk space
 and outbound transfer for this first start.
+
+Run migration and model provisioning as separate one-shot commands. Do not combine
+them with `--abort-on-container-exit`: a successful migration exits before the larger
+model job and would force-stop that healthy download.
 
 The Phase 7 telemetry stack is optional during bootstrap. Set `TELEMETRY_ENABLED=true`
 and include `--profile observability` once its memory budget and private SSH-tunnel

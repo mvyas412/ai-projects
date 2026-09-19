@@ -69,9 +69,11 @@ and fixed an `opc` ordering defect; the host now reports clean cloud-init comple
 the expected firewall/services, and zero Terraform drift. The manually protected
 publisher produced the signed, scanned, SBOM-attested multiarchitecture application
 image for commit `7c8993d`; its immutable digest and anonymous pull are verified. No
-application secret, public application deployment, Auth0 production update, or paid
-model run has occurred. The [OCI onboarding checklist](docs/PHASE8_OCI_ONBOARDING.md)
-records the remaining approval gates.
+paid model run has occurred. The first Streamlit release is now deployed through the
+free HTTPS hostname: migration/model provisioning, API readiness, authenticated identity,
+Personal workspace, Library, service readiness, and logout pass. Upload, grounded chat,
+capacity/failure, restore, rollback, and candidate evidence remain gated. The
+[OCI onboarding checklist](docs/PHASE8_OCI_ONBOARDING.md) records the remaining gates.
 The amended free-first capacity contract requires ten registered users, 3–5 normally
 concurrent users, and progressive 1/3/5/10-user measurements with a required 10-user burst.
 Missing the gate triggers optimization and review, not an automatic paid upgrade.
@@ -639,5 +641,6 @@ Phase 8 decisions are accepted. Its isolated OCI learning checkpoint now include
 CPU-only ARM64-capable image, a private single-VM Compose topology, an HTTPS edge,
 secret-safe templates, and guarded image delivery. The approved Phoenix infrastructure
 is provisioned and verified, and the immutable application image is published with scan,
-SBOM, provenance, signature, and public-pull evidence. Application deployment and
-exercised cloud acceptance evidence remain gated.
+SBOM, provenance, signature, and public-pull evidence. The default Streamlit deployment
+and authenticated shell/logout proof pass; exercised data-path and cloud resilience
+evidence remain gated.

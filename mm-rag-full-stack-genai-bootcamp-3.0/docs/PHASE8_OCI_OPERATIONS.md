@@ -33,9 +33,13 @@ to finish at `status: done` before release deployment.
    from `deploy/oci/release-manifest.example.json`; validate it with
    `python -m scripts.phase8_release`.
 3. Copy only the approved checkout, ignored `runtime.env`, and ignored Streamlit secrets
-   to `/opt/mm-rag`. Keep secrets mode `0600`; never print them.
+   to `/opt/mm-rag`. Keep secrets mode `0600`; own the Streamlit secrets bind mount as
+   application UID/GID `10001:10001` while keeping `runtime.env` operator-owned. Never
+   print either file.
 4. Run `docker compose config --quiet`, pull by digest, start persistence services, run
-   the one-shot migration and model jobs, then start API/worker/UI/edge.
+   the one-shot migration and model jobs independently, then start API/worker/UI/edge.
+   Do not use `--abort-on-container-exit` across both one-shot jobs because the shorter
+   migration would terminate model provisioning.
 5. Verify HTTPS, Auth0 callback/logout, authenticated email/workspace, API readiness,
    tenant isolation, upload/job completion, grounded chat, citations, and logout.
 

@@ -705,8 +705,10 @@ isolated branch. The reviewed Phoenix plan provisioned the single A1 host, netwo
 private versioned backup bucket, and budget alerts. Clean cloud-init, host services,
 firewall policy, and zero Terraform drift are verified. The protected publisher has
 produced a signed, scanned, SBOM-attested AMD64/ARM64 application image at an immutable
-digest, and anonymous pull is verified. Application deployment and exercised acceptance
-evidence remain gated.
+digest, and anonymous pull is verified. The default Streamlit release now runs behind
+public HTTPS; migration/model provisioning, API readiness, authenticated identity,
+Personal workspace, Library, and logout pass. Data-path, capacity/failure, restore,
+rollback, and candidate evidence remain gated.
 
 Local hardening now also proves fixable high/critical vulnerability scans for both app
 images, tracked-source secret and OCI configuration scans, automated candidate
