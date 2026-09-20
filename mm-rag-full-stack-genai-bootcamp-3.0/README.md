@@ -1,4 +1,4 @@
-# Multimodal RAG Production — Phase 9 accepted; Phase 10 decision kickoff
+# Multimodal RAG Production — Phase 9 accepted; Phase 10 implementation
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
@@ -90,13 +90,17 @@ ADR 0050 selects a read-only Google Drive API v3 adapter as the first connector.
 change-token, permission, download/export, discovery, and cursor-expiry coverage runs
 without credentials, while the bounded live provider proof is complete.
 
-Phase 10 decision kickoff is documented in
+Phase 10 implementation is governed by
 [the operational-hardening contract](docs/PHASE10_OPERATIONS_KICKOFF.md). Accepted
 ADRs 0051–0056 cover scope/evidence, backup and restore drills, retention scheduling,
 dependency maintenance, OCI capacity/cost guardrails, and upgrade/rollback/disaster
-recovery automation. Implementation is authorized within their reviewed free-first
-boundaries; automatic retention apply, unattended upgrades, paid capacity, and
-production-SLA claims remain disabled.
+recovery automation. The tracked implementation now includes the accepted policy and
+content-free evidence gate, fail-closed encrypted backup and isolated-restore tooling,
+monthly grouped maintenance candidates, an owner/admin retention reminder and preview,
+free-first host/certificate/backup/cost guardrails, and plan-hash-authorized release
+orchestration. Supervised OCI evidence is still required before acceptance. Automatic
+retention apply, unattended upgrades, paid capacity, and production-SLA claims remain
+disabled.
 
 The current `3.0` lineage contains:
 
@@ -201,14 +205,18 @@ future capabilities have already been implemented.
 
 The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
-The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
-shows the accepted product path and evaluation/observability layer. Phase 5 is
+The [current Phase 10 operational architecture](docs/architecture/images/10-phase-10-operational-hardening.png)
+shows the reviewed control and evidence loops around the accepted product path. The
+[Phase 7 workflow and DEV architecture reference](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
+shows the detailed product and evaluation/observability layers. Phase 5 is
 closed without candidate promotion. Phase 6
 Milestones 6.0–6.5 provide the deterministic visual/table corpus, immutable local
 extraction and visual retrieval, normalized tables, exact calculation, and
 backend-mediated evidence inspection; `visual-table-v1` is the accepted default.
-Phases 7–9 are accepted. Phase 10 operational hardening is in progress under accepted
-ADRs 0051–0056; destructive and paid boundaries remain separately gated.
+Phases 7–9 are accepted. Phase 10 local implementation is in progress under accepted
+ADRs 0051–0056; supervised OCI drills, final evidence, destructive actions, and paid
+boundaries remain separately gated. Use the
+[Phase 10 operations handbook](docs/PHASE10_OPERATIONS.md) for the exact workflow.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–10 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,

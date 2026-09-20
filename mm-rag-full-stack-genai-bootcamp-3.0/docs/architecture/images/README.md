@@ -17,6 +17,7 @@ reviewed for hierarchy, legibility, component coverage, and flow direction.
 | `07-phase-7-evaluation-observability.png` | Evaluation and observability target |
 | `08-phase-8-scalable-platform.png` | Scalable production deployment target |
 | `09-phase-9-enterprise-controls.png` | Enterprise and commercial controls target |
+| `10-phase-10-operational-hardening.png` | Implemented operational hardening and pending supervised evidence |
 | `10-final-production-architecture.png` | Final production-state architecture without phase labels |
 
 ## Shared visual specification

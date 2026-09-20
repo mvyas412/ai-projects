@@ -879,7 +879,8 @@ reconcile commercial usage.
 
 ## Phase 10 — operational hardening and lifecycle operations
 
-**Status:** ADRs 0051–0056 Accepted on 2026-09-20; implementation is in progress.
+**Status:** ADRs 0051–0056 Accepted on 2026-09-20; local implementation is complete
+and supervised OCI evidence is pending.
 Automatic retention apply, unattended upgrades, destructive host actions, temporary
 cloud resources, paid capacity/services, and production-SLA claims remain separately gated.
 
@@ -907,6 +908,14 @@ The implementation order is: scope/evidence (ADR 0051), backup/restore drills
 (ADR 0054), capacity/cost guardrails (ADR 0055), then upgrade/rollback/DR automation
 (ADR 0056). ADR 0053 authorizes preview-only reporting; automatic retention apply
 remains disabled pending a separate policy decision.
+
+The implementation adds one tracked free-first policy, strict content-free evidence
+validators, a lease-bounded encrypted backup cycle, an internal-network restore-drill
+Compose project, a five-minute Linux/Compose capacity collector, monthly grouped
+Dependabot candidates, durable authorized preview audits surfaced in Settings, and an
+exact-plan-hash release executor. Example systemd units remain disabled until a
+supervised host run succeeds. No operational tool receives product authorization from a
+backup name, host coordinate, queue message, or provider resource identifier.
 
 ## Architecture invariants
 
@@ -955,11 +964,11 @@ remains disabled pending a separate policy decision.
 | Deployment platform | Accepted OCI learning path with one Always Free-eligible ARM VM and Docker Compose under ADRs 0037–0038; Phoenix deployment and Phase 8 evidence pass |
 | First enterprise connector | Accepted read-only Google Drive API v3 under ADR 0050; secret-safe OAuth and bounded permission/deletion propagation evidence pass |
 | Phase 10 operational boundary | Accepted in ADR 0051; existing trust boundaries and free-first target remain binding |
-| Backup/restore automation | Accepted in ADR 0052; daily verification, monthly isolated restore, existing private OCI destination |
-| Automatic retention | ADR 0053 accepts monthly preview-only reporting; automatic apply remains disabled |
-| Dependency maintenance | ADR 0054 accepts monthly grouped candidates; no unattended production update selected |
-| OCI capacity/cost guardrails | ADR 0055 accepts free/local monitoring and the existing budget alarm; no paid capacity authorized |
-| Upgrade/rollback/DR automation | ADR 0056 accepts plan-first operator execution; destructive or replacement actions require reviewed plans |
+| Backup/restore automation | Lease-bounded daily encrypted backup and internal-network restore-drill tooling implemented under ADR 0052; supervised OCI evidence pending |
+| Automatic retention | Owner/admin reminder, token-safe preview report and durable preview audit implemented under ADR 0053; automatic apply remains disabled |
+| Dependency maintenance | Monthly grouped uv/npm/Actions/container candidates and evidence validation implemented under ADR 0054; no auto-merge or paid acceptance |
+| OCI capacity/cost guardrails | Five-minute content-free host/queue/certificate/backup/inventory collector implemented under ADR 0055; no auto-scale or paid capacity |
+| Upgrade/rollback/DR automation | Exact-hash, leased, plan-first executor implemented under ADR 0056; supervised rollback and separately approved clean-host proof pending |
 
 Accepted Phase 2 decisions are recorded in
 [`docs/architecture/decisions`](decisions/):

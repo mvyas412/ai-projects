@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 10 implementation — ADRs 0051–0056 Accepted; Milestone 10.1 next |
+| Active milestone | Phase 10 validation — local Milestones 10.1–10.6 implemented; supervised OCI evidence next |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -66,7 +66,7 @@ Rules:
 | Phase 9 | Completed and accepted — ADRs 0043–0050, provider-neutral milestones 9.0–9.6, and bounded Google Drive OAuth/propagation proofs pass |
 | Phase 9 closure | PR #17 squash-merged into `main` at `ad4e7fb`; source and merged trees match |
 | Phase 9 release | Annotated `mm-rag-v9.0.0` identifies the verified documentation-kickoff closure commit and is immutable |
-| Phase 10 | In progress — ADRs 0051–0056 Accepted; operational hardening implementation authorized within free-first safeguards |
+| Phase 10 | In progress — ADRs 0051–0056 Accepted; local operational tooling and handbook implemented, supervised OCI drills/evidence pending |
 
 ## Delivery sequence and gates
 
@@ -1106,12 +1106,12 @@ preview, approval, hold, and rollback controls.
 | Milestone | Deliverable | Status | Completion gate |
 | --- | --- | --- | --- |
 | 10.0 | Scope, invariants, evidence contract, and failure budget | Completed | ADR 0051 Accepted with measurable boundaries |
-| 10.1 | Scheduled encrypted backup verification and isolated restore drills | Ready | ADR 0052 Accepted; restore evidence is content-free and repeatable |
-| 10.2 | Governed retention scheduling and safe deletion execution | Ready | ADR 0053 Accepted; preview-only boundary, automatic apply disabled |
-| 10.3 | Dependency, vulnerability, and supply-chain maintenance | Ready | ADR 0054 Accepted; bounded update cadence and rollback gate required |
-| 10.4 | OCI monitoring, saturation, and cost guardrails | Ready | ADR 0055 Accepted; alerts and safe degradation must pass without paid capacity |
-| 10.5 | Upgrade, rollback, disaster-recovery, and operator automation | Ready | ADR 0056 Accepted; operator authorization and separate clean-host approval required |
-| 10.6 | Final operator handbook and release evidence | Pending | All accepted Phase 10 gates pass and unresolved items remain explicit |
+| 10.1 | Scheduled encrypted backup verification and isolated restore drills | Implemented; live proof pending | Encrypted backup cycle, network-isolated restore Compose, aggregate/checksum/health evidence, and disabled timer are tested locally |
+| 10.2 | Governed retention scheduling and safe deletion execution | Implemented at preview-only boundary | Owner/admin reminder, durable preview audit, token-safe report; automatic apply remains disabled |
+| 10.3 | Dependency, vulnerability, and supply-chain maintenance | Implemented; first candidate pending | Monthly grouped Dependabot candidates plus integrity/SBOM/provenance/ARM64/rollback evidence contract; no auto-merge or paid run |
+| 10.4 | OCI monitoring, saturation, and cost guardrails | Implemented; host proof pending | Five-minute content-free collector and disabled timer enforce approved resource/backup/cost boundaries; queue/certificate numeric cutoffs remain unresolved |
+| 10.5 | Upgrade, rollback, disaster-recovery, and operator automation | Implemented; drills pending | Exact plan hash, fresh backup, immutable images, lease and separate explicit execution; clean-host cloud approval remains required |
+| 10.6 | Final operator handbook and release evidence | Handbook implemented; evidence pending | Content-free eight-scenario gate must pass after supervised OCI drills |
 
 ### Proposed completion gate
 
@@ -1214,11 +1214,11 @@ preview, approval, hold, and rollback controls.
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Implement scheduled encrypted backup verification and isolated-restore tooling | Milestone 10.1 free tests and content-free evidence |
-| 2 | Implement monthly preview-only retention reporting | Milestone 10.2 evidence; automatic apply remains disabled |
-| 3 | Implement maintenance and free-first capacity guardrails | Milestones 10.3–10.4 tests and runbooks |
-| 4 | Implement guarded upgrade/rollback automation | Milestone 10.5 local evidence; clean-host cloud drill remains separately approved |
-| 5 | Preserve deferred Phase 9 provider choices | No SCIM, real-billing, production quota, or paid service is implied by Phase 10 |
+| 1 | Run the full free repository gate and review the Phase 10 diff | Local implementation evidence |
+| 2 | Supervise one OCI encrypted backup and isolated restore drill | Milestone 10.1 content-free evidence; no active-data overwrite |
+| 3 | Install the reviewed disabled timers and capture healthy capacity/cost evidence | Milestone 10.4 host evidence without paid capacity |
+| 4 | Exercise one exact upgrade/rollback plan | Milestone 10.5 evidence; execution separately authorized |
+| 5 | Review a zero-cost temporary clean-host plan before any cloud creation | Milestone 10.6 recovery evidence; separate approval required |
 
 ## Update protocol
 

@@ -4,7 +4,15 @@
 > The handbook remains the editable source of truth; regenerate these posters
 > whenever architecture, data flow, technology, or phase status changes.
 
-## Current Phase 7 workflow and DEV architecture
+## Current Phase 10 operational architecture
+
+This view shows the implemented plan/authorize/evidence loops around the accepted
+free-first learning deployment. Supervised OCI evidence is pending and red stop markers
+preserve the separate approval boundaries.
+
+![Phase 10 operational hardening and recovery](images/10-phase-10-operational-hardening.png)
+
+## Phase 7 workflow and DEV architecture reference
 
 This current implementation view shows the Phase 3/4 runtime and governance
 boundaries, Phase 5 hybrid retrieval foundation, Phase 6 visual/table extraction,
@@ -65,6 +73,10 @@ This poster records the accepted and released Phase 6 visual/table architecture.
 ## Phase 9 — Enterprise integrations and commercial controls
 
 ![Phase 9 enterprise integrations and commercial controls](images/09-phase-9-enterprise-controls.png)
+
+## Phase 10 — Operational hardening and recovery
+
+![Phase 10 operational hardening and recovery](images/10-phase-10-operational-hardening.png)
 
 ## Maintenance rule
 

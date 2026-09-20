@@ -1,0 +1,37 @@
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /mm-rag-full-stack-genai-bootcamp-3.0
+    schedule:
+      interval: monthly
+    groups:
+      phase10-python:
+        patterns: ["*"]
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: npm
+    directory: /mm-rag-full-stack-genai-bootcamp-3.0/frontend-next
+    schedule:
+      interval: monthly
+    groups:
+      phase10-nextjs:
+        patterns: ["*"]
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      phase10-actions:
+        patterns: ["*"]
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: docker
+    directory: /mm-rag-full-stack-genai-bootcamp-3.0
+    schedule:
+      interval: monthly
+    groups:
+      phase10-containers:
+        patterns: ["*"]
+    open-pull-requests-limit: 1
