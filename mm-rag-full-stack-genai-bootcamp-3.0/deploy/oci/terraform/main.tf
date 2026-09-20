@@ -140,6 +140,26 @@ resource "oci_objectstorage_bucket" "backups" {
   freeform_tags  = var.freeform_tags
 }
 
+# The application host is the only principal allowed to create backup objects.
+# Bucket administration, object listing, reads, overwrites, and deletion stay denied.
+resource "oci_identity_dynamic_group" "backup_uploader" {
+  compartment_id = var.tenancy_ocid
+  name           = "mm-rag-learning-backup-uploader"
+  description    = "MM-RAG learning host instance principal for encrypted backup upload"
+  matching_rule  = "ALL {instance.id = '${oci_core_instance.app.id}'}"
+  freeform_tags  = var.freeform_tags
+}
+
+resource "oci_identity_policy" "backup_uploader" {
+  compartment_id = var.compartment_ocid
+  name           = "mm-rag-learning-backup-uploader"
+  description    = "Allow the MM-RAG host to create encrypted objects only in its backup bucket"
+  statements = [
+    "Allow dynamic-group ${oci_identity_dynamic_group.backup_uploader.name} to manage objects in compartment id ${var.compartment_ocid} where all {target.bucket.name = '${oci_objectstorage_bucket.backups.name}', request.permission = 'OBJECT_CREATE'}",
+  ]
+  freeform_tags = var.freeform_tags
+}
+
 resource "oci_budget_budget" "learning_guardrail" {
   compartment_id = var.tenancy_ocid
   amount         = var.monthly_budget_usd

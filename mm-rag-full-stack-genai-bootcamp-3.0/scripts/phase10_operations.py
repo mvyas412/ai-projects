@@ -96,8 +96,8 @@ def validate_policy(payload: dict[str, Any]) -> dict[str, Any]:
         review_percent=80,
         review_duration_minutes=15,
         critical_percent=90,
-        queue_age_critical_minutes=None,
-        certificate_critical_days=None,
+        queue_age_critical_minutes=15,
+        certificate_critical_days=14,
     )
     release = _mapping(payload, "release")
     _require_values(

@@ -1106,10 +1106,10 @@ preview, approval, hold, and rollback controls.
 | Milestone | Deliverable | Status | Completion gate |
 | --- | --- | --- | --- |
 | 10.0 | Scope, invariants, evidence contract, and failure budget | Completed | ADR 0051 Accepted with measurable boundaries |
-| 10.1 | Scheduled encrypted backup verification and isolated restore drills | Live proof passed | Encrypted private-bucket upload, checksum, aggregate restore, readiness, cleanup, and active-service recovery pass; timer remains disabled |
+| 10.1 | Scheduled encrypted backup verification and isolated restore drills | Live proof passed; scheduling hardening in review | Encrypted private-bucket upload, checksum, aggregate restore, readiness, cleanup, and active-service recovery pass; instance-principal upload and timer validation remain |
 | 10.2 | Governed retention scheduling and safe deletion execution | Implemented at preview-only boundary | Owner/admin reminder, durable preview audit, token-safe report; automatic apply remains disabled |
 | 10.3 | Dependency, vulnerability, and supply-chain maintenance | Implemented; first candidate pending | Monthly grouped Dependabot candidates plus integrity/SBOM/provenance/ARM64/rollback evidence contract; no auto-merge or paid run |
-| 10.4 | OCI monitoring, saturation, and cost guardrails | Healthy host proof; thresholds pending | Live inventory matches the reviewed free-first topology and host metrics are healthy; queue/certificate numeric cutoffs remain unresolved and the timer remains disabled |
+| 10.4 | OCI monitoring, saturation, and cost guardrails | Healthy host proof; thresholds approved | Live inventory matches the reviewed free-first topology; 15-minute queue and 14-day certificate critical cutoffs are tracked; timer validation remains |
 | 10.5 | Upgrade, rollback, disaster-recovery, and operator automation | Implemented; drills pending | Exact plan hash, fresh backup, immutable images, lease and separate explicit execution; clean-host cloud approval remains required |
 | 10.6 | Final operator handbook and release evidence | Handbook implemented; evidence pending | Content-free eight-scenario gate must pass after supervised OCI drills |
 
@@ -1215,10 +1215,10 @@ preview, approval, hold, and rollback controls.
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
 | 1 | Run the full free repository gate and review the Phase 10 diff | Local implementation evidence |
-| 2 | Approve exact queue-age and certificate-expiry alert thresholds | Complete Milestone 10.4 policy without inventing production claims |
-| 3 | Review the disabled timers after threshold approval | No automatic scheduling before the policy and one supervised cycle agree |
+| 2 | Apply and verify the reviewed instance-principal IAM plan | Daily upload uses bucket-scoped create-only authority without a static API key |
+| 3 | Validate and enable the approved backup/capacity timers | Daily 05:30 Pacific backup and five-minute capacity sampling pass one supervised cycle |
 | 4 | Exercise one exact upgrade/rollback plan | Milestone 10.5 evidence; execution separately authorized |
-| 5 | Review a zero-cost temporary clean-host plan before any cloud creation | Milestone 10.6 recovery evidence; separate approval required |
+| 5 | Review a zero-cost temporary clean-host plan before any cloud creation | Milestone 10.6 recovery evidence; separate apply/delete approval required |
 
 ## Update protocol
 

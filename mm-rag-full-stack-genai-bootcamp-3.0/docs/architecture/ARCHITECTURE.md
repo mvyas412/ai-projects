@@ -915,7 +915,10 @@ Compose project, a five-minute Linux/Compose capacity collector, monthly grouped
 Dependabot candidates, durable authorized preview audits surfaced in Settings, and an
 exact-plan-hash release executor. A supervised host backup/private-bucket upload and
 isolated restore now pass, and the aggregate host snapshot is healthy. Example systemd
-units remain disabled pending exact alert-threshold approval. No operational tool receives product authorization from a
+units now carry the approved 15-minute queue and 14-day certificate critical thresholds.
+Daily backup upload uses an instance principal restricted to creating objects in the
+exact private bucket; no static OCI API key belongs on the host. The units remain disabled
+until the IAM plan and one supervised scheduled cycle pass. No operational tool receives product authorization from a
 backup name, host coordinate, queue message, or provider resource identifier.
 
 ## Architecture invariants
@@ -968,7 +971,7 @@ backup name, host coordinate, queue message, or provider resource identifier.
 | Backup/restore automation | Lease-bounded daily encrypted backup and internal-network restore-drill tooling implemented under ADR 0052; supervised encrypted upload, restore, cleanup, and service-recovery evidence pass |
 | Automatic retention | Owner/admin reminder, token-safe preview report and durable preview audit implemented under ADR 0053; automatic apply remains disabled |
 | Dependency maintenance | Monthly grouped uv/npm/Actions/container candidates and evidence validation implemented under ADR 0054; no auto-merge or paid acceptance |
-| OCI capacity/cost guardrails | Five-minute content-free collector implemented under ADR 0055; live free-first inventory and host metrics are healthy, while exact queue/certificate thresholds remain pending and no auto-scale or paid capacity is authorized |
+| OCI capacity/cost guardrails | Five-minute content-free collector implemented under ADR 0055; live free-first inventory and host metrics are healthy, 15-minute queue and 14-day certificate critical thresholds are tracked, and no auto-scale or paid capacity is authorized |
 | Upgrade/rollback/DR automation | Exact-hash, leased, plan-first executor implemented under ADR 0056; supervised rollback and separately approved clean-host proof pending |
 
 Accepted Phase 2 decisions are recorded in

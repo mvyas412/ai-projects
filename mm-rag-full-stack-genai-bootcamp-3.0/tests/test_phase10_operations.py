@@ -186,7 +186,7 @@ def test_capacity_guardrails_report_review_and_critical(
     assert "unexpected-paid-resource" in result["reasons"]
 
 
-def test_healthy_capacity_waits_for_unresolved_threshold_decisions(
+def test_healthy_capacity_passes_with_resolved_thresholds(
     policy: dict[str, object],
 ) -> None:
     result = capacity_evidence(
@@ -206,11 +206,28 @@ def test_healthy_capacity_waits_for_unresolved_threshold_decisions(
         },
         policy,
     )
-    assert result["status"] == "needs-decision"
-    assert result["unresolved_thresholds"] == [
-        "queue-age-critical-minutes",
-        "certificate-critical-days",
-    ]
+    assert result["status"] == "pass"
+    assert result["unresolved_thresholds"] == []
+
+
+def test_queue_and_certificate_thresholds_are_critical(
+    policy: dict[str, object],
+) -> None:
+    metrics = {
+        "cpu_percent": 20,
+        "memory_percent": 30,
+        "disk_percent": 40,
+        "inode_percent": 10,
+        "sustained_minutes": 0,
+        "verified_backup_age_hours": 8,
+        "certificate_days_remaining": 14,
+        "oldest_queue_age_minutes": 15,
+        "queue_age_critical": False,
+        "unexpected_paid_resources": False,
+    }
+    result = capacity_evidence({"metrics": metrics}, policy)
+    assert result["status"] == "critical"
+    assert result["reasons"] == ["certificate-expiry", "queue-age"]
 
 
 def test_release_preflight_is_plan_first_and_awaits_operator() -> None:

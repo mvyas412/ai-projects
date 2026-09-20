@@ -27,6 +27,7 @@ def run_backup_cycle(
     output_directory: Path,
     recipient: str,
     upload_bucket: str | None = None,
+    upload_namespace: str | None = None,
     runner: Runner | None = None,
     bundler: Bundler = create_encrypted_bundle,
     now: datetime | None = None,
@@ -139,18 +140,28 @@ def run_backup_cycle(
             bundler(staging, bundle, recipient)
             bundle_digest = _sha256(bundle)
             if upload_bucket:
+                if not upload_namespace:
+                    raise ValueError("OCI namespace is required for upload")
                 run(
                     [
                         "oci",
                         "os",
                         "object",
                         "put",
+                        "--auth",
+                        "instance_principal",
+                        "--namespace-name",
+                        upload_namespace,
                         "--bucket-name",
                         upload_bucket,
                         "--name",
                         bundle.name,
                         "--file",
                         str(bundle),
+                        "--no-multipart",
+                        "--verify-checksum",
+                        "--opc-checksum-algorithm",
+                        "SHA256",
                         "--force",
                     ],
                     compose_file.parent,
@@ -247,8 +258,11 @@ def main() -> None:
     args = _parser().parse_args()
     recipient = args.recipient_file.read_text(encoding="utf-8").strip()
     bucket = os.environ.get("PHASE10_OCI_BACKUP_BUCKET") if args.upload else None
+    namespace = os.environ.get("PHASE10_OCI_NAMESPACE") if args.upload else None
     if args.upload and not bucket:
         raise ValueError("PHASE10_OCI_BACKUP_BUCKET is required for upload")
+    if args.upload and not namespace:
+        raise ValueError("PHASE10_OCI_NAMESPACE is required for upload")
     result = run_backup_cycle(
         compose_file=args.compose_file,
         environment_file=args.environment_file,
@@ -256,6 +270,7 @@ def main() -> None:
         output_directory=args.output_directory,
         recipient=recipient,
         upload_bucket=bucket,
+        upload_namespace=namespace,
     )
     print(json.dumps(result, sort_keys=True))
 

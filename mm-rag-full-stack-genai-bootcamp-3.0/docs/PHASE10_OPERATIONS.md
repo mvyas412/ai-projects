@@ -33,6 +33,12 @@ seven daily and two monthly verified generations, never deleting the final two k
 generations. `backup-plan` only computes candidates; cloud deletion remains a separately
 reviewed exact plan.
 
+The deployed host authenticates to OCI with its instance principal. The Terraform policy
+matches only that instance and grants only `OBJECT_CREATE` in the exact backup bucket.
+The upload command supplies the non-secret Object Storage namespace and verifies SHA-256;
+no user API key is installed on the host, and the principal cannot list, read, overwrite,
+or delete objects.
+
 Once per month, restore the latest known-good bundle into disposable, network-restricted
 services. Verify schema head, aggregate SQL/vector/object counts, object checksums,
 tenant isolation and readiness. The active data plane must remain untouched. Cleanup of
@@ -85,9 +91,8 @@ urgent candidate remains reviewed and rollback-capable.
 Record CPU, memory, disk, inode, queue age, certificate lifetime, verified-backup age and
 unexpected paid-resource presence without provider identifiers. Sustained 80% resource
 use for 15 minutes requests review; 90% or an older-than-48-hour verified backup is
-critical. Queue-age and certificate cutoffs remain explicitly unset until controlled
-free tests establish useful values; the report calls this out rather than inventing a
-threshold.
+critical. An oldest queued item at 15 minutes or a certificate with 14 days or less
+remaining is also critical.
 
 At review level, stop optional evaluation and new bulk ingestion before changing
 capacity. At critical level, preserve active work, reject new expensive work with a

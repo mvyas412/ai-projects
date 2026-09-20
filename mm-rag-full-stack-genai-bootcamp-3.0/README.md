@@ -101,8 +101,10 @@ free-first host/certificate/backup/cost guardrails, and plan-hash-authorized rel
 orchestration. A supervised OCI cycle now passes encrypted private-bucket upload,
 checksum verification, isolated PostgreSQL/Qdrant/object restore, active-service
 recovery, and healthy content-free host capacity collection. Exact queue-age and TLS
-expiry alert thresholds, upgrade/rollback execution, and separately approved clean-host
-recovery evidence remain before acceptance. Automatic retention apply, unattended
+expiry alert thresholds are now fixed at 15 minutes and 14 days. Daily encrypted uploads
+use a bucket-scoped OCI instance principal with no static host key. Upgrade/rollback
+execution and separately approved clean-host recovery evidence remain before acceptance.
+Automatic retention apply, unattended
 upgrades, paid capacity, and production-SLA claims remain disabled.
 
 The current `3.0` lineage contains:

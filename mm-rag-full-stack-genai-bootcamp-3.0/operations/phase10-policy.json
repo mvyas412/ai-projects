@@ -8,10 +8,10 @@
     "restore_drill_interval_days": 31
   },
   "capacity": {
-    "certificate_critical_days": null,
+    "certificate_critical_days": 14,
     "critical_percent": 90,
     "learning_users": 10,
-    "queue_age_critical_minutes": null,
+    "queue_age_critical_minutes": 15,
     "review_duration_minutes": 15,
     "review_percent": 80
   },
