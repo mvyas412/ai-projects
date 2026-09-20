@@ -447,11 +447,29 @@ class LifecycleService:
         with self._session.begin():
             self._require(user, workspace_id, PolicyAction.RETENTION_PREVIEW)
             scope = self._retention_scope(workspace_id, generated_at)
-        return RetentionPreview(
-            policy_revision=self._settings.lifecycle_policy_revision,
-            generated_at=generated_at,
-            scope=scope,
-        )
+            preview = RetentionPreview(
+                policy_revision=self._settings.lifecycle_policy_revision,
+                generated_at=generated_at,
+                scope=scope,
+            )
+            record_audit_event(
+                self._session,
+                workspace_id=workspace_id,
+                actor_user_id=user.id,
+                action="retention.preview_generated",
+                resource_type="workspace",
+                resource_id=workspace_id,
+                details={
+                    "policy_revision": preview.policy_revision,
+                    "due_document_deletions": preview.due_document_deletions,
+                    "due_conversation_deletions": preview.due_conversation_deletions,
+                    "inactive_generation_count": len(scope.generations),
+                    "terminal_job_count": len(scope.jobs),
+                    "security_audit_event_count": len(scope.audits),
+                    "orphan_object_count": len(scope.orphans),
+                },
+            )
+        return preview
 
     def inventory_orphans(
         self,

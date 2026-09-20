@@ -164,6 +164,7 @@ def test_due_document_purge_reconciles_objects_and_metadata(client: TestClient) 
             )
         )
         assert "lifecycle.document_purged" in actions
+        assert "retention.preview_generated" in actions
 
 
 def test_hold_blocks_preview_until_admin_removes_it(client: TestClient) -> None:

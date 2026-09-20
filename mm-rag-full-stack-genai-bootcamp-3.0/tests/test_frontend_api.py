@@ -67,3 +67,22 @@ def test_api_client_hides_network_exception_details(monkeypatch) -> None:
         _client().conversations("workspace-1")
     assert str(error.value) == "The backend is currently unavailable."
     assert "secret.internal" not in str(error.value)
+
+
+def test_retention_preview_uses_read_only_workspace_route(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    def request(method: str, url: str, **kwargs) -> httpx.Response:
+        captured.update(method=method, url=url, **kwargs)
+        return httpx.Response(
+            200,
+            json={"policy_revision": "phase4-retention-v1"},
+            request=httpx.Request(method, url),
+        )
+
+    monkeypatch.setattr(httpx, "request", request)
+    _client().retention_preview("workspace-1")
+    assert captured["method"] == "GET"
+    assert captured["url"] == (
+        "http://backend.test/api/v1/workspaces/workspace-1/governance/retention/preview"
+    )

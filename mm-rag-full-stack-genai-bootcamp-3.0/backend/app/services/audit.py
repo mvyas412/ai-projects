@@ -71,6 +71,12 @@ _SAFE_DETAIL_FIELDS = frozenset(
         "snapshot_consent",
         "review_status",
         "promoted_case_id",
+        "due_document_deletions",
+        "due_conversation_deletions",
+        "inactive_generation_count",
+        "terminal_job_count",
+        "security_audit_event_count",
+        "orphan_object_count",
     }
 )
 

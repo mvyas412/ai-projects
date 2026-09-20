@@ -250,6 +250,11 @@ class BackendAPIClient:
     def feedback(self, workspace_id: str) -> list[dict[str, Any]]:
         return self._json("GET", f"/api/v1/workspaces/{workspace_id}/feedback")
 
+    def retention_preview(self, workspace_id: str) -> dict[str, Any]:
+        return self._json(
+            "GET", f"/api/v1/workspaces/{workspace_id}/governance/retention/preview"
+        )
+
     def review_feedback(
         self,
         workspace_id: str,
