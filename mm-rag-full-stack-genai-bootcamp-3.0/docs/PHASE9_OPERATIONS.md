@@ -61,5 +61,5 @@ MM_RAG_RUN_INTEGRATION_TESTS=1 uv run pytest -q \
 ```
 
 Before commit or release, run `make check`. The bounded Google OAuth health/checkpoint
-probe has passed. Provider permission/deletion propagation, external SCIM, and any
-billing-sandbox proof still require separate credentials, fixtures, and approval.
+and permission/deletion propagation proofs pass. External SCIM and any real billing
+provider remain optional future integrations requiring separate credentials and approval.

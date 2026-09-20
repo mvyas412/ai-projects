@@ -68,6 +68,31 @@ creation succeeded, ten objects were sampled, and the first sampled object's per
 count was returned without content download or identity disclosure. Credential files
 were verified ignored and mode `0600`.
 
+## Permission and deletion propagation proof
+
+Use only a dedicated synthetic fixture. Capture the baseline after upload:
+
+```bash
+GOOGLE_DRIVE_CLIENT_CONFIG=data/runtime/credentials/google-drive-client.json \
+GOOGLE_DRIVE_PROPAGATION_STAGE=baseline \
+GOOGLE_DRIVE_FIXTURE_NAME=phase9-google-drive-propagation-fixture.pdf \
+  make google-drive-propagation
+```
+
+Temporarily expand the fixture to link-viewer access, run the `expanded` stage, restore
+it to Restricted, and run the `restored` stage. Move only the fixture to Drive Trash,
+then run the `deleted` stage. Cloud permission changes and deletion require explicit
+action-time approval. The helper reads provider metadata only and writes opaque IDs,
+fingerprints, and cursors to ignored mode-`0600` runtime evidence; standard output is
+limited to aggregate booleans and counts.
+
+The bounded proof completed on 2026-09-19. The connector observed permission expansion
+from one to two opaque principals, contraction back to the original one-principal
+fingerprint, and a terminal deletion change after the fixture moved to Trash. The file
+also disappeared from active discovery. No content was downloaded, no provider/source/
+permission identifier entered tracked evidence, and the trashed fixture remains
+recoverable through Google Drive.
+
 ## Revoke or rotate
 
 - Revoke the app from the Google Account third-party access page when the proof ends or

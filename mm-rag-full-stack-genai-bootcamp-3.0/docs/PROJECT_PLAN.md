@@ -1,6 +1,6 @@
 # Multimodal RAG production project plan
 
-> Living delivery plan — updated 2026-09-15
+> Living delivery plan — updated 2026-09-19
 
 This is the version-controlled planning source of truth for the journey from the
 preserved prototype through the enterprise platform. It defines sequence, scope,
@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 9 acceptance; provider-neutral implementation complete |
+| Active milestone | Phase 9 completed and accepted; closure PR pending |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -63,7 +63,7 @@ Rules:
 | Phase 6 release | Annotated `mm-rag-v6.0.0` at verified closure commit `d97e8e8`; immutable |
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
 | Phase 8 | Completed and accepted — OCI Streamlit deployment, authenticated data path, progressive capacity, resilience, encrypted backup/restore, rollback, and all ten evidence scenarios pass; Next.js remains deferred and unpromoted |
-| Phase 9 | Implementation-complete candidate — ADRs 0043–0050 accepted; provider-neutral milestones 9.0–9.6 pass focused tests and PostgreSQL tenant-isolation proof; live/provider-specific acceptance remains gated |
+| Phase 9 | Completed and accepted — ADRs 0043–0050, provider-neutral milestones 9.0–9.6, and bounded Google Drive OAuth/propagation proofs pass |
 
 ## Delivery sequence and gates
 
@@ -94,7 +94,7 @@ security and data-integrity gates on which it depends.
 | 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Completed and accepted; `visual-table-v1` promoted with explicit rollback |
 | 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Implemented; post-fix acceptance baseline in progress |
 | 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Non-provisioning implementation and local hardening complete; cloud acceptance pending Phase 7 closure and explicit provisioning approval |
-| 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Planned |
+| 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Completed and accepted |
 
 ## Phase 1 — working prototype
 
@@ -1033,9 +1033,10 @@ of the accepted single-VM topology under representative bounded load.
 
 ## Phase 9 — enterprise integrations and commercial controls
 
-**Status:** Provider-neutral implementation-complete candidate. ADRs 0043–0050 are
-accepted. Providers, credentials, paid services, initial production meters/quotas, and
-provider-specific propagation targets remain separately gated.
+**Status:** Completed and accepted. ADRs 0043–0050 are accepted. Provider-neutral
+milestones 9.0–9.6 and the bounded Google Drive live proof pass. External identity and
+real billing providers, paid services, production meters/quotas, and automatic retention
+remain deliberately deferred or separately gated.
 
 Milestone 9.0 now has a tracked requirements/threat model and first-connector scorecard.
 The provider-neutral portion of Milestone 9.1 implements typed discovery, change-page,
@@ -1044,7 +1045,9 @@ registry; tenant/connector-bound opaque credential references; and runtime-only 
 resolution. Focused lint, typing, and contract tests pass. ADR 0050 now selects and
 implements the read-only Google Drive adapter with mocked provider coverage. Its secure
 Desktop OAuth bootstrap, file-backed runtime resolver, and aggregate-only live probe
-pass with the read-only scope; permission/deletion propagation evidence remains gated.
+pass with the read-only scope. A dedicated synthetic fixture then proved permission
+expansion, contraction to the original fingerprint, deletion change-feed delivery, and
+absence from active discovery without content download or identifier disclosure.
 Migration
 `20260919_0019` adds tenant-isolated
 connector/sync, identity, entitlement, usage, simulated-billing, and compliance records.
@@ -1063,8 +1066,8 @@ commercial accounting, and compliance-grade administration.
 | Milestone | Deliverable |
 | --- | --- |
 | 9.0 | Complete — enterprise requirements, threat model, and provider priorities |
-| 9.1 | Verified — connector SDK, read-only Google Drive adapter, secret-safe OAuth, and bounded aggregate-only live probe |
-| 9.2 | Implemented — durable fenced delta sync and deny-first ACL/deletion state; live propagation objective pending |
+| 9.1 | Verified — connector SDK, read-only Google Drive adapter, secret-safe OAuth, and bounded aggregate-only live probes |
+| 9.2 | Verified — durable fenced delta sync plus live permission expansion/contraction and deletion propagation proof |
 | 9.3 | Implemented — SCIM-compatible ordered lifecycle and allowlisted mapping; provider proof pending |
 | 9.4 | Implemented — immutable usage, transactional reserve/settle, corrections; product quota values pending |
 | 9.5 | Implemented — signed simulated provider and entitlement reconciliation; real billing prohibited |
@@ -1148,21 +1151,20 @@ commercial accounting, and compliance-grade administration.
 | Dedicated frontend framework | 8.0 | Accepted — Streamlit remains authoritative; bounded Next.js candidate remains unpromoted under ADR 0040 |
 | Phase 9 scope and trust boundaries | 9.0 | Accepted — ADR 0043 |
 | Connector SDK and credential envelope | 9.0–9.1 | Accepted — ADR 0044; Google Drive selected in ADR 0050 |
-| Incremental sync, source ACL, and deletion propagation | 9.2 | Accepted — ADR 0045; timing target TBD |
+| Incremental sync, source ACL, and deletion propagation | 9.2 | Accepted — ADR 0045; bounded Google Drive propagation proof passes, while a production timing SLO remains TBD |
 | Enterprise identity lifecycle and group mapping | 9.3 | Accepted — ADR 0046; provider TBD |
 | Immutable usage ledger, quotas, and entitlements | 9.4 | Accepted — ADR 0047; initial meters/quotas TBD |
 | Billing, subscription, and reconciliation boundary | 9.5 | Accepted — ADR 0048; provider TBD |
 | Compliance lifecycle and administrative evidence | 9.6 | Accepted — ADR 0049; automatic schedule disabled |
-| First enterprise connector | 9.1–9.2 | Accepted — read-only Google Drive API v3 in ADR 0050; OAuth health/checkpoint proof passes, propagation proof pending |
+| First enterprise connector | 9.1–9.2 | Accepted — read-only Google Drive API v3 in ADR 0050; OAuth, checkpoint, permission, and deletion proofs pass |
 
 ## Immediate next actions
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Implement durable connector installations, sync runs/attempts, checkpoints, and source mappings | Migration, RLS, repositories, replay/fencing tests, and deny-first visibility evidence |
-| 2 | Complete the read-only Google Drive adapter and deterministic provider tests | Change-token, deletion, permission, blob/export, cursor-expiry, and privacy coverage |
-| 3 | Implement provider-neutral identity, usage/quota, simulated billing, and compliance contracts | Milestone migrations/services with concurrency, audit, reconciliation, and lifecycle tests |
-| 4 | Run separately authorized live proofs after account setup | Google OAuth first; identity/billing sandbox only after explicit provider configuration |
+| 1 | Publish the accepted Phase 9 closure | Reviewable PR, required checks, and squash merge |
+| 2 | Keep optional external providers behind separate decisions | No SCIM or real-billing provider is selected or implied by Phase 9 acceptance |
+| 3 | Define production policy only if the learning deployment advances | Production propagation SLO, meter/quota values, retention schedule, and restricted-scope review |
 
 ## Update protocol
 
