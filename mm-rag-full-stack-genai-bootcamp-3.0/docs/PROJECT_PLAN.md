@@ -3,9 +3,9 @@
 > Living delivery plan — updated 2026-09-19
 
 This is the version-controlled planning source of truth for the journey from the
-preserved prototype through the enterprise platform. It defines sequence, scope,
+preserved prototype through an operationally hardened learning platform. It defines sequence, scope,
 deliverables, dependencies, acceptance gates, risks, and current status for
-Phases 1–9.
+Phases 1–10.
 
 Use the [architecture handbook](architecture/ARCHITECTURE.md) for component
 boundaries and data flows. Use the active private phase context document for
@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 9 completed and accepted; closure PR pending |
+| Active milestone | Phase 10 decision kickoff — ADRs 0051–0056 Proposed; no implementation authorized |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -64,6 +64,9 @@ Rules:
 | Phase 7 | Completed and accepted — Milestones 7.0–7.5, seven-day post-fix baseline, numeric pilot SLOs, and final free gate pass |
 | Phase 8 | Completed and accepted — OCI Streamlit deployment, authenticated data path, progressive capacity, resilience, encrypted backup/restore, rollback, and all ten evidence scenarios pass; Next.js remains deferred and unpromoted |
 | Phase 9 | Completed and accepted — ADRs 0043–0050, provider-neutral milestones 9.0–9.6, and bounded Google Drive OAuth/propagation proofs pass |
+| Phase 9 closure | PR #17 squash-merged into `main` at `ad4e7fb`; source and merged trees match |
+| Phase 9 release | Annotated `mm-rag-v9.0.0` identifies the verified documentation-kickoff closure commit and is immutable |
+| Phase 10 | Proposed — production hardening, lifecycle operations, maintenance, capacity/cost safeguards, and recovery automation |
 
 ## Delivery sequence and gates
 
@@ -77,6 +80,7 @@ flowchart LR
     p6 -->|"multimodal quality baseline"| p7["Phase 7<br/>Evaluation and observability"]
     p7 -->|"SLO and quality evidence"| p8["Phase 8<br/>Scalable production platform"]
     p8 -->|"operational production base"| p9["Phase 9<br/>Enterprise/commercial platform"]
+    p9 -->|"governed product baseline"| p10["Phase 10<br/>Operational hardening"]
 ```
 
 Later-phase discovery may run early, but implementation must not bypass the
@@ -92,9 +96,10 @@ security and data-integrity gates on which it depends.
 | 4 | Fine-grained governance | Automated evidence of cross-tenant isolation | Completed and accepted |
 | 5 | High-quality hybrid retrieval | Evaluated improvement over dense-only baseline | Closed without acceptance |
 | 6 | First-class image and table intelligence | Accurate visual/numerical evidence with citations | Completed and accepted; `visual-table-v1` promoted with explicit rollback |
-| 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Implemented; post-fix acceptance baseline in progress |
-| 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Non-provisioning implementation and local hardening complete; cloud acceptance pending Phase 7 closure and explicit provisioning approval |
+| 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Completed and accepted |
+| 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Completed and accepted on the free-first Phoenix learning deployment |
 | 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Completed and accepted |
+| 10 | Operational hardening and lifecycle operations | Repeatable maintenance, recovery, retention, and cost-control evidence | Proposed; ADRs 0051–0056 require review |
 
 ## Phase 1 — working prototype
 
@@ -1082,6 +1087,47 @@ commercial accounting, and compliance-grade administration.
 - Billing reconciliation and administrative reports agree with the usage ledger.
 - Enterprise lifecycle workflows produce reviewable evidence.
 
+## Phase 10 — operational hardening and lifecycle operations
+
+**Status:** Proposed. The user approved the decision kickoff and free-first scope.
+ADRs 0051–0056 remain Proposed; no automation, destructive retention, infrastructure
+change, paid service, or production-SLA claim is authorized until the relevant ADR is
+reviewed and accepted.
+
+### Objective
+
+Turn the accepted learning platform into a maintainable, repeatable operational system:
+exercise recovery continuously, make upgrades reversible, keep dependencies current,
+bound OCI cost/capacity risk, and introduce lifecycle automation only behind explicit
+preview, approval, hold, and rollback controls.
+
+### Proposed milestones
+
+| Milestone | Deliverable | Status | Completion gate |
+| --- | --- | --- | --- |
+| 10.0 | Scope, invariants, evidence contract, and failure budget | Proposed | ADR 0051 accepted with measurable boundaries |
+| 10.1 | Scheduled encrypted backup verification and isolated restore drills | Proposed | ADR 0052 accepted; restore evidence is content-free and repeatable |
+| 10.2 | Governed retention scheduling and safe deletion execution | Proposed | ADR 0053 accepted; preview/reauthorization/hold/restore rules proven before enablement |
+| 10.3 | Dependency, vulnerability, and supply-chain maintenance | Proposed | ADR 0054 accepted; bounded update cadence and rollback gate demonstrated |
+| 10.4 | OCI monitoring, saturation, and cost guardrails | Proposed | ADR 0055 accepted; alerts and safe degradation pass without paid capacity |
+| 10.5 | Upgrade, rollback, disaster-recovery, and operator automation | Proposed | ADR 0056 accepted; clean-host recovery and reversible upgrade drill pass |
+| 10.6 | Final operator handbook and release evidence | Proposed | All accepted Phase 10 gates pass and unresolved items remain explicit |
+
+### Proposed completion gate
+
+- Backups are encrypted, verified, and restored on a repeatable schedule without
+  exposing customer content or secrets in evidence.
+- Retention remains disabled until a reviewed schedule is accepted; every destructive
+  run requires an exact preview, stable scope, hold precedence, and durable audit.
+- Dependency and image updates fail closed on integrity or vulnerability regressions and
+  retain an exercised rollback path.
+- The free-first OCI host has measurable saturation, disk, certificate, backup-age, and
+  cost guardrails suitable for the accepted ten-user learning target.
+- A clean-host recovery and an in-place upgrade/rollback drill meet approved learning
+  RTO/RPO objectives without silent data loss.
+- Runbooks allow a new operator to deploy, diagnose, recover, rotate credentials, and
+  retire the learning environment without reading private context.
+
 ## Cross-phase workstreams
 
 | Workstream | Continuous responsibility |
@@ -1157,14 +1203,21 @@ commercial accounting, and compliance-grade administration.
 | Billing, subscription, and reconciliation boundary | 9.5 | Accepted — ADR 0048; provider TBD |
 | Compliance lifecycle and administrative evidence | 9.6 | Accepted — ADR 0049; automatic schedule disabled |
 | First enterprise connector | 9.1–9.2 | Accepted — read-only Google Drive API v3 in ADR 0050; OAuth, checkpoint, permission, and deletion proofs pass |
+| Phase 10 scope and evidence boundary | 10.0 | Proposed — ADR 0051 |
+| Backup verification and restore drills | 10.1 | Proposed — ADR 0052 |
+| Automatic retention schedule and execution | 10.2 | Proposed — ADR 0053; remains disabled |
+| Dependency and supply-chain maintenance | 10.3 | Proposed — ADR 0054 |
+| OCI capacity, monitoring, and cost guardrails | 10.4 | Proposed — ADR 0055 |
+| Upgrade, rollback, and disaster-recovery automation | 10.5–10.6 | Proposed — ADR 0056 |
 
 ## Immediate next actions
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Publish the accepted Phase 9 closure | Reviewable PR, required checks, and squash merge |
-| 2 | Keep optional external providers behind separate decisions | No SCIM or real-billing provider is selected or implied by Phase 9 acceptance |
-| 3 | Define production policy only if the learning deployment advances | Production propagation SLO, meter/quota values, retention schedule, and restricted-scope review |
+| 1 | Review Phase 10 scope and safety boundaries | ADR 0051 approval or revision |
+| 2 | Review recovery and retention together | ADRs 0052–0053; retention remains disabled until explicitly accepted |
+| 3 | Review maintenance, capacity, and operator automation | ADRs 0054–0056 with free-first evidence targets |
+| 4 | Preserve deferred Phase 9 provider choices | No SCIM, real-billing, production quota, or paid service is implied by Phase 10 |
 
 ## Update protocol
 

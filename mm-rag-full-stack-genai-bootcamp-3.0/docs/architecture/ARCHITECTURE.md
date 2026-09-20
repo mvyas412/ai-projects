@@ -3,7 +3,7 @@
 > Living architecture baseline — updated 2026-09-19
 
 This document is the version-controlled architecture source of truth for the
-complete system and Phases 1–9. Update it whenever a component, boundary, data
+complete system and Phases 1–10. Update it whenever a component, boundary, data
 flow, technology decision, or phase status changes.
 
 The companion [project plan](../PROJECT_PLAN.md) owns delivery sequence,
@@ -14,7 +14,7 @@ milestones, dependencies, completion gates, risks, and immediate next actions.
 Presentation-ready rendered diagrams are maintained in the
 [architecture poster gallery](ARCHITECTURE_POSTERS.md). The gallery includes a
 final production-state architecture without phase numbers, a complete-system
-roadmap view, and one diagram for each phase. The Mermaid diagrams in this
+roadmap view, and one diagram for each accepted phase plus proposed Phase 10. The Mermaid diagrams in this
 handbook remain the editable source of truth.
 
 The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
@@ -193,7 +193,8 @@ flowchart LR
     p6["Phase 6<br/>Visual/table intelligence<br/>Completed / accepted"] -->
     p7["Phase 7<br/>Evaluation/observability<br/>Accepted"] -->
     p8["Phase 8<br/>Scalable platform<br/>Accepted"] -->
-    p9["Phase 9<br/>Enterprise platform<br/>Accepted"]
+    p9["Phase 9<br/>Enterprise platform<br/>Accepted"] -->
+    p10["Phase 10<br/>Operational hardening<br/>Proposed"]
 ```
 
 | Phase | Capability | Main technologies/components | Stores | Status |
@@ -207,6 +208,7 @@ flowchart LR
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Local telemetry and protected evaluation evidence | Completed and accepted |
 | 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; encrypted OCI backup | Completed and accepted on the free-first Phoenix learning deployment |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Completed and accepted at the provider-neutral learning boundary; bounded Google Drive proof passes |
+| 10 | Operational hardening and lifecycle operations | Backup verification, retention orchestration, maintenance gates, capacity/cost controls, recovery automation | Existing OCI/Compose platform and content-free operational evidence | Proposed; ADRs 0051–0056 require review |
 
 ## Phase 1 — working prototype
 
@@ -875,6 +877,35 @@ and usage accounting remain separate. Exit: enterprises can provision users,
 connect governed sources, control/audit usage, apply lifecycle policy, and
 reconcile commercial usage.
 
+## Phase 10 — operational hardening and lifecycle operations
+
+**Status:** Decision kickoff approved; ADRs 0051–0056 are Proposed. No runtime,
+infrastructure, scheduling, retention, or paid-service change is authorized yet.
+
+Phase 10 does not add a new user-facing data path. It wraps the accepted platform with
+reviewable operational control loops while PostgreSQL remains relational truth and the
+existing authorization, provenance, tenant, retrieval, and evidence boundaries remain
+unchanged.
+
+```mermaid
+flowchart LR
+    operator["Operator / reviewed automation"] --> preview["Plan + immutable preview"]
+    preview --> authorize["Explicit policy / release authorization"]
+    authorize --> execute["Bounded maintenance executor"]
+    execute --> platform["Existing OCI + Compose platform"]
+    platform --> verify["Health, integrity, SLO, cost verification"]
+    verify --> evidence[("Content-free evidence")]
+    verify -->|"failed gate"| rollback["Rollback / restore"]
+    rollback --> platform
+    holds["Retention holds + tenant policy"] --> authorize
+    budget["Free-first capacity + cost guardrails"] --> authorize
+```
+
+The proposed decision order is: scope/evidence (ADR 0051), backup/restore drills
+(ADR 0052), retention scheduling (ADR 0053), dependency/supply-chain maintenance
+(ADR 0054), capacity/cost guardrails (ADR 0055), then upgrade/rollback/DR automation
+(ADR 0056). Retention remains disabled until ADR 0053 is explicitly accepted.
+
 ## Architecture invariants
 
 - FastAPI, never the frontend, is the authorization boundary.
@@ -921,6 +952,12 @@ reconcile commercial usage.
 | Observability backend | Accepted ADRs 0031–0032: OTLP through an OpenTelemetry Collector to optional free local Grafana LGTM; production provider remains TBD |
 | Deployment platform | Accepted OCI learning path with one Always Free-eligible ARM VM and Docker Compose under ADRs 0037–0038; Phoenix deployment and Phase 8 evidence pass |
 | First enterprise connector | Accepted read-only Google Drive API v3 under ADR 0050; secret-safe OAuth and bounded permission/deletion propagation evidence pass |
+| Phase 10 operational boundary | Proposed in ADR 0051; existing trust boundaries and free-first target remain binding |
+| Backup/restore automation | Proposed in ADR 0052; no schedule or destination change selected |
+| Automatic retention | Proposed in ADR 0053 and still disabled |
+| Dependency maintenance | Proposed in ADR 0054; no unattended production update selected |
+| OCI capacity/cost guardrails | Proposed in ADR 0055; no paid capacity authorized |
+| Upgrade/rollback/DR automation | Proposed in ADR 0056; destructive or replacement actions require reviewed plans |
 
 Accepted Phase 2 decisions are recorded in
 [`docs/architecture/decisions`](decisions/):
@@ -999,6 +1036,15 @@ Accepted Phase 9 decisions are:
 - [ADR 0048 — Billing, subscription, and reconciliation boundary](decisions/0048-billing-subscription-reconciliation.md)
 - [ADR 0049 — Compliance lifecycle and administrative evidence](decisions/0049-compliance-lifecycle-admin-evidence.md)
 - [ADR 0050 — Google Drive as the first enterprise connector](decisions/0050-google-drive-first-connector.md)
+
+Proposed Phase 10 decisions are:
+
+- [ADR 0051 — Phase 10 operational scope and evidence boundary](decisions/0051-phase10-operational-scope-evidence-boundary.md)
+- [ADR 0052 — Automated backup verification and isolated restore drills](decisions/0052-backup-verification-restore-drills.md)
+- [ADR 0053 — Governed retention scheduling and safe deletion execution](decisions/0053-retention-scheduling-safe-deletion.md)
+- [ADR 0054 — Dependency and supply-chain maintenance](decisions/0054-dependency-supply-chain-maintenance.md)
+- [ADR 0055 — OCI capacity, monitoring, and cost guardrails](decisions/0055-oci-capacity-monitoring-cost-guardrails.md)
+- [ADR 0056 — Upgrade, rollback, and disaster-recovery automation](decisions/0056-upgrade-rollback-disaster-recovery-automation.md)
 
 ## Maintenance checklist
 
