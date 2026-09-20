@@ -913,8 +913,9 @@ The implementation adds one tracked free-first policy, strict content-free evide
 validators, a lease-bounded encrypted backup cycle, an internal-network restore-drill
 Compose project, a five-minute Linux/Compose capacity collector, monthly grouped
 Dependabot candidates, durable authorized preview audits surfaced in Settings, and an
-exact-plan-hash release executor. Example systemd units remain disabled until a
-supervised host run succeeds. No operational tool receives product authorization from a
+exact-plan-hash release executor. A supervised host backup/private-bucket upload and
+isolated restore now pass, and the aggregate host snapshot is healthy. Example systemd
+units remain disabled pending exact alert-threshold approval. No operational tool receives product authorization from a
 backup name, host coordinate, queue message, or provider resource identifier.
 
 ## Architecture invariants
@@ -964,10 +965,10 @@ backup name, host coordinate, queue message, or provider resource identifier.
 | Deployment platform | Accepted OCI learning path with one Always Free-eligible ARM VM and Docker Compose under ADRs 0037–0038; Phoenix deployment and Phase 8 evidence pass |
 | First enterprise connector | Accepted read-only Google Drive API v3 under ADR 0050; secret-safe OAuth and bounded permission/deletion propagation evidence pass |
 | Phase 10 operational boundary | Accepted in ADR 0051; existing trust boundaries and free-first target remain binding |
-| Backup/restore automation | Lease-bounded daily encrypted backup and internal-network restore-drill tooling implemented under ADR 0052; supervised OCI evidence pending |
+| Backup/restore automation | Lease-bounded daily encrypted backup and internal-network restore-drill tooling implemented under ADR 0052; supervised encrypted upload, restore, cleanup, and service-recovery evidence pass |
 | Automatic retention | Owner/admin reminder, token-safe preview report and durable preview audit implemented under ADR 0053; automatic apply remains disabled |
 | Dependency maintenance | Monthly grouped uv/npm/Actions/container candidates and evidence validation implemented under ADR 0054; no auto-merge or paid acceptance |
-| OCI capacity/cost guardrails | Five-minute content-free host/queue/certificate/backup/inventory collector implemented under ADR 0055; no auto-scale or paid capacity |
+| OCI capacity/cost guardrails | Five-minute content-free collector implemented under ADR 0055; live free-first inventory and host metrics are healthy, while exact queue/certificate thresholds remain pending and no auto-scale or paid capacity is authorized |
 | Upgrade/rollback/DR automation | Exact-hash, leased, plan-first executor implemented under ADR 0056; supervised rollback and separately approved clean-host proof pending |
 
 Accepted Phase 2 decisions are recorded in

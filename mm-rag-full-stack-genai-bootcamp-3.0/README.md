@@ -98,9 +98,12 @@ recovery automation. The tracked implementation now includes the accepted policy
 content-free evidence gate, fail-closed encrypted backup and isolated-restore tooling,
 monthly grouped maintenance candidates, an owner/admin retention reminder and preview,
 free-first host/certificate/backup/cost guardrails, and plan-hash-authorized release
-orchestration. Supervised OCI evidence is still required before acceptance. Automatic
-retention apply, unattended upgrades, paid capacity, and production-SLA claims remain
-disabled.
+orchestration. A supervised OCI cycle now passes encrypted private-bucket upload,
+checksum verification, isolated PostgreSQL/Qdrant/object restore, active-service
+recovery, and healthy content-free host capacity collection. Exact queue-age and TLS
+expiry alert thresholds, upgrade/rollback execution, and separately approved clean-host
+recovery evidence remain before acceptance. Automatic retention apply, unattended
+upgrades, paid capacity, and production-SLA claims remain disabled.
 
 The current `3.0` lineage contains:
 
