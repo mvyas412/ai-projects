@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 10 decision kickoff — ADRs 0051–0056 Proposed; no implementation authorized |
+| Active milestone | Phase 10 implementation — ADRs 0051–0056 Accepted; Milestone 10.1 next |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -66,7 +66,7 @@ Rules:
 | Phase 9 | Completed and accepted — ADRs 0043–0050, provider-neutral milestones 9.0–9.6, and bounded Google Drive OAuth/propagation proofs pass |
 | Phase 9 closure | PR #17 squash-merged into `main` at `ad4e7fb`; source and merged trees match |
 | Phase 9 release | Annotated `mm-rag-v9.0.0` identifies the verified documentation-kickoff closure commit and is immutable |
-| Phase 10 | Proposed — production hardening, lifecycle operations, maintenance, capacity/cost safeguards, and recovery automation |
+| Phase 10 | In progress — ADRs 0051–0056 Accepted; operational hardening implementation authorized within free-first safeguards |
 
 ## Delivery sequence and gates
 
@@ -99,7 +99,7 @@ security and data-integrity gates on which it depends.
 | 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Completed and accepted |
 | 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Completed and accepted on the free-first Phoenix learning deployment |
 | 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Completed and accepted |
-| 10 | Operational hardening and lifecycle operations | Repeatable maintenance, recovery, retention, and cost-control evidence | Proposed; ADRs 0051–0056 require review |
+| 10 | Operational hardening and lifecycle operations | Repeatable maintenance, recovery, retention, and cost-control evidence | In progress; ADRs 0051–0056 Accepted |
 
 ## Phase 1 — working prototype
 
@@ -1089,10 +1089,10 @@ commercial accounting, and compliance-grade administration.
 
 ## Phase 10 — operational hardening and lifecycle operations
 
-**Status:** Proposed. The user approved the decision kickoff and free-first scope.
-ADRs 0051–0056 remain Proposed; no automation, destructive retention, infrastructure
-change, paid service, or production-SLA claim is authorized until the relevant ADR is
-reviewed and accepted.
+**Status:** In progress. ADRs 0051–0056 were accepted on 2026-09-20 with their
+free-first defaults. Implementation is authorized within those safeguards; automatic
+retention apply, unattended upgrades, destructive host actions, temporary cloud
+resources, paid services/capacity, and production-SLA claims remain separately gated.
 
 ### Objective
 
@@ -1101,17 +1101,17 @@ exercise recovery continuously, make upgrades reversible, keep dependencies curr
 bound OCI cost/capacity risk, and introduce lifecycle automation only behind explicit
 preview, approval, hold, and rollback controls.
 
-### Proposed milestones
+### Milestones
 
 | Milestone | Deliverable | Status | Completion gate |
 | --- | --- | --- | --- |
-| 10.0 | Scope, invariants, evidence contract, and failure budget | Proposed | ADR 0051 accepted with measurable boundaries |
-| 10.1 | Scheduled encrypted backup verification and isolated restore drills | Proposed | ADR 0052 accepted; restore evidence is content-free and repeatable |
-| 10.2 | Governed retention scheduling and safe deletion execution | Proposed | ADR 0053 accepted; preview/reauthorization/hold/restore rules proven before enablement |
-| 10.3 | Dependency, vulnerability, and supply-chain maintenance | Proposed | ADR 0054 accepted; bounded update cadence and rollback gate demonstrated |
-| 10.4 | OCI monitoring, saturation, and cost guardrails | Proposed | ADR 0055 accepted; alerts and safe degradation pass without paid capacity |
-| 10.5 | Upgrade, rollback, disaster-recovery, and operator automation | Proposed | ADR 0056 accepted; clean-host recovery and reversible upgrade drill pass |
-| 10.6 | Final operator handbook and release evidence | Proposed | All accepted Phase 10 gates pass and unresolved items remain explicit |
+| 10.0 | Scope, invariants, evidence contract, and failure budget | Completed | ADR 0051 Accepted with measurable boundaries |
+| 10.1 | Scheduled encrypted backup verification and isolated restore drills | Ready | ADR 0052 Accepted; restore evidence is content-free and repeatable |
+| 10.2 | Governed retention scheduling and safe deletion execution | Ready | ADR 0053 Accepted; preview-only boundary, automatic apply disabled |
+| 10.3 | Dependency, vulnerability, and supply-chain maintenance | Ready | ADR 0054 Accepted; bounded update cadence and rollback gate required |
+| 10.4 | OCI monitoring, saturation, and cost guardrails | Ready | ADR 0055 Accepted; alerts and safe degradation must pass without paid capacity |
+| 10.5 | Upgrade, rollback, disaster-recovery, and operator automation | Ready | ADR 0056 Accepted; operator authorization and separate clean-host approval required |
+| 10.6 | Final operator handbook and release evidence | Pending | All accepted Phase 10 gates pass and unresolved items remain explicit |
 
 ### Proposed completion gate
 
@@ -1203,21 +1203,22 @@ preview, approval, hold, and rollback controls.
 | Billing, subscription, and reconciliation boundary | 9.5 | Accepted — ADR 0048; provider TBD |
 | Compliance lifecycle and administrative evidence | 9.6 | Accepted — ADR 0049; automatic schedule disabled |
 | First enterprise connector | 9.1–9.2 | Accepted — read-only Google Drive API v3 in ADR 0050; OAuth, checkpoint, permission, and deletion proofs pass |
-| Phase 10 scope and evidence boundary | 10.0 | Proposed — ADR 0051 |
-| Backup verification and restore drills | 10.1 | Proposed — ADR 0052 |
-| Automatic retention schedule and execution | 10.2 | Proposed — ADR 0053; remains disabled |
-| Dependency and supply-chain maintenance | 10.3 | Proposed — ADR 0054 |
-| OCI capacity, monitoring, and cost guardrails | 10.4 | Proposed — ADR 0055 |
-| Upgrade, rollback, and disaster-recovery automation | 10.5–10.6 | Proposed — ADR 0056 |
+| Phase 10 scope and evidence boundary | 10.0 | Accepted — ADR 0051; complete |
+| Backup verification and restore drills | 10.1 | Accepted — ADR 0052; implementation ready |
+| Automatic retention schedule and execution | 10.2 | Accepted preview-only boundary — ADR 0053; automatic apply remains disabled |
+| Dependency and supply-chain maintenance | 10.3 | Accepted — ADR 0054; implementation ready |
+| OCI capacity, monitoring, and cost guardrails | 10.4 | Accepted — ADR 0055; implementation ready |
+| Upgrade, rollback, and disaster-recovery automation | 10.5–10.6 | Accepted — ADR 0056; destructive/cloud actions remain separately gated |
 
 ## Immediate next actions
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Review Phase 10 scope and safety boundaries | ADR 0051 approval or revision |
-| 2 | Review recovery and retention together | ADRs 0052–0053; retention remains disabled until explicitly accepted |
-| 3 | Review maintenance, capacity, and operator automation | ADRs 0054–0056 with free-first evidence targets |
-| 4 | Preserve deferred Phase 9 provider choices | No SCIM, real-billing, production quota, or paid service is implied by Phase 10 |
+| 1 | Implement scheduled encrypted backup verification and isolated-restore tooling | Milestone 10.1 free tests and content-free evidence |
+| 2 | Implement monthly preview-only retention reporting | Milestone 10.2 evidence; automatic apply remains disabled |
+| 3 | Implement maintenance and free-first capacity guardrails | Milestones 10.3–10.4 tests and runbooks |
+| 4 | Implement guarded upgrade/rollback automation | Milestone 10.5 local evidence; clean-host cloud drill remains separately approved |
+| 5 | Preserve deferred Phase 9 provider choices | No SCIM, real-billing, production quota, or paid service is implied by Phase 10 |
 
 ## Update protocol
 

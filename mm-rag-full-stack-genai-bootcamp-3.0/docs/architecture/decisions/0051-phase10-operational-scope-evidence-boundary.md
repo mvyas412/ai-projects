@@ -1,7 +1,7 @@
 # ADR 0051: Phase 10 operational scope and evidence boundary
 
-- Status: Proposed
-- Date: 2026-09-19
+- Status: Accepted
+- Date: 2026-09-20
 - Milestone: 10.0
 
 ## Context
@@ -19,7 +19,7 @@ availability risk.
 | Automate each task independently | Fast local improvements | Inconsistent evidence, authority, and rollback behavior |
 | One evidence-gated operational phase | Shared safety model and review order | More decision work before automation |
 
-## Proposed decision
+## Decision
 
 Define Phase 10 as operational hardening around the existing modular-monolith and OCI
 learning deployment. Require plan/authorize/execute/verify/rollback stages, content-free
@@ -27,15 +27,14 @@ evidence, stable scope, free-first limits, and explicit approval for destructive
 provider-specific, credential, or paid actions. Do not change product authorization,
 data ownership, retrieval defaults, or accepted release tags.
 
-## Recommendation
+## Accepted defaults
 
-Approve the evidence-gated Phase 10 boundary and proposed milestone order.
-
-## Approval questions
-
-1. Approve Phase 10 as operational hardening rather than new product capability?
-2. Keep the ten-user and USD 0 learning targets?
-3. Require content-free evidence and reviewed rollback for every operational change?
+- Phase 10 is operational hardening, not a new product capability.
+- The approximate ten-user and USD 0 learning targets remain binding.
+- Every operational change requires content-free evidence and a reviewed rollback or
+  restore path.
+- Destructive, provider-specific, credential, paid, and cloud-resource actions remain
+  separate approval boundaries.
 
 ## Consequences
 

@@ -91,11 +91,12 @@ change-token, permission, download/export, discovery, and cursor-expiry coverage
 without credentials, while the bounded live provider proof is complete.
 
 Phase 10 decision kickoff is documented in
-[the operational-hardening contract](docs/PHASE10_OPERATIONS_KICKOFF.md). Proposed
+[the operational-hardening contract](docs/PHASE10_OPERATIONS_KICKOFF.md). Accepted
 ADRs 0051–0056 cover scope/evidence, backup and restore drills, retention scheduling,
 dependency maintenance, OCI capacity/cost guardrails, and upgrade/rollback/disaster
-recovery automation. They authorize no implementation yet; automatic retention,
-unattended upgrades, paid capacity, and production-SLA claims remain disabled.
+recovery automation. Implementation is authorized within their reviewed free-first
+boundaries; automatic retention apply, unattended upgrades, paid capacity, and
+production-SLA claims remain disabled.
 
 The current `3.0` lineage contains:
 
@@ -206,8 +207,8 @@ closed without candidate promotion. Phase 6
 Milestones 6.0–6.5 provide the deterministic visual/table corpus, immutable local
 extraction and visual retrieval, normalized tables, exact calculation, and
 backend-mediated evidence inspection; `visual-table-v1` is the accepted default.
-Phases 7–9 are accepted. Phase 10 is a decision-only operational-hardening kickoff;
-ADRs 0051–0056 remain Proposed and authorize no implementation yet.
+Phases 7–9 are accepted. Phase 10 operational hardening is in progress under accepted
+ADRs 0051–0056; destructive and paid boundaries remain separately gated.
 
 The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–10 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,

@@ -1,6 +1,6 @@
 # Phase 10 operational-hardening kickoff
 
-> Status: Proposed — decision work only
+> Status: Accepted — implementation authorized within the recorded safeguards
 
 ## Objective
 
@@ -26,7 +26,7 @@ retention, unattended upgrade, or destructive schedule is selected by this kicko
   separate explicit approval.
 - Phase 5 defaults and rollback profiles remain unchanged.
 
-## Proposed milestone sequence
+## Milestone sequence
 
 1. Define operational scope, evidence, and failure budgets.
 2. Automate encrypted backup verification and isolated restore drills.
@@ -48,7 +48,7 @@ retention, unattended upgrade, or destructive schedule is selected by this kicko
 | Upgrade or host loss causes data loss | Quiesced backup boundary, immutable release manifest, clean-host restore, rollback | Exercised upgrade/rollback and clean-host recovery |
 | Automation leaks secrets or identifiers | Runtime-only credential resolution, redaction, mode-0600 private evidence | Secret scan and content-free evidence validation |
 
-## Decisions requiring approval
+## Accepted decisions
 
 - ADR 0051: overall scope, evidence, and non-goals.
 - ADR 0052: backup cadence, restore cadence, destinations, and evidence retention.
@@ -57,4 +57,6 @@ retention, unattended upgrade, or destructive schedule is selected by this kicko
 - ADR 0055: capacity thresholds, alert channels, and free-budget controls.
 - ADR 0056: upgrade/rollback/DR orchestration and clean-host recovery authority.
 
-Implementation begins only after the applicable ADR is Accepted.
+ADRs 0051–0056 were accepted on 2026-09-20 with their recorded defaults. Automatic
+retention apply, unattended upgrades, paid services/capacity, destructive host actions,
+new credentials, and temporary cloud resources remain separate approval boundaries.

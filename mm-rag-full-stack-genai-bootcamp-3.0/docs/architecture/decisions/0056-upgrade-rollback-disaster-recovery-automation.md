@@ -1,7 +1,7 @@
 # ADR 0056: Upgrade, rollback, and disaster-recovery automation
 
-- Status: Proposed
-- Date: 2026-09-19
+- Status: Accepted
+- Date: 2026-09-20
 - Milestone: 10.5–10.6
 
 ## Context
@@ -18,7 +18,7 @@ verify the data plane, roll back compatible changes, and rebuild a lost learning
 | Fully autonomous upgrades and recovery | Fast | Excessive authority and destructive risk |
 | Reviewed plans with guarded automation | Repeatable and auditable | Requires explicit state and compatibility contracts |
 
-## Proposed decision
+## Decision
 
 Implement plan-first operator commands that validate revision, manifest, migration
 compatibility, backup freshness, active jobs, disk headroom, and service health before
@@ -27,16 +27,16 @@ post-change verification, and explicit rollback/restore branches. Clean-host rec
 must recreate infrastructure from reviewed IaC, then restore encrypted data without
 placing secrets in Terraform, cloud-init, logs, or evidence.
 
-## Recommendation
+## Accepted defaults
 
-Automate preflight and verification first, then exercise in-place upgrade/rollback and
-clean-host recovery separately. Keep final execution operator-authorized.
-
-## Approval questions
-
-1. Approve plan-first, operator-authorized execution rather than autonomous changes?
-2. Must every release include both rollback compatibility and restore fallback evidence?
-3. May a clean-host drill create temporary free-tier resources when separately approved?
+- Use plan-first, operator-authorized execution rather than autonomous changes.
+- Every application release provides rollback compatibility or, when rollback is unsafe,
+  a tested restore fallback.
+- Preflight revision, image digest, backup age, migration compatibility, disk headroom,
+  active jobs, and service health before changing state.
+- A clean-host drill may create temporary free-tier resources only after a separately
+  reviewed zero-cost plan and explicit approval.
+- Secrets never enter Terraform, cloud-init, logs, or evidence.
 
 ## Consequences
 
