@@ -1,6 +1,6 @@
 # Multimodal RAG architecture handbook
 
-> Living architecture baseline — updated 2026-09-15
+> Living architecture baseline — updated 2026-09-19
 
 This document is the version-controlled architecture source of truth for the
 complete system and Phases 1–9. Update it whenever a component, boundary, data
@@ -193,7 +193,7 @@ flowchart LR
     p6["Phase 6<br/>Visual/table intelligence<br/>Completed / accepted"] -->
     p7["Phase 7<br/>Evaluation/observability<br/>Accepted"] -->
     p8["Phase 8<br/>Scalable platform<br/>Accepted"] -->
-    p9["Phase 9<br/>Enterprise platform<br/>In progress"]
+    p9["Phase 9<br/>Enterprise platform<br/>Accepted"]
 ```
 
 | Phase | Capability | Main technologies/components | Stores | Status |
@@ -206,7 +206,7 @@ flowchart LR
 | 6 | Native image and table understanding | Local-first region extraction, visual retrieval, structured tables, safe calculation, and evidence viewer | Qdrant, PostgreSQL, object storage | Completed and accepted; `visual-table-v1` promoted after free/live and signed-in candidate proof |
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Local telemetry and protected evaluation evidence | Completed and accepted |
 | 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; encrypted OCI backup | Completed and accepted on the free-first Phoenix learning deployment |
-| 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Provider-neutral implementation complete; live/provider proofs pending |
+| 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Completed and accepted at the provider-neutral learning boundary; bounded Google Drive proof passes |
 
 ## Phase 1 — working prototype
 
@@ -820,15 +820,23 @@ root-disk headroom.
 
 ## Phase 9 — enterprise integrations and commercial controls
 
-**Status:** Provider-neutral implementation-complete candidate. ADRs 0043–0050 are
-accepted. Live connector and external identity/billing acceptance remain gated.
+**Status:** Completed and accepted. ADRs 0043–0050 are accepted. The bounded live
+Google Drive connector gate passes; optional external identity and billing providers
+remain deliberately unselected.
 
 The Milestone 9.0 threat model and provider scorecard are tracked in
 [`PHASE9_ENTERPRISE_KICKOFF.md`](../PHASE9_ENTERPRISE_KICKOFF.md). The first Milestone
 9.1 slice adds a provider-neutral connector protocol, canonical discovery/change/version/
 permission values, explicit adapter registry, and a tenant/connector-bound credential
 reference resolved only inside a short-lived runtime context. ADR 0050 adds a read-only
-Google Drive API v3 adapter with deterministic mocked coverage. Migration
+Google Drive API v3 adapter with deterministic mocked coverage. Its private learning
+bootstrap uses a Desktop OAuth client, loopback PKCE/state validation, mode-`0600`
+ignored credential files, runtime token refresh, and an aggregate-only metadata probe.
+The bounded live probes pass provider health, initial checkpoint, discovery sampling,
+opaque permission counting, permission expansion and contraction, deletion change-feed
+delivery, and post-deletion discovery denial without content download or identifier
+disclosure.
+Migration
 `20260919_0019` and tenant-scoped services add fenced delta sync, deny-first source
 visibility, ordered SCIM-compatible lifecycle records, immutable usage and reservations,
 simulated signed billing reconciliation, and stable-scope compliance workflows. A live
@@ -912,6 +920,7 @@ reconcile commercial usage.
 | Region evidence/viewer/rollout | ADR 0030 implementation adds backend-mediated `evidence-v1`, integrity-checked streaming, accessible inspection, and accepted `visual-table-v1`; Phase 6 browser, promotion, and release gates pass |
 | Observability backend | Accepted ADRs 0031–0032: OTLP through an OpenTelemetry Collector to optional free local Grafana LGTM; production provider remains TBD |
 | Deployment platform | Accepted OCI learning path with one Always Free-eligible ARM VM and Docker Compose under ADRs 0037–0038; Phoenix deployment and Phase 8 evidence pass |
+| First enterprise connector | Accepted read-only Google Drive API v3 under ADR 0050; secret-safe OAuth and bounded permission/deletion propagation evidence pass |
 
 Accepted Phase 2 decisions are recorded in
 [`docs/architecture/decisions`](decisions/):

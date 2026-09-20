@@ -20,6 +20,11 @@ from backend.app.connectors.credentials import (
     ResolvedCredential,
 )
 from backend.app.connectors.google_drive import GoogleDriveConnector
+from backend.app.connectors.google_oauth import (
+    GOOGLE_DRIVE_READONLY_SCOPE,
+    GoogleDriveFileCredentialResolver,
+    GoogleOAuthCredentialError,
+)
 
 __all__ = [
     "ChangeKind",
@@ -35,6 +40,9 @@ __all__ = [
     "CredentialResolver",
     "CredentialState",
     "GoogleDriveConnector",
+    "GoogleDriveFileCredentialResolver",
+    "GoogleOAuthCredentialError",
+    "GOOGLE_DRIVE_READONLY_SCOPE",
     "PermissionSnapshot",
     "Principal",
     "PrincipalKind",

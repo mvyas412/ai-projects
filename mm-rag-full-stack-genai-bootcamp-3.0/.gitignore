@@ -78,6 +78,7 @@ temp/
 data/uploads/
 data/parsed_pdf_output/
 data/runtime/
+output/
 
 # Local databases and service volumes
 *.db
