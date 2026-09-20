@@ -1,4 +1,4 @@
-# Multimodal RAG Production — Phase 8 accepted OCI learning deployment
+# Multimodal RAG Production — Phase 9 accepted; Phase 10 decision kickoff
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
@@ -69,6 +69,8 @@ least-privilege networking, private versioned backup storage, and USD 1 budget a
 remain active. No paid capacity upgrade was introduced.
 
 Phase 9 is completed and accepted at the provider-neutral learning boundary.
+Annotated tag `mm-rag-v9.0.0` identifies the verified Phase 9 release and Phase 10
+decision-kickoff documentation commit; the tag is immutable.
 Accepted ADRs 0043–0049 define provider-neutral
 contracts for enterprise scope, connectors and sync, identity lifecycle, immutable
 usage controls, billing reconciliation, and compliance administration. Provider-neutral
@@ -87,6 +89,13 @@ contracts and runtime-only opaque credential resolution.
 ADR 0050 selects a read-only Google Drive API v3 adapter as the first connector. Mocked
 change-token, permission, download/export, discovery, and cursor-expiry coverage runs
 without credentials, while the bounded live provider proof is complete.
+
+Phase 10 decision kickoff is documented in
+[the operational-hardening contract](docs/PHASE10_OPERATIONS_KICKOFF.md). Proposed
+ADRs 0051–0056 cover scope/evidence, backup and restore drills, retention scheduling,
+dependency maintenance, OCI capacity/cost guardrails, and upgrade/rollback/disaster
+recovery automation. They authorize no implementation yet; automatic retention,
+unattended upgrades, paid capacity, and production-SLA claims remain disabled.
 
 The current `3.0` lineage contains:
 
@@ -192,14 +201,15 @@ future capabilities have already been implemented.
 The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
 provides presentation-ready whole-system, final-production, and Phase 1–9 images.
 The [current workflow and DEV architecture](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
-shows the accepted Phase 6 product path and implemented Phase 7 evaluation and
-observability layer. Phase 5 is closed without candidate promotion. Phase 6
+shows the accepted product path and evaluation/observability layer. Phase 5 is
+closed without candidate promotion. Phase 6
 Milestones 6.0–6.5 provide the deterministic visual/table corpus, immutable local
 extraction and visual retrieval, normalized tables, exact calculation, and
 backend-mediated evidence inspection; `visual-table-v1` is the accepted default.
-Phase 7 acceptance remains pending its representative post-fix baseline review.
+Phases 7–9 are accepted. Phase 10 is a decision-only operational-hardening kickoff;
+ADRs 0051–0056 remain Proposed and authorize no implementation yet.
 
-The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–9 delivery
+The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–10 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
 and current next actions. Update it with evidence whenever progress or scope changes.
 Use the [Phase 3 operations runbook](docs/PHASE3_OPERATIONS.md) for ingestion runtime
