@@ -1,0 +1,80 @@
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:?Set a digest-pinned POSTGRES_IMAGE}
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_restore:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [restore]
+    mem_limit: 768m
+
+  qdrant:
+    image: ${QDRANT_IMAGE:?Set a digest-pinned QDRANT_IMAGE}
+    volumes:
+      - ${PHASE10_RESTORE_ROOT:?Set an isolated restore root}/qdrant:/qdrant/storage
+    networks: [restore]
+    mem_limit: 1536m
+
+  seaweedfs:
+    image: ${SEAWEEDFS_IMAGE:?Set a digest-pinned SEAWEEDFS_IMAGE}
+    command: ["mini", "-dir=/data", "-ip=seaweedfs", "-ip.bind=0.0.0.0"]
+    environment:
+      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_BUCKET: ${S3_ORIGINALS_BUCKET},${S3_ARTIFACTS_BUCKET}
+    volumes:
+      - ${PHASE10_RESTORE_ROOT:?Set an isolated restore root}/objects:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:9333/cluster/status >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [restore]
+    mem_limit: 768m
+
+  api:
+    image: ${MM_RAG_IMAGE:?Set a digest-pinned MM_RAG_IMAGE}
+    command: ["uv", "run", "--no-sync", "uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8003"]
+    environment:
+      APP_ENV: staging
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+      QDRANT_URL: http://qdrant:6333
+      OBJECT_STORAGE_BACKEND: s3
+      S3_ENDPOINT_URL: http://seaweedfs:8333
+      S3_REGION: ${S3_REGION}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_ORIGINALS_BUCKET: ${S3_ORIGINALS_BUCKET}
+      S3_ARTIFACTS_BUCKET: ${S3_ARTIFACTS_BUCKET}
+      S3_PATH_STYLE: "true"
+      AUTH0_ISSUER: https://${AUTH0_DOMAIN}/
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      TELEMETRY_ENABLED: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      seaweedfs:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8003/api/v1/health/ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [restore]
+    mem_limit: 1024m
+
+networks:
+  restore:
+    internal: true
+
+volumes:
+  postgres_restore:

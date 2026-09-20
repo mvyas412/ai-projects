@@ -1,0 +1,14 @@
+{
+  "metrics": {
+    "certificate_days_remaining": 30,
+    "cpu_percent": 25,
+    "disk_percent": 40,
+    "inode_percent": 10,
+    "memory_percent": 55,
+    "oldest_queue_age_minutes": 0,
+    "queue_age_critical": false,
+    "sustained_minutes": 15,
+    "unexpected_paid_resources": false,
+    "verified_backup_age_hours": 8
+  }
+}

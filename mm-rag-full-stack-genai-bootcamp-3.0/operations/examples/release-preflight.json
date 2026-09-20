@@ -1,0 +1,16 @@
+{
+  "action": "upgrade",
+  "application_services": ["api", "dispatcher", "ui", "edge"],
+  "checks": {
+    "backup_fresh": true,
+    "digest_pinned": true,
+    "disk_headroom": true,
+    "health_ready": true,
+    "jobs_quiesced": true,
+    "migration_compatible": true,
+    "rollback_or_restore_available": true
+  },
+  "current_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "operator_authorized": false,
+  "target_revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+}
