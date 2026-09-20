@@ -51,7 +51,7 @@ def run_restore_drill(
     started = False
     started_at = datetime.now(UTC)
     try:
-        _run([*prefix, "up", "-d", "postgres", "qdrant", "seaweedfs"], environment)
+        _run(_dependency_start_command(prefix), environment)
         started = True
         _run([*prefix, "cp", str(restored / "postgres.dump"), "postgres:/tmp/restore.dump"], environment)
         _run(
@@ -153,6 +153,20 @@ def _run(command: list[str], environment: dict[str, str]) -> None:
         stderr=subprocess.DEVNULL,
         timeout=900,
     )
+
+
+def _dependency_start_command(prefix: list[str]) -> list[str]:
+    return [
+        *prefix,
+        "up",
+        "-d",
+        "--wait",
+        "--wait-timeout",
+        "120",
+        "postgres",
+        "qdrant",
+        "seaweedfs",
+    ]
 
 
 def _capture(command: list[str], environment: dict[str, str]) -> str:

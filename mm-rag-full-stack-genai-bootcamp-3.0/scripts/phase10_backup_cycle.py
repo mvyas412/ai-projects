@@ -200,7 +200,12 @@ def _validate_inputs(
         raise ValueError("Compose and environment files must exist")
     if environment_file.stat().st_mode & 0o077:
         raise ValueError("Environment file permissions must be 0600")
-    if not recipient.strip().startswith("age1"):
+    normalized_recipient = recipient.strip()
+    if not (
+        normalized_recipient.startswith("age1")
+        or normalized_recipient.startswith("ssh-ed25519 ")
+        or normalized_recipient.startswith("ssh-rsa ")
+    ):
         raise ValueError("A public age recipient is required")
     for directory in (work_directory, output_directory):
         if directory.exists() and (directory.is_symlink() or not directory.is_dir()):

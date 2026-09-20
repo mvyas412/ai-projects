@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.phase10_restore_drill import _counts
+from scripts.phase10_restore_drill import _counts, _dependency_start_command
 
 ROOT = Path(__file__).parents[1]
 
@@ -26,3 +26,19 @@ def test_restore_aggregate_count_parser_is_strict() -> None:
     }
     with pytest.raises(ValueError, match="malformed"):
         _counts('{"documents": "two"}\n')
+
+
+def test_restore_waits_for_dependency_health_before_import() -> None:
+    command = _dependency_start_command(["docker", "compose"])
+    assert command == [
+        "docker",
+        "compose",
+        "up",
+        "-d",
+        "--wait",
+        "--wait-timeout",
+        "120",
+        "postgres",
+        "qdrant",
+        "seaweedfs",
+    ]

@@ -85,3 +85,33 @@ def test_backup_cycle_cleans_plaintext_and_restarts_after_failure(tmp_path: Path
         )
     assert not any(work.glob("staging-*"))
     assert any(command[-5:] == ["up", "-d", "api", "dispatcher", "ui"] for command in commands)
+
+
+def test_backup_cycle_accepts_age_ssh_public_recipient(tmp_path: Path) -> None:
+    compose, environment, work, output = _inputs(tmp_path)
+
+    def runner(command: Sequence[str], _cwd: Path, stdout: Any) -> None:
+        args = list(command)
+        if "ps" in args and stdout is not None:
+            stdout.write(b"")
+        if "exec" in args and stdout is not None:
+            stdout.write(b"postgres")
+        if "cp" in args:
+            Path(args[-1]).mkdir(parents=True, exist_ok=True)
+
+    def bundler(_source: Path, destination: Path, recipient: str) -> None:
+        assert recipient.startswith("ssh-ed25519 ")
+        destination.write_bytes(b"encrypted")
+
+    result = run_backup_cycle(
+        compose_file=compose,
+        environment_file=environment,
+        work_directory=work,
+        output_directory=output,
+        recipient="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAITestOnly",
+        runner=runner,
+        bundler=bundler,
+        now=datetime(2026, 9, 20, 5, 30, tzinfo=UTC),
+    )
+
+    assert result["status"] == "pass"
