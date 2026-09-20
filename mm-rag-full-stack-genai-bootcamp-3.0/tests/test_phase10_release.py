@@ -30,8 +30,8 @@ def _plan(tmp_path: Path) -> dict[str, Any]:
         "\n".join(
             (
                 f"MM_RAG_IMAGE={images['app']}",
-                f"CADDY_IMAGE={images['caddy']}",
-                f"POSTGRES_IMAGE={images['postgres']}",
+                f'CADDY_IMAGE="{images["caddy"]}"',
+                f"POSTGRES_IMAGE='{images['postgres']}'",
                 f"QDRANT_IMAGE={images['qdrant']}",
                 f"RABBITMQ_IMAGE={images['rabbitmq']}",
                 f"SEAWEEDFS_IMAGE={images['seaweedfs']}",
@@ -126,9 +126,49 @@ def test_release_execution_is_bounded_and_records_revision(
     assert result["status"] == "executed-awaiting-verification"
     assert len(commands) == 8
     assert commands[2][-3:] == ["stop", "dispatcher", "worker"]
+    assert any(command[-3:] == ["run", "--rm", "migrate"] for command in commands)
     assert (
         tmp_path / "operations" / "private" / "release-state" / "deployed-revision"
     ).read_text(encoding="utf-8").strip() == "b" * 40
+
+
+def test_rollback_preserves_forward_only_schema(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(release, "PROJECT_ROOT", tmp_path)
+    payload = _plan(tmp_path)
+    payload["action"] = "rollback"
+    commands: list[list[str]] = []
+
+    release.execute_plan(
+        payload,
+        confirmation=release.plan_hash(payload),
+        authorized=True,
+        runner=lambda command, _cwd: commands.append(list(command)),
+        now=datetime(2026, 9, 20, 11, tzinfo=UTC),
+    )
+
+    assert len(commands) == 6
+    assert not any(command[-3:] == ["run", "--rm", "migrate"] for command in commands)
+    assert not any(command[-3:] == ["run", "--rm", "models"] for command in commands)
+    assert "--no-deps" in commands[4]
+
+
+def test_restore_execution_requires_isolated_runbook(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(release, "PROJECT_ROOT", tmp_path)
+    payload = _plan(tmp_path)
+    payload["action"] = "restore"
+
+    with pytest.raises(ValueError, match="isolated restore runbook"):
+        release.execute_plan(
+            payload,
+            confirmation=release.plan_hash(payload),
+            authorized=True,
+            runner=lambda _command, _cwd: None,
+            now=datetime(2026, 9, 20, 11, tzinfo=UTC),
+        )
 
 
 def test_release_plan_rejects_stale_backup(

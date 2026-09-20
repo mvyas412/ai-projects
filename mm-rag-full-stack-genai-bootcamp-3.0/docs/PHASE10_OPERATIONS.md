@@ -115,7 +115,9 @@ application roles, and verify readiness and tenant-safe smoke tests. If compatib
 checks fail, use the tested restore branch rather than destructive schema reversal.
 
 Rollback restores the prior immutable manifest only when migration compatibility is
-proven; otherwise restore the matched encrypted backup. A clean-host drill starts from
+proven and preserves the already-forward schema without rerunning older migration code.
+The release executor rejects restore actions; restore the matched encrypted backup only
+through the isolated restore runbook. A clean-host drill starts from
 reviewed Terraform and requires a separately approved zero-cost plan for temporary
 resources. Secrets are supplied only at runtime, never through Terraform, cloud-init,
 logs or evidence. Remove temporary resources only after recovery evidence is captured
@@ -145,3 +147,12 @@ uv run python -m scripts.phase10_operations gate evaluation/phase10/results
 After an incident, preserve timestamps, aggregate impact, decisions and remediation;
 exclude document content, prompts, tokens, user identifiers and provider identifiers.
 Update this handbook, architecture, plan and private context in the same work session.
+
+## Current validation checkpoint
+
+The OCI learning host has passed instance-principal encrypted upload, isolated restore,
+healthy capacity sampling, and an immutable upgrade → application rollback → roll-forward
+drill. Daily backup verification and five-minute capacity sampling are enabled. The
+worker, paid acceptance, automatic retention apply, auto-scaling, and paid capacity remain
+disabled. Phase 10 closure still requires one authenticated preview-only retention report
+and the separately approved temporary clean-host recovery drill.

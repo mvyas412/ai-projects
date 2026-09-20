@@ -879,8 +879,9 @@ reconcile commercial usage.
 
 ## Phase 10 — operational hardening and lifecycle operations
 
-**Status:** ADRs 0051–0056 Accepted on 2026-09-20; local implementation is complete
-and supervised OCI evidence is pending.
+**Status:** ADRs 0051–0056 Accepted on 2026-09-20; scheduled backup/capacity and the
+reversible release drill pass. Authenticated retention-preview and temporary clean-host
+recovery evidence remain.
 Automatic retention apply, unattended upgrades, destructive host actions, temporary
 cloud resources, paid capacity/services, and production-SLA claims remain separately gated.
 
@@ -917,8 +918,13 @@ exact-plan-hash release executor. A supervised host backup/private-bucket upload
 isolated restore now pass, and the aggregate host snapshot is healthy. Example systemd
 units now carry the approved 15-minute queue and 14-day certificate critical thresholds.
 Daily backup upload uses an instance principal restricted to creating objects in the
-exact private bucket; no static OCI API key belongs on the host. The units remain disabled
-until the IAM plan and one supervised scheduled cycle pass. No operational tool receives product authorization from a
+exact private bucket; no static OCI API key belongs on the host. The reviewed IAM plan,
+one supervised scheduled cycle, and healthy capacity snapshot pass; daily backup and
+five-minute capacity timers are enabled. Automatic retention apply remains disabled.
+The exact release executor upgraded to migration `20260919_0019`, rolled application code
+back while preserving that forward schema, and rolled forward to the signed target. A
+rollback uses `--no-deps` so Compose cannot invoke an older migration dependency, while
+restore execution remains isolated in the dedicated restore runbook. No operational tool receives product authorization from a
 backup name, host coordinate, queue message, or provider resource identifier.
 
 ## Architecture invariants
@@ -968,11 +974,11 @@ backup name, host coordinate, queue message, or provider resource identifier.
 | Deployment platform | Accepted OCI learning path with one Always Free-eligible ARM VM and Docker Compose under ADRs 0037–0038; Phoenix deployment and Phase 8 evidence pass |
 | First enterprise connector | Accepted read-only Google Drive API v3 under ADR 0050; secret-safe OAuth and bounded permission/deletion propagation evidence pass |
 | Phase 10 operational boundary | Accepted in ADR 0051; existing trust boundaries and free-first target remain binding |
-| Backup/restore automation | Lease-bounded daily encrypted backup and internal-network restore-drill tooling implemented under ADR 0052; supervised encrypted upload, restore, cleanup, and service-recovery evidence pass |
+| Backup/restore automation | Lease-bounded daily encrypted backup and internal-network restore-drill tooling implemented under ADR 0052; instance-principal upload, restore, cleanup, service recovery, and 05:30 PT scheduling pass |
 | Automatic retention | Owner/admin reminder, token-safe preview report and durable preview audit implemented under ADR 0053; automatic apply remains disabled |
-| Dependency maintenance | Monthly grouped uv/npm/Actions/container candidates and evidence validation implemented under ADR 0054; no auto-merge or paid acceptance |
-| OCI capacity/cost guardrails | Five-minute content-free collector implemented under ADR 0055; live free-first inventory and host metrics are healthy, 15-minute queue and 14-day certificate critical thresholds are tracked, and no auto-scale or paid capacity is authorized |
-| Upgrade/rollback/DR automation | Exact-hash, leased, plan-first executor implemented under ADR 0056; supervised rollback and separately approved clean-host proof pending |
+| Dependency maintenance | Monthly grouped uv/npm/Actions/container candidates implemented under ADR 0054; first lockfile/test/scan/SBOM/provenance/ARM64/signing/rollback gate passes with no auto-merge or paid acceptance |
+| OCI capacity/cost guardrails | Five-minute collector under ADR 0055 is enabled; live free-first inventory and host metrics are healthy, 15-minute queue and 14-day certificate thresholds pass, and no auto-scale or paid capacity is authorized |
+| Upgrade/rollback/DR automation | Exact-hash executor under ADR 0056 passes upgrade, forward-schema-safe rollback, and roll-forward; separately approved clean-host proof remains pending |
 
 Accepted Phase 2 decisions are recorded in
 [`docs/architecture/decisions`](decisions/):

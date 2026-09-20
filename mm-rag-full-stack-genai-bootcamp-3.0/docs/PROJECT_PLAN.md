@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 10 validation — backup/restore and host-capacity proof pass; threshold and recovery decisions next |
+| Active milestone | Phase 10 closure — scheduled operations and reversible release pass; retention preview and clean-host recovery remain |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -66,7 +66,7 @@ Rules:
 | Phase 9 | Completed and accepted — ADRs 0043–0050, provider-neutral milestones 9.0–9.6, and bounded Google Drive OAuth/propagation proofs pass |
 | Phase 9 closure | PR #17 squash-merged into `main` at `ad4e7fb`; source and merged trees match |
 | Phase 9 release | Annotated `mm-rag-v9.0.0` identifies the verified documentation-kickoff closure commit and is immutable |
-| Phase 10 | In progress — ADRs 0051–0056 Accepted; backup/restore and healthy OCI host evidence pass, thresholds and release/recovery drills pending |
+| Phase 10 | In progress — scheduled backup/capacity and upgrade/rollback/roll-forward pass; retention preview and clean-host recovery remain |
 
 ## Delivery sequence and gates
 
@@ -1106,12 +1106,12 @@ preview, approval, hold, and rollback controls.
 | Milestone | Deliverable | Status | Completion gate |
 | --- | --- | --- | --- |
 | 10.0 | Scope, invariants, evidence contract, and failure budget | Completed | ADR 0051 Accepted with measurable boundaries |
-| 10.1 | Scheduled encrypted backup verification and isolated restore drills | Live proof passed; scheduling hardening in review | Encrypted private-bucket upload, checksum, aggregate restore, readiness, cleanup, and active-service recovery pass; instance-principal upload and timer validation remain |
+| 10.1 | Scheduled encrypted backup verification and isolated restore drills | Completed | Instance-principal ciphertext upload, checksum, aggregate restore, cleanup, service recovery, and daily 05:30 PT timer pass |
 | 10.2 | Governed retention scheduling and safe deletion execution | Implemented at preview-only boundary | Owner/admin reminder, durable preview audit, token-safe report; automatic apply remains disabled |
-| 10.3 | Dependency, vulnerability, and supply-chain maintenance | Implemented; first candidate pending | Monthly grouped Dependabot candidates plus integrity/SBOM/provenance/ARM64/rollback evidence contract; no auto-merge or paid run |
-| 10.4 | OCI monitoring, saturation, and cost guardrails | Healthy host proof; thresholds approved | Live inventory matches the reviewed free-first topology; 15-minute queue and 14-day certificate critical cutoffs are tracked; timer validation remains |
-| 10.5 | Upgrade, rollback, disaster-recovery, and operator automation | Implemented; drills pending | Exact plan hash, fresh backup, immutable images, lease and separate explicit execution; clean-host cloud approval remains required |
-| 10.6 | Final operator handbook and release evidence | Handbook implemented; evidence pending | Content-free eight-scenario gate must pass after supervised OCI drills |
+| 10.3 | Dependency, vulnerability, and supply-chain maintenance | First candidate passed | Lockfiles, tests, vulnerability scan, SBOM, provenance, ARM64 image, signing, and rollback evidence pass; no auto-merge or paid run |
+| 10.4 | OCI monitoring, saturation, and cost guardrails | Completed | Healthy live inventory and thresholds pass; five-minute timer is enabled with no auto-scale or paid capacity |
+| 10.5 | Upgrade, rollback, disaster-recovery, and operator automation | Reversible release passed | Exact upgrade, forward-schema-safe rollback, and roll-forward pass; clean-host cloud approval remains required |
+| 10.6 | Final operator handbook and release evidence | In progress | Six of eight scenarios pass; authenticated retention preview and clean-host recovery remain |
 
 ### Proposed completion gate
 

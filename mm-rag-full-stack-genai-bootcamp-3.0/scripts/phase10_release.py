@@ -104,6 +104,8 @@ def execute_plan(
 ) -> dict[str, Any]:
     """Execute a reviewed immutable plan; rollback remains a separate reviewed plan."""
     validated = validate_plan(payload, now=now)
+    if payload["action"] == "restore":
+        raise ValueError("Restore execution requires the isolated restore runbook")
     expected = validated["plan_sha256"]
     if not authorized or confirmation != expected:
         raise ValueError("Exact plan hash and explicit operator authorization are required")
@@ -129,20 +131,34 @@ def execute_plan(
         [*prefix, "config", "--quiet"],
         [*prefix, "pull"],
         [*prefix, "stop", "dispatcher", "worker"],
-        [*prefix, "run", "--rm", "migrate"],
-        [*prefix, "run", "--rm", "models"],
-        [*prefix, "up", "-d", "postgres", "qdrant", "seaweedfs", "rabbitmq"],
-        [
-            *prefix,
-            "up",
-            "-d",
-            "--wait",
-            "--wait-timeout",
-            "180",
-            *application_services,
-        ],
-        [*prefix, "ps"],
     ]
+    if payload["action"] == "upgrade":
+        commands.extend(
+            (
+                [*prefix, "run", "--rm", "migrate"],
+                [*prefix, "run", "--rm", "models"],
+            )
+        )
+    application_up = [
+        *prefix,
+        "up",
+        "-d",
+        "--wait",
+        "--wait-timeout",
+        "180",
+    ]
+    if payload["action"] == "rollback":
+        # Compose dependencies include migrate; older migrators cannot read a future head.
+        application_up.append("--no-deps")
+    application_up.extend(application_services)
+    # Rollback preserves the forward-only schema and switches application images only.
+    commands.extend(
+        (
+            [*prefix, "up", "-d", "postgres", "qdrant", "seaweedfs", "rabbitmq"],
+            application_up,
+            [*prefix, "ps"],
+        )
+    )
     with lock_path.open("a", encoding="utf-8") as lock:
         try:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -175,7 +191,7 @@ def _validate_images(environment: Path, manifest: dict[str, Any]) -> None:
             continue
         key, separator, value = line.partition("=")
         if separator:
-            values[key] = value
+            values[key] = _environment_value(value)
     images = manifest.get("images")
     if not isinstance(images, dict):
         raise ValueError("Release manifest images are missing")
@@ -184,6 +200,17 @@ def _validate_images(environment: Path, manifest: dict[str, Any]) -> None:
     ]
     if mismatched:
         raise ValueError(f"Runtime environment image mismatch: {', '.join(mismatched)}")
+
+
+def _environment_value(value: str) -> str:
+    normalized = value.strip()
+    if (
+        len(normalized) >= 2
+        and normalized[0] == normalized[-1]
+        and normalized[0] in {"'", '"'}
+    ):
+        return normalized[1:-1]
+    return normalized
 
 
 def _project_file(payload: dict[str, Any], key: str) -> Path:
