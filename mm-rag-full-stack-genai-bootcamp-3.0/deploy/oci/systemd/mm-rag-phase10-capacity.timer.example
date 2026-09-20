@@ -1,0 +1,11 @@
+[Unit]
+Description=Sample MM-RAG Phase 10 capacity every five minutes
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=5min
+Persistent=true
+Unit=mm-rag-phase10-capacity.service
+
+[Install]
+WantedBy=timers.target

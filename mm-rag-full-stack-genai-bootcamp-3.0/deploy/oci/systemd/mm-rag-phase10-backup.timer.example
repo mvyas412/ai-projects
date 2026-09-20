@@ -1,0 +1,11 @@
+[Unit]
+Description=Run the MM-RAG Phase 10 backup each day
+
+[Timer]
+OnCalendar=*-*-* 05:30:00 America/Los_Angeles
+Persistent=true
+RandomizedDelaySec=10m
+Unit=mm-rag-phase10-backup.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,10 @@
+{
+  "automatic_apply": false,
+  "counts": {
+    "eligible": 0,
+    "held": 0
+  },
+  "mode": "preview-only",
+  "policy_revision": "phase4-retention-v1",
+  "preview_token": "replace-with-private-runtime-preview-token"
+}

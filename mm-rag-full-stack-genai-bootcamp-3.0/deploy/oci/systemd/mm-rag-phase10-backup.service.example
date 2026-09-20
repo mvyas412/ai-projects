@@ -1,0 +1,24 @@
+[Unit]
+Description=MM-RAG Phase 10 encrypted backup and integrity verification
+Requires=docker.service
+After=docker.service network-online.target
+
+[Service]
+Type=oneshot
+User=opc
+Group=opc
+WorkingDirectory=/opt/mm-rag
+EnvironmentFile=/opt/mm-rag/operations/private/phase10-backup.env
+Environment=PATH=/opt/mm-rag/.tools/bin:/usr/local/bin:/usr/bin:/bin
+UMask=0077
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+TimeoutStartSec=45min
+ExecStart=/opt/mm-rag/.tools/bin/python3.12 -m scripts.phase10_backup_cycle --compose-file deploy/oci/compose.yaml --environment-file deploy/oci/runtime.env --work-directory ${PHASE10_BACKUP_WORK_DIRECTORY} --output-directory ${PHASE10_BACKUP_OUTPUT_DIRECTORY} --recipient-file ${PHASE10_BACKUP_RECIPIENT_FILE} --upload
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=read-only
+ProtectSystem=strict
+ReadWritePaths=/opt/mm-rag/operations/private

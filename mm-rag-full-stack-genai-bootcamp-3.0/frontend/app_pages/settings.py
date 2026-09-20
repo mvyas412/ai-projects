@@ -1,3 +1,5 @@
+from datetime import UTC, datetime, timedelta
+
 import streamlit as st
 from utils.api import BackendAPIError
 from utils.runtime import api_client, current_user_identity, selected_workspace
@@ -43,6 +45,53 @@ with st.expander("Privacy and security", icon=":material/security:"):
     st.caption("Access tokens and local secrets are not displayed or persisted as product data.")
 
 if workspace["role"] in {"owner", "admin"}:
+    st.subheader("Monthly retention review")
+    st.caption(
+        "Preview eligible records without deleting anything. Applying retention remains "
+        "disabled until a separate policy decision and fresh authorization."
+    )
+    try:
+        recent_activity = api_client().activity(str(workspace["id"]), limit=200)
+        prior_previews = [
+            item for item in recent_activity if item["action"] == "retention.preview_generated"
+        ]
+        latest_preview = max(
+            (
+                datetime.fromisoformat(item["created_at"].replace("Z", "+00:00"))
+                for item in prior_previews
+            ),
+            default=None,
+        )
+        if latest_preview is None or datetime.now(UTC) - latest_preview > timedelta(days=31):
+            st.warning("The monthly retention preview is due. No deletion will be applied.")
+        else:
+            st.info(f"Latest preview: {latest_preview.date().isoformat()} · apply remains disabled")
+    except BackendAPIError as exc:
+        st.error(str(exc), icon=":material/error:")
+    if st.button("Generate preview", icon=":material/preview:"):
+        try:
+            preview = api_client().retention_preview(str(workspace["id"]))
+            counts = {
+                "Documents": preview["due_document_deletions"],
+                "Conversations": preview["due_conversation_deletions"],
+                "Inactive generations": preview["inactive_generations"],
+                "Terminal jobs": preview["terminal_jobs"],
+                "Audit events": preview["security_audit_events"],
+                "Orphan objects": preview["orphan_objects"],
+            }
+            st.success("Preview generated. No records were deleted.")
+            st.caption(
+                f"Policy {preview['policy_revision']} · generated {preview['generated_at']}"
+            )
+            st.dataframe(
+                [{"Category": name, "Eligible": count} for name, count in counts.items()],
+                hide_index=True,
+                use_container_width=True,
+            )
+            # The one-time preview token is intentionally neither displayed nor persisted.
+        except BackendAPIError as exc:
+            st.error(str(exc), icon=":material/error:")
+
     st.subheader("Feedback review")
     st.caption(
         "Workspace feedback stays tenant-scoped. Promotion records a reviewed regression-case "

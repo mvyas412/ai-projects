@@ -10,6 +10,10 @@ output "backup_bucket_name" {
   value = oci_objectstorage_bucket.backups.name
 }
 
+output "object_storage_namespace" {
+  value = data.oci_objectstorage_namespace.deployment.namespace
+}
+
 output "deployment_summary" {
   value = {
     environment = "learning"
@@ -17,5 +21,6 @@ output "deployment_summary" {
     ocpus       = var.instance_ocpus
     memory_gbs  = var.instance_memory_gbs
     public_tcp  = [80, 443]
+    backup_auth = "instance-principal-create-only"
   }
 }

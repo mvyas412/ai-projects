@@ -1,0 +1,39 @@
+{
+  "backup": {
+    "daily_keep": 7,
+    "destination": "existing-private-oci-bucket",
+    "maximum_verified_age_hours": 48,
+    "minimum_known_good": 2,
+    "monthly_keep": 2,
+    "restore_drill_interval_days": 31
+  },
+  "capacity": {
+    "certificate_critical_days": 14,
+    "critical_percent": 90,
+    "learning_users": 10,
+    "queue_age_critical_minutes": 15,
+    "review_duration_minutes": 15,
+    "review_percent": 80
+  },
+  "infrastructure_budget_usd": 0,
+  "maintenance": {
+    "automatic_merge": false,
+    "interval_days": 31,
+    "paid_acceptance": false,
+    "runtime_database_image_changes_require_rollback_proof": true
+  },
+  "release": {
+    "operator_authorization_required": true,
+    "plan_first": true,
+    "temporary_cloud_resources_require_separate_approval": true
+  },
+  "retention": {
+    "automatic_apply": false,
+    "interval_days": 31,
+    "mode": "preview-only",
+    "notification": "application-admin-view",
+    "recovery_days": null,
+    "retention_days": null
+  },
+  "schema": "mm-rag-phase10-policy-v1"
+}

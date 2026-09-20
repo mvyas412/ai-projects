@@ -1,4 +1,4 @@
-.PHONY: setup models models-verify phase6-models phase6-models-verify services observability observability-stop observability-status observability-baseline observability-baseline-status runtime runtime-stop services-stop migrate api ui dispatcher worker operations-status operations-retention-preview backup google-drive-authorize google-drive-probe google-drive-propagation phase5-evaluation phase6-evaluation phase7-evaluation phase8-deployment-validate phase8-next-check check check-live check-acceptance
+.PHONY: setup models models-verify phase6-models phase6-models-verify services observability observability-stop observability-status observability-baseline observability-baseline-status runtime runtime-stop services-stop migrate api ui dispatcher worker operations-status operations-retention-preview backup google-drive-authorize google-drive-probe google-drive-propagation phase5-evaluation phase6-evaluation phase7-evaluation phase8-deployment-validate phase8-next-check phase10-policy-check phase10-operations-check phase10-backup phase10-restore-drill phase10-release-plan phase10-capacity phase10-retention-preview phase10-evidence-gate check check-live check-acceptance
 
 setup:
 	uv python install 3.12
@@ -103,6 +103,39 @@ phase8-deployment-validate:
 
 phase8-next-check:
 	cd frontend-next && npm ci && npm audit && npm test && npm run typecheck && npm run build
+
+phase10-policy-check:
+	uv run python -m scripts.phase10_operations policy operations/phase10-policy.json
+
+phase10-operations-check: phase10-policy-check
+	uv run pytest -q tests/test_phase10_*.py
+
+phase10-backup:
+	@test -n "$(WORK_DIRECTORY)" || (echo "Set WORK_DIRECTORY to a private mode-0700 path" && exit 2)
+	@test -n "$(OUTPUT_DIRECTORY)" || (echo "Set OUTPUT_DIRECTORY to a private mode-0700 path" && exit 2)
+	@test -n "$(RECIPIENT_FILE)" || (echo "Set RECIPIENT_FILE to the public age recipient path" && exit 2)
+	uv run python -m scripts.phase10_backup_cycle --work-directory "$(WORK_DIRECTORY)" --output-directory "$(OUTPUT_DIRECTORY)" --recipient-file "$(RECIPIENT_FILE)" $(if $(UPLOAD),--upload)
+
+phase10-restore-drill:
+	@test -n "$(BUNDLE)" || (echo "Set BUNDLE to an encrypted backup path" && exit 2)
+	@test -n "$(IDENTITY_FILE)" || (echo "Set IDENTITY_FILE to the private age identity path" && exit 2)
+	@test -n "$(WORK_DIRECTORY)" || (echo "Set WORK_DIRECTORY to a disposable private path" && exit 2)
+	uv run python -m scripts.phase10_restore_drill "$(BUNDLE)" --identity-file "$(IDENTITY_FILE)" --work-directory "$(WORK_DIRECTORY)" --expected-migration 20260919_0019 --output evaluation/phase10/results/isolated-restore.json
+
+phase10-release-plan:
+	@test -n "$(INPUT)" || (echo "Set INPUT to an ignored release plan JSON path" && exit 2)
+	uv run python -m scripts.phase10_release plan "$(INPUT)"
+
+phase10-capacity:
+	@test -n "$(INPUT)" || (echo "Set INPUT to an ignored capacity snapshot JSON path" && exit 2)
+	uv run python -m scripts.phase10_operations capacity "$(INPUT)"
+
+phase10-retention-preview:
+	@test -n "$(INPUT)" || (echo "Set INPUT to an ignored preview JSON path" && exit 2)
+	uv run python -m scripts.phase10_operations retention-preview "$(INPUT)"
+
+phase10-evidence-gate:
+	uv run python -m scripts.phase10_operations gate evaluation/phase10/results
 
 check:
 	./scripts/verify_phase3.sh

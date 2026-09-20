@@ -1,7 +1,7 @@
 # ADR 0054: Dependency and supply-chain maintenance
 
-- Status: Proposed
-- Date: 2026-09-19
+- Status: Accepted
+- Date: 2026-09-20
 - Milestone: 10.3
 
 ## Context
@@ -18,7 +18,7 @@ behavior, migrations, security controls, or protected evaluation evidence.
 | Fully automatic dependency updates | Fast patch uptake | Noisy, risky, and may consume paid tests |
 | Scheduled grouped candidates with evidence gates | Predictable and reviewable | Requires maintenance automation and triage |
 
-## Proposed decision
+## Decision
 
 Create bounded monthly update candidates grouped by ecosystem. Require lockfile
 integrity, source/IaC/image scans, SBOM/provenance checks, deterministic tests, migration
@@ -26,15 +26,16 @@ checks, protected free evaluations, ARM64 build validation, and an immutable rol
 manifest. Never auto-merge or run paid acceptance; urgent vulnerabilities use a narrow
 reviewed path.
 
-## Recommendation
+## Accepted defaults
 
-Adopt monthly grouped candidates plus a separately approved urgent-security path.
-
-## Approval questions
-
-1. Approve monthly grouped maintenance candidates?
-2. Which severity and exploitability threshold triggers the urgent path?
-3. Require an exercised rollback before promoting every runtime/image update?
+- Produce grouped maintenance candidates monthly; never auto-merge or automatically run
+  paid acceptance.
+- Use the urgent path for known-exploited vulnerabilities affecting MM-RAG, exploitable
+  critical vulnerabilities, or high-severity vulnerabilities with a public exploit in
+  an exposed component.
+- Require exercised rollback evidence for runtime, database, and container-image
+  promotions. Documentation-only and isolated development-tool changes do not require a
+  deployment rollback drill.
 
 ## Consequences
 

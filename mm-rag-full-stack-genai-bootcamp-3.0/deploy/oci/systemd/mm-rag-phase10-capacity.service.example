@@ -1,0 +1,21 @@
+[Unit]
+Description=MM-RAG Phase 10 free-first capacity guardrails
+Requires=docker.service
+After=docker.service network-online.target
+
+[Service]
+Type=oneshot
+User=opc
+Group=opc
+WorkingDirectory=/opt/mm-rag
+EnvironmentFile=/opt/mm-rag/operations/private/phase10-backup.env
+Environment=PATH=/opt/mm-rag/.tools/bin:/usr/local/bin:/usr/bin:/bin
+UMask=0077
+TimeoutStartSec=2min
+ExecStart=/opt/mm-rag/.tools/bin/python3.12 -m scripts.phase10_capacity_snapshot --compose-file deploy/oci/compose.yaml --environment-file deploy/oci/runtime.env --backup-directory ${PHASE10_BACKUP_OUTPUT_DIRECTORY} --inventory-status-file operations/private/oci-inventory-status.json --state-file operations/private/capacity-state.json --certificate-host ${PHASE10_CERTIFICATE_HOST} --output evaluation/phase10/results/capacity-latest.json
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=read-only
+ProtectSystem=strict
+ReadWritePaths=/opt/mm-rag/operations/private /opt/mm-rag/evaluation/phase10/results

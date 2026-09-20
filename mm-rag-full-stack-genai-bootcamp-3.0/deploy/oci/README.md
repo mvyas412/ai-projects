@@ -46,3 +46,8 @@ The plan-only Terraform module, release manifest, Next.js candidate, capacity pr
 encrypted backup bundler, and evidence gate are documented in
 `docs/PHASE8_OCI_OPERATIONS.md`. Never run `terraform apply` or `docker compose up` from
 this bundle until Phase 7 is accepted and the OCI provisioning action is separately approved.
+
+Phase 10 adds disabled-by-default systemd examples in `systemd/`. Review and supervise
+one encrypted backup cycle before enabling its timer; clean-host drills, host replacement,
+retention apply and cloud-object deletion keep separate approval boundaries. See
+`docs/PHASE10_OPERATIONS.md`.

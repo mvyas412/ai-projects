@@ -1,7 +1,7 @@
 # ADR 0055: OCI capacity, monitoring, and cost guardrails
 
-- Status: Proposed
-- Date: 2026-09-19
+- Status: Accepted
+- Date: 2026-09-20
 - Milestone: 10.4
 
 ## Context
@@ -19,7 +19,7 @@ resource would undermine the learning objective.
 | Add paid managed monitoring/autoscaling | Stronger operations | Violates the current budget goal |
 | Free-first host/provider guardrails and safe degradation | Low cost and sufficient for learning | No high-availability claim |
 
-## Proposed decision
+## Decision
 
 Use existing telemetry plus bounded host/provider inventory checks for CPU, memory,
 disk/inodes, queue age, service readiness, certificate expiry, backup age, and budget.
@@ -27,16 +27,16 @@ Define warning/critical thresholds and safe degradation/backpressure before cons
 capacity changes. Keep the USD 1 budget alarm and an allowlist of expected free resources.
 No auto-scaling or paid shape is authorized.
 
-## Recommendation
+## Accepted defaults
 
-Approve free-first monitoring for the ten-user target, with alerts recorded locally and
-in existing provider budget channels before selecting external paging.
-
-## Approval questions
-
-1. Approve the ten-user learning target and no production-SLA claim?
-2. Approve free/local alerting plus the existing OCI budget alarm?
-3. What sustained threshold should trigger a reviewed capacity decision?
+- Keep the ten-user learning target and make no production-SLA claim.
+- Use free/local alerting plus the existing OCI budget alarm; do not select external
+  paging or paid monitoring.
+- Trigger a reviewed capacity decision when CPU, memory, disk, or inode use remains at
+  or above 80% for 15 minutes. Treat 90% resource use, excessive queue age, an overdue
+  backup, or impending certificate expiry as critical; refine service-specific
+  thresholds through controlled free tests.
+- Keep auto-scaling and paid OCI shapes disabled.
 
 ## Consequences
 

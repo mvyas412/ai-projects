@@ -1,7 +1,7 @@
 # ADR 0053: Governed retention scheduling and safe deletion execution
 
-- Status: Proposed
-- Date: 2026-09-19
+- Status: Accepted
+- Date: 2026-09-20
 - Milestone: 10.2
 
 ## Context
@@ -18,7 +18,7 @@ turns a reviewed administrative tool into recurring destructive automation.
 | Schedule direct deletion | Simple | Unacceptable stale-scope and hold-bypass risk |
 | Schedule preview, notify, reauthorize, then execute | Governed and auditable | Requires policy, review window, and recovery decisions |
 
-## Proposed decision
+## Decision
 
 Never schedule direct deletion. A scheduler may create an immutable preview only. A
 workspace owner/admin must review and reauthorize the unchanged scope before execution;
@@ -26,17 +26,15 @@ holds always win, failures checkpoint safely, and a recovery window precedes phy
 purge. Automatic execution remains disabled until schedule, review window, recovery
 window, exemptions, and notification policy are explicitly accepted.
 
-## Recommendation
+## Accepted defaults
 
-Begin with preview-only monthly reports and no automatic apply. Consider execution only
-after synthetic held/unheld data, stale-preview rejection, restore, and cross-store
-reconciliation all pass.
-
-## Approval questions
-
-1. Approve preview-only scheduling as the first implementation boundary?
-2. What retention and recovery windows should eventually apply?
-3. Who may reauthorize execution, and what notification channel should be used?
+- Generate one preview-only report monthly and keep automatic apply disabled.
+- An owner or admin must review and reauthorize an unchanged preview through the
+  existing administrative product boundary; holds always win.
+- Use the application administrative view as the initial notification surface; do not
+  select an external notification provider yet.
+- Retention and recovery-window values remain undecided until measured storage growth
+  supports a separate policy decision.
 
 ## Consequences
 
