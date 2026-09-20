@@ -316,9 +316,13 @@ def capacity_evidence(payload: dict[str, Any], policy: dict[str, Any]) -> dict[s
     if unexpected_paid:
         state = "critical"
         reasons.append("unexpected-paid-resource")
+    if state == "healthy":
+        result_status = "needs-decision" if unresolved else "pass"
+    else:
+        result_status = state
     return evidence(
         "capacity-guardrails",
-        "pass" if state == "healthy" else state,
+        result_status,
         state=state,
         reasons=sorted(reasons),
         unresolved_thresholds=unresolved,

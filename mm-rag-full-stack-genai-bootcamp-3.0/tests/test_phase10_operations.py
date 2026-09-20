@@ -186,6 +186,33 @@ def test_capacity_guardrails_report_review_and_critical(
     assert "unexpected-paid-resource" in result["reasons"]
 
 
+def test_healthy_capacity_waits_for_unresolved_threshold_decisions(
+    policy: dict[str, object],
+) -> None:
+    result = capacity_evidence(
+        {
+            "metrics": {
+                "cpu_percent": 20,
+                "memory_percent": 30,
+                "disk_percent": 40,
+                "inode_percent": 10,
+                "sustained_minutes": 0,
+                "verified_backup_age_hours": 8,
+                "certificate_days_remaining": 60,
+                "oldest_queue_age_minutes": 0,
+                "queue_age_critical": False,
+                "unexpected_paid_resources": False,
+            }
+        },
+        policy,
+    )
+    assert result["status"] == "needs-decision"
+    assert result["unresolved_thresholds"] == [
+        "queue-age-critical-minutes",
+        "certificate-critical-days",
+    ]
+
+
 def test_release_preflight_is_plan_first_and_awaits_operator() -> None:
     payload = {
         "action": "upgrade",
