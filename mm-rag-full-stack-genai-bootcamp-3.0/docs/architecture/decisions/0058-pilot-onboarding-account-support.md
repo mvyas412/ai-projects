@@ -1,6 +1,6 @@
 # ADR 0058: Pilot onboarding, account lifecycle, and support
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-20
 - Milestone: 11.1
 
@@ -23,8 +23,9 @@ Use manually approved invitations with existing Auth0 and current workspace role
 Keep support and notices in the application plus a documented manual operator path; do
 not add an email, ticketing, or notification provider for the initial pilot.
 
-## Questions for approval
+## Accepted decision
 
-- Who may approve and revoke pilot access?
-- Should every participant begin in a personal workspace only?
-- What support response target is appropriate for a learning pilot?
+Use manually approved and revocable access through existing Auth0. Participants begin
+in a personal workspace. Support remains an in-application/manual operator path with no
+new provider; the named approver and response-time promise must be fixed before live
+invitations begin.

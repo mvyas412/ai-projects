@@ -14,8 +14,8 @@ milestones, dependencies, completion gates, risks, and immediate next actions.
 Presentation-ready rendered diagrams are maintained in the
 [architecture poster gallery](ARCHITECTURE_POSTERS.md). The gallery records the
 accepted architecture through Phase 10. The Mermaid diagrams in this handbook are the
-editable source of truth and now include proposed Phase 11; rendered Phase 11 artwork
-remains future work after its scope is approved.
+editable source of truth and now include the accepted Phase 11 pilot-control boundary;
+rendered Phase 11 artwork remains future work.
 
 The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 records the accepted Phase 6 product path plus the implemented Phase 7 evaluation
@@ -195,7 +195,7 @@ flowchart LR
     p8["Phase 8<br/>Scalable platform<br/>Accepted"] -->
     p9["Phase 9<br/>Enterprise platform<br/>Accepted"] -->
     p10["Phase 10<br/>Operational hardening<br/>Completed / v10.0.0"] -->
-    p11["Phase 11<br/>Invitation-only pilot<br/>Proposed"]
+    p11["Phase 11<br/>Invitation-only pilot<br/>In progress"]
 ```
 
 | Phase | Capability | Main technologies/components | Stores | Status |
@@ -210,7 +210,7 @@ flowchart LR
 | 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; encrypted OCI backup | Completed and accepted on the free-first Phoenix learning deployment |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Completed and accepted at the provider-neutral learning boundary; bounded Google Drive proof passes |
 | 10 | Operational hardening and lifecycle operations | Backup verification, retention orchestration, maintenance gates, capacity/cost controls, recovery automation | Existing OCI/Compose platform and content-free operational evidence | Completed and accepted; all eight evidence scenarios pass |
-| 11 | Invitation-only product pilot | Controlled onboarding, measured product journeys, voluntary feedback, support and staged rollout | Existing product and content-free/consented pilot evidence | Proposed; ADRs 0057–0062 await approval |
+| 11 | Invitation-only product pilot | Controlled onboarding, measured product journeys, voluntary feedback, support and staged rollout | Existing product and content-free/consented pilot evidence | In progress; synthetic boundary implemented, live rollout disabled |
 
 ## Phase 1 — working prototype
 
@@ -931,7 +931,7 @@ backup name, host coordinate, queue message, or provider resource identifier.
 
 ## Phase 11 — invitation-only product pilot
 
-**Status:** Proposed. The recommended architecture adds no new provider or data plane.
+**Status:** In progress. The accepted architecture adds no new provider or data plane.
 It places a staged pilot-control boundary around the accepted Streamlit/FastAPI product.
 
 ```mermaid
@@ -948,7 +948,7 @@ flowchart LR
     pause --> product
 ```
 
-The initial recommendation keeps Streamlit authoritative, existing Auth0/manual access,
+The accepted decision keeps Streamlit authoritative, existing Auth0/manual access,
 the free-first OCI topology, and current operational controls. No raw prompts, documents,
 identities, or provider identifiers enter pilot evidence. Public signup, external
 notifications, Next.js promotion, paid capacity, and production-SLA claims remain out
@@ -1006,9 +1006,9 @@ of scope until separately decided.
 | Dependency maintenance | Monthly grouped uv/npm/Actions/container candidates implemented under ADR 0054; first lockfile/test/scan/SBOM/provenance/ARM64/signing/rollback gate passes with no auto-merge or paid acceptance |
 | OCI capacity/cost guardrails | Five-minute collector under ADR 0055 is enabled; live free-first inventory and host metrics are healthy, 15-minute queue and 14-day certificate thresholds pass, and no auto-scale or paid capacity is authorized |
 | Upgrade/rollback/DR automation | Exact-hash executor under ADR 0056 passes upgrade, forward-schema-safe rollback, roll-forward, and clean-host recovery with runtime-only secrets and verified cleanup |
-| Phase 11 pilot boundary | Proposed in ADR 0057; invitation-only, ten-user maximum, free-first, content-free evidence |
-| Pilot frontend | Proposed in ADR 0059; keep Streamlit authoritative and Next.js unpromoted initially |
-| Pilot feedback | Proposed in ADR 0060; voluntary structured feedback plus aggregate telemetry, no raw-content evidence |
+| Phase 11 pilot boundary | Accepted in ADR 0057; invitation-only, ten-user maximum, free-first, content-free evidence |
+| Pilot frontend | Accepted in ADR 0059; Streamlit authoritative and Next.js unpromoted |
+| Pilot feedback | Accepted in ADR 0060; voluntary structured feedback plus aggregate telemetry, no raw-content evidence |
 
 Accepted Phase 2 decisions are recorded in
 [`docs/architecture/decisions`](decisions/):
@@ -1097,7 +1097,7 @@ Accepted Phase 10 decisions are:
 - [ADR 0055 — OCI capacity, monitoring, and cost guardrails](decisions/0055-oci-capacity-monitoring-cost-guardrails.md)
 - [ADR 0056 — Upgrade, rollback, and disaster-recovery automation](decisions/0056-upgrade-rollback-disaster-recovery-automation.md)
 
-Proposed Phase 11 decisions are:
+Accepted Phase 11 decisions are:
 
 - [ADR 0057 — Phase 11 pilot scope and evidence boundary](decisions/0057-phase11-pilot-scope-evidence.md)
 - [ADR 0058 — Pilot onboarding, account lifecycle, and support](decisions/0058-pilot-onboarding-account-support.md)

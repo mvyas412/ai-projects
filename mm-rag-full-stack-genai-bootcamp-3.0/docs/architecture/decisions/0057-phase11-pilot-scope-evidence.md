@@ -1,6 +1,6 @@
 # ADR 0057: Phase 11 pilot scope and evidence boundary
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-20
 - Milestone: 11.0
 
@@ -23,8 +23,9 @@ Define Phase 11 as a reversible, invitation-only learning pilot for at most ten
 registered users. Keep the USD 0 target and content-free aggregate evidence. Do not make
 a production-SLA or public-launch claim.
 
-## Questions for approval
+## Accepted decision
 
-- Is the invitation-only pilot the desired Phase 11 outcome?
-- Should ten registered users remain the hard maximum until a later decision?
-- Which user-success measures are required for acceptance?
+The pilot is invitation-only with ten registered users as a hard maximum. Safety,
+authorization, privacy, integrity, cost, and recovery gates must pass completely.
+Exact live user-success thresholds remain a separately reviewed rollout value; the
+initial implementation is limited to content-free synthetic rehearsal.

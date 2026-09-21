@@ -1,6 +1,6 @@
 # ADR 0060: Pilot consent, privacy, and feedback
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-20
 - Milestone: 11.3
 
@@ -25,8 +25,9 @@ content-free aggregate telemetry. Do not retain raw prompts, answers, documents,
 identities, or provider identifiers in pilot evidence. Keep automatic retention apply
 disabled until a separate policy decision.
 
-## Questions for approval
+## Accepted decision
 
-- Which structured feedback categories are useful and non-sensitive?
-- How long should pilot feedback and aggregate evidence be retained?
-- How should a participant request access removal or data deletion?
+Allow voluntary ratings in usability, answer relevance, evidence clarity, performance,
+and accessibility categories. Pilot evidence remains aggregate and content-free.
+Exact retention duration, consent text, and the manual access/removal request procedure
+must be approved before live collection; automatic retention apply remains disabled.

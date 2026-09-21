@@ -1,6 +1,6 @@
 # ADR 0061: Pilot reliability, support, capacity, and cost
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-20
 - Milestone: 11.4
 
@@ -25,8 +25,10 @@ manual support. Publish a learning-pilot availability statement with planned mai
 no emergency guarantee, and immediate pause when safety, authorization, integrity,
 capacity, or cost gates fail.
 
-## Questions for approval
+## Accepted decision
 
-- What support hours and response target should participants expect?
-- Should the pilot pause after any critical alert or only after repeated failure?
-- What measured threshold would trigger a paid-capacity decision review?
+Keep the existing free-first topology and no production SLA. Authorization, privacy,
+integrity, secret, cross-tenant, unexpected-cost, and recovery failures pause the pilot
+immediately. Ordinary performance issues are remediated within the active stage. Any
+paid-capacity review and support-time promise require a separate decision supported by
+measured evidence.

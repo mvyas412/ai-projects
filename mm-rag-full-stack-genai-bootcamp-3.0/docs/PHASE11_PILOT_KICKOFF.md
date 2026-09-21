@@ -1,6 +1,6 @@
 # Phase 11 invitation-only product pilot kickoff
 
-Status: **Proposed — decision work only**
+Status: **Accepted — synthetic implementation foundation in progress**
 
 ## Recommended direction
 
@@ -50,8 +50,10 @@ measured pilot evidence demonstrates a need.
 - Promotion of the deferred Next.js candidate without a separate parity decision.
 - Collection of raw prompts, documents, identities, or secrets as pilot evidence.
 
-## Approval sequence
+## Implementation boundary
 
-Review ADRs 0057–0062 in order. Acceptance of one ADR does not authorize implementation,
-real-user invitations, paid work, external messages, or cloud changes unless explicitly
-stated in a later implementation approval.
+ADRs 0057–0062 are accepted. The versioned policy, synthetic rehearsal, evidence gate,
+tests, and operating guide may be implemented. Real-user invitations, paid work,
+external messages, cloud changes, and Next.js promotion still require separate approval.
+Live stage durations, active-user thresholds, support response targets, consent text,
+and evidence-retention duration remain unresolved.

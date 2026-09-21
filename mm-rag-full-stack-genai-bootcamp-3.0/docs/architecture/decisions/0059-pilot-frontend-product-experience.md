@@ -1,6 +1,6 @@
 # ADR 0059: Pilot frontend and product experience
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-20
 - Milestone: 11.2
 
@@ -24,8 +24,10 @@ Keep Streamlit authoritative for the initial pilot. Improve only measured onboar
 library, progress, chat, evidence, settings, accessibility, and recovery pain points.
 Leave Next.js deferred until pilot evidence justifies a separate parity decision.
 
-## Questions for approval
+## Accepted decision
 
-- Is Streamlit acceptable for the entire initial pilot?
-- Which user journeys must be rehearsed before invitations?
-- What measured evidence would justify reopening Next.js promotion?
+Streamlit remains authoritative. Internal rehearsal covers authentication, personal
+workspace defaulting, upload and asynchronous controls, library readiness, grounded
+chat and citations, feedback, access revocation, support/pause, and recovery. Next.js
+promotion requires a separate parity decision supported by repeated measured pain or
+an accessibility/security issue that cannot reasonably be corrected in Streamlit.

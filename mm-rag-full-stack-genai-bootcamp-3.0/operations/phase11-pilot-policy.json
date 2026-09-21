@@ -1,0 +1,41 @@
+{
+  "schema": "mm-rag-phase11-pilot-policy-v1",
+  "scope": {
+    "invitation_only": true,
+    "maximum_registered_users": 10,
+    "public_signup": false,
+    "production_sla": false
+  },
+  "product": {
+    "authoritative_frontend": "streamlit",
+    "nextjs_promoted": false,
+    "personal_workspace_first": true
+  },
+  "evidence": {
+    "aggregate_only": true,
+    "raw_content_allowed": false,
+    "identities_allowed": false,
+    "voluntary_feedback_categories": [
+      "accessibility",
+      "answer-relevance",
+      "evidence-clarity",
+      "performance",
+      "usability"
+    ],
+    "retention_days": null
+  },
+  "operations": {
+    "infrastructure_budget_usd": 0,
+    "external_notifications": false,
+    "automatic_retention_apply": false,
+    "paid_acceptance": false,
+    "support_response_target_hours": null
+  },
+  "rollout": {
+    "stages": ["internal-rehearsal", "canary-2", "cohort-5", "cohort-10"],
+    "live_stages_enabled": false,
+    "live_stage_duration_days": null,
+    "live_stage_minimum_active_users": null,
+    "separate_live_authorization_required": true
+  }
+}

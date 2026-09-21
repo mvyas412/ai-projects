@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 11.0 decision kickoff — Proposed invitation-only pilot |
+| Active milestone | Phase 11.1–11.5 synthetic pilot foundation |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -68,7 +68,7 @@ Rules:
 | Phase 9 release | Annotated `mm-rag-v9.0.0` identifies the verified documentation-kickoff closure commit and is immutable |
 | Phase 10 | Completed and accepted — all eight evidence scenarios pass |
 | Phase 10 release | Annotated `mm-rag-v10.0.0` peels to accepted merge `a2d200b`; immutable |
-| Phase 11 | Proposed — invitation-only free-first product pilot; ADRs 0057–0062 require approval |
+| Phase 11 | In progress — ADRs 0057–0062 accepted; synthetic rehearsal enabled, live rollout disabled |
 
 ## Delivery sequence and gates
 
@@ -103,7 +103,7 @@ security and data-integrity gates on which it depends.
 | 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Completed and accepted on the free-first Phoenix learning deployment |
 | 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Completed and accepted |
 | 10 | Operational hardening and lifecycle operations | Repeatable maintenance, recovery, retention, and cost-control evidence | Completed and accepted; released as `mm-rag-v10.0.0` |
-| 11 | Invitation-only product pilot | New users complete core workflows safely within privacy, reliability, support, and cost bounds | Proposed; ADRs 0057–0062 awaiting review |
+| 11 | Invitation-only product pilot | New users complete core workflows safely within privacy, reliability, support, and cost bounds | In progress; synthetic foundation implemented, live rollout disabled |
 
 ## Phase 1 — working prototype
 
@@ -1134,9 +1134,10 @@ preview, approval, hold, and rollback controls.
 
 ## Phase 11 — invitation-only product pilot
 
-**Status:** Proposed. ADRs 0057–0062 require explicit approval. No implementation,
-real-user invitation, external notification, frontend promotion, paid work, or cloud
-change is authorized.
+**Status:** In progress. ADRs 0057–0062 are Accepted. The versioned policy, synthetic
+rehearsal, content-free evidence gate, tests, and operating guide are implemented.
+Real-user invitation, external notification, frontend promotion, paid work, or cloud
+change remains separately gated.
 
 ### Objective
 
@@ -1148,12 +1149,12 @@ privacy, recovery, and cost boundaries remain intact.
 
 | Milestone | Deliverable | Status | Proposed completion gate |
 | --- | --- | --- | --- |
-| 11.0 | Scope, invariants, user-success evidence, and stop conditions | Proposed | ADR 0057 accepted |
-| 11.1 | Manual invitation, onboarding, access revocation, and support contract | Proposed | ADR 0058 accepted; synthetic lifecycle rehearsal passes |
-| 11.2 | Streamlit pilot journeys and accessibility | Proposed | ADR 0059 accepted; measured core journeys pass |
-| 11.3 | Consent, privacy, voluntary feedback, and evidence governance | Proposed | ADR 0060 accepted; no raw content/identity in evidence |
-| 11.4 | Reliability, support, capacity, maintenance, and cost boundary | Proposed | ADR 0061 accepted; free-first preflight and pause controls pass |
-| 11.5 | Internal → 2 → 5 → 10-user staged rollout and closure | Proposed | ADR 0062 accepted; every stage passes before expansion |
+| 11.0 | Scope, invariants, user-success evidence, and stop conditions | Implemented | ADR 0057 accepted; versioned policy validates |
+| 11.1 | Manual invitation, onboarding, access revocation, and support contract | Foundation implemented | ADR 0058 accepted; synthetic lifecycle contract passes |
+| 11.2 | Streamlit pilot journeys and accessibility | Foundation implemented | ADR 0059 accepted; required journeys are represented in the contract gate |
+| 11.3 | Consent, privacy, voluntary feedback, and evidence governance | Foundation implemented | ADR 0060 accepted; sensitive evidence rejected |
+| 11.4 | Reliability, support, capacity, maintenance, and cost boundary | Foundation implemented | ADR 0061 accepted; paid/provider/live actions disabled |
+| 11.5 | Internal → 2 → 5 → 10-user staged rollout and closure | Internal stage only | ADR 0062 accepted; live stages require separate approval |
 
 ### Proposed completion gate
 
@@ -1247,21 +1248,20 @@ privacy, recovery, and cost boundaries remain intact.
 | Dependency and supply-chain maintenance | 10.3 | Accepted — ADR 0054; implementation ready |
 | OCI capacity, monitoring, and cost guardrails | 10.4 | Accepted — ADR 0055; implementation ready |
 | Upgrade, rollback, and disaster-recovery automation | 10.5–10.6 | Accepted — ADR 0056; destructive/cloud actions remain separately gated |
-| Phase 11 pilot scope and evidence | 11.0 | Proposed — ADR 0057 |
-| Pilot onboarding, account lifecycle, and support | 11.1 | Proposed — ADR 0058 |
-| Pilot frontend and product experience | 11.2 | Proposed — ADR 0059; Streamlit recommended |
-| Pilot consent, privacy, and feedback | 11.3 | Proposed — ADR 0060 |
-| Pilot reliability, support, capacity, and cost | 11.4 | Proposed — ADR 0061 |
-| Pilot rollout, acceptance, and rollback | 11.5 | Proposed — ADR 0062 |
+| Phase 11 pilot scope and evidence | 11.0 | Accepted — ADR 0057; synthetic policy/gate implemented |
+| Pilot onboarding, account lifecycle, and support | 11.1 | Accepted — ADR 0058; live approver/response target TBD |
+| Pilot frontend and product experience | 11.2 | Accepted — ADR 0059; Streamlit remains authoritative |
+| Pilot consent, privacy, and feedback | 11.3 | Accepted — ADR 0060; live consent/retention duration TBD |
+| Pilot reliability, support, capacity, and cost | 11.4 | Accepted — ADR 0061; free-first and immediate safety pause |
+| Pilot rollout, acceptance, and rollback | 11.5 | Accepted — ADR 0062; internal stage enabled, live thresholds TBD |
 
 ## Immediate next actions
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Review the Phase 11 objective and ADR 0057 | Approved pilot scope, invariants, and evidence boundary |
-| 2 | Review ADRs 0058–0060 | Approved onboarding, frontend, consent, privacy, and feedback contracts |
-| 3 | Review ADRs 0061–0062 | Approved reliability, cost, rollout, stop, and acceptance contracts |
-| 4 | After ADR approval, prepare an implementation plan and synthetic rehearsal only | No real user is invited before a separate implementation approval |
+| 1 | Run and review the synthetic Phase 11 rehearsal/evidence gate | All required internal scenarios pass without user data or provider calls |
+| 2 | Review unresolved live-pilot values | Approver, consent, support, retention, duration, active-user, and acceptance values approved |
+| 3 | Authorize a bounded two-user canary separately | No real user is invited before explicit authorization |
 
 ## Update protocol
 

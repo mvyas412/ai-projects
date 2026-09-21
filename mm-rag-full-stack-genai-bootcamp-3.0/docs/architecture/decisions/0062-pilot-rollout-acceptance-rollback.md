@@ -1,6 +1,6 @@
 # ADR 0062: Pilot rollout, acceptance, and rollback
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-20
 - Milestone: 11.5
 
@@ -23,8 +23,11 @@ Use internal rehearsal, two-user canary, five-user stage, then ten-user maximum.
 authorization, task completion, reliability, cost, privacy, accessibility, backup, and
 rollback gates at every stage. End with an explicit accept, remediate, or stop decision.
 
-## Questions for approval
+## Accepted decision
 
-- What minimum duration and active-user count should each stage require?
-- Which failures require immediate access freeze or rollback?
-- What evidence is sufficient to accept Phase 11?
+Use the ordered internal, two-user, five-user, and ten-user stages. Only internal
+synthetic rehearsal is enabled initially. Live duration and minimum-active-user values
+remain unresolved and require separate approval before invitations. Every stage must
+preserve safety, authorization, privacy, integrity, free-first cost, backup, and
+rollback gates; Phase 11 closes only through an explicit accept, remediate, or stop
+decision.

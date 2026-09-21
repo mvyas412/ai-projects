@@ -1,4 +1,4 @@
-.PHONY: setup models models-verify phase6-models phase6-models-verify services observability observability-stop observability-status observability-baseline observability-baseline-status runtime runtime-stop services-stop migrate api ui dispatcher worker operations-status operations-retention-preview backup google-drive-authorize google-drive-probe google-drive-propagation phase5-evaluation phase6-evaluation phase7-evaluation phase8-deployment-validate phase8-next-check phase10-policy-check phase10-operations-check phase10-backup phase10-restore-drill phase10-release-plan phase10-capacity phase10-retention-preview phase10-evidence-gate check check-live check-acceptance
+.PHONY: setup models models-verify phase6-models phase6-models-verify services observability observability-stop observability-status observability-baseline observability-baseline-status runtime runtime-stop services-stop migrate api ui dispatcher worker operations-status operations-retention-preview backup google-drive-authorize google-drive-probe google-drive-propagation phase5-evaluation phase6-evaluation phase7-evaluation phase8-deployment-validate phase8-next-check phase10-policy-check phase10-operations-check phase10-backup phase10-restore-drill phase10-release-plan phase10-capacity phase10-retention-preview phase10-evidence-gate phase11-policy-check phase11-rehearsal phase11-evidence-gate check check-live check-acceptance
 
 setup:
 	uv python install 3.12
@@ -136,6 +136,15 @@ phase10-retention-preview:
 
 phase10-evidence-gate:
 	uv run python -m scripts.phase10_operations gate evaluation/phase10/results
+
+phase11-policy-check:
+	uv run python -m scripts.phase11_pilot policy
+
+phase11-rehearsal: phase11-policy-check
+	uv run python -m scripts.phase11_pilot rehearse --output evaluation/phase11/results/internal-rehearsal.json
+
+phase11-evidence-gate:
+	uv run python -m scripts.phase11_pilot gate evaluation/phase11/results/internal-rehearsal.json
 
 check:
 	./scripts/verify_phase3.sh
