@@ -1,4 +1,4 @@
-# Multimodal RAG Production — Phase 10 accepted
+# Multimodal RAG Production — Phase 10 released; Phase 11 proposed
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
@@ -110,6 +110,14 @@ now pass. The content-free Phase 10 gate reports all eight required scenarios pa
 and Phase 10 is accepted.
 Automatic retention apply, unattended
 upgrades, paid capacity, and production-SLA claims remain disabled.
+
+Annotated tag `mm-rag-v10.0.0` identifies the accepted Phase 10 release at merge
+commit `a2d200b`. Phase 11 decision work is now proposed as a free-first,
+invitation-only product pilot for at most ten registered users. The
+[Phase 11 kickoff](docs/PHASE11_PILOT_KICKOFF.md) and Proposed ADRs 0057–0062 cover
+pilot scope, onboarding, frontend strategy, privacy/feedback, support/cost limits,
+and staged rollout. No Phase 11 implementation, user invitation, frontend promotion,
+paid work, or cloud change is authorized by the kickoff.
 
 The current `3.0` lineage contains:
 

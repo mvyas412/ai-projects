@@ -1,11 +1,11 @@
 # Multimodal RAG production project plan
 
-> Living delivery plan — updated 2026-09-19
+> Living delivery plan — updated 2026-09-20
 
 This is the version-controlled planning source of truth for the journey from the
 preserved prototype through an operationally hardened learning platform. It defines sequence, scope,
 deliverables, dependencies, acceptance gates, risks, and current status for
-Phases 1–10.
+Phases 1–11.
 
 Use the [architecture handbook](architecture/ARCHITECTURE.md) for component
 boundaries and data flows. Use the active private phase context document for
@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 10 closure publication — accepted with all eight evidence scenarios passing |
+| Active milestone | Phase 11.0 decision kickoff — Proposed invitation-only pilot |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -67,6 +67,8 @@ Rules:
 | Phase 9 closure | PR #17 squash-merged into `main` at `ad4e7fb`; source and merged trees match |
 | Phase 9 release | Annotated `mm-rag-v9.0.0` identifies the verified documentation-kickoff closure commit and is immutable |
 | Phase 10 | Completed and accepted — all eight evidence scenarios pass |
+| Phase 10 release | Annotated `mm-rag-v10.0.0` peels to accepted merge `a2d200b`; immutable |
+| Phase 11 | Proposed — invitation-only free-first product pilot; ADRs 0057–0062 require approval |
 
 ## Delivery sequence and gates
 
@@ -81,6 +83,7 @@ flowchart LR
     p7 -->|"SLO and quality evidence"| p8["Phase 8<br/>Scalable production platform"]
     p8 -->|"operational production base"| p9["Phase 9<br/>Enterprise/commercial platform"]
     p9 -->|"governed product baseline"| p10["Phase 10<br/>Operational hardening"]
+    p10 -->|"recoverable operating baseline"| p11["Phase 11<br/>Invitation-only pilot"]
 ```
 
 Later-phase discovery may run early, but implementation must not bypass the
@@ -99,7 +102,8 @@ security and data-integrity gates on which it depends.
 | 7 | Measurable quality and operations | SLOs, traces, evaluations, alerts, and release gates | Completed and accepted |
 | 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Completed and accepted on the free-first Phoenix learning deployment |
 | 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Completed and accepted |
-| 10 | Operational hardening and lifecycle operations | Repeatable maintenance, recovery, retention, and cost-control evidence | In progress; ADRs 0051–0056 Accepted |
+| 10 | Operational hardening and lifecycle operations | Repeatable maintenance, recovery, retention, and cost-control evidence | Completed and accepted; released as `mm-rag-v10.0.0` |
+| 11 | Invitation-only product pilot | New users complete core workflows safely within privacy, reliability, support, and cost bounds | Proposed; ADRs 0057–0062 awaiting review |
 
 ## Phase 1 — working prototype
 
@@ -1128,6 +1132,40 @@ preview, approval, hold, and rollback controls.
 - Runbooks allow a new operator to deploy, diagnose, recover, rotate credentials, and
   retire the learning environment without reading private context.
 
+## Phase 11 — invitation-only product pilot
+
+**Status:** Proposed. ADRs 0057–0062 require explicit approval. No implementation,
+real-user invitation, external notification, frontend promotion, paid work, or cloud
+change is authorized.
+
+### Objective
+
+Validate that up to ten invited learning users can understand and safely use the
+accepted product while the existing free-first deployment, authorization, provenance,
+privacy, recovery, and cost boundaries remain intact.
+
+### Proposed milestones
+
+| Milestone | Deliverable | Status | Proposed completion gate |
+| --- | --- | --- | --- |
+| 11.0 | Scope, invariants, user-success evidence, and stop conditions | Proposed | ADR 0057 accepted |
+| 11.1 | Manual invitation, onboarding, access revocation, and support contract | Proposed | ADR 0058 accepted; synthetic lifecycle rehearsal passes |
+| 11.2 | Streamlit pilot journeys and accessibility | Proposed | ADR 0059 accepted; measured core journeys pass |
+| 11.3 | Consent, privacy, voluntary feedback, and evidence governance | Proposed | ADR 0060 accepted; no raw content/identity in evidence |
+| 11.4 | Reliability, support, capacity, maintenance, and cost boundary | Proposed | ADR 0061 accepted; free-first preflight and pause controls pass |
+| 11.5 | Internal → 2 → 5 → 10-user staged rollout and closure | Proposed | ADR 0062 accepted; every stage passes before expansion |
+
+### Proposed completion gate
+
+- Invited users can complete sign-in, upload, ingestion, chat, citation/evidence review,
+  feedback, and logout without developer intervention.
+- Authorization and tenant-isolation negatives, accessibility, non-disclosure, backup,
+  restore, and rollback remain green throughout the pilot.
+- Aggregate success, latency, error, queue, storage, support, and cost evidence stays
+  within accepted limits without retaining raw content or identities.
+- Pilot access can be paused or revoked safely, and closure produces an explicit accept,
+  remediate, or stop decision rather than an implicit public launch.
+
 ## Cross-phase workstreams
 
 | Workstream | Continuous responsibility |
@@ -1209,16 +1247,21 @@ preview, approval, hold, and rollback controls.
 | Dependency and supply-chain maintenance | 10.3 | Accepted — ADR 0054; implementation ready |
 | OCI capacity, monitoring, and cost guardrails | 10.4 | Accepted — ADR 0055; implementation ready |
 | Upgrade, rollback, and disaster-recovery automation | 10.5–10.6 | Accepted — ADR 0056; destructive/cloud actions remain separately gated |
+| Phase 11 pilot scope and evidence | 11.0 | Proposed — ADR 0057 |
+| Pilot onboarding, account lifecycle, and support | 11.1 | Proposed — ADR 0058 |
+| Pilot frontend and product experience | 11.2 | Proposed — ADR 0059; Streamlit recommended |
+| Pilot consent, privacy, and feedback | 11.3 | Proposed — ADR 0060 |
+| Pilot reliability, support, capacity, and cost | 11.4 | Proposed — ADR 0061 |
+| Pilot rollout, acceptance, and rollback | 11.5 | Proposed — ADR 0062 |
 
 ## Immediate next actions
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Run the full free repository gate and review the Phase 10 diff | Local implementation evidence |
-| 2 | Apply and verify the reviewed instance-principal IAM plan | Daily upload uses bucket-scoped create-only authority without a static API key |
-| 3 | Validate and enable the approved backup/capacity timers | Daily 05:30 Pacific backup and five-minute capacity sampling pass one supervised cycle |
-| 4 | Exercise one exact upgrade/rollback plan | Milestone 10.5 evidence; execution separately authorized |
-| 5 | Review a zero-cost temporary clean-host plan before any cloud creation | Milestone 10.6 recovery evidence; separate apply/delete approval required |
+| 1 | Review the Phase 11 objective and ADR 0057 | Approved pilot scope, invariants, and evidence boundary |
+| 2 | Review ADRs 0058–0060 | Approved onboarding, frontend, consent, privacy, and feedback contracts |
+| 3 | Review ADRs 0061–0062 | Approved reliability, cost, rollout, stop, and acceptance contracts |
+| 4 | After ADR approval, prepare an implementation plan and synthetic rehearsal only | No real user is invited before a separate implementation approval |
 
 ## Update protocol
 
