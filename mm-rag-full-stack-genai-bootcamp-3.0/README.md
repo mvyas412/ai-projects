@@ -121,8 +121,8 @@ are implemented; live invitations, frontend promotion, paid work, and cloud chan
 remain separately gated.
 The approved live defaults use Owner-controlled access, one-business-day best-effort
 support, 30-day post-closure aggregate evidence retention, staged 2/5/10-user gates,
-90% core-journey completion, and 100% safeguard passage. Live execution remains blocked
-pending approved consent copy and separate authorization to start the canary.
+90% core-journey completion, and 100% safeguard passage. Consent and bounded live
+execution are approved; the canary awaits two privately supplied participant identities.
 
 The current `3.0` lineage contains:
 

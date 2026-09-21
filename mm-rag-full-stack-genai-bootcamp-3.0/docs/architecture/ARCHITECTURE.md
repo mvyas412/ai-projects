@@ -210,7 +210,7 @@ flowchart LR
 | 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; encrypted OCI backup | Completed and accepted on the free-first Phoenix learning deployment |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Completed and accepted at the provider-neutral learning boundary; bounded Google Drive proof passes |
 | 10 | Operational hardening and lifecycle operations | Backup verification, retention orchestration, maintenance gates, capacity/cost controls, recovery automation | Existing OCI/Compose platform and content-free operational evidence | Completed and accepted; all eight evidence scenarios pass |
-| 11 | Invitation-only product pilot | Controlled onboarding, measured product journeys, voluntary feedback, support and staged rollout | Existing product and content-free/consented pilot evidence | In progress; synthetic boundary implemented, live rollout disabled |
+| 11 | Invitation-only product pilot | Controlled onboarding, measured product journeys, voluntary feedback, support and staged rollout | Existing product and content-free/consented pilot evidence | In progress; two-user canary authorized, private participants pending |
 
 ## Phase 1 — working prototype
 
@@ -958,8 +958,8 @@ The accepted live defaults designate the workspace Owner as access approver, tar
 best-effort support within one business day, retain aggregate evidence for 30 days after
 closure, and require staged 2/5/10-user gates over 3/7/14 days with 2/3/5 active users.
 Core-journey completion must reach 90%; every safeguard gate must remain at 100%.
-Live execution remains disabled until consent copy and a separate start authorization
-are approved.
+Consent and bounded live execution are approved. The two-user canary awaits exactly two
+participant identities supplied through a private operator workflow.
 
 ## Architecture invariants
 

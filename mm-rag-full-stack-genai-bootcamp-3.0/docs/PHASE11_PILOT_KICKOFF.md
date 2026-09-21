@@ -56,5 +56,5 @@ ADRs 0057–0062 are accepted. The versioned policy, synthetic rehearsal, eviden
 tests, and operating guide may be implemented. Real-user invitations, paid work,
 external messages, cloud changes, and Next.js promotion still require separate approval.
 Stage durations, active-user thresholds, support response target, evidence retention,
-and acceptance percentages are approved and versioned. Participant-facing consent copy
-and explicit live-execution authorization remain unresolved.
+acceptance percentages, participant-facing consent, and bounded live execution are
+approved and versioned. The canary awaits two privately supplied participant identities.

@@ -48,7 +48,7 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def validate_policy(payload: dict[str, Any]) -> dict[str, Any]:
-    """Fail closed when the approved synthetic-only pilot boundary drifts."""
+    """Fail closed when the approved bounded-pilot boundary drifts."""
     _reject_sensitive_fields(payload)
     if payload.get("schema") != POLICY_SCHEMA:
         raise ValueError("Unsupported Phase 11 policy schema")
@@ -80,6 +80,12 @@ def validate_policy(payload: dict[str, Any]) -> dict[str, Any]:
     ):
         raise ValueError("voluntary feedback categories must be non-empty strings")
     _require_values(
+        _mapping(payload, "consent"),
+        participant_notice="docs/PHASE11_PILOT_CONSENT.md",
+        status="accepted",
+        accepted_on="2026-09-20",
+    )
+    _require_values(
         _mapping(payload, "operations"),
         infrastructure_budget_usd=0,
         external_notifications=False,
@@ -97,8 +103,10 @@ def validate_policy(payload: dict[str, Any]) -> dict[str, Any]:
     _require_values(
         _mapping(payload, "rollout"),
         stages=stages,
-        live_stages_enabled=False,
+        live_stages_enabled=True,
         separate_live_authorization_required=True,
+        live_execution_authorized=True,
+        participant_identities_tracked=False,
     )
     _require_values(
         _mapping(payload, "acceptance"),
@@ -172,14 +180,16 @@ def evidence_gate(payload: dict[str, Any], policy: dict[str, Any]) -> dict[str, 
 
 
 def canary_readiness(policy: dict[str, Any]) -> dict[str, Any]:
-    """Report prerequisites without granting authority to start a live pilot."""
+    """Report readiness without persisting participant identities."""
     validate_policy(policy)
     return {
         "schema": EVIDENCE_SCHEMA,
         "status": "blocked",
         "target_stage": "canary-2",
         "approved_defaults_complete": True,
-        "blockers": ["approved-consent-copy", "explicit-live-execution-authorization"],
+        "consent_accepted": True,
+        "live_execution_authorized": True,
+        "blockers": ["two-private-participant-identities"],
     }
 
 

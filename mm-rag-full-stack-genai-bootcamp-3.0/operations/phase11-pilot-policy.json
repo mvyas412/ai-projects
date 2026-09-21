@@ -25,6 +25,11 @@
     "retention_days_after_closure": 30,
     "automatic_deletion": false
   },
+  "consent": {
+    "participant_notice": "docs/PHASE11_PILOT_CONSENT.md",
+    "status": "accepted",
+    "accepted_on": "2026-09-20"
+  },
   "operations": {
     "infrastructure_budget_usd": 0,
     "external_notifications": false,
@@ -40,8 +45,10 @@
       {"name": "cohort-5", "maximum_users": 5, "minimum_active_users": 3, "minimum_days": 7},
       {"name": "cohort-10", "maximum_users": 10, "minimum_active_users": 5, "minimum_days": 14}
     ],
-    "live_stages_enabled": false,
-    "separate_live_authorization_required": true
+    "live_stages_enabled": true,
+    "separate_live_authorization_required": true,
+    "live_execution_authorized": true,
+    "participant_identities_tracked": false
   },
   "acceptance": {
     "minimum_core_journey_completion_percent": 90,

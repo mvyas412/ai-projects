@@ -1,6 +1,6 @@
 # Phase 11 pilot participant notice and consent
 
-Status: **Proposed for participant review; not active**
+Status: **Accepted for the bounded Phase 11 pilot**
 
 ## Before you join
 

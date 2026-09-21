@@ -21,11 +21,11 @@ def policy() -> dict[str, object]:
     return json.loads(POLICY_PATH.read_text(encoding="utf-8"))
 
 
-def test_accepted_policy_preserves_synthetic_only_boundary(policy: dict[str, object]) -> None:
+def test_accepted_policy_preserves_bounded_live_boundary(policy: dict[str, object]) -> None:
     assert validate_policy(policy)["status"] == "valid"
     changed = json.loads(json.dumps(policy))
-    changed["rollout"]["live_stages_enabled"] = True
-    with pytest.raises(ValueError, match="live_stages_enabled"):
+    changed["rollout"]["participant_identities_tracked"] = True
+    with pytest.raises(ValueError, match="participant_identities_tracked"):
         validate_policy(changed)
 
 
@@ -43,16 +43,15 @@ def test_approved_live_defaults_are_frozen(policy: dict[str, object]) -> None:
     }
 
 
-def test_canary_readiness_remains_blocked_before_live_authorization(
+def test_canary_readiness_waits_only_for_private_participant_identities(
     policy: dict[str, object],
 ) -> None:
     result = canary_readiness(policy)
     assert result["status"] == "blocked"
     assert result["approved_defaults_complete"] is True
-    assert result["blockers"] == [
-        "approved-consent-copy",
-        "explicit-live-execution-authorization",
-    ]
+    assert result["consent_accepted"] is True
+    assert result["live_execution_authorized"] is True
+    assert result["blockers"] == ["two-private-participant-identities"]
 
 
 def test_synthetic_rehearsal_passes_complete_gate(policy: dict[str, object]) -> None:

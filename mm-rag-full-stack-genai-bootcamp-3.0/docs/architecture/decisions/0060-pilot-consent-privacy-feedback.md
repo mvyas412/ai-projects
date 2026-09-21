@@ -31,5 +31,5 @@ Allow voluntary ratings in usability, answer relevance, evidence clarity, perfor
 and accessibility categories. Pilot evidence remains aggregate and content-free.
 Aggregate pilot evidence is retained for 30 days after closure and then removed through
 a reviewed manual operation; automatic deletion and automatic retention apply remain
-disabled. Exact participant-facing consent copy must be approved before live collection.
+disabled. The participant-facing copy in `docs/PHASE11_PILOT_CONSENT.md` is accepted.
 The Owner handles manual access-removal and deletion requests.

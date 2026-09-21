@@ -1,6 +1,6 @@
 # Phase 11 pilot operations
 
-Status: **Foundation implemented; live rollout disabled**
+Status: **Canary authorized; awaiting two private participant identities**
 
 ## Purpose
 
@@ -42,10 +42,10 @@ content, provider identifiers, or secrets.
 - At least 90% of attempted core journeys must complete, while all safeguard gates must
   pass without exception.
 
-The readiness command remains blocked until participant-facing consent copy and an
-explicit live-execution authorization are recorded. Changing the JSON alone grants no
-authority to invite users or make external changes.
+The participant notice and bounded live execution are approved. The readiness command
+remains blocked until exactly two participant identities are supplied through a private
+operator workflow. Identities must never be placed in Git, aggregate evidence, logs, or
+command output.
 
-The proposed participant wording is maintained in
-[the Phase 11 pilot notice and consent](PHASE11_PILOT_CONSENT.md). It must be explicitly
-accepted before it can clear the readiness blocker or be presented to participants.
+The accepted participant wording is maintained in
+[the Phase 11 pilot notice and consent](PHASE11_PILOT_CONSENT.md).
