@@ -106,6 +106,7 @@ def validate_policy(payload: dict[str, Any]) -> dict[str, Any]:
         live_stages_enabled=True,
         separate_live_authorization_required=True,
         live_execution_authorized=True,
+        approved_participant_count=2,
         participant_identities_tracked=False,
     )
     _require_values(
@@ -189,7 +190,8 @@ def canary_readiness(policy: dict[str, Any]) -> dict[str, Any]:
         "approved_defaults_complete": True,
         "consent_accepted": True,
         "live_execution_authorized": True,
-        "blockers": ["two-private-participant-identities"],
+        "approved_participant_count": 2,
+        "blockers": ["participant-activation-and-consent"],
     }
 
 

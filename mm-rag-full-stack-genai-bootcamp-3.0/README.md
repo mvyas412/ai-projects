@@ -122,7 +122,8 @@ remain separately gated.
 The approved live defaults use Owner-controlled access, one-business-day best-effort
 support, 30-day post-closure aggregate evidence retention, staged 2/5/10-user gates,
 90% core-journey completion, and 100% safeguard passage. Consent and bounded live
-execution are approved; the canary awaits two privately supplied participant identities.
+execution are approved. Two participants are enrolled privately; the canary awaits
+their verification, credential setup, and consent.
 
 The current `3.0` lineage contains:
 

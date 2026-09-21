@@ -43,7 +43,7 @@ def test_approved_live_defaults_are_frozen(policy: dict[str, object]) -> None:
     }
 
 
-def test_canary_readiness_waits_only_for_private_participant_identities(
+def test_canary_readiness_waits_only_for_participant_activation_and_consent(
     policy: dict[str, object],
 ) -> None:
     result = canary_readiness(policy)
@@ -51,7 +51,8 @@ def test_canary_readiness_waits_only_for_private_participant_identities(
     assert result["approved_defaults_complete"] is True
     assert result["consent_accepted"] is True
     assert result["live_execution_authorized"] is True
-    assert result["blockers"] == ["two-private-participant-identities"]
+    assert result["approved_participant_count"] == 2
+    assert result["blockers"] == ["participant-activation-and-consent"]
 
 
 def test_synthetic_rehearsal_passes_complete_gate(policy: dict[str, object]) -> None:

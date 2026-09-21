@@ -68,7 +68,7 @@ Rules:
 | Phase 9 release | Annotated `mm-rag-v9.0.0` identifies the verified documentation-kickoff closure commit and is immutable |
 | Phase 10 | Completed and accepted — all eight evidence scenarios pass |
 | Phase 10 release | Annotated `mm-rag-v10.0.0` peels to accepted merge `a2d200b`; immutable |
-| Phase 11 | In progress — synthetic gate passes; two-user canary authorized and awaiting private participants |
+| Phase 11 | In progress — two participants enrolled privately; activation and consent pending |
 
 ## Delivery sequence and gates
 
@@ -103,7 +103,7 @@ security and data-integrity gates on which it depends.
 | 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Completed and accepted on the free-first Phoenix learning deployment |
 | 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Completed and accepted |
 | 10 | Operational hardening and lifecycle operations | Repeatable maintenance, recovery, retention, and cost-control evidence | Completed and accepted; released as `mm-rag-v10.0.0` |
-| 11 | Invitation-only product pilot | New users complete core workflows safely within privacy, reliability, support, and cost bounds | In progress; two-user canary authorized and awaiting private participants |
+| 11 | Invitation-only product pilot | New users complete core workflows safely within privacy, reliability, support, and cost bounds | In progress; bounded Auth0 enrollment complete, activation/consent pending |
 
 ## Phase 1 — working prototype
 
@@ -1253,15 +1253,15 @@ privacy, recovery, and cost boundaries remain intact.
 | Pilot frontend and product experience | 11.2 | Accepted — ADR 0059; Streamlit remains authoritative |
 | Pilot consent, privacy, and feedback | 11.3 | Accepted — ADR 0060; consent copy accepted; 30-day aggregate retention |
 | Pilot reliability, support, capacity, and cost | 11.4 | Accepted — ADR 0061; free-first and immediate safety pause |
-| Pilot rollout, acceptance, and rollback | 11.5 | Accepted — ADR 0062; two-user canary authorized; participant identities pending |
+| Pilot rollout, acceptance, and rollback | 11.5 | Accepted — ADR 0062; two participants enrolled; activation/consent pending |
 
 ## Immediate next actions
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
 | 1 | Run and review the synthetic Phase 11 rehearsal/evidence gate | All required internal scenarios pass without user data or provider calls |
-| 2 | Receive exactly two participant identities privately | Identities remain outside Git, logs, and aggregate evidence |
-| 3 | Start the authorized two-user canary | Consent shown before participation; three-day gate begins after both become active |
+| 2 | Complete participant verification, password setup, and consent | Both accounts active without credentials or identities entering evidence |
+| 3 | Start the authorized two-user canary | Three-day gate begins after both participants become active |
 
 ## Update protocol
 

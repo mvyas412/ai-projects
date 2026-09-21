@@ -42,10 +42,17 @@ content, provider identifiers, or secrets.
 - At least 90% of attempted core journeys must complete, while all safeguard gates must
   pass without exception.
 
-The participant notice and bounded live execution are approved. The readiness command
-remains blocked until exactly two participant identities are supplied through a private
-operator workflow. Identities must never be placed in Git, aggregate evidence, logs, or
-command output.
+The participant notice and bounded live execution are approved. Exactly two participant
+identities were supplied through the private operator workflow and are not present in
+Git or aggregate evidence. Auth0 public database signup is disabled, and Google social
+login is disabled for MM-RAG, leaving the manually managed database accounts as the
+pilot entry path. The readiness command remains blocked until participant activation
+and consent are complete.
+
+One pre-existing account is active. The second account was created with an undisclosed
+one-time random credential; Auth0 sent verification and password-reset messages so the
+participant can establish their own credential. Both accounts were sent verification
+messages. No credential was displayed or retained by the operator.
 
 The accepted participant wording is maintained in
 [the Phase 11 pilot notice and consent](PHASE11_PILOT_CONSENT.md).

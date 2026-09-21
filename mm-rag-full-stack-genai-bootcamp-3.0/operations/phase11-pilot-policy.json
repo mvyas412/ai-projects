@@ -48,6 +48,7 @@
     "live_stages_enabled": true,
     "separate_live_authorization_required": true,
     "live_execution_authorized": true,
+    "approved_participant_count": 2,
     "participant_identities_tracked": false
   },
   "acceptance": {
