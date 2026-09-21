@@ -21,6 +21,7 @@ def run_restore_drill(
     compose_file: Path,
     work_directory: Path,
     expected_migration: str,
+    migrate_forward: bool = False,
 ) -> dict[str, Any]:
     """Restore into a unique no-public-port Compose project and remove it afterward."""
     for path in (bundle, identity_file, environment_file, compose_file):
@@ -87,6 +88,13 @@ def run_restore_drill(
         )
         if source_counts != restored_counts:
             raise ValueError("Restored aggregate PostgreSQL counts do not match the backup")
+        if migrate_forward:
+            _run_with_input(
+                _runtime_role_bootstrap_command(prefix),
+                environment,
+                _runtime_role_bootstrap_sql(),
+            )
+            _run(_forward_migration_command(prefix), environment)
         migration = _capture(
             [*prefix, "run", "--rm", "api", "uv", "run", "--no-sync", "alembic", "current"],
             environment,
@@ -169,6 +177,49 @@ def _dependency_start_command(prefix: list[str]) -> list[str]:
     ]
 
 
+def _forward_migration_command(prefix: list[str]) -> list[str]:
+    return [*prefix, "run", "--rm", "api", "uv", "run", "--no-sync", "alembic", "upgrade", "head"]
+
+
+def _runtime_role_bootstrap_command(prefix: list[str]) -> list[str]:
+    return [
+        *prefix,
+        "exec",
+        "-T",
+        "postgres",
+        "sh",
+        "-c",
+        'PGPASSWORD="$POSTGRES_PASSWORD" psql -v ON_ERROR_STOP=1 '
+        '-U "$POSTGRES_USER" -d "$POSTGRES_DB"',
+    ]
+
+
+def _runtime_role_bootstrap_sql() -> str:
+    roles = ("mm_rag_api", "mm_rag_worker", "mm_rag_dispatcher", "mm_rag_operations")
+    statements = []
+    for role in roles:
+        statements.append(
+            "DO $mm_rag$ BEGIN "
+            f"IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{role}') THEN "
+            f"CREATE ROLE {role} NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE "
+            "NOINHERIT NOBYPASSRLS; "
+            "END IF; END $mm_rag$;"
+        )
+    return "\n".join(statements) + "\n"
+
+
+def _run_with_input(command: list[str], environment: dict[str, str], value: str) -> None:
+    subprocess.run(
+        command,
+        check=True,
+        env=environment,
+        input=value.encode(),
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        timeout=300,
+    )
+
+
 def _capture(command: list[str], environment: dict[str, str]) -> str:
     result = subprocess.run(
         command,
@@ -204,6 +255,7 @@ def _parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--work-directory", type=Path, required=True)
     parser.add_argument("--expected-migration", required=True)
+    parser.add_argument("--migrate-forward", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     return parser
 
@@ -217,6 +269,7 @@ def main() -> None:
         compose_file=args.compose_file,
         work_directory=args.work_directory,
         expected_migration=args.expected_migration,
+        migrate_forward=args.migrate_forward,
     )
     encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"
     args.output.parent.mkdir(mode=0o700, parents=True, exist_ok=True)

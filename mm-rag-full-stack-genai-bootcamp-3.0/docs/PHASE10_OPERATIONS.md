@@ -123,6 +123,12 @@ resources. Secrets are supplied only at runtime, never through Terraform, cloud-
 logs or evidence. Remove temporary resources only after recovery evidence is captured
 and their exact deletion plan is approved.
 
+When a verified backup predates the target release migration, use the restore drill's
+explicit `--migrate-forward` option. A fresh PostgreSQL cluster has no global MM-RAG
+roles because `pg_dump` intentionally excludes them; the forward path recreates only
+the four accepted NOLOGIN least-privilege roles before running the current immutable
+image's `alembic upgrade head`. The option is never implicit and does not reverse schema.
+
 Validate an ignored exact plan first:
 
 ```bash
@@ -154,5 +160,7 @@ The OCI learning host has passed instance-principal encrypted upload, isolated r
 healthy capacity sampling, and an immutable upgrade → application rollback → roll-forward
 drill. Daily backup verification and five-minute capacity sampling are enabled. The
 worker, paid acceptance, automatic retention apply, auto-scaling, and paid capacity remain
-disabled. Phase 10 closure still requires one authenticated preview-only retention report
-and the separately approved temporary clean-host recovery drill.
+disabled. Authenticated preview-only retention and the separately approved temporary
+clean-host recovery drill pass; the temporary host and boot volume were removed through
+an exact approved destroy plan. All eight content-free evidence scenarios pass, and only
+the explicit Phase 10 acceptance decision remains.

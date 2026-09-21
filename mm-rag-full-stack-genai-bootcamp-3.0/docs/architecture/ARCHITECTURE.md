@@ -194,7 +194,7 @@ flowchart LR
     p7["Phase 7<br/>Evaluation/observability<br/>Accepted"] -->
     p8["Phase 8<br/>Scalable platform<br/>Accepted"] -->
     p9["Phase 9<br/>Enterprise platform<br/>Accepted"] -->
-    p10["Phase 10<br/>Operational hardening<br/>In progress"]
+    p10["Phase 10<br/>Operational hardening<br/>Validated / acceptance pending"]
 ```
 
 | Phase | Capability | Main technologies/components | Stores | Status |
@@ -208,7 +208,7 @@ flowchart LR
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Local telemetry and protected evaluation evidence | Completed and accepted |
 | 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; encrypted OCI backup | Completed and accepted on the free-first Phoenix learning deployment |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Completed and accepted at the provider-neutral learning boundary; bounded Google Drive proof passes |
-| 10 | Operational hardening and lifecycle operations | Backup verification, retention orchestration, maintenance gates, capacity/cost controls, recovery automation | Existing OCI/Compose platform and content-free operational evidence | In progress; ADRs 0051–0056 Accepted |
+| 10 | Operational hardening and lifecycle operations | Backup verification, retention orchestration, maintenance gates, capacity/cost controls, recovery automation | Existing OCI/Compose platform and content-free operational evidence | Implementation and all eight evidence scenarios complete; acceptance pending |
 
 ## Phase 1 — working prototype
 
@@ -879,9 +879,9 @@ reconcile commercial usage.
 
 ## Phase 10 — operational hardening and lifecycle operations
 
-**Status:** ADRs 0051–0056 Accepted on 2026-09-20; scheduled backup/capacity and the
-reversible release drill pass. Authenticated retention-preview and temporary clean-host
-recovery evidence remain.
+**Status:** ADRs 0051–0056 Accepted on 2026-09-20; implementation and validation are
+complete, including authenticated retention preview and a temporary clean-host recovery
+drill. All eight content-free scenarios pass; explicit acceptance remains.
 Automatic retention apply, unattended upgrades, destructive host actions, temporary
 cloud resources, paid capacity/services, and production-SLA claims remain separately gated.
 
@@ -978,7 +978,7 @@ backup name, host coordinate, queue message, or provider resource identifier.
 | Automatic retention | Owner/admin reminder, token-safe preview report and durable preview audit implemented under ADR 0053; automatic apply remains disabled |
 | Dependency maintenance | Monthly grouped uv/npm/Actions/container candidates implemented under ADR 0054; first lockfile/test/scan/SBOM/provenance/ARM64/signing/rollback gate passes with no auto-merge or paid acceptance |
 | OCI capacity/cost guardrails | Five-minute collector under ADR 0055 is enabled; live free-first inventory and host metrics are healthy, 15-minute queue and 14-day certificate thresholds pass, and no auto-scale or paid capacity is authorized |
-| Upgrade/rollback/DR automation | Exact-hash executor under ADR 0056 passes upgrade, forward-schema-safe rollback, and roll-forward; separately approved clean-host proof remains pending |
+| Upgrade/rollback/DR automation | Exact-hash executor under ADR 0056 passes upgrade, forward-schema-safe rollback, roll-forward, and clean-host recovery with runtime-only secrets and verified cleanup |
 
 Accepted Phase 2 decisions are recorded in
 [`docs/architecture/decisions`](decisions/):

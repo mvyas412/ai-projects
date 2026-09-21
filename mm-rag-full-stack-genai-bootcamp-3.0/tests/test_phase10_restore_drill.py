@@ -4,7 +4,13 @@ from pathlib import Path
 
 import pytest
 
-from scripts.phase10_restore_drill import _counts, _dependency_start_command
+from scripts.phase10_restore_drill import (
+    _counts,
+    _dependency_start_command,
+    _forward_migration_command,
+    _runtime_role_bootstrap_command,
+    _runtime_role_bootstrap_sql,
+)
 
 ROOT = Path(__file__).parents[1]
 
@@ -42,3 +48,29 @@ def test_restore_waits_for_dependency_health_before_import() -> None:
         "qdrant",
         "seaweedfs",
     ]
+
+
+def test_restore_forward_migration_is_explicit_and_uses_current_image() -> None:
+    command = _forward_migration_command(["docker", "compose"])
+    assert command == [
+        "docker",
+        "compose",
+        "run",
+        "--rm",
+        "api",
+        "uv",
+        "run",
+        "--no-sync",
+        "alembic",
+        "upgrade",
+        "head",
+    ]
+
+
+def test_restore_forward_migration_bootstraps_cluster_roles() -> None:
+    command = _runtime_role_bootstrap_command(["docker", "compose"])
+    assert command[:5] == ["docker", "compose", "exec", "-T", "postgres"]
+    sql = _runtime_role_bootstrap_sql()
+    for role in ("mm_rag_api", "mm_rag_worker", "mm_rag_dispatcher", "mm_rag_operations"):
+        assert f"CREATE ROLE {role}" in sql
+    assert "NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS" in sql
