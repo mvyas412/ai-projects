@@ -25,9 +25,9 @@ rollback gates at every stage. End with an explicit accept, remediate, or stop d
 
 ## Accepted decision
 
-Use the ordered internal, two-user, five-user, and ten-user stages. Only internal
-synthetic rehearsal is enabled initially. Live duration and minimum-active-user values
-remain unresolved and require separate approval before invitations. Every stage must
-preserve safety, authorization, privacy, integrity, free-first cost, backup, and
-rollback gates; Phase 11 closes only through an explicit accept, remediate, or stop
-decision.
+Use the ordered internal, two-user, five-user, and ten-user stages. The two-user canary
+runs at least three days with both users active; the five-user stage runs at least seven
+days with three active users; the ten-user stage runs at least fourteen days with five
+active users. Only internal synthetic rehearsal is enabled initially. Every stage must
+preserve safety, authorization, privacy, integrity, free-first cost, backup, and rollback
+gates; Phase 11 closes only through an explicit accept, remediate, or stop decision.

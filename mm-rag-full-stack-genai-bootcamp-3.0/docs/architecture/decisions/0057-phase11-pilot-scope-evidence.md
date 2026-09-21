@@ -29,3 +29,7 @@ The pilot is invitation-only with ten registered users as a hard maximum. Safety
 authorization, privacy, integrity, cost, and recovery gates must pass completely.
 Exact live user-success thresholds remain a separately reviewed rollout value; the
 initial implementation is limited to content-free synthetic rehearsal.
+
+The approved acceptance defaults require at least 90% completion of attempted core
+journeys and 100% passage of authorization, privacy, integrity, backup, rollback, and
+cost safeguards.

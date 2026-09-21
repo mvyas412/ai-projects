@@ -27,5 +27,5 @@ not add an email, ticketing, or notification provider for the initial pilot.
 
 Use manually approved and revocable access through existing Auth0. Participants begin
 in a personal workspace. Support remains an in-application/manual operator path with no
-new provider; the named approver and response-time promise must be fixed before live
-invitations begin.
+new provider. The workspace Owner approves and revokes access. The learning-pilot
+support target is best effort within one business day, with no emergency guarantee.

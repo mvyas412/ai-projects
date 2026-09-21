@@ -55,5 +55,6 @@ measured pilot evidence demonstrates a need.
 ADRs 0057–0062 are accepted. The versioned policy, synthetic rehearsal, evidence gate,
 tests, and operating guide may be implemented. Real-user invitations, paid work,
 external messages, cloud changes, and Next.js promotion still require separate approval.
-Live stage durations, active-user thresholds, support response targets, consent text,
-and evidence-retention duration remain unresolved.
+Stage durations, active-user thresholds, support response target, evidence retention,
+and acceptance percentages are approved and versioned. Participant-facing consent copy
+and explicit live-execution authorization remain unresolved.

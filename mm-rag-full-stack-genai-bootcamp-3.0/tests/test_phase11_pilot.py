@@ -5,7 +5,12 @@ from pathlib import Path
 
 import pytest
 
-from scripts.phase11_pilot import evidence_gate, synthetic_rehearsal, validate_policy
+from scripts.phase11_pilot import (
+    canary_readiness,
+    evidence_gate,
+    synthetic_rehearsal,
+    validate_policy,
+)
 
 ROOT = Path(__file__).parents[1]
 POLICY_PATH = ROOT / "operations" / "phase11-pilot-policy.json"
@@ -22,6 +27,32 @@ def test_accepted_policy_preserves_synthetic_only_boundary(policy: dict[str, obj
     changed["rollout"]["live_stages_enabled"] = True
     with pytest.raises(ValueError, match="live_stages_enabled"):
         validate_policy(changed)
+
+
+def test_approved_live_defaults_are_frozen(policy: dict[str, object]) -> None:
+    assert policy["operations"]["access_approver_role"] == "owner"
+    assert policy["evidence"]["retention_days_after_closure"] == 30
+    assert policy["rollout"]["stages"][1:] == [
+        {"name": "canary-2", "maximum_users": 2, "minimum_active_users": 2, "minimum_days": 3},
+        {"name": "cohort-5", "maximum_users": 5, "minimum_active_users": 3, "minimum_days": 7},
+        {"name": "cohort-10", "maximum_users": 10, "minimum_active_users": 5, "minimum_days": 14},
+    ]
+    assert policy["acceptance"] == {
+        "minimum_core_journey_completion_percent": 90,
+        "required_safeguard_pass_percent": 100,
+    }
+
+
+def test_canary_readiness_remains_blocked_before_live_authorization(
+    policy: dict[str, object],
+) -> None:
+    result = canary_readiness(policy)
+    assert result["status"] == "blocked"
+    assert result["approved_defaults_complete"] is True
+    assert result["blockers"] == [
+        "approved-consent-copy",
+        "explicit-live-execution-authorization",
+    ]
 
 
 def test_synthetic_rehearsal_passes_complete_gate(policy: dict[str, object]) -> None:

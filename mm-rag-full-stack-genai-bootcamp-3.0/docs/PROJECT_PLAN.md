@@ -1249,18 +1249,18 @@ privacy, recovery, and cost boundaries remain intact.
 | OCI capacity, monitoring, and cost guardrails | 10.4 | Accepted — ADR 0055; implementation ready |
 | Upgrade, rollback, and disaster-recovery automation | 10.5–10.6 | Accepted — ADR 0056; destructive/cloud actions remain separately gated |
 | Phase 11 pilot scope and evidence | 11.0 | Accepted — ADR 0057; synthetic policy/gate implemented |
-| Pilot onboarding, account lifecycle, and support | 11.1 | Accepted — ADR 0058; live approver/response target TBD |
+| Pilot onboarding, account lifecycle, and support | 11.1 | Accepted — ADR 0058; Owner approval and one-business-day best effort |
 | Pilot frontend and product experience | 11.2 | Accepted — ADR 0059; Streamlit remains authoritative |
-| Pilot consent, privacy, and feedback | 11.3 | Accepted — ADR 0060; live consent/retention duration TBD |
+| Pilot consent, privacy, and feedback | 11.3 | Accepted — ADR 0060; 30-day post-closure aggregate retention; consent copy TBD |
 | Pilot reliability, support, capacity, and cost | 11.4 | Accepted — ADR 0061; free-first and immediate safety pause |
-| Pilot rollout, acceptance, and rollback | 11.5 | Accepted — ADR 0062; internal stage enabled, live thresholds TBD |
+| Pilot rollout, acceptance, and rollback | 11.5 | Accepted — ADR 0062; numeric stage/acceptance gates fixed; live execution disabled |
 
 ## Immediate next actions
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
 | 1 | Run and review the synthetic Phase 11 rehearsal/evidence gate | All required internal scenarios pass without user data or provider calls |
-| 2 | Review unresolved live-pilot values | Approver, consent, support, retention, duration, active-user, and acceptance values approved |
+| 2 | Review the drafted participant-facing consent copy | Plain-language scope, privacy, support, deletion, and pilot limits approved |
 | 3 | Authorize a bounded two-user canary separately | No real user is invited before explicit authorization |
 
 ## Update protocol

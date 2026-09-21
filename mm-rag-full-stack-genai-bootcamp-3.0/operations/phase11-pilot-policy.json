@@ -22,20 +22,29 @@
       "performance",
       "usability"
     ],
-    "retention_days": null
+    "retention_days_after_closure": 30,
+    "automatic_deletion": false
   },
   "operations": {
     "infrastructure_budget_usd": 0,
     "external_notifications": false,
     "automatic_retention_apply": false,
     "paid_acceptance": false,
-    "support_response_target_hours": null
+    "access_approver_role": "owner",
+    "support_response_target_business_days": 1
   },
   "rollout": {
-    "stages": ["internal-rehearsal", "canary-2", "cohort-5", "cohort-10"],
+    "stages": [
+      {"name": "internal-rehearsal", "maximum_users": 0, "minimum_active_users": 0, "minimum_days": 0},
+      {"name": "canary-2", "maximum_users": 2, "minimum_active_users": 2, "minimum_days": 3},
+      {"name": "cohort-5", "maximum_users": 5, "minimum_active_users": 3, "minimum_days": 7},
+      {"name": "cohort-10", "maximum_users": 10, "minimum_active_users": 5, "minimum_days": 14}
+    ],
     "live_stages_enabled": false,
-    "live_stage_duration_days": null,
-    "live_stage_minimum_active_users": null,
     "separate_live_authorization_required": true
+  },
+  "acceptance": {
+    "minimum_core_journey_completion_percent": 90,
+    "required_safeguard_pass_percent": 100
   }
 }

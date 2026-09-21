@@ -30,5 +30,5 @@ capacity, or cost gates fail.
 Keep the existing free-first topology and no production SLA. Authorization, privacy,
 integrity, secret, cross-tenant, unexpected-cost, and recovery failures pause the pilot
 immediately. Ordinary performance issues are remediated within the active stage. Any
-paid-capacity review and support-time promise require a separate decision supported by
-measured evidence.
+paid-capacity review requires a separate decision supported by measured evidence. The
+support target is best effort within one business day.

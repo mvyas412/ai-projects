@@ -23,6 +23,7 @@ Generate ignored synthetic evidence and validate it:
 ```bash
 make phase11-rehearsal
 make phase11-evidence-gate
+make phase11-canary-readiness
 ```
 
 The contract gate enumerates login/logout, personal-workspace defaulting, upload/progress/cancel/retry,
@@ -30,10 +31,21 @@ library readiness, grounded chat/citations, structured feedback, access revocati
 support/pause handling, and backup/rollback readiness. Evidence contains no identities,
 content, provider identifiers, or secrets.
 
-## Deliberately unresolved live-pilot values
+## Approved live-pilot defaults
 
-Before a two-user canary, separately approve the stage duration/minimum active-user
-counts, support response target, feedback/evidence retention duration, exact consent
-copy, named access approver, and the live acceptance rubric. A live-stage policy change
-must be reviewed together with an invitation plan; changing the JSON alone grants no
+- The workspace Owner approves and revokes access.
+- Support is best effort within one business day.
+- Aggregate evidence is retained for 30 days after closure and removed manually after
+  review; automatic deletion remains disabled.
+- Stage gates are 2 users/3 days/2 active, 5 users/7 days/3 active, and
+  10 users/14 days/5 active.
+- At least 90% of attempted core journeys must complete, while all safeguard gates must
+  pass without exception.
+
+The readiness command remains blocked until participant-facing consent copy and an
+explicit live-execution authorization are recorded. Changing the JSON alone grants no
 authority to invite users or make external changes.
+
+The proposed participant wording is maintained in
+[the Phase 11 pilot notice and consent](PHASE11_PILOT_CONSENT.md). It must be explicitly
+accepted before it can clear the readiness blocker or be presented to participants.

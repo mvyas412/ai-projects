@@ -29,5 +29,7 @@ disabled until a separate policy decision.
 
 Allow voluntary ratings in usability, answer relevance, evidence clarity, performance,
 and accessibility categories. Pilot evidence remains aggregate and content-free.
-Exact retention duration, consent text, and the manual access/removal request procedure
-must be approved before live collection; automatic retention apply remains disabled.
+Aggregate pilot evidence is retained for 30 days after closure and then removed through
+a reviewed manual operation; automatic deletion and automatic retention apply remain
+disabled. Exact participant-facing consent copy must be approved before live collection.
+The Owner handles manual access-removal and deletion requests.

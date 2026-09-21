@@ -954,6 +954,13 @@ identities, or provider identifiers enter pilot evidence. Public signup, externa
 notifications, Next.js promotion, paid capacity, and production-SLA claims remain out
 of scope until separately decided.
 
+The accepted live defaults designate the workspace Owner as access approver, target
+best-effort support within one business day, retain aggregate evidence for 30 days after
+closure, and require staged 2/5/10-user gates over 3/7/14 days with 2/3/5 active users.
+Core-journey completion must reach 90%; every safeguard gate must remain at 100%.
+Live execution remains disabled until consent copy and a separate start authorization
+are approved.
+
 ## Architecture invariants
 
 - FastAPI, never the frontend, is the authorization boundary.

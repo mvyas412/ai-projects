@@ -71,7 +71,8 @@ def validate_policy(payload: dict[str, Any]) -> dict[str, Any]:
         aggregate_only=True,
         raw_content_allowed=False,
         identities_allowed=False,
-        retention_days=None,
+        retention_days_after_closure=30,
+        automatic_deletion=False,
     )
     categories = evidence.get("voluntary_feedback_categories")
     if not isinstance(categories, list) or not categories or not all(
@@ -84,15 +85,25 @@ def validate_policy(payload: dict[str, Any]) -> dict[str, Any]:
         external_notifications=False,
         automatic_retention_apply=False,
         paid_acceptance=False,
-        support_response_target_hours=None,
+        access_approver_role="owner",
+        support_response_target_business_days=1,
     )
+    stages = [
+        {"name": "internal-rehearsal", "maximum_users": 0, "minimum_active_users": 0, "minimum_days": 0},
+        {"name": "canary-2", "maximum_users": 2, "minimum_active_users": 2, "minimum_days": 3},
+        {"name": "cohort-5", "maximum_users": 5, "minimum_active_users": 3, "minimum_days": 7},
+        {"name": "cohort-10", "maximum_users": 10, "minimum_active_users": 5, "minimum_days": 14},
+    ]
     _require_values(
         _mapping(payload, "rollout"),
-        stages=["internal-rehearsal", "canary-2", "cohort-5", "cohort-10"],
+        stages=stages,
         live_stages_enabled=False,
-        live_stage_duration_days=None,
-        live_stage_minimum_active_users=None,
         separate_live_authorization_required=True,
+    )
+    _require_values(
+        _mapping(payload, "acceptance"),
+        minimum_core_journey_completion_percent=90,
+        required_safeguard_pass_percent=100,
     )
     return {
         "schema": POLICY_SCHEMA,
@@ -160,6 +171,18 @@ def evidence_gate(payload: dict[str, Any], policy: dict[str, Any]) -> dict[str, 
     }
 
 
+def canary_readiness(policy: dict[str, Any]) -> dict[str, Any]:
+    """Report prerequisites without granting authority to start a live pilot."""
+    validate_policy(policy)
+    return {
+        "schema": EVIDENCE_SCHEMA,
+        "status": "blocked",
+        "target_stage": "canary-2",
+        "approved_defaults_complete": True,
+        "blockers": ["approved-consent-copy", "explicit-live-execution-authorization"],
+    }
+
+
 def _mapping(payload: dict[str, Any], key: str) -> dict[str, Any]:
     value = payload.get(key)
     if not isinstance(value, dict):
@@ -197,7 +220,7 @@ def _payload_hash(payload: object) -> str:
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Validate Phase 11 pilot contracts")
-    parser.add_argument("command", choices=("policy", "rehearse", "gate"))
+    parser.add_argument("command", choices=("policy", "rehearse", "gate", "canary-readiness"))
     parser.add_argument("input", nargs="?", type=Path)
     parser.add_argument("--policy", type=Path, default=Path("operations/phase11-pilot-policy.json"))
     parser.add_argument("--output", type=Path)
@@ -211,6 +234,8 @@ def main() -> None:
         result = validate_policy(policy)
     elif args.command == "rehearse":
         result = synthetic_rehearsal(policy)
+    elif args.command == "canary-readiness":
+        result = canary_readiness(policy)
     else:
         if args.input is None:
             raise SystemExit("gate requires an evidence JSON path")
