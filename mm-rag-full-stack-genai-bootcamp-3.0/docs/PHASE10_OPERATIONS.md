@@ -163,4 +163,4 @@ worker, paid acceptance, automatic retention apply, auto-scaling, and paid capac
 disabled. Authenticated preview-only retention and the separately approved temporary
 clean-host recovery drill pass; the temporary host and boot volume were removed through
 an exact approved destroy plan. All eight content-free evidence scenarios pass, and only
-the explicit Phase 10 acceptance decision remains.
+the closure publication remains. Phase 10 is accepted.

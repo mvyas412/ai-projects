@@ -1,4 +1,4 @@
-# Multimodal RAG Production — Phase 10 validation complete
+# Multimodal RAG Production — Phase 10 accepted
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
@@ -106,8 +106,8 @@ use a bucket-scoped OCI instance principal with no static host key. The 05:30 PT
 and five-minute capacity timers pass supervised activation. Signed-image upgrade,
 forward-schema-safe rollback, and roll-forward pass at migration `20260919_0019`.
 Authenticated preview-only retention and separately approved clean-host recovery evidence
-now pass. The content-free Phase 10 gate reports all eight required scenarios passing;
-final acceptance remains an explicit user decision.
+now pass. The content-free Phase 10 gate reports all eight required scenarios passing,
+and Phase 10 is accepted.
 Automatic retention apply, unattended
 upgrades, paid capacity, and production-SLA claims remain disabled.
 
@@ -222,7 +222,7 @@ closed without candidate promotion. Phase 6
 Milestones 6.0–6.5 provide the deterministic visual/table corpus, immutable local
 extraction and visual retrieval, normalized tables, exact calculation, and
 backend-mediated evidence inspection; `visual-table-v1` is the accepted default.
-Phases 7–9 are accepted. Phase 10 implementation and validation are complete under
+Phases 7–10 are accepted. Phase 10 implementation and validation are complete under
 accepted ADRs 0051–0056; all eight content-free evidence scenarios pass. Automatic
 retention apply, other destructive actions, and paid boundaries remain separately gated. Use the
 [Phase 10 operations handbook](docs/PHASE10_OPERATIONS.md) for the exact workflow.

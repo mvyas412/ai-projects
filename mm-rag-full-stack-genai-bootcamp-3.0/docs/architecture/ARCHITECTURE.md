@@ -194,7 +194,7 @@ flowchart LR
     p7["Phase 7<br/>Evaluation/observability<br/>Accepted"] -->
     p8["Phase 8<br/>Scalable platform<br/>Accepted"] -->
     p9["Phase 9<br/>Enterprise platform<br/>Accepted"] -->
-    p10["Phase 10<br/>Operational hardening<br/>Validated / acceptance pending"]
+    p10["Phase 10<br/>Operational hardening<br/>Completed / accepted"]
 ```
 
 | Phase | Capability | Main technologies/components | Stores | Status |
@@ -208,7 +208,7 @@ flowchart LR
 | 7 | Measurable quality and reliability | OpenTelemetry-compatible boundary, eval harness, dashboards | Local telemetry and protected evaluation evidence | Completed and accepted |
 | 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; encrypted OCI backup | Completed and accepted on the free-first Phoenix learning deployment |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Completed and accepted at the provider-neutral learning boundary; bounded Google Drive proof passes |
-| 10 | Operational hardening and lifecycle operations | Backup verification, retention orchestration, maintenance gates, capacity/cost controls, recovery automation | Existing OCI/Compose platform and content-free operational evidence | Implementation and all eight evidence scenarios complete; acceptance pending |
+| 10 | Operational hardening and lifecycle operations | Backup verification, retention orchestration, maintenance gates, capacity/cost controls, recovery automation | Existing OCI/Compose platform and content-free operational evidence | Completed and accepted; all eight evidence scenarios pass |
 
 ## Phase 1 — working prototype
 
@@ -881,7 +881,7 @@ reconcile commercial usage.
 
 **Status:** ADRs 0051–0056 Accepted on 2026-09-20; implementation and validation are
 complete, including authenticated retention preview and a temporary clean-host recovery
-drill. All eight content-free scenarios pass; explicit acceptance remains.
+drill. All eight content-free scenarios pass, and Phase 10 is accepted.
 Automatic retention apply, unattended upgrades, destructive host actions, temporary
 cloud resources, paid capacity/services, and production-SLA claims remain separately gated.
 

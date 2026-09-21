@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 10 acceptance decision — implementation and all eight evidence scenarios pass |
+| Active milestone | Phase 10 closure publication — accepted with all eight evidence scenarios passing |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -66,7 +66,7 @@ Rules:
 | Phase 9 | Completed and accepted — ADRs 0043–0050, provider-neutral milestones 9.0–9.6, and bounded Google Drive OAuth/propagation proofs pass |
 | Phase 9 closure | PR #17 squash-merged into `main` at `ad4e7fb`; source and merged trees match |
 | Phase 9 release | Annotated `mm-rag-v9.0.0` identifies the verified documentation-kickoff closure commit and is immutable |
-| Phase 10 | Implementation and validation complete — all eight evidence scenarios pass; explicit acceptance pending |
+| Phase 10 | Completed and accepted — all eight evidence scenarios pass |
 
 ## Delivery sequence and gates
 
@@ -1089,8 +1089,8 @@ commercial accounting, and compliance-grade administration.
 
 ## Phase 10 — operational hardening and lifecycle operations
 
-**Status:** Implementation and validation complete; explicit acceptance pending. ADRs
-0051–0056 were accepted on 2026-09-20 with their free-first defaults. Automatic
+**Status:** Completed and accepted. ADRs 0051–0056 were accepted on 2026-09-20 with
+their free-first defaults, and all eight evidence scenarios pass. Automatic
 retention apply, unattended upgrades, destructive host actions, temporary cloud
 resources, paid services/capacity, and production-SLA claims remain separately gated.
 
@@ -1111,7 +1111,7 @@ preview, approval, hold, and rollback controls.
 | 10.3 | Dependency, vulnerability, and supply-chain maintenance | First candidate passed | Lockfiles, tests, vulnerability scan, SBOM, provenance, ARM64 image, signing, and rollback evidence pass; no auto-merge or paid run |
 | 10.4 | OCI monitoring, saturation, and cost guardrails | Completed | Healthy live inventory and thresholds pass; five-minute timer is enabled with no auto-scale or paid capacity |
 | 10.5 | Upgrade, rollback, disaster-recovery, and operator automation | Completed | Exact upgrade, forward-schema-safe rollback, roll-forward, and clean-host recovery pass |
-| 10.6 | Final operator handbook and release evidence | Completed | All eight content-free scenarios pass; explicit Phase 10 acceptance remains |
+| 10.6 | Final operator handbook and release evidence | Completed and accepted | All eight content-free scenarios pass |
 
 ### Proposed completion gate
 
