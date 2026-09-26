@@ -960,8 +960,10 @@ closure, and require staged 2/5/10-user gates over 3/7/14 days with 2/3/5 active
 Core-journey completion must reach 90%; every safeguard gate must remain at 100%.
 Consent and bounded live execution are approved. Two private accounts are activated and
 covered by one human's consent. ADR 0063 permits a bounded, explicitly non-validating
-two-account technical rehearsal. ADR 0062's formal two-user clock and expansion stages
-remain blocked until a second independent human participates.
+two-account technical rehearsal. That rehearsal passes all ten aggregate technical
+scenarios, including access revocation, a bounded ingestion retry, grounded citations,
+and structured feedback. ADR 0062's formal two-user clock and expansion stages remain
+blocked until a second independent human participates.
 
 ## Architecture invariants
 

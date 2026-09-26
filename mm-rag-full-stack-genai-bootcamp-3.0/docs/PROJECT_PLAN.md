@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 11.5 two-account technical rehearsal |
+| Active milestone | Phase 11.5 independent-human staged pilot |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -68,7 +68,7 @@ Rules:
 | Phase 9 release | Annotated `mm-rag-v9.0.0` identifies the verified documentation-kickoff closure commit and is immutable |
 | Phase 10 | Completed and accepted — all eight evidence scenarios pass |
 | Phase 10 release | Annotated `mm-rag-v10.0.0` peels to accepted merge `a2d200b`; immutable |
-| Phase 11 | In progress — two accounts active; technical rehearsal authorized; formal two-user validation blocked |
+| Phase 11 | In progress — two-account technical rehearsal passes; formal two-user validation blocked pending a second independent human |
 
 ## Delivery sequence and gates
 
@@ -103,7 +103,7 @@ security and data-integrity gates on which it depends.
 | 8 | Scalable production deployment | Load, recovery, and reversible-release evidence | Completed and accepted on the free-first Phoenix learning deployment |
 | 9 | Enterprise and commercial controls | Governed connectors, provisioning, metering, and audit | Completed and accepted |
 | 10 | Operational hardening and lifecycle operations | Repeatable maintenance, recovery, retention, and cost-control evidence | Completed and accepted; released as `mm-rag-v10.0.0` |
-| 11 | Invitation-only product pilot | New users complete core workflows safely within privacy, reliability, support, and cost bounds | In progress; two-account technical rehearsal authorized, formal user validation blocked |
+| 11 | Invitation-only product pilot | New users complete core workflows safely within privacy, reliability, support, and cost bounds | In progress; two-account technical rehearsal passes, formal user validation blocked pending a second independent human |
 
 ## Phase 1 — working prototype
 
@@ -1136,8 +1136,8 @@ preview, approval, hold, and rollback controls.
 
 **Status:** In progress. ADRs 0057–0063 are Accepted. The versioned policy, synthetic
 rehearsal, content-free evidence gate, tests, and operating guide are implemented.
-Real-user invitation, external notification, frontend promotion, paid work, or cloud
-change remains separately gated.
+Broader invitation, external notification, frontend promotion, further paid work, or
+cloud change remains separately gated.
 
 ### Objective
 
@@ -1154,7 +1154,7 @@ privacy, recovery, and cost boundaries remain intact.
 | 11.2 | Streamlit pilot journeys and accessibility | Foundation implemented | ADR 0059 accepted; required journeys are represented in the contract gate |
 | 11.3 | Consent, privacy, voluntary feedback, and evidence governance | Foundation implemented | ADR 0060 accepted; sensitive evidence rejected |
 | 11.4 | Reliability, support, capacity, maintenance, and cost boundary | Foundation implemented | ADR 0061 accepted; paid/provider/live actions disabled |
-| 11.5 | Internal → 2 → 5 → 10-user staged rollout and closure | Technical rehearsal authorized | ADR 0062 formal stages preserved; ADR 0063 permits non-validating two-account rehearsal |
+| 11.5 | Internal → 2 → 5 → 10-user staged rollout and closure | Technical rehearsal passed; formal stages pending | ADR 0062 formal stages preserved; ADR 0063 non-validating two-account rehearsal passes all ten technical scenarios |
 
 ### Proposed completion gate
 
@@ -1253,16 +1253,16 @@ privacy, recovery, and cost boundaries remain intact.
 | Pilot frontend and product experience | 11.2 | Accepted — ADR 0059; Streamlit remains authoritative |
 | Pilot consent, privacy, and feedback | 11.3 | Accepted — ADR 0060; consent copy accepted; 30-day aggregate retention |
 | Pilot reliability, support, capacity, and cost | 11.4 | Accepted — ADR 0061; free-first and immediate safety pause |
-| Pilot rollout, acceptance, and rollback | 11.5 | Accepted — ADR 0062; ADR 0063 technical rehearsal authorized; formal canary needs a second human |
+| Pilot rollout, acceptance, and rollback | 11.5 | Accepted — ADR 0062; ADR 0063 technical rehearsal passes; formal canary needs a second human |
 
 ## Immediate next actions
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Run and review the synthetic Phase 11 rehearsal/evidence gate | All required internal scenarios pass without user data or provider calls |
-| 2 | Complete account verification, password setup, and consent | Complete for both accounts without credentials or identities entering evidence |
-| 3 | Run the bounded two-account technical rehearsal | Aggregate identity-free evidence is labeled non-product-validation |
-| 4 | Enroll a second independent human before formal validation | ADR 0062 three-day clock remains stopped until then |
+| 1 | Preserve the completed bounded two-account technical rehearsal | All ten aggregate scenarios pass and remain labeled non-product-validation |
+| 2 | Enroll a second independent human before formal validation | ADR 0062 three-day clock remains stopped until then |
+| 3 | Run the formal two-user stage after fresh participant consent | Three-day evidence meets the 90% journey and 100% safeguard gates |
+| 4 | Make an explicit accept, remediate, or stop decision | No automatic expansion to the five-user stage |
 
 ## Update protocol
 

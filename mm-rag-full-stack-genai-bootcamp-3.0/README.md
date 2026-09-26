@@ -124,7 +124,10 @@ support, 30-day post-closure aggregate evidence retention, staged 2/5/10-user ga
 90% core-journey completion, and 100% safeguard passage. Consent and bounded live
 execution are approved. Two private accounts are activated and covered by one human's
 consent. ADR 0063 authorizes a two-account technical rehearsal, but it does not count
-as the formal two-user canary or authorize rollout expansion.
+as the formal two-user canary or authorize rollout expansion. That rehearsal now passes
+all ten aggregate technical scenarios, including reversible access revocation, one
+bounded PDF retry, grounded citations, and structured feedback. Formal Phase 11
+validation still requires a second independent human participant.
 
 The current `3.0` lineage contains:
 
