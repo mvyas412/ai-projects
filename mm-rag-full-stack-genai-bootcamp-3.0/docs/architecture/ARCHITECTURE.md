@@ -210,7 +210,7 @@ flowchart LR
 | 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; encrypted OCI backup | Completed and accepted on the free-first Phoenix learning deployment |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Completed and accepted at the provider-neutral learning boundary; bounded Google Drive proof passes |
 | 10 | Operational hardening and lifecycle operations | Backup verification, retention orchestration, maintenance gates, capacity/cost controls, recovery automation | Existing OCI/Compose platform and content-free operational evidence | Completed and accepted; all eight evidence scenarios pass |
-| 11 | Invitation-only product pilot | Controlled onboarding, measured product journeys, voluntary feedback, support and staged rollout | Existing product and content-free/consented pilot evidence | In progress; two participants enrolled privately, activation/consent pending |
+| 11 | Invitation-only product pilot | Controlled onboarding, measured product journeys, voluntary feedback, support and staged rollout | Existing product and content-free/consented pilot evidence | In progress; two-account technical rehearsal authorized, formal user validation blocked |
 
 ## Phase 1 — working prototype
 
@@ -958,9 +958,10 @@ The accepted live defaults designate the workspace Owner as access approver, tar
 best-effort support within one business day, retain aggregate evidence for 30 days after
 closure, and require staged 2/5/10-user gates over 3/7/14 days with 2/3/5 active users.
 Core-journey completion must reach 90%; every safeguard gate must remain at 100%.
-Consent and bounded live execution are approved. Two participants are enrolled through
-the private operator workflow; the canary awaits verification, credential setup, and
-participant consent.
+Consent and bounded live execution are approved. Two private accounts are activated and
+covered by one human's consent. ADR 0063 permits a bounded, explicitly non-validating
+two-account technical rehearsal. ADR 0062's formal two-user clock and expansion stages
+remain blocked until a second independent human participates.
 
 ## Architecture invariants
 
@@ -1113,6 +1114,7 @@ Accepted Phase 11 decisions are:
 - [ADR 0060 — Pilot consent, privacy, and feedback](decisions/0060-pilot-consent-privacy-feedback.md)
 - [ADR 0061 — Pilot reliability, support, capacity, and cost](decisions/0061-pilot-reliability-support-cost.md)
 - [ADR 0062 — Pilot rollout, acceptance, and rollback](decisions/0062-pilot-rollout-acceptance-rollback.md)
+- [ADR 0063 — Two-account technical rehearsal boundary](decisions/0063-two-account-technical-rehearsal.md)
 
 ## Maintenance checklist
 

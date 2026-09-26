@@ -52,9 +52,11 @@ measured pilot evidence demonstrates a need.
 
 ## Implementation boundary
 
-ADRs 0057–0062 are accepted. The versioned policy, synthetic rehearsal, evidence gate,
+ADRs 0057–0063 are accepted. The versioned policy, synthetic rehearsal, evidence gate,
 tests, and operating guide may be implemented. Real-user invitations, paid work,
 external messages, cloud changes, and Next.js promotion still require separate approval.
 Stage durations, active-user thresholds, support response target, evidence retention,
 acceptance percentages, participant-facing consent, and bounded live execution are
-approved and versioned. The canary awaits two privately supplied participant identities.
+approved and versioned. Two private accounts are active and covered by one human's
+consent. ADR 0063 authorizes a non-validating two-account technical rehearsal; the
+formal two-user canary still requires a second independent human.

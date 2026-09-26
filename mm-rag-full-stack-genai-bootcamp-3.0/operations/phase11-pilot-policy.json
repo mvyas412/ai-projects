@@ -48,8 +48,12 @@
     "live_stages_enabled": true,
     "separate_live_authorization_required": true,
     "live_execution_authorized": true,
-    "approved_participant_count": 2,
-    "participant_identities_tracked": false
+    "approved_account_count": 2,
+    "participant_identities_tracked": false,
+    "account_activation_complete": true,
+    "participant_consent_complete": true,
+    "technical_rehearsal_authorized": true,
+    "formal_two_user_validation": false
   },
   "acceptance": {
     "minimum_core_journey_completion_percent": 90,

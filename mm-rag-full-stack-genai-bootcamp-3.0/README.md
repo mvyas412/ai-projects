@@ -114,7 +114,7 @@ upgrades, paid capacity, and production-SLA claims remain disabled.
 Annotated tag `mm-rag-v10.0.0` identifies the accepted Phase 10 release at merge
 commit `a2d200b`. Phase 11 is now in progress as a free-first,
 invitation-only product pilot for at most ten registered users. The
-[Phase 11 kickoff](docs/PHASE11_PILOT_KICKOFF.md) and Accepted ADRs 0057–0062 cover
+[Phase 11 kickoff](docs/PHASE11_PILOT_KICKOFF.md) and Accepted ADRs 0057–0063 cover
 pilot scope, onboarding, frontend strategy, privacy/feedback, support/cost limits,
 and staged rollout. The versioned synthetic rehearsal and content-free evidence gate
 are implemented; live invitations, frontend promotion, paid work, and cloud changes
@@ -122,8 +122,9 @@ remain separately gated.
 The approved live defaults use Owner-controlled access, one-business-day best-effort
 support, 30-day post-closure aggregate evidence retention, staged 2/5/10-user gates,
 90% core-journey completion, and 100% safeguard passage. Consent and bounded live
-execution are approved. Two participants are enrolled privately; the canary awaits
-their verification, credential setup, and consent.
+execution are approved. Two private accounts are activated and covered by one human's
+consent. ADR 0063 authorizes a two-account technical rehearsal, but it does not count
+as the formal two-user canary or authorize rollout expansion.
 
 The current `3.0` lineage contains:
 

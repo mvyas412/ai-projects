@@ -9,6 +9,7 @@ from typing import Any
 
 POLICY_SCHEMA = "mm-rag-phase11-pilot-policy-v1"
 EVIDENCE_SCHEMA = "mm-rag-phase11-pilot-evidence-v1"
+TECHNICAL_EVIDENCE_SCHEMA = "mm-rag-phase11-technical-rehearsal-evidence-v1"
 REQUIRED_SCENARIOS = {
     "access-revocation",
     "backup-rollback",
@@ -20,6 +21,7 @@ REQUIRED_SCENARIOS = {
     "support-pause",
     "upload-progress-cancel-retry",
 }
+TECHNICAL_REQUIRED_SCENARIOS = REQUIRED_SCENARIOS | {"cross-account-isolation"}
 FORBIDDEN_KEYS = {
     "access_token",
     "answer",
@@ -106,8 +108,12 @@ def validate_policy(payload: dict[str, Any]) -> dict[str, Any]:
         live_stages_enabled=True,
         separate_live_authorization_required=True,
         live_execution_authorized=True,
-        approved_participant_count=2,
+        approved_account_count=2,
         participant_identities_tracked=False,
+        account_activation_complete=True,
+        participant_consent_complete=True,
+        technical_rehearsal_authorized=True,
+        formal_two_user_validation=False,
     )
     _require_values(
         _mapping(payload, "acceptance"),
@@ -181,17 +187,101 @@ def evidence_gate(payload: dict[str, Any], policy: dict[str, Any]) -> dict[str, 
 
 
 def canary_readiness(policy: dict[str, Any]) -> dict[str, Any]:
-    """Report readiness without persisting participant identities."""
+    """Separate technical account rehearsal from formal human-user validation."""
     validate_policy(policy)
     return {
         "schema": EVIDENCE_SCHEMA,
-        "status": "blocked",
-        "target_stage": "canary-2",
+        "status": "ready",
+        "target_stage": "technical-rehearsal-2-accounts",
         "approved_defaults_complete": True,
         "consent_accepted": True,
         "live_execution_authorized": True,
-        "approved_participant_count": 2,
-        "blockers": ["participant-activation-and-consent"],
+        "approved_account_count": 2,
+        "formal_canary_status": "blocked",
+        "formal_canary_blockers": ["second-independent-human-participant"],
+    }
+
+
+def technical_rehearsal_template(policy: dict[str, Any]) -> dict[str, Any]:
+    """Create an identity-free template for manually observed rehearsal evidence."""
+    validation = validate_policy(policy)
+    return {
+        "schema": TECHNICAL_EVIDENCE_SCHEMA,
+        "recorded_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
+        "stage": "technical-rehearsal-2-accounts",
+        "synthetic": False,
+        "formal_product_validation": False,
+        "status": "incomplete",
+        "registered_account_count": 2,
+        "independent_human_participant_count": 1,
+        "provider_calls": 0,
+        "paid_cost_usd": 0,
+        "policy_sha256": validation["policy_sha256"],
+        "scenarios": [
+            {"name": name, "status": "pending"}
+            for name in sorted(TECHNICAL_REQUIRED_SCENARIOS)
+        ],
+    }
+
+
+def technical_evidence_gate(
+    payload: dict[str, Any], policy: dict[str, Any]
+) -> dict[str, Any]:
+    """Validate bounded technical evidence without treating accounts as people."""
+    validation = validate_policy(policy)
+    _reject_sensitive_fields(payload)
+    if payload.get("schema") != TECHNICAL_EVIDENCE_SCHEMA:
+        raise ValueError("Unsupported Phase 11 technical evidence schema")
+    _require_values(
+        payload,
+        stage="technical-rehearsal-2-accounts",
+        synthetic=False,
+        formal_product_validation=False,
+        registered_account_count=2,
+        independent_human_participant_count=1,
+        policy_sha256=validation["policy_sha256"],
+    )
+    if not isinstance(payload.get("provider_calls"), int) or payload["provider_calls"] < 0:
+        raise ValueError("provider_calls must be a non-negative integer")
+    paid_cost = payload.get("paid_cost_usd")
+    if not isinstance(paid_cost, (int, float)) or paid_cost < 0:
+        raise ValueError("paid_cost_usd must be a non-negative number")
+
+    scenarios = payload.get("scenarios")
+    if not isinstance(scenarios, list):
+        raise ValueError("scenarios must be a list")
+    names: set[str] = set()
+    incomplete: list[str] = []
+    for scenario in scenarios:
+        if not isinstance(scenario, dict):
+            raise ValueError("scenario entries must be objects")
+        name = scenario.get("name")
+        status = scenario.get("status")
+        if not isinstance(name, str) or status not in {"pass", "pending", "fail"}:
+            raise ValueError("technical scenarios require pass, pending, or fail status")
+        if name in names:
+            raise ValueError(f"duplicate scenario: {name}")
+        names.add(name)
+        if status != "pass":
+            incomplete.append(name)
+    missing = sorted(TECHNICAL_REQUIRED_SCENARIOS - names)
+    unexpected = sorted(names - TECHNICAL_REQUIRED_SCENARIOS)
+    status = (
+        "pass"
+        if not missing
+        and not unexpected
+        and not incomplete
+        and payload.get("status") == "pass"
+        else "incomplete"
+    )
+    return {
+        "schema": TECHNICAL_EVIDENCE_SCHEMA,
+        "status": status,
+        "formal_product_validation": False,
+        "scenario_count": len(names),
+        "missing": missing,
+        "unexpected": unexpected,
+        "incomplete": sorted(incomplete),
     }
 
 
@@ -232,7 +322,17 @@ def _payload_hash(payload: object) -> str:
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Validate Phase 11 pilot contracts")
-    parser.add_argument("command", choices=("policy", "rehearse", "gate", "canary-readiness"))
+    parser.add_argument(
+        "command",
+        choices=(
+            "policy",
+            "rehearse",
+            "gate",
+            "canary-readiness",
+            "technical-template",
+            "technical-gate",
+        ),
+    )
     parser.add_argument("input", nargs="?", type=Path)
     parser.add_argument("--policy", type=Path, default=Path("operations/phase11-pilot-policy.json"))
     parser.add_argument("--output", type=Path)
@@ -248,6 +348,12 @@ def main() -> None:
         result = synthetic_rehearsal(policy)
     elif args.command == "canary-readiness":
         result = canary_readiness(policy)
+    elif args.command == "technical-template":
+        result = technical_rehearsal_template(policy)
+    elif args.command == "technical-gate":
+        if args.input is None:
+            raise SystemExit("technical-gate requires an evidence JSON path")
+        result = technical_evidence_gate(load_json(args.input), policy)
     else:
         if args.input is None:
             raise SystemExit("gate requires an evidence JSON path")

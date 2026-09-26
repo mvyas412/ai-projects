@@ -1,6 +1,6 @@
 # Phase 11 pilot operations
 
-Status: **Canary authorized; awaiting two private participant identities**
+Status: **Two-account technical rehearsal authorized; formal two-user canary blocked**
 
 ## Purpose
 
@@ -24,6 +24,8 @@ Generate ignored synthetic evidence and validate it:
 make phase11-rehearsal
 make phase11-evidence-gate
 make phase11-canary-readiness
+make phase11-technical-template
+make phase11-technical-gate
 ```
 
 The contract gate enumerates login/logout, personal-workspace defaulting, upload/progress/cancel/retry,
@@ -42,17 +44,19 @@ content, provider identifiers, or secrets.
 - At least 90% of attempted core journeys must complete, while all safeguard gates must
   pass without exception.
 
-The participant notice and bounded live execution are approved. Exactly two participant
-identities were supplied through the private operator workflow and are not present in
-Git or aggregate evidence. Auth0 public database signup is disabled, and Google social
-login is disabled for MM-RAG, leaving the manually managed database accounts as the
-pilot entry path. The readiness command remains blocked until participant activation
-and consent are complete.
+Exactly two approved account identities were supplied through the private operator
+workflow and are not present in Git or aggregate evidence. Both are verified, have
+participant-controlled credentials, and completed authenticated Personal-workspace
+login. Auth0 public database signup and MM-RAG Google social login remain disabled.
 
-One pre-existing account is active. The second account was created with an undisclosed
-one-time random credential; Auth0 sent verification and password-reset messages so the
-participant can establish their own credential. Both accounts were sent verification
-messages. No credential was displayed or retained by the operator.
+One human accepted the participant notice for both accounts. ADR 0063 therefore permits
+a clearly labeled two-account technical rehearsal while preserving ADR 0062's formal
+two-user gate. The rehearsal does not start the three-day clock, satisfy product-user
+validation, or authorize expansion. `make phase11-canary-readiness` reports the
+technical rehearsal ready and the formal canary blocked on a second independent human.
+The technical-template command creates ignored, identity-free evidence with every live
+scenario pending. Operators update only aggregate statuses and provider-call/cost totals;
+the technical gate cannot convert that evidence into formal product validation.
 
 The accepted participant wording is maintained in
 [the Phase 11 pilot notice and consent](PHASE11_PILOT_CONSENT.md).

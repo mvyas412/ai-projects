@@ -1,6 +1,7 @@
 from collections.abc import Mapping
 
 import streamlit as st
+from pilot import PILOT_LABEL
 from streamlit.errors import StreamlitSecretNotFoundError
 from utils.api import BackendAPIClient, BackendAPIError
 from utils.presentation import resolve_user_identity
@@ -112,7 +113,7 @@ with st.sidebar:
     )
     st.caption(f"Signed in as {display_name}")
     st.button("Log out", icon=":material/logout:", on_click=st.logout)
-    st.caption("Phase 10 · Operational hardening")
+    st.caption(PILOT_LABEL)
 
 page = st.navigation(
     [
