@@ -77,10 +77,10 @@ jobs:
       LOCAL_STORAGE_ROOT: /tmp/mm-rag-phase3-ci-storage
     steps:
       - name: Check out repository
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@v7
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v10.0.1
+        uses: astral-sh/setup-uv@v7
         with:
           version: "0.8.13"
           enable-cache: true
