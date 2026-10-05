@@ -8,9 +8,10 @@ from uuid import UUID, uuid4
 
 import pytest
 from sqlalchemy import delete, func, select
+from sqlalchemy.engine import Engine
 
 from backend.app.core.config import get_settings
-from backend.app.db.session import create_database_engine, create_session_factory
+from backend.app.db.session import create_session_factory
 from backend.app.models import (
     AuditEvent,
     Document,
@@ -36,15 +37,15 @@ from backend.app.services.ingestion_outbox import IngestionOutboxStateMachine
     os.getenv("MM_RAG_RUN_INTEGRATION_TESTS") != "1",
     reason="Set MM_RAG_RUN_INTEGRATION_TESTS=1 with Compose services running",
 )
-def test_postgres_skip_locked_prevents_overlapping_outbox_leases() -> None:
-    engine = create_database_engine(get_settings())
-    factory = create_session_factory(engine)
+def test_postgres_skip_locked_prevents_overlapping_outbox_leases(
+    isolated_postgres_engine: Engine,
+) -> None:
+    factory = create_session_factory(isolated_postgres_engine)
     user_id = uuid4()
     workspace_id = uuid4()
     document_id = uuid4()
     version_id = uuid4()
-    # Keep this lease proof isolated from legitimate due events in a persistent
-    # developer database by placing its synthetic clock safely in the past.
+    # Only test-owned dispatchers can access this database; time is deterministic.
     now = datetime(2000, 1, 1, tzinfo=UTC)
     pipeline_fingerprint = "b" * 64
 
@@ -287,4 +288,3 @@ def test_postgres_skip_locked_prevents_overlapping_outbox_leases() -> None:
             )
             session.execute(delete(Workspace).where(Workspace.id == workspace_id))
             session.execute(delete(User).where(User.id == user_id))
-        engine.dispose()
