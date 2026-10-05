@@ -934,11 +934,42 @@ backup name, host coordinate, queue message, or provider resource identifier.
 **Status:** In progress. The accepted architecture adds no new provider or data plane.
 It places a staged pilot-control boundary around the accepted Streamlit/FastAPI product.
 
-Current checkpoint: recovery and the permanent backup-resume fix are verified, while
-the two-person canary remains paused for bounded retry controls and formal workflow
-evidence. Worker stop, participant pause and separate merge/paid-execution approvals
+Current checkpoint: separately approved capacity recovery passes on the existing host.
+Eight services are running; API/dispatcher/UI use `dba88de`. The matching worker is
+created/never-started/restart-no. Effective one-attempt/zero-provider-retry configuration,
+fresh capacity, readiness/TLS/anonymous denial, empty jobs/queues and restored timers
+pass, with no failed host units. Storage/edge/setup metadata and the permanent backup
+fix are preserved. The two-person canary remains paused for formal workflow evidence.
+The separately approved October 5 local test-isolation fix passes `make check`
+(442 tests/16 expected skips) and `make check-live` (457 tests/one expected skip),
+resolving the earlier outbox regression without changing dispatch semantics.
+Worker stop, participant pause and separate merge/paid-execution approvals
 remain binding. The recovery narrative below records historical checkpoints, not
 instructions to repeat them or evidence of Phase 11 acceptance.
+
+October 5 local diagnosis checkpoint verifies shared test/dispatcher PostgreSQL bindings. The
+test's past clock excludes newer application rows from its own claims but leaves its
+committed event eligible for a normal-clock dispatcher. An in-memory competing claim
+reproduces the zero-claim symptom; the original claimant remains unproven. Recommend
+an isolated PostgreSQL test database using the same migrations and unchanged lease/
+idempotency assertions, rather than changing product dispatch semantics. No fix,
+live regression replay, persistent data mutation or service change is performed.
+
+Subsequent approved implementation isolates that PostgreSQL concurrency proof in a
+uniquely created local database, runs the unchanged Alembic chain there and verifies
+the actual database/head before exposing its engine. Application settings and all
+20 original assertions remain unchanged; 14 synthetic lifecycle/safety tests cover
+target refusal, child-only configuration, failure cleanup and database-identity/owner
+guards. Cleanup removes only this creation without force or session termination.
+The targeted proof and full free/live gates pass while the application dispatcher
+remains running; temporary database cleanup, local readiness and zero schema drift
+are verified. No product code, migrations, provider, cloud deployment, worker state,
+participant pause or Phase 11 acceptance boundary changes.
+
+Separate October 5 source-publication approval covers commit and normal push of the
+local test fix and recovery records only. The fresh pre-commit free gate passes 442
+tests/16 expected skips, unchanged head and zero drift. New PR/merge, image publication/
+deployment, worker start and participant resumption remain outside this authorization.
 
 The local `EXECUTION_RETRY_PROFILE` execution boundary defaults to `standard`, preserving
 the accepted retry behavior. Opt-in `pilot-single-attempt-v1` stores one attempt on new
@@ -953,7 +984,76 @@ publishes the prior recovery checkpoint. Source commit/push for this control is 
 approved; reviewed deployment and operational preflight are still required before the
 paused pilot can proceed.
 
-Draft PR #28 also carries a separately approved source-only candidate security patch:
+Publication checkpoint — 2026-10-04: PR #28 is squash-merged at `dba88de`, with a
+tree identical to source `541ab9c` after eight applicable CI passes. One explicitly
+approved protected application-image publication succeeds at that merged revision
+([run 37262385321](https://github.com/mvyas412/ai-projects/actions/runs/37262385321)).
+The immutable index is
+`sha256:4a39d5affe71651ca5a19bf6d79542ee578f3bc4aca62234d6abf86721ec9978`.
+All eight jobs pass; both architectures have SLSA provenance containing the approved
+revision and SPDX SBOMs confirming PyJWT 2.15.0, pypdf 6.19.0 and urllib3 2.8.0.
+The published-image scan and OIDC-signing gate pass. Independent cryptographic signature
+verification remains part of deployment preflight. Publication does not deploy or activate
+the retry profile; exact reviewed host-plan approval remains required. No Next.js publication,
+worker start, participant resumption, paid call or new resource occurs.
+
+Deployment preparation — 2026-10-04 Pacific: a strict read-only SSH attempt reaches
+the host but fails authentication without a loaded dedicated recovery identity; no remote
+command executes. Current host safeguards and immutable rollback baseline remain unverified,
+as does independent cryptographic signature verification. Planning must explicitly bound
+Compose migration/model dependency traversal and align API/stopped-worker image and retry
+profile without starting the worker. No executable ready plan/hash or runtime change is
+issued from historical manifests; worker stop and participant pause remain binding.
+
+Fresh supervised plan — 2026-10-04 Pacific: key reload enables verified read-only
+preflight of current `8000dab` immutable rollback inputs, host-file hashes, enforcing
+SELinux, healthy core/application/storage services, TLS and anonymous 401, capacity,
+empty application queues/jobs, stopped worker and fresh encrypted-backup integrity.
+Cached model hashes verify offline. Independent image signature verification passes
+against the exact protected workflow/issuer/repository/ref/full `dba88de` revision,
+using a project-local verifier checked against the pinned official installer checksum.
+The ignored exact-hash supervised plan is not an authorization or generic-executor input.
+It preserves persistence/edge pins and the host's tested backup fix; only the application
+image/common retry profile change. Explicit no-dependency/no-pull setup/start commands
+and verify-only model checks prevent broader startup or downloads. The new worker is
+created with matching image/profile and restart disabled, never started; retain that
+override until separate resumption approval. Existing backup/release leases and bounded
+backup-timer pause/restore prevent maintenance races. Fresh guards and exact approval
+are mandatory; first failure stops without retry or automatic rollback. Twenty-six
+free release/retry tests and plan/manifest/input hashes pass. No live deployment or
+paid execution, new resources, participant resumption or Phase 11 acceptance occurs.
+
+Supervised deployment result — 2026-10-04 Pacific: fresh approved exact-hash attempt
+pulls/verifies the target ARM64 digest, stages image/profile, runs one unchanged-head
+forward migrator and verifies cached models offline. It stops at `create --no-deps`, an
+unsupported Compose option introduced by the agent's plan. The failure policy restores
+only the backup timer and releases leases; no retry, worker start or rollback occurs.
+API/UI/dispatcher remain stopped, old worker stopped, five persistence/edge services
+unchanged/running, queues/jobs empty and recorded application revision unadvanced. Do
+not claim ready deployment or pilot acceptance. A corrected separately approved
+continuation will use supported, dry-run-verified `up --no-start --no-deps --pull never
+worker` before API/dispatcher/UI-only startup. Completed pull/configuration/migration/model
+steps must not repeat. Private original inputs and backup fix remain preserved; no
+secret transfer, paid call, resource creation or participant resumption. Free live
+regressions pass 443 tests/one skip with unchanged schema and local health, not cloud
+readiness. Exact new plan approval remains the next gate.
+
+Continuation preflight checkpoint — 2026-10-04 Pacific: the operator approves the
+corrected continuation, but fresh guards find only the capacity service failed. Read-only
+source hashes and safe journal error-category markers confirm its unchanged collector's
+operations-report `exec api` fails while API is stopped; it cannot refresh complete
+capacity evidence until application restoration. Core host, edge/storage and both
+enabled/waiting timers remain healthy; direct current CPU/memory/disk/inode values are
+within unchanged policy limits. No continuation apply record, timer pause or startup.
+The revised complete plan awaits new exact approval for this narrowly explicit known
+failure, direct fresh safeguards, the same never-started worker/application scope, and
+at most one provider-free capacity service start after readiness (avoid duplication if
+the unchanged timer has already succeeded). Require fresh capacity pass/no failed units
+before recording target revision. Preserve all sources/policies/timers/rollback inputs;
+no error-state hiding, repeat setup, automatic retry/rollback, paid call, worker start,
+participant resumption, new resource, Git publication or Phase 11 acceptance.
+
+PR #28 also carries a separately approved source-only candidate security patch:
 Next.js 16.3.5 to 16.3.6 and its matching runtime/compiler lock entries address
 [GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j). The candidate
 contains no `next/og` or `ImageResponse` usage; the dependency finding alone does not

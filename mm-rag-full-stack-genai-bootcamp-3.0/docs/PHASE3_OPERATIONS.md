@@ -85,3 +85,19 @@ Run `make check`, then `make check-live`. The live gate includes PostgreSQL/Qdra
 SeaweedFS, RabbitMQ topology/confirm/manual-ack behavior, FastAPI, and Streamlit.
 It does not run the paid OpenAI acceptance suite. Run `make check-acceptance` only
 with explicit authorization for paid model requests.
+
+The PostgreSQL outbox concurrency proof uses a uniquely named disposable database
+on the existing local server, not the application's database. Run it from the host/
+CI runner with a loopback `postgresql+psycopg` URL and a development/test environment.
+The migration credential needs database creation and the normal Alembic permissions;
+do not broaden a deployed runtime role for testing. The fixture applies the unchanged
+migration chain to `head`, verifies the database/head, and preserves all original
+locking, expiry, publication and idempotency assertions. The application dispatcher
+may remain running; the ingestion worker need not start.
+
+Cleanup closes the test engine and drops only the exact database this fixture created,
+after checking its database identity and owner. It never uses force, terminates other
+sessions or removes a pre-existing database. A setup/test failure still triggers this
+bounded cleanup; an ownership mismatch or busy database fails visibly for review,
+without an automatic cleanup retry. Remote/query-overridden URLs are refused and the
+temporary migration URL is passed only to a child process, never written to `.env`.

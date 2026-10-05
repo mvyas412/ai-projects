@@ -1,9 +1,18 @@
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
 from pydantic import SecretStr
+from sqlalchemy.engine import Engine
 
-from backend.app.core.config import Settings
+from backend.app.core.config import Settings, get_settings
+from scripts.isolated_postgres_test_database import isolated_postgres_test_database
+
+
+@pytest.fixture
+def isolated_postgres_engine() -> Iterator[Engine]:
+    with isolated_postgres_test_database(get_settings()) as engine:
+        yield engine
 
 
 @pytest.fixture
