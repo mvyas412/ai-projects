@@ -70,6 +70,22 @@ and new-file privacy checks pass. No cloud deployment, worker start, participant
 resumption, paid call or Phase 11 acceptance is included. Commit/push approval covers
 source publication only and does not activate this profile.
 
+Candidate security checkpoint — 2026-10-04: draft PR #28 initially failed its
+dependency scan on the pre-existing Next.js 16.3.5 pin. Separately approved
+source-only remediation pins 16.3.6 and matching runtime/compiler dependencies for
+[GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j). Four candidate
+tests, type-checking, production compilation and npm audit (zero vulnerabilities)
+pass under Node 24 without credentials or provider calls. Expected build-time Auth0
+configuration warnings do not constitute authenticated browser verification.
+Fresh free `make check` (420 tests/16 skips) and `make check-live` (435 tests/one
+skip), static/offline/schema gates and existing local API/dependency/UI health pass.
+No image publication, deployment, worker start or participant resumption is included;
+Streamlit remains authoritative and the PR stays draft pending review/checks.
+The initial native application-image scan separately reports existing Python dependency
+findings, including PyJWT, pypdf and urllib3. Do not treat the clean candidate npm audit
+as an application-image scan pass, suppress findings or widen upgrades implicitly.
+Separate remediation approval and passing security gates are required before merge.
+
 ## Purpose
 
 The Phase 11 controls provide a deterministic, content-free rehearsal of the pilot

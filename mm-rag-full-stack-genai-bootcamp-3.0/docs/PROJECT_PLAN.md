@@ -1241,6 +1241,19 @@ remain supervised workflow limits. No deployment, worker start, participant resu
 or paid pilot execution is implied. Source commit/push is separately approved;
 reviewed deployment and formal workflow evidence remain pending.
 
+Draft PR #28 contains the retry controls. Its candidate dependency scan exposed
+critical [GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j)
+in the pre-existing Next.js 16.3.5 pin. Separately approved source-only remediation
+pins the evaluation candidate to 16.3.6 with matching runtime/compiler lock entries;
+no unrelated dependency or deployed runtime is upgraded. Candidate tests (four),
+type-checking, production compilation and npm audit (zero vulnerabilities) pass on
+Node 24. Auth0 configuration warnings are expected in the credential-free build,
+which does not prove authenticated browser parity. Streamlit remains authoritative;
+merge, publication, deployment and paused-pilot execution remain separately gated.
+The initial application-image security scan also fails on existing Python dependencies;
+that separate finding is not remediated by the candidate patch and needs a reviewed,
+separately approved source-only scope before the PR can clear all security gates.
+
 The two-person observation window starts at `2026-10-01T02:10:47Z`, with an earliest
 three-day review at `2026-10-04T02:10:47Z`. Two independent people, activity evidence,
 90% core-journey completion, and 100% safeguards are required; elapsed time alone is

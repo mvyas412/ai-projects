@@ -953,6 +953,16 @@ publishes the prior recovery checkpoint. Source commit/push for this control is 
 approved; reviewed deployment and operational preflight are still required before the
 paused pilot can proceed.
 
+Draft PR #28 also carries a separately approved source-only candidate security patch:
+Next.js 16.3.5 to 16.3.6 and its matching runtime/compiler lock entries address
+[GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j). The candidate
+contains no `next/og` or `ImageResponse` usage; the dependency finding alone does not
+establish exploitability or affect the authoritative deployed Streamlit frontend.
+Free candidate tests, type-checking, production compilation and a clean npm audit
+verify the patch locally, not frontend promotion or authenticated browser acceptance.
+No OCI runtime, container base image, provider, retry policy or deployment authority
+changes with this patch.
+
 ```mermaid
 flowchart LR
     operator["Pilot operator"] --> invite["Manual approved invitation"]
