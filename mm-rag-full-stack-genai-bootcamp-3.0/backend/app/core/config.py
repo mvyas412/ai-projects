@@ -80,6 +80,7 @@ class Settings(BaseSettings):
     worker_heartbeat_seconds: int = Field(default=15, ge=5, le=300)
     worker_shutdown_seconds: int = Field(default=120, ge=5, le=600)
     worker_recovery_poll_seconds: int = Field(default=15, ge=5, le=300)
+    execution_retry_profile: Literal["standard", "pilot-single-attempt-v1"] = "standard"
     runtime_health_directory: Path = PROJECT_ROOT / "data/runtime/health"
     outbox_terminal_retention_days: int = Field(default=30, ge=1, le=365)
     outbox_alert_attempts: int = Field(default=10, ge=1, le=1000)
@@ -128,6 +129,22 @@ class Settings(BaseSettings):
     openai_api_key: SecretStr | None = None
     openai_chat_model: str = DEFAULT_OPENAI_CHAT_MODEL
     openai_embedding_model: str = DEFAULT_OPENAI_EMBEDDING_MODEL
+
+    @property
+    def single_attempt_execution(self) -> bool:
+        return self.execution_retry_profile == "pilot-single-attempt-v1"
+
+    @property
+    def ingestion_max_attempts(self) -> int:
+        return 1 if self.single_attempt_execution else 3
+
+    @property
+    def openai_embedding_max_retries(self) -> int:
+        return 0 if self.single_attempt_execution else 2
+
+    @property
+    def openai_chat_max_retries(self) -> int | None:
+        return 0 if self.single_attempt_execution else None
 
     @property
     def phase6_enabled(self) -> bool:

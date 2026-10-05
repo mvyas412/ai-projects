@@ -24,7 +24,10 @@ from backend.app.models import (
     WorkspaceMembership,
     WorkspaceRole,
 )
-from backend.app.services.ingestion_jobs import IngestionJobStateMachine
+from backend.app.services.ingestion_jobs import (
+    IngestionInvalidTransitionError,
+    IngestionJobStateMachine,
+)
 from backend.app.services.ingestion_outbox import IngestionOutboxStateMachine
 
 
@@ -142,6 +145,65 @@ def test_postgres_skip_locked_prevents_overlapping_outbox_leases() -> None:
                 now=now,
                 reason="integration_complete",
             )
+
+        pilot = get_settings().model_copy(
+            update={"execution_retry_profile": "pilot-single-attempt-v1"}
+        )
+        for version_number, different_keys in [(2, False), (3, True)]:
+            pilot_version_id = uuid4()
+            with factory.begin() as session:
+                session.add(DocumentVersion(
+                    id=pilot_version_id, document_id=document_id,
+                    workspace_id=workspace_id, created_by_user_id=user_id,
+                    version_number=version_number, content_sha256=str(version_number) * 64,
+                    ingestion_fingerprint=pipeline_fingerprint,
+                    object_key=f"workspaces/{workspace_id}/documents/{document_id}/{pilot_version_id}",
+                    byte_size=100, status=DocumentVersionStatus.UPLOADED.value,
+                ))
+            pilot_barrier = Barrier(2)
+
+            def create_bounded_request(index: int) -> tuple[UUID | None, bool]:
+                try:
+                    with factory.begin() as session:
+                        user = session.get(User, user_id)
+                        assert user is not None
+                        pilot_barrier.wait(timeout=5)
+                        bounded_job, created = IngestionJobStateMachine(
+                            session, pilot
+                        ).create_job(
+                            user=user, workspace_id=workspace_id,
+                            document_id=document_id,
+                            document_version_id=pilot_version_id,
+                            idempotency_key=f"bounded-{version_number}-{index if different_keys else 0}",
+                            request_hash="d" * 64,
+                            pipeline_fingerprint=pipeline_fingerprint, now=now,
+                        )
+                        assert bounded_job.max_attempts == 1
+                        return bounded_job.id, created
+                except IngestionInvalidTransitionError:
+                    return None, False
+
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                bounded_results = list(executor.map(create_bounded_request, range(2)))
+            assert sorted(result[1] for result in bounded_results) == [False, True]
+            assert sum(result[0] is None for result in bounded_results) == int(different_keys)
+            bounded_ids = {result[0] for result in bounded_results if result[0] is not None}
+            assert len(bounded_ids) == 1
+            bounded_id = next(iter(bounded_ids))
+            with factory.begin() as session:
+                assert session.scalar(
+                    select(func.count()).select_from(IngestionJob).where(
+                        IngestionJob.document_version_id == pilot_version_id
+                    )
+                ) == 1
+                assert session.scalar(
+                    select(func.count()).select_from(IngestionOutboxEvent).where(
+                        IngestionOutboxEvent.job_id == bounded_id
+                    )
+                ) == 1
+                IngestionOutboxStateMachine(session).discard_unpublished_for_job(
+                    job_id=bounded_id, now=now, reason="integration_complete"
+                )
 
         first_session = factory()
         second_session = factory()

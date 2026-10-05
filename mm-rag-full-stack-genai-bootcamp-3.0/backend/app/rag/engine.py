@@ -137,6 +137,7 @@ class QdrantOpenAIRAGEngine:
                 embeddings = OpenAIEmbeddings(
                     api_key=api_key,
                     model=self._settings.openai_embedding_model,
+                    max_retries=self._settings.openai_embedding_max_retries,
                 )
                 vector = embeddings.embed_query(request.query)
             selector_route = (
@@ -359,6 +360,7 @@ class QdrantOpenAIRAGEngine:
                 response = ChatOpenAI(
                     api_key=api_key,
                     model=self._settings.openai_chat_model,
+                    max_retries=self._settings.openai_chat_max_retries,
                     temperature=0,
                 ).invoke(messages)
         except Exception as exc:

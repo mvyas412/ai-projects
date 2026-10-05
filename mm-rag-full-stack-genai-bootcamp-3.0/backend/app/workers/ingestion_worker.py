@@ -103,6 +103,7 @@ async def _run(settings: Settings) -> None:
         shutdown_requested=shutdown,
     )
     health = ProcessHealth(settings.runtime_health_directory, "worker")
+    service.verify_retry_scope()
     connection = await connect_rabbitmq(settings, process_name=identity)
     channel = await connection.channel(publisher_confirms=False)
     await channel.set_qos(prefetch_count=1)

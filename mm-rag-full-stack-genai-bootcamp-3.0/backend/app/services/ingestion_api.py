@@ -116,7 +116,7 @@ class IngestionAPIService:
         library = DocumentLibraryService(self._session, self._storage, self._settings)
 
         def create_job(document: Document, version: DocumentVersion) -> IngestionJob:
-            job, _ = IngestionJobStateMachine(self._session).create_job(
+            job, _ = IngestionJobStateMachine(self._session, self._settings).create_job(
                 user=user,
                 workspace_id=workspace_id,
                 document_id=document.id,
@@ -266,7 +266,7 @@ class IngestionAPIService:
             pipeline_fingerprint=current_fingerprint,
             predecessor_job_id=predecessor_job_id,
         )
-        return IngestionJobStateMachine(self._session).create_job(
+        return IngestionJobStateMachine(self._session, self._settings).create_job(
             user=user,
             workspace_id=workspace_id,
             document_id=document_id,

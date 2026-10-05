@@ -95,8 +95,11 @@ def _job_summary(view: IngestionJobView) -> IngestionJobSummary:
         error = IngestionPublicError(
             code=job.last_error_code,
             retryable=(
-                job.state == IngestionJobState.RETRY_SCHEDULED.value
-                or job.last_error_code == "attempts_exhausted"
+                job.max_attempts > 1
+                and (
+                    job.state == IngestionJobState.RETRY_SCHEDULED.value
+                    or job.last_error_code == "attempts_exhausted"
+                )
             ),
             summary=job.last_error_message,
             correlation_id=str(job.id),

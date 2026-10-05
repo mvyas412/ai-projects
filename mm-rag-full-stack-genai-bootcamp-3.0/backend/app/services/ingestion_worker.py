@@ -11,6 +11,7 @@ from uuid import UUID
 
 from opentelemetry.propagate import extract
 from opentelemetry.trace import SpanKind
+from sqlalchemy import select
 
 from backend.app.broker.messages import IngestionEventMessage
 from backend.app.core.config import Settings
@@ -19,7 +20,12 @@ from backend.app.db.rls import DatabasePurpose, set_rls_context
 from backend.app.db.session import SessionFactory
 from backend.app.ingestion.pipeline import pipeline_manifest
 from backend.app.models.document import Document, DocumentVersion
-from backend.app.models.ingestion import IngestionAttempt, IngestionJob, IngestionProgressStage
+from backend.app.models.ingestion import (
+    IngestionAttempt,
+    IngestionJob,
+    IngestionJobState,
+    IngestionProgressStage,
+)
 from backend.app.rag.indexing import (
     DocumentIndexer,
     EmptyDocumentError,
@@ -96,6 +102,30 @@ class IngestionWorkerService:
         self._visual_processor = visual_processor
         self._worker_id = worker_id
         self._shutdown = shutdown_requested or threading.Event()
+
+    def verify_retry_scope(self) -> None:
+        """Refuse incompatible active jobs before connecting a bounded consumer."""
+        with self._session_factory.begin() as session:
+            set_rls_context(session, purpose=DatabasePurpose.OPERATIONS)
+            incompatible = session.scalar(
+                select(IngestionJob.id).where(
+                    (
+                        IngestionJob.max_attempts != 1
+                        if self._settings.single_attempt_execution
+                        else IngestionJob.max_attempts == 1
+                    ),
+                    IngestionJob.state.in_(
+                        [
+                            IngestionJobState.PENDING.value,
+                            IngestionJobState.QUEUED.value,
+                            IngestionJobState.RUNNING.value,
+                            IngestionJobState.RETRY_SCHEDULED.value,
+                        ]
+                    ),
+                ).limit(1)
+            )
+            if incompatible is not None:
+                raise RuntimeError("Bounded pilot requires a reviewed single-attempt job scope")
 
     def process(self, message: IngestionEventMessage) -> DeliveryDisposition:
         carrier = {"traceparent": message.traceparent} if message.traceparent else {}
@@ -214,7 +244,7 @@ class IngestionWorkerService:
     def recover_expired(self) -> list[UUID]:
         with self._session_factory.begin() as session:
             set_rls_context(session, purpose=DatabasePurpose.OPERATIONS)
-            return IngestionJobStateMachine(session).recover_expired_jobs(
+            return IngestionJobStateMachine(session, self._settings).recover_expired_jobs(
                 now=datetime.now(UTC),
                 limit=25,
             )
@@ -225,13 +255,17 @@ class IngestionWorkerService:
             workspace_id = set_rls_context(session, purpose=DatabasePurpose.WORKER, job_id=job_id)
             if workspace_id is None:
                 raise IngestionJobNotFoundError
-            state = IngestionJobStateMachine(session)
+            state = IngestionJobStateMachine(session, self._settings)
             job, attempt = state.claim_job(
                 job_id=job_id,
                 worker_id=self._worker_id,
                 now=now,
                 lease_duration=timedelta(seconds=self._settings.worker_lease_seconds),
             )
+            if job.max_attempts == 1 and not self._settings.single_attempt_execution:
+                raise IngestionInvalidTransitionError(
+                    "Single-attempt jobs require the bounded provider retry profile"
+                )
             generation = state.create_generation(
                 job_id=job.id,
                 attempt_id=attempt.id,
@@ -267,7 +301,7 @@ class IngestionWorkerService:
                         workspace_id=work.job.workspace_id,
                         job_id=work.job.id,
                     )
-                    cancel = IngestionJobStateMachine(session).heartbeat(
+                    cancel = IngestionJobStateMachine(session, self._settings).heartbeat(
                         job_id=work.job.id,
                         attempt_id=work.attempt.id,
                         fencing_token=work.attempt.fencing_token,
@@ -299,7 +333,7 @@ class IngestionWorkerService:
                 workspace_id=work.job.workspace_id,
                 job_id=work.job.id,
             )
-            cancelled = IngestionJobStateMachine(session).heartbeat(
+            cancelled = IngestionJobStateMachine(session, self._settings).heartbeat(
                 job_id=work.job.id,
                 attempt_id=work.attempt.id,
                 fencing_token=work.attempt.fencing_token,
@@ -402,7 +436,7 @@ class IngestionWorkerService:
                 workspace_id=work.job.workspace_id,
                 job_id=work.job.id,
             )
-            IngestionJobStateMachine(session).complete_success(
+            IngestionJobStateMachine(session, self._settings).complete_success(
                 job_id=work.job.id,
                 attempt_id=work.attempt.id,
                 fencing_token=work.attempt.fencing_token,
@@ -425,7 +459,7 @@ class IngestionWorkerService:
                     workspace_id=work.job.workspace_id,
                     job_id=work.job.id,
                 )
-                IngestionJobStateMachine(session).finish_cancellation(
+                IngestionJobStateMachine(session, self._settings).finish_cancellation(
                     job_id=work.job.id,
                     attempt_id=work.attempt.id,
                     fencing_token=work.attempt.fencing_token,
@@ -448,7 +482,7 @@ class IngestionWorkerService:
                     workspace_id=work.job.workspace_id,
                     job_id=work.job.id,
                 )
-                IngestionJobStateMachine(session).record_failure(
+                IngestionJobStateMachine(session, self._settings).record_failure(
                     job_id=work.job.id,
                     attempt_id=work.attempt.id,
                     fencing_token=work.attempt.fencing_token,
