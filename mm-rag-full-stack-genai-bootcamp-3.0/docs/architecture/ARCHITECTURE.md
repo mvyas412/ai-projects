@@ -1,9 +1,9 @@
 # Multimodal RAG architecture handbook
 
-> Living architecture baseline — updated 2026-09-19
+> Living architecture baseline — updated 2026-09-20
 
 This document is the version-controlled architecture source of truth for the
-complete system and Phases 1–10. Update it whenever a component, boundary, data
+complete system and Phases 1–11. Update it whenever a component, boundary, data
 flow, technology decision, or phase status changes.
 
 The companion [project plan](../PROJECT_PLAN.md) owns delivery sequence,
@@ -12,10 +12,10 @@ milestones, dependencies, completion gates, risks, and immediate next actions.
 ## Rendered architecture posters
 
 Presentation-ready rendered diagrams are maintained in the
-[architecture poster gallery](ARCHITECTURE_POSTERS.md). The gallery includes a
-final production-state architecture without phase numbers, a complete-system
-roadmap view, and one diagram for each accepted phase plus proposed Phase 10. The Mermaid diagrams in this
-handbook remain the editable source of truth.
+[architecture poster gallery](ARCHITECTURE_POSTERS.md). The gallery records the
+accepted architecture through Phase 10. The Mermaid diagrams in this handbook are the
+editable source of truth and now include the accepted Phase 11 pilot-control boundary;
+rendered Phase 11 artwork remains future work.
 
 The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 records the accepted Phase 6 product path plus the implemented Phase 7 evaluation
@@ -194,7 +194,8 @@ flowchart LR
     p7["Phase 7<br/>Evaluation/observability<br/>Accepted"] -->
     p8["Phase 8<br/>Scalable platform<br/>Accepted"] -->
     p9["Phase 9<br/>Enterprise platform<br/>Accepted"] -->
-    p10["Phase 10<br/>Operational hardening<br/>Completed / accepted"]
+    p10["Phase 10<br/>Operational hardening<br/>Completed / v10.0.0"] -->
+    p11["Phase 11<br/>Invitation-only pilot<br/>In progress"]
 ```
 
 | Phase | Capability | Main technologies/components | Stores | Status |
@@ -209,6 +210,7 @@ flowchart LR
 | 8 | Production-shaped learning deployment | Caddy, Streamlit, API/workers, private Compose services | Self-hosted PostgreSQL/Qdrant/SeaweedFS/RabbitMQ; encrypted OCI backup | Completed and accepted on the free-first Phoenix learning deployment |
 | 9 | Enterprise and commercial controls | Connectors, metering, billing, SSO/SCIM, compliance | PostgreSQL and provider systems | Completed and accepted at the provider-neutral learning boundary; bounded Google Drive proof passes |
 | 10 | Operational hardening and lifecycle operations | Backup verification, retention orchestration, maintenance gates, capacity/cost controls, recovery automation | Existing OCI/Compose platform and content-free operational evidence | Completed and accepted; all eight evidence scenarios pass |
+| 11 | Invitation-only product pilot | Controlled onboarding, measured product journeys, voluntary feedback, support and staged rollout | Existing product and content-free/consented pilot evidence | In progress; two-account technical rehearsal authorized, formal user validation blocked |
 
 ## Phase 1 — working prototype
 
@@ -927,6 +929,371 @@ rollback uses `--no-deps` so Compose cannot invoke an older migration dependency
 restore execution remains isolated in the dedicated restore runbook. No operational tool receives product authorization from a
 backup name, host coordinate, queue message, or provider resource identifier.
 
+## Phase 11 — invitation-only product pilot
+
+**Status:** In progress. The accepted architecture adds no new provider or data plane.
+It places a staged pilot-control boundary around the accepted Streamlit/FastAPI product.
+
+Current checkpoint: recovery and the permanent backup-resume fix are verified, while
+the two-person canary remains paused for bounded retry controls and formal workflow
+evidence. Worker stop, participant pause and separate merge/paid-execution approvals
+remain binding. The recovery narrative below records historical checkpoints, not
+instructions to repeat them or evidence of Phase 11 acceptance.
+
+```mermaid
+flowchart LR
+    operator["Pilot operator"] --> invite["Manual approved invitation"]
+    invite --> users["2 → 5 → 10 registered users"]
+    users --> product["Accepted Streamlit + FastAPI product"]
+    product --> evidence["Aggregate content-free telemetry"]
+    users --> feedback["Voluntary structured feedback"]
+    evidence --> gate["Stage gate"]
+    feedback --> gate
+    gate -->|"pass"| expand["Next bounded stage"]
+    gate -->|"safety / privacy / integrity / cost failure"| pause["Pause or revoke access"]
+    pause --> product
+```
+
+The accepted decision keeps Streamlit authoritative, existing Auth0/manual access,
+the free-first OCI topology, and current operational controls. No raw prompts, documents,
+identities, or provider identifiers enter pilot evidence. Public signup, external
+notifications, Next.js promotion, paid capacity, and production-SLA claims remain out
+of scope until separately decided.
+
+The accepted live defaults designate the workspace Owner as access approver, target
+best-effort support within one business day, retain aggregate evidence for 30 days after
+closure, and require staged 2/5/10-user gates over 3/7/14 days with 2/3/5 active users.
+Core-journey completion must reach 90%; every safeguard gate must remain at 100%.
+Consent and bounded live execution are approved. Two private accounts are activated and
+covered by one human's consent. ADR 0063 permits a bounded, explicitly non-validating
+two-account technical rehearsal. That rehearsal passes all ten aggregate technical
+scenarios, including access revocation, a bounded ingestion retry, grounded citations,
+and structured feedback. On September 30 Pacific, verified independent-participant
+activation and operator-confirmed cloud Personal-workspace access satisfied the
+second-human onboarding boundary. A bounded two-person observation window started at
+`2026-10-01T02:10:47Z`; its earliest three-day review is `2026-10-04T02:10:47Z`.
+Formal workflow, activity, accessibility, and current operational safeguard evidence
+remain pending. The technical readiness command retains its frozen rehearsal scope;
+manual observation records do not pass either existing evidence gate. No new provider,
+paid call, worker start, automatic acceptance, or five-/ten-user expansion is authorized.
+
+A subsequent explicit approval permits one bounded independent-user workflow: one PDF
+and up to one question per participant, required embeddings, optional feedback, no
+automatic retries, and no new resources. Host preflight is paused for existing-key SSH
+access. The product's three-attempt ingestion default and embedding-client retry default
+must not be used unchecked under this single-attempt approval. Execution stays paused
+until retry controls and current operational safeguards are verified; no paid execution
+or product retry-contract change has occurred.
+
+An explicitly approved temporary IAM policy permits the existing exact-host instance
+principal to consume only its own Run Command executions in the existing compartment.
+It does not grant OS administrator privileges or alter the backup-upload policy. The
+read-only recovery diagnostic succeeded with exit code zero, but did not establish
+privileged access to the SSH key file. SSH recovery remains blocked. SSH repair,
+credential changes and reboot remain separate from the paid pilot authorization.
+Separately approved cleanup deleted the temporary policy and verified the original
+backup-upload policy remains object-create-only. The IAM policy configuration baseline is restored;
+the earlier successful command does not imply continued command-agent authorization.
+
+Read-only OCI inspection on October 1 confirms the existing VM Running, serial-console
+setup controls, and a recent encrypted backup object with upload checksum headers.
+Object-list/header metadata does not establish recoverability, current quiescence,
+queue state, or operational readiness. The operator subsequently approved dedicated
+key/temporary-console setup only. On October 3 the operator-created RSA 4096-bit key
+and owner-only permissions were verified without reading private contents. The
+operator-created console connection is verified Active with a matching public-key
+fingerprint; operator-provided serial-banner/OS-prompt evidence now supports attachment,
+not authenticated host access. Fresh October 3 backup upload metadata is not a restore
+or quiescence pass. Proposed supervised maintenance must preserve existing keys and gate
+worker/application startup; current runtime safeguards remain unverified. Maintenance
+recovery was subsequently approved conditionally, but both-user activity-pause
+confirmation remains outstanding and the operator reports the serial session closed.
+Reconnect before maintenance; no reboot, SSH repair, or additional IAM change occurred.
+
+The operator subsequently confirms pause/reconnection, while OCI reports Running/Active.
+The unsubmitted reboot confirmation reveals the default 15-minute shutdown/power-cycle
+fallback; a specific risk acknowledgement is still required. Direct Terminal control
+is blocked by the product safety boundary, so boot interception and credential entry
+remain operator-controlled. No reboot, temporary boot edit, or SSH repair has occurred.
+
+The operator subsequently acknowledged the reboot fallback risk and confirmed console
+readiness. One supervised attempt is approved with Force reboot unchecked; the final
+click and boot interception are operator handoff. No reboot execution or SSH repair is
+yet verified, and paid work/current operational safeguards remain paused. Stop at the
+first boot menu for actual-screen inspection; do not automatically retry maintenance.
+
+The operator subsequently reports reboot submission and serial reconnection to the OS
+login prompt, without a captured recovery menu. OCI reports Running/Active; an empty
+Work requests view does not independently certify reboot completion. The attempt is
+stopped without automatic retry, and another reboot requires fresh explicit approval.
+No SSH repair or current operational pass is evidenced; paid execution remains paused.
+
+Read-only recovery resumed after an operator pause. Local recovery-key metadata remains
+correct, but OCI requires operator reauthentication before current VM/connection
+verification. No second reboot is authorized by the resume request; host repair and
+paid execution remain paused without new cloud mutation.
+
+Reauthentication subsequently restored read-only OCI access. Fresh inspection verifies
+Running and the existing matching-key console connection Active; serial attachment
+remains operator handoff. No second reboot, SSH repair, worker start, or paid call occurred.
+
+The subsequent operator transcript evidences serial attachment at the OS login prompt.
+The additional reboot confirmation is unsubmitted with Force reboot unchecked; fresh
+approval and operator pause/readiness confirmation remain required. No second reboot,
+SSH repair, worker start, or paid call has occurred.
+
+The operator subsequently approved exactly one additional supervised reboot after the
+fallback-risk and pause/readiness review. Final submission and boot interception are
+operator handoff with Force reboot unchecked; stop at the first boot menu for inspection.
+No third attempt or automatic retry is authorized. Execution/repair remain unverified,
+and paid work/application startup remain gated on actual current safeguards.
+
+The additional approved attempt produced operator-reported normal boot/cloud-init
+completion, not a maintenance shell or SSH repair; OCI reports Running/Active. Container
+networking restarted, but actual worker/job/provider and application state are unverified.
+The additional approval is consumed; no third reboot is authorized. Review earliest
+firmware/GRUB output and the A1/OL9-specific procedure before another recovery decision.
+Do not enable the OS-banner Cockpit suggestion or broaden access; retain pilot pause.
+
+Full operator scrollback subsequently evidences the firmware boot-device menu and
+GRUB 2.06 with an unpaused five-second countdown. This supersedes the incomplete-snippet
+menu-absence inference, not the normal-boot/SSH-unrepaired result. Any further explicitly
+approved attempt must stop Esc at the first menu for inspection, then pause GRUB before
+editing. No further reboot or security-setting change occurred; retain pilot pause.
+
+The operator subsequently approved exactly one further supervised reboot using the
+corrected first-menu/Up-Down handling. Current serial OS login and the unchecked Force
+reboot dialog are evidenced; submission/interception remain operator handoff, not yet
+verified. No retry loop, SSH repair, worker start, or paid execution is claimed.
+
+The subsequent operator screenshot evidences GRUB command-line interception, not a
+Linux recovery shell, boot edit, or SSH repair. Menu return/inspection is operator
+handoff; no further reboot or paid processing is authorized by this checkpoint.
+
+Esc subsequently left the plain GRUB prompt active. Read-only root/prefix/device
+inspection is the next operator handoff, not an inferred configuration failure, further
+reboot, or unreviewed config/kernel load. SSH repair/current safeguards remain unverified.
+
+Read-only operator screenshots subsequently verify the saved normal kernel/initramfs,
+boot partition and root-volume arguments, with both referenced tuning variables empty
+in the current GRUB session. Reviewed recovery handoff stages the verified kernel with
+a temporary maintenance-shell argument only, preserving original arguments/security
+settings. No saved boot configuration change, kernel load success, OS recovery access
+or SSH repair is yet evidenced; normal application/worker startup remains gated.
+
+The complete temporary arguments were subsequently verified through operator echo
+output; short normal-kernel and matching-initramfs loads returned without visible GRUB
+errors. Boot handoff remains within the current approved recovery attempt, with no
+persistent configuration change or further OCI reboot. OS recovery access and SSH
+repair remain unverified; application/worker and paid-work safeguards remain gated.
+
+Subsequent operator boot output evidences root-volume mount and switch-root into
+the temporary maintenance Bash prompt, despite initramfs iSCSI discovery warnings.
+This is not full integrity/readiness evidence. Verify PID 1 and root mount mode
+before any filesystem/key modification; SSH repair and normal-service startup
+safeguards remain pending, with participants and paid workflows paused.
+
+Operator checks now confirm Bash as PID 1, the expected read-only XFS root and successful
+initial SELinux policy loading. Root read/write remount is the next approved handoff,
+followed by exact SSH-path metadata inspection. Existing keys, permissions/ownership
+and SELinux protections must be preserved; no key repair or service start is evidenced.
+
+Operator output subsequently verifies writable root with SELinux labeling and expected
+SSH-directory/regular-key-file ownership, modes and labels. The next approved handoff
+creates a unique preserving backup before append-only public-key repair. No key append,
+restored SSH or normal-service startup is yet evidenced.
+
+Operator unique-backup comparison returned zero, the public-key fingerprint matches
+locally/remotely and exact-line presence check confirms it is absent. Approved append
+handoff preserves original bytes and requires post-write verification. No append,
+restored SSH or normal-service startup is yet evidenced; private-key material was not
+read or transferred.
+
+Subsequent operator append verification confirms original-prefix preservation and
+unchanged key-file ownership/mode/SELinux label, but detects two recovery-key lines.
+Before narrow duplicate correction, verify the entire file against the preserved backup
+plus two approved append payloads. Preserve all original keys; restored SSH and normal
+startup remain unverified and paid workflows remain gated.
+
+Whole-file comparison subsequently confirmed the backup plus two exact approved append
+payloads. Operator tail correction reported zero and the key-line count is now one;
+original backup remains. Final whole-file and metadata verification precede controlled
+SSH startup. Gate Docker autostart; historical worker stopped state is not current proof.
+
+Final whole-file comparison confirms original backup plus exactly one approved recovery
+key, with ownership/mode/SSH-home label intact. File repair is verified; SSH connectivity
+is not. Next flush and inspect offline Docker startup settings before reviewing temporary
+autostart protection and controlled init. Containers/worker/paid workflows remain gated.
+
+Operator flush returned zero and offline Docker service/socket states are enabled/disabled.
+Reviewed startup handoff verifies runtime storage and stages/verifies runtime-only masks
+for both units before normal init, preserving persistent enablement. This barrier prevents
+ordinary systemd activation, not a future reboot or deliberate alternate daemon launch;
+live SSH and actual host/worker readiness remain pending.
+
+Operator verifies tmpfs runtime storage and both successful Docker masks as masked-runtime,
+with persistent enablement unchanged. Verify public SSH host-key metadata before controlled
+normal init and recheck the barrier afterward. No additional reboot, live SSH pass or
+container/worker/paid-work startup is evidenced.
+
+Public SSH host-key metadata matches local trust and controlled normal init was handed
+off without another reboot. Subsequent partial logs evidence audit-service SELinux
+denials with tmpfs labeling, unavailable journal socket and OCI service restart loops.
+Runtime labeling is a suspected cause, not a verified diagnosis or authorization to
+bypass SELinux/relabel globally/reboot. Bounded SSH TCP reachability passes, but a strict
+public-identity/agent authentication probe has no usable signing identity. Operator
+private key loading/login, post-init runtime-mask verification and readiness are pending.
+
+Live SSH is subsequently verified after private operator key reload; read-only root
+checks confirm Docker masked/inactive and failed/restarting core services. Policy
+validation plus non-mutating dry-run identifies eight runtime-label mismatches, including
+core runtime directories, systemd private socket and both mask links. Separate approval
+is requested for their default label-type restoration and journald/D-Bus restart only,
+then audit/OCI verification. Preserve enforcement, masks, data and persistent settings;
+no global relabel, policy change, reboot, Docker start or paid workflow is included.
+
+Explicitly approved eight-object repair succeeds after fresh safeguard checks: all
+non-recursive default-type validations pass with enforcing SELinux, unchanged Docker
+mask targets and inactive units. Approved journald/D-Bus restart reports journald
+failure; follow-up read-only diagnostics stall and only the verified agent-owned local
+SSH connection is closed. Existing operator SSH is the next diagnostic handoff. No
+broader label/security/data changes, restart retry, reboot, Docker start or paid run
+occurs; post-restart service state and complete operational recovery remain unverified.
+
+Read-only operator diagnostics list D-Bus/auditd processes while journald remains failed
+with exit status one. Policy validation confirms the journald streams directory is an
+additional type mismatch outside the eight approved targets. Proposed separate approval
+covers only that directory's non-recursive default-type correction and one bounded
+journald restart; full recovery is not accepted and no additional change has occurred.
+
+The one-directory correction/restart is subsequently approved, but the strict SSH
+connection times out with no remote command output. Execution remains unverified; no
+blind repeat is performed. Existing operator SSH must inspect label/unit state and
+lingering repair processes before further handoff. No broader correction, reboot,
+Docker start or operational acceptance is authorized by the connection failure.
+
+Operator metadata subsequently separates the remaining agent/sudo/runcommand tree from
+the diagnostic SSH session. The available journald unit log is historical, not a current
+failure trace. A supervised bounded correction of the streams directory returns status
+137, with its policy mismatch unchanged. No subsequent journald restart occurs; the
+timeout does not establish that privileged children exited. Keep the recovery gate
+closed pending read-only process inspection and a reviewed next step. No automatic
+sudo retry, wider relabel, reboot, mask removal, Docker start or paid work follows.
+
+Follow-up inspection lists no diagnostic timeout/restorecon/systemctl, only the prior
+agent-owned sudo tree. Reported shell/init/SSH contexts and sudo-directory metadata
+do not identify the privileged-command hang's cause. A supervised normal boot with
+one-boot Docker masks is a proposed alternative, not an implemented change. It requires
+preflight, console readiness and fresh risk-reviewed approval: existing runtime masks
+expire on reboot, missed interception can start Docker, and OCI shutdown may fall back
+to power cycling. No reboot, security bypass or paid work follows from these checks.
+
+Operator preflight subsequently confirms both Docker units inactive/runtime-masked
+and the debug generator executable. Recovery is explicitly paused for intermittent
+operator availability before any new reboot approval. SSH is restored, not OS or
+application readiness; journald and privileged-command recovery remain unresolved.
+No further repair, restart, reboot, Docker activation or paid processing is performed
+while paused. Revalidate key/console readiness and runtime safeguards on explicit
+resume; masks expire on reboot and no additional reboot is authorized.
+
+October 4 resumption permits read-only prerequisite checks, not new host mutations.
+Local recovery-key permissions/public fingerprint match; the agent has no loaded
+identities. Operator private reload and current host/console/Docker verification are
+pending. Yesterday's runtime state is not a current pass, and no further reboot,
+repair, service start or paid execution is authorized by the resume request.
+
+Operator key loading is reported for two hours, but the prior SSH session is
+disconnected and one new strict connection times out before authentication. HTTPS
+connection and agent browser inspection also do not verify current readiness. This
+does not establish key failure or instance state; Docker was intentionally blocked.
+Existing instance/serial-console verification moves to operator read-only handoff;
+no retry, reboot, new connection, permission/network change or paid execution occurs.
+
+Operator October 4 checks report the same VM Running, unchanged public IP and existing
+console Active; serial reconnection evidences attachment and ongoing journal failure /
+repository-service restarts, not privileged access or OS readiness. Proposed normal-boot
+review requires an unsubmitted dialog, current operator/participant readiness and fresh
+approval of incomplete preflight, runtime-mask expiry, interception/autostart and
+shutdown/power-cycle risks. No additional reboot, boot edit, service change or paid work.
+
+October 4 agent browser inspection confirms the existing-VM reboot dialog is unsubmitted
+with Force unchecked. A partly obscured red instance-health warning requires inspection
+before any new reboot approval; operational readiness remains unverified.
+
+Subsequent inspection reads the unresponsive-instance warning and verifies zero
+infrastructure/maintenance status for the displayed hour, not guest health. Operator
+confirms 90 minutes availability. Proposed normal boot requires fresh exact-one-boot
+approval, current participant pause and temporary Docker service/socket masks staged
+before startup. Current backup/quiescence checks are incomplete; mask expiry, missed
+interception/autostart and OCI's 15-minute fallback remain explicit risks. The reviewed
+reboot confirmation is unsubmitted with Force unchecked; no host mutation occurred.
+
+Operator approval now covers exactly one supervised normal reboot with temporary
+Docker boot masks, with both participants paused and serial Terminal connected. Fresh
+verification shows Force unchecked and no submission. Final click/interception remain
+operator handoff; execution and new mask staging are unverified, not readiness evidence.
+
+Subsequent inspection shows OCI Stopping after operator handoff while serial output
+still reflects the old long-uptime boot. Shutdown transition is evidenced, not completed
+recovery or new boot masks. Exact click time is unrecorded; no additional reboot, force
+action, Docker start or paid processing is authorized or performed.
+
+The subsequent operator screenshot evidences intercepted GRUB, rescue selected and the
+normal UEK entry second. Inspect the normal entry's temporary editor before one-boot
+Docker masks and startup; no saved boot change or recovered OS readiness is yet evidenced.
+
+The normal-entry editor is now verified: original kernel/initramfs and root/storage/
+console arguments are retained without a maintenance Bash override. Only the two
+approved main-system Docker unit masks may be appended; visual verification must precede
+boot. No persistent boot, debug-shell or security-policy change is authorized.
+
+Both exact Docker boot-mask arguments are visually verified on the normal kernel
+line, preserving original arguments and initramfs. Boot remains the existing approved
+attempt's temporary handoff, not a saved change or another reboot. Verify live masks
+and OS/core-service/SSH/SELinux health before any container or paid-work activation.
+
+Subsequent strict SSH and bounded privileged checks verify normal OS recovery with
+SELinux Enforcing, core services healthy, matching runtime labels and no failed units.
+Docker remains inactive/generator-masked and the saved worker manually stopped; accepted
+phase10 operational timers are enabled/waiting. Proposed runtime-only debug-generator
+masking and one daemon-reload require fresh approval before existing Docker/services
+start. Preserve other generators, persistent boot configuration, images/data and worker
+stop. No further reboot, recreation/migration or paid work; participants remain paused.
+Application/data-plane readiness and Phase 11 acceptance remain unverified.
+
+Subsequent approved runtime-only debug-generator override and one reload release the
+generated Docker masks. Verified vendor-unit startup restores eight existing services
+without pull/recreation/migration or further reboot. Health/TLS/readiness/anonymous denial
+pass, revision/schema retained, worker/one-shots stopped, no active job/queue backlog.
+Both enabled timers failed while Docker was masked; recovery/catch-up backup needs review.
+Capacity evidence stale, newest encrypted bundle approximately 36.6 hours old without
+renewed integrity proof. Application startup passes; full readiness/pilot acceptance
+pending, participants paused, no paid calls/upgrades/new resources. Runtime override
+expires next boot; retain it while current kernel mask arguments remain.
+
+Subsequent approved timer recovery completes one encrypted/checksum-verified uploaded
+backup and restores original schedules, with fresh passing capacity evidence, healthy
+services and no failed units. Compose dependency startup unexpectedly reruns existing
+migrate/models one-shots; schema/image unchanged, both now stopped, worker never started.
+A tested direct-existing-container current-boot guard contains resume behavior; review
+permanent remediation before another reboot or pilot resumption. No second backup/new
+restore proof, paid calls/image upgrades/new resources/additional reboot. Participants
+remain paused; current-boot recovery is verified, Phase 11 is not accepted.
+
+Subsequent approved permanent backup remediation snapshots validated full running IDs
+before quiescence, directly stops/resumes only those containers and preserves storage-
+before-application restoration and plaintext cleanup on failure. Compose dependency
+startup is removed from backup authority; originally stopped worker/storage and setup
+jobs stay stopped. Twenty focused tests, complete free gate (398 passed/16 expected
+skips), live gate (413 passed/one expected skip) and five synthetic host cases pass.
+The backup-only source patch is checksum verified with rollback source retained, the
+temporary backup guard removed and protected canonical unit restored. Current-boot
+Docker override remains. An installer timer assertion stops final validation, followed
+by independent passing checks of original timers, fresh capacity, readiness/TLS and
+empty queues. Worker/setup-job start times and schema/image are unchanged. No extra
+real backup/reboot, paid call, image upgrade/new resource, Git publication or Phase 11
+acceptance; both participants remain paused.
+
 ## Architecture invariants
 
 - FastAPI, never the frontend, is the authorization boundary.
@@ -979,6 +1346,9 @@ backup name, host coordinate, queue message, or provider resource identifier.
 | Dependency maintenance | Monthly grouped uv/npm/Actions/container candidates implemented under ADR 0054; first lockfile/test/scan/SBOM/provenance/ARM64/signing/rollback gate passes with no auto-merge or paid acceptance |
 | OCI capacity/cost guardrails | Five-minute collector under ADR 0055 is enabled; live free-first inventory and host metrics are healthy, 15-minute queue and 14-day certificate thresholds pass, and no auto-scale or paid capacity is authorized |
 | Upgrade/rollback/DR automation | Exact-hash executor under ADR 0056 passes upgrade, forward-schema-safe rollback, roll-forward, and clean-host recovery with runtime-only secrets and verified cleanup |
+| Phase 11 pilot boundary | Accepted in ADR 0057; invitation-only, ten-user maximum, free-first, content-free evidence |
+| Pilot frontend | Accepted in ADR 0059; Streamlit authoritative and Next.js unpromoted |
+| Pilot feedback | Accepted in ADR 0060; voluntary structured feedback plus aggregate telemetry, no raw-content evidence |
 
 Accepted Phase 2 decisions are recorded in
 [`docs/architecture/decisions`](decisions/):
@@ -1066,6 +1436,16 @@ Accepted Phase 10 decisions are:
 - [ADR 0054 — Dependency and supply-chain maintenance](decisions/0054-dependency-supply-chain-maintenance.md)
 - [ADR 0055 — OCI capacity, monitoring, and cost guardrails](decisions/0055-oci-capacity-monitoring-cost-guardrails.md)
 - [ADR 0056 — Upgrade, rollback, and disaster-recovery automation](decisions/0056-upgrade-rollback-disaster-recovery-automation.md)
+
+Accepted Phase 11 decisions are:
+
+- [ADR 0057 — Phase 11 pilot scope and evidence boundary](decisions/0057-phase11-pilot-scope-evidence.md)
+- [ADR 0058 — Pilot onboarding, account lifecycle, and support](decisions/0058-pilot-onboarding-account-support.md)
+- [ADR 0059 — Pilot frontend and product experience](decisions/0059-pilot-frontend-product-experience.md)
+- [ADR 0060 — Pilot consent, privacy, and feedback](decisions/0060-pilot-consent-privacy-feedback.md)
+- [ADR 0061 — Pilot reliability, support, capacity, and cost](decisions/0061-pilot-reliability-support-cost.md)
+- [ADR 0062 — Pilot rollout, acceptance, and rollback](decisions/0062-pilot-rollout-acceptance-rollback.md)
+- [ADR 0063 — Two-account technical rehearsal boundary](decisions/0063-two-account-technical-rehearsal.md)
 
 ## Maintenance checklist
 

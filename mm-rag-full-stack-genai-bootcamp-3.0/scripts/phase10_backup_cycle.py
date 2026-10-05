@@ -5,6 +5,7 @@ import fcntl
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 from collections.abc import Callable, Sequence
@@ -17,6 +18,37 @@ from scripts.phase10_operations import backup_verification_evidence
 
 Runner = Callable[[Sequence[str], Path, Any], None]
 Bundler = Callable[[Path, Path, str], None]
+APPLICATION_SERVICES = ("api", "dispatcher", "worker", "ui")
+STORAGE_SERVICES = ("qdrant", "seaweedfs")
+
+
+def _running_container_ids(inventory: str) -> dict[str, str]:
+    """Validate the running-container snapshot without disclosing raw metadata."""
+    try:
+        if inventory.lstrip().startswith("["):
+            entries = json.loads(inventory)
+        else:
+            entries = [json.loads(line) for line in inventory.splitlines() if line.strip()]
+        running: dict[str, str] = {}
+        for entry in entries:
+            if not isinstance(entry, dict):
+                raise ValueError
+            service = entry.get("Service")
+            if service not in (*APPLICATION_SERVICES, *STORAGE_SERVICES):
+                continue
+            container_id = entry.get("ID")
+            if (
+                entry.get("State") != "running"
+                or not isinstance(container_id, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", container_id)
+                or service in running
+                or container_id in running.values()
+            ):
+                raise ValueError
+            running[service] = container_id
+        return running
+    except (ValueError, TypeError) as exc:
+        raise ValueError("Backup running-container inventory is invalid") from exc
 
 
 def run_backup_cycle(
@@ -69,26 +101,33 @@ def run_backup_cycle(
         staging.mkdir(mode=0o700)
         (staging / "qdrant").mkdir(mode=0o700)
         (staging / "objects").mkdir(mode=0o700)
-        stopped_storage = False
-        application_services: list[str] = []
+        storage_to_resume: list[str] = []
+        application_to_resume: list[str] = []
         try:
-            running_path = staging / "running-services.txt"
+            running_path = staging / "running-containers.json"
             with running_path.open("wb") as running_services:
                 run(
-                    [*prefix, "ps", "--services", "--status", "running"],
+                    [
+                        *prefix,
+                        "ps",
+                        "--format",
+                        "json",
+                        "--status",
+                        "running",
+                        "--no-trunc",
+                        "--orphans=false",
+                    ],
                     compose_file.parent,
                     running_services,
                 )
-            running = set(running_path.read_text(encoding="utf-8").splitlines())
+            running = _running_container_ids(running_path.read_text(encoding="utf-8"))
             running_path.unlink()
-            application_services = [
-                service
-                for service in ("api", "dispatcher", "worker", "ui")
-                if service in running
+            application_to_resume = [
+                running[service] for service in APPLICATION_SERVICES if service in running
             ]
-            if application_services:
+            if application_to_resume:
                 run(
-                    [*prefix, "stop", *application_services],
+                    ["docker", "stop", *application_to_resume],
                     compose_file.parent,
                     None,
                 )
@@ -124,8 +163,11 @@ def run_backup_cycle(
                     compose_file.parent,
                     counts,
                 )
-            run([*prefix, "stop", "qdrant", "seaweedfs"], compose_file.parent, None)
-            stopped_storage = True
+            storage_to_resume = [
+                running[service] for service in STORAGE_SERVICES if service in running
+            ]
+            if storage_to_resume:
+                run(["docker", "stop", *storage_to_resume], compose_file.parent, None)
             run(
                 [*prefix, "cp", "qdrant:/qdrant/storage/.", str(staging / "qdrant")],
                 compose_file.parent,
@@ -181,17 +223,18 @@ def run_backup_cycle(
             return evidence
         finally:
             try:
-                if stopped_storage:
+                if storage_to_resume:
+                    # Compose start/up can run dependency jobs; resume exact original IDs only.
                     run(
-                        [*prefix, "up", "-d", "qdrant", "seaweedfs"],
+                        ["docker", "start", *storage_to_resume],
                         compose_file.parent,
                         None,
                     )
             finally:
                 try:
-                    if application_services:
+                    if application_to_resume:
                         run(
-                            [*prefix, "up", "-d", *application_services],
+                            ["docker", "start", *application_to_resume],
                             compose_file.parent,
                             None,
                         )

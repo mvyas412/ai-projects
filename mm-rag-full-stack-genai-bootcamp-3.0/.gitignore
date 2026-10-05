@@ -112,6 +112,7 @@ evaluation/phase6/results/
 evaluation/phase6/representative/
 evaluation/phase8/results/
 evaluation/phase10/results/
+evaluation/phase11/results/
 operations/private/
 deploy/oci/runtime.env
 deploy/oci/streamlit-secrets.toml

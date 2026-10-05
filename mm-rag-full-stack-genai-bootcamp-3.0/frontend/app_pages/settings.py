@@ -1,6 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 import streamlit as st
+from pilot import PILOT_NOTICE, PILOT_SUPPORT
 from utils.api import BackendAPIError
 from utils.runtime import api_client, current_user_identity, selected_workspace
 
@@ -20,6 +21,11 @@ with access.container(border=True, height="stretch"):
     st.write(workspace["name"])
     st.caption("Access is enforced by FastAPI for every document and conversation request.")
     st.badge(str(workspace["role"]).capitalize(), color="blue")
+
+with st.container(border=True):
+    st.subheader("Learning pilot notice")
+    st.write(PILOT_NOTICE)
+    st.caption(PILOT_SUPPORT)
 
 st.subheader("Service readiness")
 try:
