@@ -5,8 +5,70 @@ Status: **Technical rehearsal passed; two-person canary paused pending bounded r
 Current checkpoint: OCI recovery and the permanent backup-resume fix are verified.
 The worker remains stopped and both participants paused. The dated recovery checkpoints
 below are chronological evidence, not instructions to repeat completed recovery actions.
-Commit/push is separately approved; merging and paid pilot execution are not authorized
-by that publication approval. Phase 11 is not accepted.
+Recovery publication was separately squash-merged through PR #27. The bounded retry
+profile is now implemented with source publication approved; deployment and paid pilot execution remain separate
+gates. Phase 11 is not accepted.
+
+## Single-attempt pilot retry profile
+
+The opt-in `EXECUTION_RETRY_PROFILE=pilot-single-attempt-v1` is a temporary execution
+boundary, not a new general retry default. `standard` retains three ingestion attempts,
+two embedding-client retries and the existing chat SDK default. Invalid profile names
+fail configuration validation. Set the same reviewed profile on API and worker only
+after separate deployment approval; no runtime environment is changed by
+this local implementation.
+
+Under the pilot profile:
+
+- New jobs durably store `max_attempts=1`; duplicate delivery cannot add an attempt.
+- Retryable failures and expired leases become terminal without a retry outbox event.
+  The stored one-attempt budget survives a later process-profile rollback.
+- Embedding and chat clients (including image transcription) receive `max_retries=0`.
+  Query-embedding failure does not proceed to generation; generation failure is not replayed.
+- Successor retry/rebuild and differently keyed re-enqueue of the same version are
+  rejected after authorization. Same-key replay preserves the original job/history.
+- Worker startup checks active job budgets before connecting the broker consumer.
+  A pilot worker refuses multi-attempt jobs; a standard worker refuses bounded jobs.
+  The claim path rechecks compatibility without performing indexing or altering history.
+- Single-attempt Library jobs show an operator-contact notice instead of Retry/Rebuild.
+  The backend remains authoritative, including for historical jobs visible in the UI.
+
+This profile is **not** a participant allowlist, PDF/question counter, token/spending cap,
+or paid-run authorization. The existing two-person, one-PDF/one-question-per-person
+maximum remains an operator-supervised workflow boundary. Legitimate embedding batches
+may require multiple distinct requests; disabling retries does not limit batch count or
+guarantee a monetary ceiling. Stop on failure and review any further attempt separately.
+Do not reopen access or start the worker from a configuration-report pass alone.
+
+Provider-free local configuration check:
+
+```bash
+EXECUTION_RETRY_PROFILE=pilot-single-attempt-v1 uv run python -m scripts.phase11_retry_controls
+```
+
+It emits only the profile and effective retry values, exits nonzero for standard mode,
+and always reports `live_execution_authorized=false`. It does not inspect the deployed
+processes, jobs/queues, participant limits, capacity, backups, or consent. Before a
+separately approved deployment/run, verify exact reviewed source/image, matching API and
+stopped-worker configuration, no incompatible active jobs, reviewed empty/limited queue,
+fresh operational safeguards and the two independent participant sessions. Preserve the
+worker stop and both-person pause until all these gates pass. Do not use Compose startup
+as a configuration probe or rewrite old jobs to make the scope check pass.
+
+Installed-SDK transport tests use only local mocked HTTP for 429, 503, connection and
+timeout failures. The profile follows the official advice to avoid multiplying SDK and
+application retries ([OpenAI retry guidance](https://developers.openai.com/api/docs/guides/rate-limits)).
+No real provider call is required to test it.
+
+Local verification checkpoint — 2026-10-04: `make check` passes 420 tests with 16
+expected skips; `make check-live` passes 435 tests with one expected skip. Ruff/Mypy,
+deployment/observability contracts, accepted migration head and zero schema drift pass.
+The real PostgreSQL concurrency proof passes for same-key replay and differently keyed
+submission rejection. Existing local API/dependency readiness and UI health pass; these
+health checks do not attest that the deployed processes use the new profile. Added-line
+and new-file privacy checks pass. No cloud deployment, worker start, participant
+resumption, paid call or Phase 11 acceptance is included. Commit/push approval covers
+source publication only and does not activate this profile.
 
 ## Purpose
 
