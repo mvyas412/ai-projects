@@ -940,6 +940,19 @@ evidence. Worker stop, participant pause and separate merge/paid-execution appro
 remain binding. The recovery narrative below records historical checkpoints, not
 instructions to repeat them or evidence of Phase 11 acceptance.
 
+The local `EXECUTION_RETRY_PROFILE` execution boundary defaults to `standard`, preserving
+the accepted retry behavior. Opt-in `pilot-single-attempt-v1` stores one attempt on new
+ingestion jobs and sets embedding/chat SDK retries to zero. Failure and lease recovery
+cannot reschedule these jobs even after profile rollback; authorization precedes
+successor/re-enqueue rejection. Worker preflight and fenced claim checks reject an
+incompatible job/profile before paid work. No new schema, provider, pipeline fingerprint,
+tenant authority or historical-job rewrite is introduced. A content-free configuration
+report is not live readiness or execution authority. Participant/PDF/question limits
+remain separately supervised, not automated counters or a spending guarantee. PR #27
+publishes the prior recovery checkpoint. Source commit/push for this control is separately
+approved; reviewed deployment and operational preflight are still required before the
+paused pilot can proceed.
+
 ```mermaid
 flowchart LR
     operator["Pilot operator"] --> invite["Manual approved invitation"]

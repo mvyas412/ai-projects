@@ -32,3 +32,15 @@ integrity, secret, cross-tenant, unexpected-cost, and recovery failures pause th
 immediately. Ordinary performance issues are remediated within the active stage. Any
 paid-capacity review requires a separate decision supported by measured evidence. The
 support target is best effort within one business day.
+
+### Bounded workflow retry implementation — 2026-10-04
+
+The separately approved one-PDF/one-question-per-person workflow forbids automatic
+retries. Its opt-in `pilot-single-attempt-v1` execution profile gives new jobs one
+durable attempt and provider clients zero retries, rejects successor retries/re-enqueue,
+and checks worker/job compatibility. Standard three-attempt behavior remains accepted;
+the profile is not a general retry-contract change or authorization to start paid work.
+The participant/document/question counts remain supervised limits, not automatically
+enforced counters, and legitimate embedding batches may contain distinct requests.
+No cost ceiling is inferred from disabling retries. Deployment and operational/pilot
+resumption remain separately reviewed.

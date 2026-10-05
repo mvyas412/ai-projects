@@ -1227,12 +1227,19 @@ privacy, recovery, and cost boundaries remain intact.
 | 11.2 | Streamlit pilot journeys and accessibility | Foundation implemented | ADR 0059 accepted; required journeys are represented in the contract gate |
 | 11.3 | Consent, privacy, voluntary feedback, and evidence governance | Foundation implemented | ADR 0060 accepted; sensitive evidence rejected |
 | 11.4 | Reliability, support, capacity, maintenance, and cost boundary | Foundation implemented | ADR 0061 accepted; paid/provider/live actions disabled |
-| 11.5 | Internal → 2 → 5 → 10-user staged rollout and closure | Technical rehearsal passed; two-person canary paused | Observation started September 30 Pacific; recovery pauses do not count as successful participation. Bounded retry controls, formal workflow evidence and later stages remain pending |
+| 11.5 | Internal → 2 → 5 → 10-user staged rollout and closure | Technical rehearsal passed; two-person canary paused | Observation started September 30 Pacific; recovery pauses do not count as successful participation. Reviewed retry-control deployment, formal workflow evidence and later stages remain pending |
 
 Current checkpoint: OCI recovery and permanent backup-resume remediation are verified;
 the worker and both participants remain paused. The following checkpoints preserve the
 chronological approval/evidence trail, not current permission to repeat completed work.
-Commit/push is separately approved; no merge or paid pilot resumption is implied.
+Recovery publication was separately squash-merged through PR #27. Locally verified bounded retry
+controls now implement opt-in `pilot-single-attempt-v1`: durable one-attempt jobs,
+zero provider retries, authorized successor/re-enqueue rejection, and worker budget/profile
+preflight. Standard behavior and immutable pipeline identity remain unchanged. The
+profile does not enforce participant/PDF/question counts or a monetary ceiling; those
+remain supervised workflow limits. No deployment, worker start, participant resumption
+or paid pilot execution is implied. Source commit/push is separately approved;
+reviewed deployment and formal workflow evidence remain pending.
 
 The two-person observation window starts at `2026-10-01T02:10:47Z`, with an earliest
 three-day review at `2026-10-04T02:10:47Z`. Two independent people, activity evidence,
