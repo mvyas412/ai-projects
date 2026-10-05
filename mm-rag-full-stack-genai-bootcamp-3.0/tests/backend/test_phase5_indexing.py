@@ -1,15 +1,22 @@
+from copy import deepcopy
+from io import BytesIO
 from types import SimpleNamespace
 from typing import Any, cast
 from uuid import uuid4
 
+import pytest
 from pydantic import SecretStr
+from pypdf import PdfWriter
+from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
 from qdrant_client import QdrantClient, models
 
 from backend.app.core.config import Settings
+from backend.app.ingestion import pipeline as pipeline_module
 from backend.app.ingestion.pipeline import (
     PHASE6_PIPELINE_PROFILE,
     PIPELINE_PROFILE,
     manifest_supports_sparse,
+    pipeline_fingerprint,
     pipeline_manifest,
 )
 from backend.app.rag import indexing as indexing_module
@@ -155,3 +162,69 @@ def test_phase6_manifest_is_versioned_and_promoted_by_default() -> None:
     structured_tables = cast(dict[str, object], default_manifest["structured_tables"])
     assert visual_extraction["remote_services"] is False
     assert structured_tables["generated_sql"] is False
+
+
+@pytest.mark.parametrize("media_type", [
+    "application/pdf", "text/plain",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+])
+def test_parser_upgrade_versions_future_manifests_without_mutating_history(
+    monkeypatch, media_type
+) -> None:
+    installed_version = pipeline_module.version
+    settings = _settings()
+    parser_version = "6.15.0"
+    monkeypatch.setattr(
+        pipeline_module, "version",
+        lambda name: parser_version if name == "pypdf" else installed_version(name),
+    )
+    previous_manifest = pipeline_manifest(settings, media_type)
+    previous_snapshot = deepcopy(previous_manifest)
+    previous_fingerprint = pipeline_fingerprint(settings, media_type)
+
+    parser_version = "6.19.0"
+    successor_manifest = pipeline_manifest(settings, media_type)
+
+    extraction = cast(dict[str, object], successor_manifest["extraction"])
+    assert extraction["pypdf_version"] == "6.19.0"
+    assert pipeline_fingerprint(settings, media_type) != previous_fingerprint
+    assert previous_manifest == previous_snapshot
+    assert previous_manifest["profile"] == successor_manifest["profile"]
+    assert manifest_supports_sparse({
+        "pipeline": previous_manifest, "chunk_count": 1, "sparse_vector_count": 1,
+    })
+
+
+def test_pdf_parser_preserves_text_page_locators_without_provider_calls(monkeypatch) -> None:
+    def forbidden_provider(**_kwargs):
+        raise AssertionError("PDF text extraction must not call a paid provider")
+
+    monkeypatch.setattr(indexing_module, "OpenAIEmbeddings", forbidden_provider)
+    monkeypatch.setattr(indexing_module, "ChatOpenAI", forbidden_provider)
+    writer = PdfWriter()
+    for text in ["Synthetic first page.", "", "Synthetic third page."]:
+        page = writer.add_blank_page(width=200, height=200)
+        if not text:
+            continue
+        font = DictionaryObject({
+            NameObject("/Type"): NameObject("/Font"),
+            NameObject("/Subtype"): NameObject("/Type1"),
+            NameObject("/BaseFont"): NameObject("/Helvetica"),
+        })
+        page[NameObject("/Resources")] = DictionaryObject({
+            NameObject("/Font"): DictionaryObject({NameObject("/F1"): font}),
+        })
+        stream = DecodedStreamObject()
+        stream.set_data(f"BT /F1 12 Tf 10 100 Td ({text}) Tj ET".encode())
+        page[NameObject("/Contents")] = writer._add_object(stream)
+    content = BytesIO()
+    writer.write(content)
+    request = IndexingRequest(
+        workspace_id=uuid4(), document_id=uuid4(), document_version_id=uuid4(),
+        generation_id=uuid4(), document_title="Synthetic PDF",
+        media_type="application/pdf", content=content.getvalue(),
+    )
+
+    assert indexing_module._extract_pages(request, SecretStr("synthetic"), _settings()) == [
+        ("Synthetic first page.", 1), ("Synthetic third page.", 3),
+    ]

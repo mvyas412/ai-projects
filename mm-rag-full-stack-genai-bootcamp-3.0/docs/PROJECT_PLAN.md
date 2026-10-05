@@ -1227,12 +1227,41 @@ privacy, recovery, and cost boundaries remain intact.
 | 11.2 | Streamlit pilot journeys and accessibility | Foundation implemented | ADR 0059 accepted; required journeys are represented in the contract gate |
 | 11.3 | Consent, privacy, voluntary feedback, and evidence governance | Foundation implemented | ADR 0060 accepted; sensitive evidence rejected |
 | 11.4 | Reliability, support, capacity, maintenance, and cost boundary | Foundation implemented | ADR 0061 accepted; paid/provider/live actions disabled |
-| 11.5 | Internal → 2 → 5 → 10-user staged rollout and closure | Technical rehearsal passed; two-person canary paused | Observation started September 30 Pacific; recovery pauses do not count as successful participation. Bounded retry controls, formal workflow evidence and later stages remain pending |
+| 11.5 | Internal → 2 → 5 → 10-user staged rollout and closure | Technical rehearsal passed; two-person canary paused | Observation started September 30 Pacific; recovery pauses do not count as successful participation. Reviewed retry-control deployment, formal workflow evidence and later stages remain pending |
 
 Current checkpoint: OCI recovery and permanent backup-resume remediation are verified;
 the worker and both participants remain paused. The following checkpoints preserve the
 chronological approval/evidence trail, not current permission to repeat completed work.
-Commit/push is separately approved; no merge or paid pilot resumption is implied.
+Recovery publication was separately squash-merged through PR #27. Locally verified bounded retry
+controls now implement opt-in `pilot-single-attempt-v1`: durable one-attempt jobs,
+zero provider retries, authorized successor/re-enqueue rejection, and worker budget/profile
+preflight. Standard behavior and immutable pipeline identity remain unchanged. The
+profile does not enforce participant/PDF/question counts or a monetary ceiling; those
+remain supervised workflow limits. No deployment, worker start, participant resumption
+or paid pilot execution is implied. Source commit/push is separately approved;
+reviewed deployment and formal workflow evidence remain pending.
+
+Draft PR #28 contains the retry controls. Its candidate dependency scan exposed
+critical [GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j)
+in the pre-existing Next.js 16.3.5 pin. Separately approved source-only remediation
+pins the evaluation candidate to 16.3.6 with matching runtime/compiler lock entries;
+no unrelated dependency or deployed runtime is upgraded. Candidate tests (four),
+type-checking, production compilation and npm audit (zero vulnerabilities) pass on
+Node 24. Auth0 configuration warnings are expected in the credential-free build,
+which does not prove authenticated browser parity. Streamlit remains authoritative;
+merge, publication, deployment and paused-pilot execution remain separately gated.
+The initial application-image security scan also fails on existing Python dependencies.
+Separately approved source-only remediation now locks PyJWT 2.15.0, pypdf 6.19.0
+and urllib3 2.8.0, without unrelated package upgrades. Offline regressions cover
+malformed-token rejection before JWKS access, valid signing-key resolution/caching,
+redirect refusal, algorithm restrictions, PDF page locators and retained no-retry controls.
+The existing manifest records pypdf for every format: future ingestion fingerprints
+change, while stored manifests/generations remain immutable; no reindex is authorized.
+Commit/push and inspection of fresh CI are separately approved; native-image security
+results remain pending. Local checks do not clear the failed CI gate or authorize deployment.
+Free verification passes (`make check`: 428 tests/16 skips; `make check-live`:
+443 tests/one skip), with unchanged frozen evidence/schema and healthy existing local
+services. The worker remains stopped and both participants remain paused.
 
 The two-person observation window starts at `2026-10-01T02:10:47Z`, with an earliest
 three-day review at `2026-10-04T02:10:47Z`. Two independent people, activity evidence,

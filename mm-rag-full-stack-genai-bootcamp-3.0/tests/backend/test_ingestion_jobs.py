@@ -8,6 +8,7 @@ from uuid import UUID, uuid4
 import pytest
 from sqlalchemy import select
 
+from backend.app.core.config import Settings
 from backend.app.db.base import Base
 from backend.app.db.session import SessionFactory, create_database_engine, create_session_factory
 from backend.app.models import (
@@ -151,9 +152,10 @@ def _create_job(
     key: str,
     predecessor_job_id: UUID | None = None,
     now: datetime | None = None,
+    settings: Settings | None = None,
 ) -> UUID:
     with context.factory.begin() as session:
-        job, created = IngestionJobStateMachine(session).create_job(
+        job, created = IngestionJobStateMachine(session, settings).create_job(
             user=user,
             workspace_id=context.workspace_id,
             document_id=context.document_id,
@@ -607,6 +609,61 @@ def test_member_cancellation_is_self_scoped_and_fenced(job_context: JobContext) 
         )
         assert finished_job.state == IngestionJobState.CANCELLED.value
         assert finished_attempt.state == IngestionAttemptState.CANCELLED.value
+
+    with job_context.factory() as session:
+        version = session.get(DocumentVersion, job_context.version_id)
+        assert version is not None
+        assert version.status == DocumentVersionStatus.UPLOADED.value
+
+
+@pytest.mark.parametrize("expired", [False, True])
+@pytest.mark.parametrize("rollback_profile", [False, True])
+def test_single_attempt_budget_survives_failure_lease_loss_and_profile_rollback(
+    job_context, test_settings, expired, rollback_profile
+) -> None:
+    pilot = test_settings.model_copy(update={"execution_retry_profile": "pilot-single-attempt-v1"})
+    job_id = _create_job(job_context, user=job_context.member, key="bounded-1", settings=pilot)
+    now = datetime(2026, 10, 4, tzinfo=UTC)
+    with job_context.factory.begin() as session:
+        state = IngestionJobStateMachine(session, test_settings if rollback_profile else pilot)
+        job, attempt = state.claim_job(
+            job_id=job_id, worker_id="bounded-worker", now=now,
+            lease_duration=timedelta(seconds=30),
+        )
+        assert job.max_attempts == job.attempt_count == 1
+        if expired:
+            state.recover_expired_lease(
+                job_id=job_id, now=now + timedelta(seconds=40), retry_at=None,
+            )
+        else:
+            state.record_failure(
+                job_id=job_id, attempt_id=attempt.id, fencing_token=attempt.fencing_token,
+                now=now + timedelta(seconds=10), retryable=True,
+                error_code="dependency_unavailable", error_message="Dependency unavailable",
+            )
+        assert job.state == "failed"
+        assert job.next_attempt_at is None
+        assert job.last_error_code == "bounded_attempt_failed"
+        assert len(list(session.scalars(select(IngestionOutboxEvent)))) == 1
+        with pytest.raises(IngestionInvalidTransitionError):
+            state.claim_job(
+                job_id=job_id, worker_id="duplicate", now=now + timedelta(seconds=50),
+                lease_duration=timedelta(seconds=30),
+            )
+
+
+def test_bounded_worker_refuses_historical_multi_attempt_job(job_context, test_settings) -> None:
+    job_id = _create_job(job_context, user=job_context.member, key="standard-1")
+    pilot = test_settings.model_copy(update={"execution_retry_profile": "pilot-single-attempt-v1"})
+    with job_context.factory.begin() as session:
+        with pytest.raises(IngestionInvalidTransitionError, match="incompatible"):
+            IngestionJobStateMachine(session, pilot).claim_job(
+                job_id=job_id, worker_id="bounded", now=datetime.now(UTC),
+                lease_duration=timedelta(seconds=30),
+            )
+        job = session.get(IngestionJob, job_id)
+        assert job is not None and job.max_attempts == 3 and job.attempt_count == 0
+        assert not list(session.scalars(select(IngestionAttempt)))
 
     with job_context.factory() as session:
         version = session.get(DocumentVersion, job_context.version_id)

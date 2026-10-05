@@ -940,6 +940,41 @@ evidence. Worker stop, participant pause and separate merge/paid-execution appro
 remain binding. The recovery narrative below records historical checkpoints, not
 instructions to repeat them or evidence of Phase 11 acceptance.
 
+The local `EXECUTION_RETRY_PROFILE` execution boundary defaults to `standard`, preserving
+the accepted retry behavior. Opt-in `pilot-single-attempt-v1` stores one attempt on new
+ingestion jobs and sets embedding/chat SDK retries to zero. Failure and lease recovery
+cannot reschedule these jobs even after profile rollback; authorization precedes
+successor/re-enqueue rejection. Worker preflight and fenced claim checks reject an
+incompatible job/profile before paid work. No new schema, provider, pipeline fingerprint,
+tenant authority or historical-job rewrite is introduced. A content-free configuration
+report is not live readiness or execution authority. Participant/PDF/question limits
+remain separately supervised, not automated counters or a spending guarantee. PR #27
+publishes the prior recovery checkpoint. Source commit/push for this control is separately
+approved; reviewed deployment and operational preflight are still required before the
+paused pilot can proceed.
+
+Draft PR #28 also carries a separately approved source-only candidate security patch:
+Next.js 16.3.5 to 16.3.6 and its matching runtime/compiler lock entries address
+[GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j). The candidate
+contains no `next/og` or `ImageResponse` usage; the dependency finding alone does not
+establish exploitability or affect the authoritative deployed Streamlit frontend.
+Free candidate tests, type-checking, production compilation and a clean npm audit
+verify the patch locally, not frontend promotion or authenticated browser acceptance.
+No OCI runtime, container base image, provider, retry policy or deployment authority
+changes with this patch.
+
+The separately approved Python security candidate locks PyJWT 2.15.0, pypdf 6.19.0
+and urllib3 2.8.0; uv imposes an urllib3 security floor without broad resolution upgrades.
+PyJWT now normalizes deeply nested malformed payloads into the verifier's existing
+non-disclosing rejection path before JWKS access. RS256, issuer, audience and required
+claims remain mandatory; synthetic JWKS tests verify signature resolution, key caching
+and redirect refusal. PDF extraction retains original page locators without provider calls.
+Because every ingestion manifest records the pypdf version, all future ingestion formats
+receive updated fingerprints. Existing stored manifests, document/version/generation
+identity and protected evidence are not rewritten, and no automatic reindex is enabled.
+Local free checks are compatibility evidence, not a replacement for fresh native-image
+security gates. No provider, retry-policy, deployed runtime or operational authority changes.
+
 ```mermaid
 flowchart LR
     operator["Pilot operator"] --> invite["Manual approved invitation"]

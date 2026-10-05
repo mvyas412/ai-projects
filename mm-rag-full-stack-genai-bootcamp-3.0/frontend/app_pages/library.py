@@ -203,7 +203,13 @@ if documents_tab.open:
                                         st.rerun()
                                     except BackendAPIError as exc:
                                         st.error(str(exc), icon=":material/error:")
-                            if job is not None and job["state"] in {"failed", "cancelled"}:
+                            if job is not None and job.get("max_attempts") == 1:
+                                st.caption("Single-attempt run: contact the operator before retrying.")
+                            if (
+                                job is not None
+                                and job.get("max_attempts") != 1
+                                and job["state"] in {"failed", "cancelled"}
+                            ):
                                 if st.button(
                                     "Retry",
                                     icon=":material/replay:",
@@ -223,7 +229,12 @@ if documents_tab.open:
                                         st.rerun()
                                     except BackendAPIError as exc:
                                         st.error(str(exc), icon=":material/error:")
-                            if can_reindex and job is not None and job["state"] == "succeeded":
+                            if (
+                                can_reindex
+                                and job is not None
+                                and job.get("max_attempts") != 1
+                                and job["state"] == "succeeded"
+                            ):
                                 if st.button(
                                     "Rebuild index",
                                     icon=":material/sync:",

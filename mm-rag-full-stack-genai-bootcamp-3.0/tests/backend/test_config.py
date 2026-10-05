@@ -8,6 +8,18 @@ from backend.app.core.config import (
 )
 
 
+def test_bounded_retry_profile_is_opt_in_and_validated() -> None:
+    standard = Settings(execution_retry_profile="standard")
+    assert standard.ingestion_max_attempts == 3
+    assert standard.openai_embedding_max_retries == 2
+    assert standard.openai_chat_max_retries is None
+    pilot = Settings(execution_retry_profile="pilot-single-attempt-v1")
+    assert pilot.ingestion_max_attempts == 1
+    assert pilot.openai_embedding_max_retries == pilot.openai_chat_max_retries == 0
+    with pytest.raises(ValidationError):
+        Settings.model_validate({"execution_retry_profile": "single-attempt-typo"})
+
+
 def test_blank_openai_model_names_use_supported_defaults() -> None:
     settings = Settings(openai_chat_model="", openai_embedding_model="   ")
 

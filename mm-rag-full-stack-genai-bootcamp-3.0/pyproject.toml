@@ -18,9 +18,9 @@ dependencies = [
     "psycopg[binary,pool]>=3.2,<4",
     "pydantic-settings>=2.10,<3",
     "pymupdf==1.28.2",
-    "pypdf==6.15.0",
+    "pypdf==6.19.0",
     "pytesseract==0.3.13",
-    "pyjwt[crypto]>=2.10,<3",
+    "pyjwt[crypto]>=2.15,<3",
     "python-multipart>=0.0.20,<1",
     "python-docx==1.2.0",
     "python-dotenv>=1.2,<2",
@@ -44,6 +44,9 @@ dependencies = [
     "opentelemetry-instrumentation-sqlalchemy>=0.58b0,<1",
     "prometheus-client>=0.22,<1",
 ]
+
+[tool.uv]
+constraint-dependencies = ["urllib3>=2.8,<3"]
 
 [tool.uv.sources]
 torch = { index = "pytorch-cpu" }
