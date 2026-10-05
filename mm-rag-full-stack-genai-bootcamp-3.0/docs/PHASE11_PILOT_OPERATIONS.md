@@ -1,13 +1,185 @@
 # Phase 11 pilot operations
 
-Status: **Technical rehearsal passed; two-person canary paused pending bounded retry controls and workflow evidence**
+Status: **Technical rehearsal passed; bounded retry profile deployed; two-person canary paused pending workflow evidence**
 
-Current checkpoint: OCI recovery and the permanent backup-resume fix are verified.
-The worker remains stopped and both participants paused. The dated recovery checkpoints
+Current checkpoint: the separately approved capacity-recovery continuation passes.
+Eight services are running on the existing host; API/dispatcher/UI use `dba88de`.
+The worker is configured on that image/profile but never started, with restart disabled.
+Fresh capacity, readiness/TLS, anonymous denial and zero-job/queue checks pass; both
+maintenance timers are enabled/active/waiting and no host units are failed.
+Both participants remain paused. The separately approved October 5 local test-isolation
+fix passes `make check` (442 tests/16 expected skips) and `make check-live`
+(457 tests/one expected skip); the earlier outbox-test failure is resolved in this gate.
+OCI recovery and the permanent backup-resume fix are preserved. The dated recovery checkpoints
 below are chronological evidence, not instructions to repeat completed recovery actions.
 Recovery publication was separately squash-merged through PR #27. The bounded retry
 profile is now implemented with source publication approved; deployment and paid pilot execution remain separate
 gates. Phase 11 is not accepted.
+
+Publication checkpoint — 2026-10-04: PR #28 passed eight applicable source CI checks
+at `541ab9c` and was squash-merged as `dba88de` with identical trees. Explicit approval
+now dispatches one protected application-image publication at that exact merged revision:
+[run 37262385321](https://github.com/mvyas412/ai-projects/actions/runs/37262385321).
+All eight jobs pass in 19m20s, including the published-image scan and OIDC-signing gate.
+Published immutable application index:
+`sha256:4a39d5affe71651ca5a19bf6d79542ee578f3bc4aca62234d6abf86721ec9978`.
+Registry metadata verifies AMD64/ARM64 manifests, SLSA provenance containing the approved
+revision and both SPDX SBOMs with the reviewed Python versions. Publication is not deployed
+profile adoption or pilot acceptance; independent signature verification remains a deployment
+preflight check. No automatic rerun or Next.js publication.
+Host deployment requires fresh preflight, rollback manifest and exact unchanged plan-hash
+approval; worker stop and participant pause remain binding. No paid call or new resource.
+The source-security checkpoints below retain historical validation boundaries.
+
+Historical deployment preparation checkpoint — 2026-10-04 Pacific: read-only preparation is
+authorized, not host execution. The existing host answers SSH but the dedicated recovery
+identity is not loaded; authentication ends before remote commands. Fresh host revision,
+backup/capacity/jobs/queues and readiness are therefore not verified. The local previous
+release manifest is historical rollback input only. Independent signature verification
+also remains outstanding. No executable ready plan or approval hash is issued.
+Review must explicitly bound Compose dependency traversal during application startup and
+stage matching image/profile configuration for the stopped worker without starting it.
+No host mutation, automatic retry, paid call, worker start or participant resumption.
+
+Fresh deployment preflight — 2026-10-04 Pacific (04:40 UTC October 5): operator reloads
+the recovery key. Strict SSH and bounded noninteractive privilege checks pass. Current
+application/rollback revision is `8000dab`; all six immutable image pins and deployment
+input hashes match. SELinux is enforcing, core services active, no failed units, disk use
+39% and inode use 2%. API/storage readiness, public TLS/UI and anonymous API 401 pass.
+Both application queues are empty with zero consumers; no active ingestion jobs exist.
+Worker remains stopped. Backup/capacity timers are active, latest capacity evidence passes,
+and the latest mode-0600 encrypted backup is 3.4 hours old with verified ciphertext SHA;
+no plaintext staging remains. Five cached models pass verify-only checks without downloads.
+This is not a fresh cloud-resource inventory or independent proof of participant pause.
+
+Independent signature verification now passes for the published index, constrained to
+the approved workflow identity, GitHub issuer, repository, main ref and full `dba88de`
+revision. Project-local Cosign 3.0.6 is checksum-verified against the already pinned
+official installer before execution; certificate trust and transparency evidence pass.
+The ignored complete supervised plan binds current/staged file hashes and immutable
+rollback/target manifests. It awaits explicit unchanged canonical plan-hash approval.
+It is not a generic `phase10_release execute` plan: that executor's upgrade dependency
+traversal is broader than this paused-pilot scope. Exactly bounded manual steps use
+`--no-deps` and `--pull never`, one forward-only unchanged-head migration, offline model
+verification and API/dispatcher/UI startup only. Edge/storage remain running unchanged.
+Worker configuration is created but never started, with matching target image/profile
+and a private `restart: no` override retained until separately approved resumption.
+Backup timer pause/restore and existing maintenance leases prevent concurrent deployment;
+the tested host backup fix is preserved rather than resetting the host checkout.
+Any drift/failure aborts without automatic retry or rollback. Approval rechecks freshness
+and requires participant pause. Twenty-six focused free release/retry tests and plan
+input/manifest checks pass. No deployment, paid call, worker start, commit/push or new resource.
+
+Supervised apply checkpoint — 2026-10-04 Pacific: the operator approves the exact
+prepared plan hash. Fresh guards pass; exclusive backup/release leases are acquired,
+original inputs saved privately on host, and the existing backup timer paused. The signed
+target app digest pulls successfully with ARM64/full revision verified. API/dispatcher/UI
+are stopped; reviewed Compose/profile/manifest and two runtime fields are installed.
+One forward migrator and offline model verification both exit zero at unchanged head
+`20260919_0019`. The next `compose create --no-deps` fails because installed Compose
+does not support that option for `create`. This is an agent planning error, not an
+operator error, worker start, model failure or data-integrity finding.
+
+Execution stops at that first failed command: no startup, retry or rollback. The backup
+timer is restored active/enabled and leases released. Read-only inspection confirms
+API/UI/dispatcher and the old worker stopped, five unchanged edge/storage services running,
+empty application queues/jobs, unchanged recorded release revision and no failed units.
+The application is unavailable, and runtime adoption/Phase 11 acceptance are not passed.
+Private original inputs remain for recovery; no secrets are transferred or printed.
+Host help and a content-free dry run verify the corrected `up --no-start --no-deps
+--pull never worker` recreates only the worker without starting it or touching dependencies.
+A separate exact-hash continuation is prepared, not executed. It skips the completed
+pull/environment/migration/model steps, configures the worker stopped/restart-no, then
+starts and verifies API/dispatcher/UI only. Fresh guards and new direct approval are
+mandatory. Free `make check-live` passes 443 tests/one skip with no drift and local
+API/UI health; this is local regression evidence, not cloud recovery. No paid calls,
+worker/participant resumption, new resources, automatic retry, commit/push or acceptance.
+
+Continuation preflight checkpoint — 2026-10-04 Pacific: the operator approves the exact
+corrected continuation hash. Read-only guards stop on the sole failed unit,
+`mm-rag-phase10-capacity.service`, before any timer pause, worker configuration or
+application startup. Its unchanged collector invokes `docker compose exec api` for
+the operations report; journal error-category markers confirm that command exits one
+while API is stopped. The earlier passing capacity report is historical, not fresh.
+Docker/journald/D-Bus/SSH, storage/edge and both enabled/waiting timers remain healthy;
+recorded revision and stopped roles are unchanged, with no continuation apply record.
+Direct provider-free CPU/memory/disk/inode measurements are within existing limits.
+
+A separate complete recovery plan is prepared, not executed: validate the known sole
+capacity failure and direct fresh safeguards explicitly, configure the worker without
+starting it, restore API/dispatcher/UI, then obtain one successful provider-free
+capacity collection (or verify a fresh timer-produced success). No collector, policy
+or timer edits and no `reset-failed` error hiding. Any other failure aborts. Only after
+all readiness/retry/capacity safeguards pass may recorded revision advance. Original
+backup/rollback inputs are preserved. No repeat pull/environment staging/migration/model
+verification, automatic retry/rollback, worker start, participant resumption, paid call,
+new resource, Git publication or Phase 11 acceptance. Twenty-six focused free tests pass;
+the prior full live gate remains 443 passed/one skip, not a cloud deployment pass.
+
+Approved recovery completion — 2026-10-04 Pacific (05:14–05:15 UTC October 5): exact
+new-plan approval authorizes one execution. Strict fresh hash/original-input/rollback,
+known stopped-API capacity-failure, direct policy metrics/TLS, encrypted-backup checksum
+and quiescence checks pass under existing backup/release leases. The backup timer is
+briefly paused. Supported no-start/no-dependency/no-pull worker configuration succeeds;
+the worker remains created/never-started/restart-no with the target image/profile.
+Only API/dispatcher/UI start; storage/edge/setup identities, mounts, networks, pins and
+start times are preserved. Public TLS/UI, dependency readiness, anonymous API 401 and
+empty application jobs/queues pass. One provider-free capacity service start succeeds,
+producing fresh passing evidence and clearing its prior failure normally, without
+`reset-failed`, policy/source/timer edits or a retry.
+
+The provider-free report verifies `pilot-single-attempt-v1`, one ingestion attempt,
+zero embedding/chat retries and `live_execution_authorized=false`. Only after full
+postflight does recorded application revision advance to `dba88de`. The backup timer
+is restored, leases released and independent read-only verification passes: eight
+services running, no failed units, both timers enabled/active/waiting, worker never
+started and setup roles stopped. SELinux, private originals, owner-only runtime secrets,
+current-boot generator override and permanent backup fix are preserved. No repeated
+image pull, migration, model verification, paid call, new resource, participant resumption,
+automatic retry/rollback, Git publication or Phase 11 acceptance.
+
+The October 4 recovery-session `make check-live` was **not a pass**: 442 tests pass, one skips and the
+existing PostgreSQL outbox lease integration test fails because its first claim returns
+zero events. Read-only inspection confirms the local dispatcher running and worker
+stopped; competing consumption of the test's past-due event is a plausible inference,
+not a confirmed cause. No test retry, dispatcher stop or source fix is performed.
+This local regression finding is separate from the verified cloud recovery and remains
+an explicit follow-up; the prior 443-test live pass is historical, not this run's result.
+
+Local diagnosis — 2026-10-05 Pacific: read-only metadata confirms the integration
+test and running local dispatcher share PostgreSQL; the local worker remains exited.
+The test commits its year-2000 event before several concurrency checks, whereas the
+dispatcher claims events due at the current time. The past clock excludes newer rows
+from the test's query but does not protect its event from the real dispatcher.
+An in-memory repository diagnostic returns one test claim without competition and zero
+after a normal-clock competing claim. This confirms the isolation defect and reproduces
+the failure mechanism, not the original event's claimant or PostgreSQL lock acceptance.
+Recommend a dedicated isolated PostgreSQL test database with the same migrations and
+unchanged assertions. Implementation remains separately approved; no live test replay,
+persistent database writes, service changes, paid calls or cloud actions occurred.
+
+Approved test-isolation implementation — 2026-10-05 Pacific: the outbox proof now
+uses a uniquely named disposable database on the existing local PostgreSQL server.
+Its fixture applies the unchanged Alembic chain, verifies the actual database and
+current head, and leaves the application URL/settings untouched. All 20 original
+lease, expiry, publication and standard/bounded idempotency assertions are unchanged.
+The fixture refuses remote/production/query-overridden targets; cleanup checks exact
+database identity/ownership and never force-drops or terminates other sessions.
+Fourteen synthetic safety/lifecycle tests and the targeted real PostgreSQL proof pass
+with the application dispatcher still running and worker stopped. The disposable
+database is removed and catalog cleanup verified. Full free gates pass: `make check`
+442 tests/16 expected skips and `make check-live` 457 tests/one expected skip, static/
+frozen-evidence/deployment/observability checks, head `20260919_0019`, zero drift and
+local API/dependency/UI health. No dependency synchronization, paid call, cloud action,
+service start/stop, participant resumption, commit/push or Phase 11 acceptance occurs.
+Historical failure evidence remains above; this is new passing regression evidence,
+not proof of the original claimant or permission to start the formal paid workflow.
+
+Source publication approval — 2026-10-05 Pacific: the operator separately approves
+commit and normal push of the local test-isolation fix and pending recovery records
+on the existing Phase 11 branch. The fresh pre-commit `make check` passes 442 tests/
+16 expected skips, unchanged head and zero drift. This approval does not authorize a
+new PR, merge, image publication/deployment, worker start or participant resumption.
 
 ## Single-attempt pilot retry profile
 
