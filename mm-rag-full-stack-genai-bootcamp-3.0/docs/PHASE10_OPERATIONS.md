@@ -28,6 +28,17 @@ The existing `scripts.phase8_backup` format remains canonical. Daily automation 
 6. verify the uploaded checksum, then remove plaintext staging; and
 7. emit content-free `backup-verification` evidence.
 
+Before quiescing, snapshot full IDs of running application/storage containers from the
+current Compose project. Validate the inventory before any stop; ambiguous or malformed
+IDs fail closed. Stop and resume those exact IDs with Docker, restoring storage before
+application roles even on backup failure. A worker or storage role that was already
+stopped stays stopped; migration/model setup and other dependency jobs are never resumed.
+Do not replace this with Compose `up` or `start`: dependency traversal is outside backup
+authority. Container disappearance is an error, not authority to recreate or pull images.
+The parser accepts both array and JSON-lines
+[Compose inventory](https://docs.docker.com/reference/cli/docker/compose/ps/); resumption
+uses [existing-container start](https://docs.docker.com/reference/cli/docker/container/start/).
+
 Never print the age identity, object coordinates, database URL or OCI identifiers. Keep
 seven daily and two monthly verified generations, never deleting the final two known-good
 generations. `backup-plan` only computes candidates; cloud deletion remains a separately
@@ -164,3 +175,48 @@ disabled. Authenticated preview-only retention and the separately approved tempo
 clean-host recovery drill pass; the temporary host and boot volume were removed through
 an exact approved destroy plan. All eight content-free evidence scenarios pass, and only
 the closure publication remains. Phase 10 is accepted.
+
+### October 4 recovery checkpoint
+
+Operator-approved normal boot restores OS/logging/SSH with SELinux enforcing. Separately
+approved runtime mask release restores eight existing application services with healthy
+configured checks, valid public TLS, dependency readiness and anonymous-access denial.
+Existing revision/schema retained; worker/one-shots stopped and participants paused.
+No pull/recreation/migration, further reboot, paid calls/upgrades/new resources occurs.
+
+Both enabled maintenance timers failed during the Docker-masked interval, before
+restoration. They remain failed, not silently disabled or restarted. Existing capacity
+evidence is stale; newest encrypted bundle approximately 36.6 hours old without renewed
+integrity/restore proof. Separately review timer recovery and missed-backup handling:
+backup pauses services and existing resume uses compose up/dependencies. Application
+startup passes, full operational readiness remains pending; do not resume the pilot.
+
+The operator subsequently approves both timer recoveries and one supervised encrypted
+catch-up backup to the existing bucket. Backup exits zero with matching ciphertext hash,
+verified upload, owner-only encrypted bundle and no plaintext staging. No new decryption/
+restore proof is performed. Both original schedules are restored and timers enabled/
+active/waiting; the fresh capacity check passes and no failed units remain.
+
+The temporary compose-start resume guard unexpectedly starts dependency jobs, including
+existing migrate/models. Both finish stopped/exit zero; schema/image revision unchanged,
+worker never started. Containment restores API/UI directly and corrects the runtime
+guard to start only existing container IDs; five scope tests and deployed hash checks
+pass. Retain that current-boot guard, but review a permanent backup-resume fix before
+another reboot or pilot resumption. Current service recovery does not accept Phase 11.
+
+The separately approved permanent fix now validates the running-container snapshot
+before quiescence and resumes only those exact existing IDs, including on partial stop,
+encryption/upload or storage-resume failure. Twenty focused tests, the complete free
+gate (398 passed/16 expected skips) and live integration gate (413 passed/one expected
+skip) pass with zero schema drift. Backup-only source deployment preserves the original
+for rollback; actual inventory parsing and five synthetic host resume cases pass without
+another real backup. The canonical protected backup unit is restored and its temporary
+drop-in/helper removed. The current-boot Docker generator override remains unchanged.
+
+Installer timer-state validation initially stops after installation; independent fresh
+checks verify both original timers enabled/active/waiting, services successful, fresh
+capacity pass, healthy application/dependency/TLS checks and no failed OS units. Worker/
+setup jobs remain stopped with unchanged start times; participants remain paused. No
+extra backup/restore, image upgrade, paid call, new resource or further reboot occurs.
+The permanent source must be retained in subsequent reviewed release promotions; this
+host-only utility patch is not a new application-image release or Phase 11 acceptance.
