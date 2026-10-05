@@ -125,6 +125,46 @@ def test_async_endpoints_require_stable_idempotency_keys(client: TestClient) -> 
     assert response.status_code == 422
 
 
+def test_bounded_upload_replay_and_retry_rejection_preserve_authorization(client) -> None:
+    app = client.app
+    app.state.settings.execution_retry_profile = "pilot-single-attempt-v1"
+    workspace_id = _workspace_id(client)
+    submitted = _upload(client, workspace_id, key="pilot-upload")
+    assert submitted.status_code == 202
+    payload = submitted.json()
+    job_id = payload["job"]["id"]
+    assert payload["job"]["max_attempts"] == 1
+    replay = _upload(client, workspace_id, key="pilot-upload")
+    assert replay.status_code == 202 and replay.json()["replayed"]
+    assert replay.json()["job"]["id"] == job_id
+    assert client.post(
+        f"/api/v1/workspaces/{workspace_id}/ingestion/jobs/{job_id}/cancel"
+    ).status_code == 200
+    retry = client.post(
+        f"/api/v1/workspaces/{workspace_id}/ingestion/jobs/{job_id}/retry",
+        headers={"Idempotency-Key": "pilot-successor"},
+    )
+    assert retry.status_code == 409 and "bounded" in retry.json()["detail"]
+    fresh_key = client.post(
+        f"/api/v1/workspaces/{workspace_id}/documents/{payload['document']['id']}"
+        f"/versions/{payload['job']['document_version_id']}/ingestion-jobs",
+        headers={"Idempotency-Key": "pilot-new-key"},
+    )
+    assert fresh_key.status_code == 409
+    with app.state.session_factory() as session:
+        jobs = list(session.scalars(select(IngestionJob)))
+        assert len(jobs) == 1 and jobs[0].state == "cancelled"
+        assert len(list(session.scalars(select(IngestionOutboxEvent)))) == 1
+    app.dependency_overrides[get_current_identity] = lambda: AuthenticatedIdentity(
+        subject="auth0|async-outsider", email="outsider@example.test", display_name="Outsider"
+    )
+    denied = client.post(
+        f"/api/v1/workspaces/{workspace_id}/ingestion/jobs/{job_id}/retry",
+        headers={"Idempotency-Key": "unauthorized-retry"},
+    )
+    assert denied.status_code == 404
+
+
 def test_representative_large_upload_streams_to_immutable_storage(
     client: TestClient,
 ) -> None:

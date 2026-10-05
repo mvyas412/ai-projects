@@ -7,6 +7,7 @@ from uuid import UUID
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from backend.app.core.config import Settings
 from backend.app.models.document import DocumentVersion, DocumentVersionStatus
 from backend.app.models.generation import IngestionGeneration, IngestionGenerationState
 from backend.app.models.ingestion import (
@@ -80,8 +81,9 @@ class IngestionJobValidationError(IngestionJobError):
 class IngestionJobStateMachine:
     """Mutate durable job state inside a caller-owned database transaction."""
 
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, settings: Settings | None = None) -> None:
         self._session = session
+        self._settings = settings or Settings.model_construct()
         self._documents = DocumentRepository(session)
         self._jobs = IngestionJobRepository(session)
         self._outbox = IngestionOutboxStateMachine(session)
@@ -136,6 +138,31 @@ class IngestionJobStateMachine:
                 requested_by_user_id=user.id,
             )
 
+        if self._settings.single_attempt_execution:
+            # Serialize differently keyed requests for the same bounded version.
+            self._documents.get_version(
+                workspace_id, document_id, document_version_id, for_update=True
+            )
+            # A concurrent identical request may have committed while we waited.
+            existing = self._jobs.get_by_idempotency_key(
+                workspace_id, operation, normalized_key
+            )
+            if existing is not None:
+                return self._resolve_replay(
+                    existing,
+                    document_id=document_id,
+                    document_version_id=document_version_id,
+                    request_hash=request_hash,
+                    pipeline_fingerprint=pipeline_fingerprint,
+                    requested_by_user_id=user.id,
+                )
+            if self._jobs.list_for_workspace(
+                workspace_id, document_version_id=document_version_id, limit=1
+            ):
+                raise IngestionInvalidTransitionError(
+                    "A bounded job already exists for this version. Contact the operator."
+                )
+
         predecessor = self._validate_predecessor(
             user=user,
             role=role,
@@ -144,6 +171,10 @@ class IngestionJobStateMachine:
             predecessor_job_id=predecessor_job_id,
             pipeline_fingerprint=pipeline_fingerprint,
         )
+        if predecessor is not None and self._settings.single_attempt_execution:
+            raise IngestionInvalidTransitionError(
+                "Retry is disabled for this bounded pilot run. Contact the operator."
+            )
         job = IngestionJob(
             workspace_id=workspace_id,
             document_id=document_id,
@@ -154,7 +185,7 @@ class IngestionJobStateMachine:
             pipeline_fingerprint=pipeline_fingerprint,
             idempotency_key=normalized_key,
             request_hash=request_hash,
-            max_attempts=3,
+            max_attempts=self._settings.ingestion_max_attempts,
         )
         try:
             with self._session.begin_nested():
@@ -229,6 +260,10 @@ class IngestionJobStateMachine:
             raise IngestionJobNotFoundError
         if job.state not in _RUNNABLE_STATES:
             raise IngestionInvalidTransitionError("Job is not runnable")
+        if self._settings.single_attempt_execution and job.max_attempts != 1:
+            raise IngestionInvalidTransitionError(
+                "Job retry budget is incompatible with bounded pilot execution"
+            )
         document = self._documents.get_document(
             job.workspace_id,
             job.document_id,
@@ -584,7 +619,11 @@ class IngestionJobStateMachine:
 
         code, message = self._safe_error(error_code, error_message)
         scheduled_retry_at: datetime | None = None
-        if retryable and job.attempt_count < job.max_attempts:
+        if (
+            retryable
+            and not self._settings.single_attempt_execution
+            and job.attempt_count < job.max_attempts
+        ):
             if retry_at is None or self._utc(retry_at) <= now:
                 raise IngestionJobValidationError("retry_at must be in the future")
             scheduled_retry_at = self._utc(retry_at)
@@ -612,8 +651,14 @@ class IngestionJobStateMachine:
             job.completed_at = now
             job.next_attempt_at = None
             if retryable:
-                job.last_error_code = "attempts_exhausted"
-                job.last_error_message = "Ingestion failed after the retry limit."
+                job.last_error_code = (
+                    "bounded_attempt_failed" if job.max_attempts == 1 else "attempts_exhausted"
+                )
+                job.last_error_message = (
+                    "Ingestion stopped after one attempt. Contact the operator."
+                    if job.max_attempts == 1
+                    else "Ingestion failed after the retry limit."
+                )
             else:
                 job.last_error_code = code
                 job.last_error_message = message
@@ -648,7 +693,11 @@ class IngestionJobStateMachine:
             raise IngestionInvalidTransitionError("Lease has not expired")
 
         scheduled_retry_at: datetime | None = None
-        if job.cancel_requested_at is None and job.attempt_count < job.max_attempts:
+        if (
+            job.cancel_requested_at is None
+            and not self._settings.single_attempt_execution
+            and job.attempt_count < job.max_attempts
+        ):
             if retry_at is None or self._utc(retry_at) <= now:
                 raise IngestionJobValidationError("retry_at must be in the future")
             scheduled_retry_at = self._utc(retry_at)
@@ -680,8 +729,14 @@ class IngestionJobStateMachine:
             job.state = IngestionJobState.FAILED.value
             job.completed_at = now
             job.next_attempt_at = None
-            job.last_error_code = "attempts_exhausted"
-            job.last_error_message = "Ingestion failed after the retry limit."
+            job.last_error_code = (
+                "bounded_attempt_failed" if job.max_attempts == 1 else "attempts_exhausted"
+            )
+            job.last_error_message = (
+                "Ingestion stopped after one attempt. Contact the operator."
+                if job.max_attempts == 1
+                else "Ingestion failed after the retry limit."
+            )
             self._outbox.discard_unpublished_for_job(
                 job_id=job.id,
                 now=now,

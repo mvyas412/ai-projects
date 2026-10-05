@@ -820,6 +820,59 @@ def test_worker_schedules_retry_and_hides_dependency_detail(
         assert [event.dispatch_sequence for event in events] == [1, 2]
 
 
+@pytest.mark.parametrize("pilot_worker", [True, False])
+def test_bounded_worker_scope_guard_is_read_only(
+    test_settings, worker_context, pilot_worker
+) -> None:
+    selected = test_settings.model_copy(update={
+        "execution_retry_profile": "pilot-single-attempt-v1" if pilot_worker else "standard"
+    })
+    if not pilot_worker:
+        with worker_context.factory.begin() as session:
+            job = session.get(IngestionJob, worker_context.job_id)
+            assert job is not None
+            job.max_attempts = 1
+    worker = _worker(selected, worker_context, SuccessfulIndexer())
+    with pytest.raises(RuntimeError, match="single-attempt job scope"):
+        worker.verify_retry_scope()
+    assert worker.process(worker_context.message) == DeliveryDisposition.ACK
+    with worker_context.factory() as session:
+        job = session.get(IngestionJob, worker_context.job_id)
+        assert job is not None and job.state == "pending" and job.attempt_count == 0
+        assert not list(session.scalars(select(IngestionAttempt)))
+
+
+def test_bounded_worker_failure_and_duplicate_delivery_do_not_repeat_work(
+    test_settings, worker_context
+) -> None:
+    pilot = test_settings.model_copy(update={"execution_retry_profile": "pilot-single-attempt-v1"})
+    # This disposable fixture represents a job created by the pilot-configured API.
+    with worker_context.factory.begin() as session:
+        job = session.get(IngestionJob, worker_context.job_id)
+        assert job is not None
+        job.max_attempts = 1
+
+    class CountingFailure(UnavailableIndexer):
+        calls = 0
+
+        def index(self, request, *, progress=None):
+            self.calls += 1
+            return super().index(request, progress=progress)
+
+    indexer = CountingFailure()
+    worker = _worker(pilot, worker_context, indexer)
+    worker.verify_retry_scope()
+    assert worker.process(worker_context.message) == DeliveryDisposition.ACK
+    assert worker.process(worker_context.message) == DeliveryDisposition.ACK
+    assert indexer.calls == 1
+    with worker_context.factory() as session:
+        job = session.get(IngestionJob, worker_context.job_id)
+        assert job is not None and job.state == "failed" and job.attempt_count == 1
+        assert job.next_attempt_at is None and job.max_attempts == 1
+        assert len(list(session.scalars(select(IngestionAttempt)))) == 1
+        assert len(list(session.scalars(select(IngestionOutboxEvent)))) == 1
+
+
 @pytest.mark.asyncio
 async def test_idle_recovery_refreshes_worker_readiness(
     test_settings, worker_context
