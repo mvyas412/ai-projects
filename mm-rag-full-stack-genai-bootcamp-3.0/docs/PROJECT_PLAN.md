@@ -68,7 +68,7 @@ Rules:
 | Phase 9 release | Annotated `mm-rag-v9.0.0` identifies the verified documentation-kickoff closure commit and is immutable |
 | Phase 10 | Completed and accepted — all eight evidence scenarios pass |
 | Phase 10 release | Annotated `mm-rag-v10.0.0` peels to accepted merge `a2d200b`; immutable |
-| Phase 11 | In progress — technical rehearsal passes; independent participant enrolled, canary paused pending bounded retry controls and formal workflow evidence |
+| Phase 11 | In progress — technical rehearsal passes; bounded retry profile deployed, canary paused pending formal workflow evidence |
 
 ## Delivery sequence and gates
 
@@ -1227,11 +1227,35 @@ privacy, recovery, and cost boundaries remain intact.
 | 11.2 | Streamlit pilot journeys and accessibility | Foundation implemented | ADR 0059 accepted; required journeys are represented in the contract gate |
 | 11.3 | Consent, privacy, voluntary feedback, and evidence governance | Foundation implemented | ADR 0060 accepted; sensitive evidence rejected |
 | 11.4 | Reliability, support, capacity, maintenance, and cost boundary | Foundation implemented | ADR 0061 accepted; paid/provider/live actions disabled |
-| 11.5 | Internal → 2 → 5 → 10-user staged rollout and closure | Technical rehearsal passed; two-person canary paused | Observation started September 30 Pacific; recovery pauses do not count as successful participation. Reviewed retry-control deployment, formal workflow evidence and later stages remain pending |
+| 11.5 | Internal → 2 → 5 → 10-user staged rollout and closure | Technical rehearsal passed; two-person canary paused | Observation started September 30 Pacific; recovery pauses do not count as successful participation. Bounded retry profile deployed; formal workflow evidence and later stages remain pending |
 
-Current checkpoint: OCI recovery and permanent backup-resume remediation are verified;
-the worker and both participants remain paused. The following checkpoints preserve the
+Current checkpoint: one separately approved capacity-recovery continuation passes.
+Eight existing-host services are running, with API/dispatcher/UI on `dba88de`; the
+matching worker remains created/never-started/restart-no. Fresh capacity, readiness,
+TLS/anonymous denial, empty jobs/queues and timer restoration pass; no host units fail.
+Both participants remain paused; the host backup fix/private originals are preserved.
+The separately approved October 5 test-isolation fix resolves the earlier local
+outbox regression: `make check` passes 442 tests/16 expected skips and `make check-live`
+passes 457 tests/one expected skip, with unchanged migration head and zero drift.
+No paid calls, worker start, new cloud resources or Phase 11 acceptance occur.
+October 5 diagnosis checkpoint confirms a test-isolation defect: the local test and dispatcher
+share PostgreSQL, and the test's committed past-due event is eligible for the real
+dispatcher before the test claims it. In-memory competition reproduces zero claims;
+the original claimant is unproven after cleanup. Recommend an isolated PostgreSQL
+test database preserving migrations/assertions, pending implementation approval.
+No live test replay, persistent data or service change occurs during diagnosis.
+Subsequent approved implementation puts that concurrency proof in an exact, disposable
+local PostgreSQL database migrated through the unchanged chain. All 20 original
+assertions remain; 14 synthetic guard/cleanup tests and the targeted live proof pass
+while the application dispatcher stays running. Exact-identity/owner cleanup is
+verified with no temporary database remaining. No remote targets, forced drop,
+application-settings change, provider call, runtime deployment or Git publication.
+The following checkpoints preserve the
 chronological approval/evidence trail, not current permission to repeat completed work.
+Separate October 5 source-publication approval covers commit and normal push of this
+test fix and pending recovery records on the existing Phase 11 branch. Fresh pre-commit
+`make check` passes 442 tests/16 expected skips, unchanged head and zero drift. No new
+PR, merge, image publication/deployment, worker start or participant resumption is approved.
 Recovery publication was separately squash-merged through PR #27. Locally verified bounded retry
 controls now implement opt-in `pilot-single-attempt-v1`: durable one-attempt jobs,
 zero provider retries, authorized successor/re-enqueue rejection, and worker budget/profile
@@ -1241,7 +1265,76 @@ remain supervised workflow limits. No deployment, worker start, participant resu
 or paid pilot execution is implied. Source commit/push is separately approved;
 reviewed deployment and formal workflow evidence remain pending.
 
-Draft PR #28 contains the retry controls. Its candidate dependency scan exposed
+Publication checkpoint — 2026-10-04: PR #28 passed eight applicable CI checks at
+`541ab9c` and was separately approved and squash-merged as `dba88de`; their complete
+trees match. Explicit application-image publication approval dispatches protected
+[run 37262385321](https://github.com/mvyas412/ai-projects/actions/runs/37262385321)
+once at that exact merged revision. All eight jobs pass in 19m20s, including native
+builds/scans and protected publication/signing. Published application index digest:
+`sha256:4a39d5affe71651ca5a19bf6d79542ee578f3bc4aca62234d6abf86721ec9978`.
+Registry metadata confirms AMD64/ARM64 images, SLSA provenance containing the approved
+revision and SPDX SBOMs with the three reviewed Python security versions on both.
+This is not a deployed retry profile or Phase 11 acceptance. No automatic rerun, Next.js
+publication, host deployment, worker start, participant resumption, paid call or new resource.
+Deployment requires fresh preflight, immutable rollback manifest and exact-plan approval.
+
+Deployment preparation — 2026-10-04 Pacific: read-only local release review is complete;
+strict SSH authentication cannot proceed until the operator privately reloads the dedicated
+recovery identity. No remote command ran, so current host safeguards and rollback baseline
+remain unverified. Independent cryptographic image-signature verification is outstanding.
+The plan must bound migration/model dependency traversal and update stopped-worker
+configuration without starting it. No ready execution plan/hash, host change, paid call or
+participant resumption is claimed; historical manifests are not fresh preflight evidence.
+
+Fresh deployment preparation — 2026-10-04 Pacific: privately reloaded recovery identity
+enables strict read-only preflight. Current `8000dab` rollback/image baseline and bound
+host files are verified; SELinux/core services, capacity, readiness/TLS/anonymous 401,
+empty application queues/jobs, stopped worker and 3.4-hour encrypted-backup integrity pass.
+Existing model-cache hashes pass offline verification. Independent Cosign verification
+of the published index passes with exact workflow/issuer/repository/ref/full-revision
+constraints. Project-local verifier uses the reviewed workflow's pinned official checksum.
+Complete ignored supervised deployment plan awaits exact canonical-hash approval; it
+bounds dependency traversal, pulls only the target app digest, runs one unchanged-head
+forward migration and verify-only models, starts API/dispatcher/UI only, and stages a
+never-started matching worker with restart disabled. Storage/edge, host backup fix and
+participant pause remain intact. Temporarily pause/restore the existing backup timer
+under maintenance leases; abort on drift/failure, with no automatic retry or rollback.
+This plan must not be passed to the broader generic upgrade executor. Twenty-six free
+release/retry tests and plan/manifest/hash checks pass. No fresh cloud-resource inventory,
+participant-product evidence, runtime adoption, host mutation, commit/push or Phase 11
+acceptance is claimed. Apply and paid/participant resumption remain separate approvals.
+
+Approved deployment outcome — 2026-10-04 Pacific: exact plan approval and fresh guards
+permit one attempt. Target immutable ARM64 image pull, configuration staging, one
+unchanged-head migration and offline model verification pass. Worker configuration
+fails because the planned Compose `create --no-deps` option is unsupported; this is an
+agent planning error. Execution stops before worker configuration/application startup,
+without retry or rollback, restoring the backup timer and releasing maintenance leases.
+Read-only checks confirm API/UI/dispatcher/old worker stopped, unchanged storage/edge
+running, empty queues/jobs, no failed units and old recorded revision. MM-RAG is currently
+unavailable; deployment/Phase 11 acceptance is not complete. A separately gated exact
+continuation uses host-verified/dry-run `up --no-start --no-deps --pull never worker`,
+then starts/verifies only API/dispatcher/UI, without repeating pull/migration/model steps.
+It awaits new approval, with private original inputs preserved. Free check-live passes
+443 tests/one skip and local health/no drift; no cloud success or paid acceptance claim.
+No paid calls, worker/participant resumption, new resources, retry, rollback or publication.
+
+Continuation preflight — 2026-10-04 Pacific: fresh exact-hash authorization does not
+reach host mutation. The sole failed unit is `mm-rag-phase10-capacity.service`; safe
+journal markers confirm its API operations-report subprocess exits one while API is
+stopped. Core host services, edge/storage and both enabled/waiting timers pass; current
+direct CPU/memory/disk/inode measurements are within limits. The old recorded revision,
+original private recovery inputs and all stopped application roles remain preserved.
+Prepare a separate complete plan with a narrowly reviewed known-failure exception,
+direct current preflight measurements, unchanged stopped-worker/application commands,
+and one provider-free successful capacity sample after startup. Require all post-change
+safeguards before revision recording, no reset-failed or policy/timer/collector edits.
+No continuation apply attempt, paid call, worker/participant resumption, new resource,
+automatic retry, rollback or Git publication. Twenty-six focused tests pass; prior full
+live regression evidence remains 443 passed/one skip. Phase 11 remains paused/unaccepted.
+
+The following source-security checkpoints are historical. PR #28 contains the retry
+controls. Its initial candidate dependency scan exposed
 critical [GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j)
 in the pre-existing Next.js 16.3.5 pin. Separately approved source-only remediation
 pins the evaluation candidate to 16.3.6 with matching runtime/compiler lock entries;
