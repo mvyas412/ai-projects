@@ -1250,9 +1250,18 @@ type-checking, production compilation and npm audit (zero vulnerabilities) pass 
 Node 24. Auth0 configuration warnings are expected in the credential-free build,
 which does not prove authenticated browser parity. Streamlit remains authoritative;
 merge, publication, deployment and paused-pilot execution remain separately gated.
-The initial application-image security scan also fails on existing Python dependencies;
-that separate finding is not remediated by the candidate patch and needs a reviewed,
-separately approved source-only scope before the PR can clear all security gates.
+The initial application-image security scan also fails on existing Python dependencies.
+Separately approved source-only remediation now locks PyJWT 2.15.0, pypdf 6.19.0
+and urllib3 2.8.0, without unrelated package upgrades. Offline regressions cover
+malformed-token rejection before JWKS access, valid signing-key resolution/caching,
+redirect refusal, algorithm restrictions, PDF page locators and retained no-retry controls.
+The existing manifest records pypdf for every format: future ingestion fingerprints
+change, while stored manifests/generations remain immutable; no reindex is authorized.
+Commit/push and inspection of fresh CI are separately approved; native-image security
+results remain pending. Local checks do not clear the failed CI gate or authorize deployment.
+Free verification passes (`make check`: 428 tests/16 skips; `make check-live`:
+443 tests/one skip), with unchanged frozen evidence/schema and healthy existing local
+services. The worker remains stopped and both participants remain paused.
 
 The two-person observation window starts at `2026-10-01T02:10:47Z`, with an earliest
 three-day review at `2026-10-04T02:10:47Z`. Two independent people, activity evidence,

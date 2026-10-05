@@ -86,6 +86,23 @@ findings, including PyJWT, pypdf and urllib3. Do not treat the clean candidate n
 as an application-image scan pass, suppress findings or widen upgrades implicitly.
 Separate remediation approval and passing security gates are required before merge.
 
+Python security checkpoint — 2026-10-04: subsequent source-only approval covers
+PyJWT 2.13.0 → 2.15.0, pypdf 6.15.0 → 6.19.0 and urllib3 2.7.0 → 2.8.0 only.
+The lockfile changes exactly these three package versions. A deeply nested synthetic
+token reproduced an uncaught exception before the upgrade and is rejected before JWKS
+fetch afterward. Offline coverage also checks valid RS256 resolution/caching, redirect
+refusal, non-RS256 rejection, PDF text/page locators and existing single-attempt controls.
+All future ingestion fingerprints change because the existing manifest records pypdf for
+every media type; historical manifests and generation identities remain untouched.
+No reindex, paid call, image publication, deployment, worker start or participant
+resumption is included. Subsequent approval covers commit/push and inspection of fresh CI;
+the native-image scan must pass before the existing CI blocker can be considered resolved.
+Free verification passes: focused regressions (28 tests), `make check` (428 tests,
+16 skips) and `make check-live` (443 tests, one skip), including lint/types,
+protected offline evidence, schema and existing local API/dependency/UI health.
+The local worker remains exited. Existing-process health is not proof of deployed
+adoption of these source dependency updates.
+
 ## Purpose
 
 The Phase 11 controls provide a deterministic, content-free rehearsal of the pilot

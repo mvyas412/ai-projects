@@ -963,6 +963,18 @@ verify the patch locally, not frontend promotion or authenticated browser accept
 No OCI runtime, container base image, provider, retry policy or deployment authority
 changes with this patch.
 
+The separately approved Python security candidate locks PyJWT 2.15.0, pypdf 6.19.0
+and urllib3 2.8.0; uv imposes an urllib3 security floor without broad resolution upgrades.
+PyJWT now normalizes deeply nested malformed payloads into the verifier's existing
+non-disclosing rejection path before JWKS access. RS256, issuer, audience and required
+claims remain mandatory; synthetic JWKS tests verify signature resolution, key caching
+and redirect refusal. PDF extraction retains original page locators without provider calls.
+Because every ingestion manifest records the pypdf version, all future ingestion formats
+receive updated fingerprints. Existing stored manifests, document/version/generation
+identity and protected evidence are not rewritten, and no automatic reindex is enabled.
+Local free checks are compatibility evidence, not a replacement for fresh native-image
+security gates. No provider, retry-policy, deployed runtime or operational authority changes.
+
 ```mermaid
 flowchart LR
     operator["Pilot operator"] --> invite["Manual approved invitation"]

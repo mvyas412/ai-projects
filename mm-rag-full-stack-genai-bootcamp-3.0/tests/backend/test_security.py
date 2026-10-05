@@ -1,4 +1,9 @@
+import base64
+import json
 from datetime import UTC, datetime, timedelta
+from io import BytesIO
+from types import SimpleNamespace
+from urllib.request import Request
 
 import jwt
 import pytest
@@ -63,3 +68,72 @@ def test_invalid_access_token_is_rejected(signing_keys, overrides) -> None:
 
     with pytest.raises(InvalidAccessTokenError):
         verifier(public_key).verify(make_token(private_key, **overrides))
+
+
+def test_deeply_nested_token_is_rejected_before_jwks_fetch(monkeypatch, capsys) -> None:
+    fetches = []
+
+    def forbidden_fetch(_client):
+        fetches.append(True)
+        raise AssertionError("Malformed tokens must not reach the network")
+
+    monkeypatch.setattr(jwt.PyJWKClient, "fetch_data", forbidden_fetch)
+    header = base64.urlsafe_b64encode(
+        b'{"alg":"RS256","kid":"test-key"}'
+    ).rstrip(b"=")
+    payload = base64.urlsafe_b64encode(b"[" * 20_000 + b"0" + b"]" * 20_000).rstrip(b"=")
+    token = b".".join((header, payload, b"synthetic-signature")).decode("ascii")
+    actual_verifier = Auth0JWTVerifier(
+        issuer=ISSUER, audience=AUDIENCE, jwks_url="https://unused.example/jwks.json"
+    )
+
+    with pytest.raises(InvalidAccessTokenError):
+        actual_verifier.verify(token)
+
+    assert fetches == []
+    assert token not in capsys.readouterr().out
+
+
+def test_real_jwks_resolution_validates_signature_and_caches_key(signing_keys, monkeypatch) -> None:
+    private_key, public_key = signing_keys
+    public_jwk = json.loads(jwt.algorithms.RSAAlgorithm.to_jwk(public_key))
+    public_jwk.update(kid="test-key", use="sig", alg="RS256")
+    fetches = []
+
+    def synthetic_open(request, *, timeout):
+        assert request.full_url == "https://unused.example/jwks.json"
+        assert timeout == 5
+        fetches.append(True)
+        return BytesIO(json.dumps({"keys": [public_jwk]}).encode())
+
+    def synthetic_opener(*handlers):
+        assert handlers[0].redirect_request(
+            Request("https://unused.example/jwks.json"), None, 302, "Found", {},
+            "https://untrusted.example/jwks.json",
+        ) is None
+        return SimpleNamespace(open=synthetic_open)
+
+    monkeypatch.setattr("urllib.request.build_opener", synthetic_opener)
+    actual_verifier = Auth0JWTVerifier(
+        issuer=ISSUER, audience=AUDIENCE, jwks_url="https://unused.example/jwks.json"
+    )
+    token = make_token(private_key)
+
+    assert actual_verifier.verify(token).subject == "auth0|user-123"
+    assert actual_verifier.verify(token).subject == "auth0|user-123"
+    assert fetches == [True]
+
+
+@pytest.mark.parametrize("algorithm", ["HS256", "none"])
+def test_non_rs256_access_tokens_are_rejected(signing_keys, algorithm) -> None:
+    _, public_key = signing_keys
+    now = datetime.now(UTC)
+    token = jwt.encode(
+        {"iss": ISSUER, "aud": AUDIENCE, "sub": "synthetic", "iat": now,
+         "exp": now + timedelta(minutes=5)},
+        "" if algorithm == "none" else b"synthetic-hmac-secret-for-offline-test",
+        algorithm=algorithm,
+    )
+
+    with pytest.raises(InvalidAccessTokenError):
+        verifier(public_key).verify(token)
