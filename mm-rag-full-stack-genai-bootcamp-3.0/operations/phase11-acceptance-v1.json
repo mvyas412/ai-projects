@@ -1,0 +1,72 @@
+{
+  "schema": "mm-rag-phase11-acceptance-v1",
+  "decision": "accept-limited-two-person-learning-pilot",
+  "scope_decision": "ADR-0064",
+  "accepted_at": "2026-10-18T23:10:45Z",
+  "accepted_on_pacific": "2026-10-18",
+  "approval": "explicit-operator-approval-to-record-phase11-acceptance",
+  "phase11_accepted": true,
+  "scope": {
+    "objective": "two-person-guided-learning-pilot",
+    "independent_human_participants": 2,
+    "deferred_unvalidated_stages": ["cohort-5", "cohort-10"],
+    "production_readiness_claim": false,
+    "unassisted_discovery_claim": false,
+    "fresh_live_negative_tenant_audit_claim": false
+  },
+  "review": {
+    "eligible_observation_hours": 96.267269,
+    "minimum_observation_hours": 72,
+    "primary_workflows_attempted": 2,
+    "primary_workflows_completed": 2,
+    "completion_percent": 100,
+    "minimum_completion_percent": 90,
+    "safeguard_groups_assessed_pass": 8,
+    "safeguard_groups_required": 8,
+    "both_final_personal_checks_complete": true,
+    "full_review_sha256": "6f8d35ca703cceaa82aeca94fb467613f6d267cc07980caefc307c79ea6e3e04",
+    "provider_reconciliation_sha256": "374df739d6d5e9450d71ff2bf5c8d94ea50494b6a2cbb03a850dd7c264e40134",
+    "detailed_aggregate_records_kept_out_of_git": true,
+    "protected_historical_evidence_rewritten": false
+  },
+  "cost": {
+    "openai_exported_usd": "0.00151422",
+    "provider_requests": 6,
+    "attribution": "operator-confirmed-exclusive-mmrag-project-use-and-matching-session-records",
+    "oci_reported_usd": "0",
+    "oci_source": "operator-report",
+    "oci_independent_billing_audit": false
+  },
+  "limitations": [
+    "Guided workflows and reported keyboard/scope usability do not establish unassisted discovery.",
+    "The first saved selection included two authorized documents; intended single-document selection was not proven.",
+    "Independent participant usability feedback was relayed by the operator; assistance amount was not quantified.",
+    "Safeguards combine fresh operational snapshots with valid protected historical proof, not new restore or full live negative-isolation tests.",
+    "OCI zero cost is operator-reported, not independently audited; provider cost is exported daily and attributed using exclusive-project confirmation."
+  ],
+  "operating_state": {
+    "worker_remains_stopped": true,
+    "worker_restart_policy": "no",
+    "existing_phase10_maintenance_unchanged": true,
+    "post_pilot_access_and_service_disposition": "separate-operator-decision-required"
+  },
+  "retention": {
+    "applies_to": "aggregate-pilot-evidence",
+    "days_after_closure": 30,
+    "manual_review_due_at": "2026-11-17T23:10:45Z",
+    "automatic_deletion": false,
+    "automatic_retention_apply": false,
+    "deletion_requires_reviewed_manual_operation": true
+  },
+  "authority": {
+    "acceptance_recording_authorized": true,
+    "git_publication_authorized": false,
+    "merge_or_release_tag_authorized": false,
+    "operational_mutation_authorized": false,
+    "paid_execution_authorized": false,
+    "worker_start_authorized": false,
+    "additional_enrollment_authorized": false,
+    "automatic_deletion_authorized": false
+  },
+  "historical_scope_approval_record": "operations/phase11-closure-scope-v1.json"
+}
