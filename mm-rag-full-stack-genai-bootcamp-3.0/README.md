@@ -1,4 +1,15 @@
-# Multimodal RAG Production — Phase 10 released; Phase 11 in progress
+# Multimodal RAG — learning project closed; inspection demo retained
+
+Phase 11 is accepted for the two-person guided learning pilot and merged through
+[PR #31](https://github.com/mvyas412/ai-projects/pull/31) at `768a67f` on October 18, 2026.
+The existing deployment is retained as an **inspection-only demonstration** under
+[ADR 0065](docs/architecture/decisions/0065-postpilot-demo-operating-mode.md): worker
+stopped/restart-no, existing maintenance unchanged, no new paid calls or resources.
+Use existing READY documents, saved answers and citations. Do not upload, submit a
+new question, retry/rebuild/reindex or start the worker. A stopped worker does not
+disable API chat. This is an operator-controlled restriction, not a new UI interlock.
+See the [current demo runbook](docs/DEMO_RUNBOOK.md) before using any setup commands below.
+Five-/ten-user validation and Next.js promotion remain deferred; this is not a production SLA.
 
 Phase 3 evolves the accepted secure product foundation into durable asynchronous
 ingestion backed by object storage and independently scalable workers. V1 and V2
@@ -112,22 +123,19 @@ Automatic retention apply, unattended
 upgrades, paid capacity, and production-SLA claims remain disabled.
 
 Annotated tag `mm-rag-v10.0.0` identifies the accepted Phase 10 release at merge
-commit `a2d200b`. Phase 11 is now in progress as a free-first,
-invitation-only product pilot for at most ten registered users. The
-[Phase 11 kickoff](docs/PHASE11_PILOT_KICKOFF.md) and Accepted ADRs 0057–0063 cover
-pilot scope, onboarding, frontend strategy, privacy/feedback, support/cost limits,
-and staged rollout. The versioned synthetic rehearsal and content-free evidence gate
-are implemented; live invitations, frontend promotion, paid work, and cloud changes
-remain separately gated.
-The approved live defaults use Owner-controlled access, one-business-day best-effort
-support, 30-day post-closure aggregate evidence retention, staged 2/5/10-user gates,
-90% core-journey completion, and 100% safeguard passage. Consent and bounded live
-execution are approved. Two private accounts are activated and covered by one human's
-consent. ADR 0063 authorizes a two-account technical rehearsal, but it does not count
-as the formal two-user canary or authorize rollout expansion. That rehearsal now passes
-all ten aggregate technical scenarios, including reversible access revocation, one
-bounded PDF retry, grounded citations, and structured feedback. Formal Phase 11
-validation still requires a second independent human participant.
+commit `a2d200b`. Phase 11 subsequently completed the two-independent-person guided
+pilot, eligible observation, final personal usability/persistence checks, cost
+reconciliation and qualified safeguard review. ADR 0064 narrows acceptance to those
+two people; five-/ten-user validation remains deferred and unvalidated. The earlier
+one-person/two-account rehearsal remains technical history, not independent human evidence.
+The [acceptance record](operations/phase11-acceptance-v1.json) preserves the wider first
+saved-document scope, guided assistance and historical-versus-fresh evidence limits.
+OpenAI spend was USD 0.00151422 for six requests; OCI USD 0 was operator-reported,
+not independently audited. Past cost does not guarantee future hosting cost.
+CI passed 460 tests with four skips and 83.59% coverage; local `make check` passed
+448 tests with 16 skips. No deployment or Phase 11 release tag accompanied closure.
+The [demo disposition](operations/phase11-demo-v1.json) now governs retained use.
+Aggregate-evidence manual retention review is November 17; no automatic deletion.
 
 The current `3.0` lineage contains:
 
@@ -219,7 +227,7 @@ acceptance is never run implicitly or repeated without explicit authorization.
 The living [architecture handbook](docs/architecture/ARCHITECTURE.md) contains:
 
 - The whole-system target architecture and end-to-end data flows.
-- A focused component and interaction diagram for every phase from 1 through 9.
+- Editable current demo architecture, phase evolution and phase-specific capability diagrams.
 - Current implementation status, architecture invariants, open technology
   decisions, and documentation-maintenance rules.
 
@@ -231,11 +239,12 @@ Planned components are explicitly labeled so the diagrams do not imply that
 future capabilities have already been implemented.
 
 The [architecture poster gallery](docs/architecture/ARCHITECTURE_POSTERS.md)
-provides presentation-ready whole-system, final-production, and Phase 1–9 images.
-The [current Phase 10 operational architecture](docs/architecture/images/10-phase-10-operational-hardening.png)
-shows the reviewed control and evidence loops around the accepted product path. The
-[Phase 7 workflow and DEV architecture reference](docs/architecture/current/mm-rag-current-workflow-dev-architecture.svg)
-shows the detailed product and evaluation/observability layers. Phase 5 is
+provides current native SVG demo/closure views and clearly labeled historical/target posters.
+The [retained demo architecture](docs/architecture/current/mm-rag-demo-architecture.svg)
+shows current operating restrictions and unchanged maintenance. The
+[Phase 11 closure and demo lifecycle](docs/architecture/current/mm-rag-phase11-closure-demo.svg)
+separates accepted evidence, source publication, deployed runtime and retention.
+The older DEV SVG and phase PNG posters remain capability/history references. Phase 5 is
 closed without candidate promotion. Phase 6
 Milestones 6.0–6.5 provide the deterministic visual/table corpus, immutable local
 extraction and visual retrieval, normalized tables, exact calculation, and
@@ -245,7 +254,7 @@ accepted ADRs 0051–0056; all eight content-free evidence scenarios pass. Autom
 retention apply, other destructive actions, and paid boundaries remain separately gated. Use the
 [Phase 10 operations handbook](docs/PHASE10_OPERATIONS.md) for the exact workflow.
 
-The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–10 delivery
+The living [project plan](docs/PROJECT_PLAN.md) defines the Phase 1–11 delivery
 sequence, milestones, dependencies, completion gates, risks, decision backlog,
 and current next actions. Update it with evidence whenever progress or scope changes.
 Use the [Phase 3 operations runbook](docs/PHASE3_OPERATIONS.md) for ingestion runtime

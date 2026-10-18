@@ -1,5 +1,10 @@
 # Phase 9 Google Drive OAuth learning setup
 
+Current [inspection-demo](DEMO_RUNBOOK.md) scope under ADR 0065 does not authorize
+new OAuth setup, connector sync or uploads. Worker stopped; maintenance unchanged;
+no new paid calls or resources. The setup capability below remains a separately
+approved workflow, not a retained-demo step.
+
 ## Scope and safety
 
 This procedure configures the private Phase 9 learning connector. It uses a Google

@@ -1,33 +1,57 @@
 # Multimodal RAG architecture posters
 
 > Rendered visual companions to the canonical [architecture handbook](ARCHITECTURE.md).
-> The handbook remains the editable source of truth; regenerate these posters
-> whenever architecture, data flow, technology, or phase status changes.
+> The handbook and current editable SVG/Mermaid diagrams are authoritative.
+> Older PNG posters below are historical or target illustrations, not current permissions.
 
-## Current Phase 10 operational architecture
+## Current retained demo architecture — October 18
+
+Phase 11's qualified two-person learning acceptance is merged in PR #31 (`768a67f`).
+The existing deployment remains available for inspection of READY documents and
+saved answers/citations. Worker stopped/restart-no; existing maintenance unchanged;
+no new paid calls or resources. A stopped worker does not disable API chat: the
+inspection restriction is operator-controlled, not a new runtime/UI interlock.
+
+![Current retained inspection demo architecture](current/mm-rag-demo-architecture.svg)
+
+## Phase 11 closure and demo lifecycle
+
+Five-/ten-user validation and Next.js promotion remain deferred. Phase 5 closed
+without quality acceptance. This is learning-project closure, not production certification.
+
+![Limited Phase 11 acceptance and retained demo lifecycle](current/mm-rag-phase11-closure-demo.svg)
+
+## Historical Phase 10 operational illustration
 
 This view shows the implemented plan/authorize/evidence loops around the accepted
-free-first learning deployment. Supervised OCI evidence is pending and red stop markers
-preserve the separate approval boundaries.
+free-first learning deployment at its original illustration checkpoint. Its pending
+labels predate accepted Phase 10 evidence; the handbook and current demo SVG above
+supersede those status labels. Existing maintenance remains unchanged.
 
 ![Phase 10 operational hardening and recovery](images/10-phase-10-operational-hardening.png)
 
 ## Phase 7 workflow and DEV architecture reference
 
-This current implementation view shows the Phase 3/4 runtime and governance
+This historical developer-capability view shows the Phase 3/4 runtime and governance
 boundaries, Phase 5 hybrid retrieval foundation, Phase 6 visual/table extraction,
 and the Phase 7 evaluation and observability layer. Phase 6 remains released at
 `mm-rag-v6.0.0`; Phase 7 is accepted with its seven-day baseline and pilot SLOs.
+Its development ports, schema and retry labels are historical, not the current demo
+runtime or permission to execute paid workflows. Its stable filename is preserved.
 
-![MM-RAG current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
+![Historical Phase 7 workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 
-## Final production architecture
+## Target production architecture — not a completion claim
 
-This is the target production system without phase or roadmap labels.
+This is an aspirational target system without phase or roadmap labels. It does not
+claim the learning deployment implements every component or provides a production SLA.
 
 ![Multimodal RAG final production architecture](images/10-final-production-architecture.png)
 
-## Complete system and evolution roadmap
+## Historical system and evolution roadmap
+
+This original roadmap is retained for design history. Use the current lifecycle
+SVG and handbook for accepted, closed-without-acceptance and deferred phase status.
 
 ![Complete Multimodal RAG architecture and evolution roadmap](images/00-complete-production-architecture.png)
 
@@ -53,6 +77,9 @@ live-service evidence and are accepted in PR #3's squash commit `57ee453`.
 ![Phase 4 fine-grained authorization and governance](images/04-phase-4-governance.png)
 
 ## Phase 5 — Hybrid retrieval, fusion, and reranking
+
+Historical target: Phase 5 closed without quality acceptance. `hybrid-v1` remains
+the default, `dense-v1` the rollback and `hybrid-v3` evaluation-only/unpromoted.
 
 ![Phase 5 hybrid retrieval, fusion, and reranking](images/05-phase-5-hybrid-retrieval.png)
 
@@ -81,7 +108,8 @@ This poster records the accepted and released Phase 6 visual/table architecture.
 ## Maintenance rule
 
 1. Update `ARCHITECTURE.md` first.
-2. Regenerate the affected poster using the shared visual specification in
-   [`images/README.md`](images/README.md).
-3. Verify technical labels and flows against the handbook.
-4. Replace the existing image while preserving its stable filename.
+2. Update the current editable Mermaid/SVG view and render it locally for review.
+3. Verify technical labels, scope limits and flows against the handbook and ADRs.
+4. Preserve clearly labeled historical/target PNGs and immutable release evidence.
+   Paid image generation is not authorized for this update; the legacy visual
+   specification remains in [`images/README.md`](images/README.md).

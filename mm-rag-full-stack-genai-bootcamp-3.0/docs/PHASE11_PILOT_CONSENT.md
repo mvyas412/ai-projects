@@ -2,6 +2,17 @@
 
 Status: **Accepted for the bounded Phase 11 pilot**
 
+## Post-pilot operating note — October 18, 2026
+
+The original notice and consent terms below are preserved; this note does not claim
+new participant consent or change existing product-data rights. The limited two-person
+pilot is accepted. The deployment remains an [inspection demo](DEMO_RUNBOOK.md) under
+ADR 0065: worker stopped, existing maintenance unchanged, no new paid calls or
+resources. Existing READY documents and saved answers/citations only; no additional
+enrollment or new processing is approved. Worker stop does not block API chat, so do
+not submit new questions. Aggregate evidence has a manual retention review due
+November 17; this is not automatic deletion of accounts, documents or conversations.
+
 ## Before you join
 
 MM-RAG is an invitation-only learning pilot, not a production service. It may have

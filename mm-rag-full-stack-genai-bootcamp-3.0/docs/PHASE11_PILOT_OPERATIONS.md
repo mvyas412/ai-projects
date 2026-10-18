@@ -1,6 +1,39 @@
 # Phase 11 pilot operations
 
-Status: **Phase 11 accepted for the two-person learning pilot; worker stopped**
+Status: **Phase 11 accepted; acceptance records merged; existing inspection demo retained**
+
+## Current demo disposition — October 18
+
+Acceptance records were squash-merged in PR #31 at `768a67f`, with 460 CI tests
+passing/4 skips and 83.59% coverage. No deployment or release tag accompanied the
+merge. The subsequent [ADR 0065](architecture/decisions/0065-postpilot-demo-operating-mode.md)
+and [`phase11-demo-v1.json`](../operations/phase11-demo-v1.json) retain the existing
+deployment for inspection-only demonstrations: worker stopped/restart-no, existing
+maintenance unchanged, no new paid calls or resources. Follow the
+[demo runbook](DEMO_RUNBOOK.md), not the historical paid-proof/startup recipes below.
+
+Existing authorized accounts may inspect READY documents and saved answers/citations.
+No new questions, uploads, retries/reprocessing, connector sync, worker start, access
+expansion, upgrades or new cloud resources are approved. A stopped worker does not
+block paid chat/query embeddings; the restriction is operator-controlled, not a new
+runtime/UI interlock. Preserve current backup/capacity schedules, private encrypted
+backup destination, cost guards, backup-resume fix and manual-retention safeguards.
+Scheduled backup quiescence can briefly interrupt access; no production SLA is claimed.
+
+Last verified deployed revision remains `dba88de`, schema `0019`; this documentation
+update is not a fresh host-health audit or deployment. Phase 5 closed without quality
+acceptance, five-/ten-user validation is deferred/unvalidated and Next.js unpromoted.
+Historical OCI USD 0 is operator-reported, not a future zero-cost guarantee. Review
+aggregate-evidence retention manually November 17; no automatic product-data deletion.
+The operator subsequently explicitly approves commit/push of these demo documentation
+and diagram changes after the free verification gate. This source-only approval
+does not authorize a new PR/merge, tag, deployment, service/access change or paid work.
+
+## Historical acceptance and closure checkpoints
+
+The dated authority and pending statements below retain their original checkpoint
+meaning. The merged acceptance and current demo disposition above supersede pending
+publication/disposition statements; frozen acceptance and review evidence is unchanged.
 
 ## October 18 explicit acceptance
 

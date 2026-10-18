@@ -1,6 +1,6 @@
-# Multimodal RAG production project plan
+# Multimodal RAG learning-project plan
 
-> Living delivery plan — updated 2026-09-20
+> Living delivery plan — updated 2026-10-18; accepted learning scope and retained demo
 
 This is the version-controlled planning source of truth for the journey from the
 preserved prototype through an operationally hardened learning platform. It defines sequence, scope,
@@ -50,7 +50,7 @@ Rules:
 | Phase 2.1 implementation foundation | Published in `33bc54d` |
 | Phase 2.1 acceptance | Completed with live Auth0 browser evidence in `f992dce` |
 | Phase 2.2 | Completed and published in `fb0fc86` |
-| Active milestone | Phase 11.5 accepted October 18 for the two-person learning pilot; commit/push separately approved; merge/tags and post-pilot disposition remain gated |
+| Active milestone | Agreed learning project closed; Phase 11 two-person acceptance merged in PR #31 (`768a67f`); existing inspection demo retained under ADR 0065 |
 | Phase 3 | Completed and accepted — Milestones 3.0–3.5 and ADRs 0007–0012 verified end to end |
 | Phase 3 merge | PR #2 merged into `main` at `228ce63`; source branch preserved |
 | Phase 3 release | Tagged `mm-rag-v3.0.0` at `9ebe767`; tag is immutable |
@@ -68,7 +68,7 @@ Rules:
 | Phase 9 release | Annotated `mm-rag-v9.0.0` identifies the verified documentation-kickoff closure commit and is immutable |
 | Phase 10 | Completed and accepted — all eight evidence scenarios pass |
 | Phase 10 release | Annotated `mm-rag-v10.0.0` peels to accepted merge `a2d200b`; immutable |
-| Phase 11 | Accepted October 18 for the two-person guided learning pilot; five-/ten-user validation deferred and unvalidated; acceptance-record commit/push separately approved |
+| Phase 11 | Accepted October 18 for the two-person guided learning pilot; acceptance records merged; five-/ten-user validation deferred and unvalidated; inspection demo retained |
 
 ## Delivery sequence and gates
 
@@ -83,7 +83,8 @@ flowchart LR
     p7 -->|"SLO and quality evidence"| p8["Phase 8<br/>Scalable production platform"]
     p8 -->|"operational production base"| p9["Phase 9<br/>Enterprise/commercial platform"]
     p9 -->|"governed product baseline"| p10["Phase 10<br/>Operational hardening"]
-    p10 -->|"recoverable operating baseline"| p11["Phase 11<br/>Invitation-only pilot"]
+    p10 -->|"recoverable operating baseline"| p11["Phase 11<br/>Two-person limited acceptance"]
+    p11 --> demo["Retained inspection demo<br/>Worker stopped; maintenance unchanged<br/>No new paid calls or resources"]
 ```
 
 Later-phase discovery may run early, but implementation must not bypass the
@@ -1207,7 +1208,7 @@ formal retry/workflow gates and Phase 11 acceptance remain pending.
 
 ## Phase 11 — invitation-only product pilot
 
-**Status:** Accepted October 18 for the two-person guided learning pilot. ADRs 0057–0064 are Accepted. The versioned policy, synthetic
+**Status:** Accepted October 18 for the two-person guided learning pilot; acceptance records merged and inspection demo retained. ADRs 0057–0065 are Accepted. The versioned policy, synthetic
 rehearsal, content-free evidence gate, tests, and operating guide are implemented.
 Broader invitation, external notification, frontend promotion, further paid work, or
 cloud change remains separately gated.
@@ -1218,18 +1219,38 @@ evidence-review digests, scope limitations, actual OpenAI USD 0.00151422/six req
 and operator-reported OCI USD 0 (not independently audited). Five-/ten-user validation
 remains deferred and unvalidated. Guided success does not prove intended single-document
 selection, unassisted discovery or fresh live negative-isolation/restore testing.
-Worker stays stopped/restart-no; maintenance remains unchanged. Git publication,
-post-pilot access/service disposition, tags and any further operational/paid action
-need separate approval. Aggregate-evidence manual retention review is due November 17;
+Worker stays stopped/restart-no; maintenance remains unchanged. PR #31 squash-merged
+the tested acceptance tree at `768a67f`; no tag or deployment accompanied the merge.
+ADR 0065 separately approves retaining the existing inspection demo. Further
+publication, tags, deployment, access expansion or operational/paid action need
+separate approval. Aggregate-evidence manual retention review is due November 17;
 automatic deletion/apply remain disabled. Dated pending statements below are historical.
 
-Subsequent explicit approval permits committing/pushing the acceptance records on
-the existing Phase 11 branch after `make check`. This is publication authority only;
-merge, tags, operational changes and post-pilot disposition remain separately gated.
+The acceptance-record commit/push was separately approved after `make check`.
+The later explicit squash-merge approval completed PR #31; the separate demo
+instruction establishes ADR 0065. The operator subsequently explicitly approves
+commit/push of the demo-documentation follow-up after free verification. This is
+source publication only: no merge, tag, deployment, service/access mutation or paid work.
 
 Pre-publication `make check` passes October 18: 448 tests/16 expected skips, lint,
 typing, protected evaluation/deployment contracts and schema head/no drift. No runtime
 or integration-boundary change, live-service rerun, dependency upgrade or paid call.
+
+### Current retained-demo decision
+
+[ADR 0065](architecture/decisions/0065-postpilot-demo-operating-mode.md),
+[`operations/phase11-demo-v1.json`](../operations/phase11-demo-v1.json) and the
+[demo runbook](DEMO_RUNBOOK.md) define the current mode. Existing authorized accounts
+may inspect READY documents and saved answers/citations. Do not submit new questions,
+upload, retry/reprocess, sync connectors or start the worker. A stopped worker does
+not block paid API chat/embeddings; inspection-only is operator-controlled, not a
+new runtime interlock. Keep existing maintenance and safeguards unchanged; add no
+paid calls, resources, upgrades or new schedules. Backup quiescence can briefly
+interrupt the demo; no SLA is claimed. Merged acceptance CI passed 460 tests/4 skips
+with 83.59% coverage. Last verified deployed revision remains `dba88de`, schema `0019`;
+this documentation update performs no fresh host audit or deployment.
+
+### Historical closure, implementation and recovery checkpoints
 
 October 11 scope approval: [ADR 0064](architecture/decisions/0064-two-person-pilot-closure-scope.md)
 is Accepted following explicit operator approval. Closure is limited to the existing
@@ -1877,14 +1898,15 @@ no additional reboot, service change or paid processing is approved or performed
 | Pilot consent, privacy, and feedback | 11.3 | Accepted — ADR 0060; consent copy accepted; 30-day aggregate retention |
 | Pilot reliability, support, capacity, and cost | 11.4 | Accepted — ADR 0061; free-first and immediate safety pause |
 | Pilot rollout, acceptance, and rollback | 11.5 | Accepted — ADRs 0062–0064; explicit two-person learning-pilot acceptance October 18; larger stages deferred |
+| Post-pilot demo disposition | Closure | Accepted — ADR 0065; existing inspection demo retained, worker stopped, maintenance unchanged, no new paid calls/resources |
 
 ## Immediate next actions
 
 | Priority | Action | Completion evidence |
 | --- | --- | --- |
-| 1 | Preserve accepted limited scope and historical evidence boundaries | October 18 acceptance record; larger cohorts remain unvalidated |
-| 2 | Publish acceptance records after the free verification gate | Commit/push separately approved; no merge or tag authorization |
-| 3 | Decide post-pilot access/service disposition separately | Worker stays stopped and existing maintenance unchanged until another decision |
+| 1 | Preserve the merged limited acceptance and qualified completion claim | PR #31 / `768a67f`; Phase 5 closed without acceptance, larger cohorts and Next.js deferred |
+| 2 | Keep the existing deployment available for inspection-only demonstrations | ADR 0065; READY documents and saved answers/citations only; no new paid calls or resources |
+| 3 | Preserve existing maintenance and worker-stop safeguards | Worker stopped/restart-no; backup/capacity schedules unchanged; no new deployment, upgrades or access expansion |
 | 4 | Manually review aggregate-evidence retention on November 17 | No automatic deletion or retention apply; reviewed manual removal only |
 
 ## Update protocol

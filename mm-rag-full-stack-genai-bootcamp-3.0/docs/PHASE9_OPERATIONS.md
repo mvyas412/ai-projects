@@ -1,5 +1,12 @@
 # Phase 9 enterprise operations
 
+Current deployment mode is the [inspection demo](DEMO_RUNBOOK.md), ADR 0065:
+worker stopped/restart-no, existing maintenance unchanged, no new paid calls or
+resources. No new connector sync, ingestion job, billing provider, enrollment or
+access expansion is approved. Existing READY documents and saved answers/citations
+only; the stopped worker does not block API chat. Procedures below are capability
+references, not current execution authority.
+
 ## Safety boundary
 
 Phase 9 runs provider-neutral and simulated controls by default. Never place OAuth

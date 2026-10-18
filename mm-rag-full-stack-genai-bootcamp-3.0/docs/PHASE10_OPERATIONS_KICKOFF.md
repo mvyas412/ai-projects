@@ -2,6 +2,12 @@
 
 > Status: Accepted — implementation authorized within the recorded safeguards
 
+Current status: Phase 10 was accepted and released; this kickoff is design history.
+Phase 11's limited two-person learning acceptance is merged. The existing deployment
+is retained as an [inspection demo](DEMO_RUNBOOK.md), ADR 0065: worker stopped,
+maintenance unchanged, no new paid calls or resources. Original targets below do
+not authorize expanding the closed two-person scope or changing existing maintenance.
+
 ## Objective
 
 Make the accepted free-first learning deployment easier to maintain, recover, upgrade,

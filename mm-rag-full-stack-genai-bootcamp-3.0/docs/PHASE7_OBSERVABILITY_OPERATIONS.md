@@ -1,5 +1,11 @@
 # Phase 7 evaluation and observability operations
 
+Current deployment mode is the [inspection demo](DEMO_RUNBOOK.md), ADR 0065:
+worker stopped/restart-no, existing maintenance unchanged, no new paid calls or
+resources. Do not enable a new observability stack, start a worker or run paid
+evaluation from the historical local setup recipes below. Existing READY documents
+and saved answers/citations only; stopping the worker does not disable API chat.
+
 This runbook covers the free local Phase 7 telemetry, evaluation, feedback, dashboard,
 alert, and incident-learning controls. Telemetry is operational metadata only. Audit,
 retrieval evidence, calculation traces, and durable job state remain authoritative.

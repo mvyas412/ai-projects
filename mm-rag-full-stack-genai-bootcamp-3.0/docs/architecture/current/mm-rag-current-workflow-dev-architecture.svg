@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
-  <title id="title">MM-RAG Platform — Current Workflow and DEV Architecture</title>
-  <desc id="desc">Current MM-RAG development workflow showing the accepted Phase 6 product path and implemented Phase 7 privacy-bounded telemetry, evaluation, feedback, dashboards, alerts, and acceptance baseline.</desc>
+  <title id="title">MM-RAG historical Phase 7 developer capability reference</title>
+  <desc id="desc">Historical development capabilities through Phase 7, not the current demo procedure. The retained Phase 11 demo permits only saved-evidence inspection, with worker stopped and maintenance unchanged. See the current demo architecture and closure diagrams in the gallery.</desc>
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#193b68"/>
@@ -26,8 +26,8 @@
   </defs>
 
   <rect width="1600" height="900" fill="#f8fafc"/>
-  <text x="800" y="40" text-anchor="middle" class="title">MM-RAG Platform — Current Workflow &amp; DEV Architecture</text>
-  <text x="800" y="68" text-anchor="middle" class="subtitle">Phase 7 · Evaluation &amp; observability · Accepted · Seven-day baseline and pilot SLOs approved</text>
+  <text x="800" y="40" text-anchor="middle" class="title">MM-RAG — Historical Phase 7 Developer Capabilities</text>
+  <text x="800" y="68" text-anchor="middle" class="subtitle">Historical reference, not demo instructions · Current demo: saved evidence only, worker stopped, no new paid calls</text>
 
   <text x="22" y="101" class="small" font-weight="700">Status snapshot</text>
   <rect x="116" y="84" width="116" height="26" rx="13" fill="#e8f7ef" stroke="#47a477"/>
@@ -240,7 +240,7 @@
 
   <!-- Delivery horizon -->
   <rect x="20" y="775" width="1560" height="105" rx="12" fill="white" stroke="#cad5e2"/>
-  <text x="38" y="800" class="lane-title">Current gate and delivery horizon</text>
+  <text x="38" y="800" class="lane-title">Historical capability milestones — current demo and Phase 11 closure are documented separately</text>
   <rect x="38" y="814" width="286" height="50" rx="9" fill="#e8f7ef" stroke="#47a477"/>
   <text x="52" y="836" class="card-title" fill="#26805a">Phase 3 · accepted</text>
   <text x="52" y="854" class="small">Durable async ingestion and paid proof</text>
@@ -254,6 +254,6 @@
   <text x="946" y="836" class="card-title" fill="#26805a">Phase 6 · accepted &amp; released</text>
   <text x="946" y="854" class="small">visual-table-v1 · mm-rag-v6.0.0</text>
   <rect x="1230" y="814" width="332" height="50" rx="9" fill="#fff7df" stroke="#c58a19"/>
-  <text x="1244" y="836" class="card-title" fill="#8a5a00">Phase 7 · implemented</text>
-  <text x="1244" y="854" class="small">Acceptance waits for 7-day SLO baseline</text>
+  <text x="1244" y="836" class="card-title" fill="#8a5a00">Phase 7 · accepted</text>
+  <text x="1244" y="854" class="small">Seven-day baseline and numeric SLOs accepted</text>
 </svg>

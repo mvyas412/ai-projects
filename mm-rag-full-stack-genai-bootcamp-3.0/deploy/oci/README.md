@@ -1,5 +1,13 @@
 # OCI learning deployment bundle
 
+Current operating mode is the [retained inspection demo](../../docs/DEMO_RUNBOOK.md),
+ADR 0065: worker stopped/restart-no, existing maintenance unchanged, no new paid
+calls or resources. Existing READY documents and saved answers/citations only;
+worker stop does not block API chat. Setup/start/Compose examples below describe
+capabilities, not approval to start the worker, redeploy or provision. Preserve the
+existing backup/capacity schedules and private backup destination; examples of
+disabled installation defaults do not override the existing accepted installation.
+
 This directory prepares the accepted Phase 8 single-VM learning topology. It does not
 create an OCI account or resource. The first deployment keeps Streamlit as the working
 frontend and uses private Compose networking behind Caddy HTTPS.

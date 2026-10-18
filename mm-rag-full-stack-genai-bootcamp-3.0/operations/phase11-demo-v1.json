@@ -1,0 +1,68 @@
+{
+  "schema": "mm-rag-phase11-demo-v1",
+  "decision": "ADR-0065",
+  "approved_on_pacific": "2026-10-18",
+  "mode": "retained-inspection-demo",
+  "acceptance_record": "operations/phase11-acceptance-v1.json",
+  "merged_acceptance_revision": "768a67f50734d485d059d5a66c79d4da7cd50140",
+  "runtime_change_authorized": false,
+  "access": {
+    "existing_authorized_accounts_only": true,
+    "additional_enrollment_authorized": false,
+    "public_signup_authorized": false,
+    "authorization_boundaries_unchanged": true
+  },
+  "demo": {
+    "allowed": [
+      "sign-in-and-out",
+      "inspect-existing-ready-documents",
+      "reopen-saved-answers",
+      "inspect-existing-citations",
+      "read-existing-status"
+    ],
+    "new_questions_authorized": false,
+    "uploads_authorized": false,
+    "retry_rebuild_reindex_authorized": false,
+    "connector_sync_authorized": false,
+    "provider_calls_authorized": false,
+    "enforcement": "operator-controlled-instructions-not-a-new-runtime-or-ui-interlock",
+    "worker_stop_blocks_api_chat": false
+  },
+  "worker": {
+    "state": "stopped",
+    "restart_policy": "no",
+    "start_authorized": false
+  },
+  "maintenance": {
+    "policy": "operations/phase10-policy.json",
+    "existing_backup_and_capacity_schedules": "unchanged",
+    "existing_private_backup_destination": "unchanged",
+    "new_observability_stack_authorized": false,
+    "automatic_retention_apply": false,
+    "automatic_deletion": false,
+    "unattended_upgrades_authorized": false,
+    "scheduled_backup_may_briefly_interrupt_demo": true,
+    "restore_and_release_operations_require_separate_approval": true
+  },
+  "resources": {
+    "new_resources_authorized": false,
+    "paid_capacity_authorized": false,
+    "new_paid_calls_authorized": false,
+    "existing_cost_guardrails": "unchanged",
+    "historical_zero_oci_report_guarantees_future_zero_cost": false
+  },
+  "retention": {
+    "aggregate_manual_review_due_at": "2026-11-17T23:10:45Z",
+    "product_records_automatically_deleted": false,
+    "automatic_deletion": false
+  },
+  "publication": {
+    "commit_push_authorized_by_this_decision": false,
+    "merge_tag_or_deployment_authorized": false
+  },
+  "scope_limits": {
+    "production_sla": false,
+    "five_ten_user_validation": "deferred-unvalidated",
+    "nextjs_promoted": false
+  }
+}

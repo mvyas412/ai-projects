@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">MM-RAG Phase 11 closure and retained demo lifecycle</title>
+  <desc id="desc">Two independent people completed the guided pilot. Limited acceptance on October 18 was verified and squash-merged in PR 31. The deployment is retained for inspecting saved evidence, with worker stopped and maintenance unchanged. No new paid calls or resources. Aggregate evidence has a manual retention review on November 17; no automatic deletion.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#456078"/></marker>
+    <style>
+      text {font-family: Arial, sans-serif; fill: #18324c;}
+      .title {font-size: 36px; font-weight: 700;}
+      .subtitle {font-size: 20px; fill: #456078;}
+      .heading {font-size: 26px; font-weight: 700;}
+      .body {font-size: 20px;}
+      .small {font-size: 18px; fill: #456078;}
+      .step {font-size: 20px; font-weight: 700; fill: #fff;}
+      .flow {fill: none; stroke: #456078; stroke-width: 3; marker-end: url(#arrow);}
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="#f6f8fc"/>
+  <text x="40" y="55" class="title">Phase 11 — accepted, published, retained as an inspection demo</text>
+  <text x="40" y="90" class="subtitle">Two-person guided learning scope only · Five-/ten-user validation remains deferred and unvalidated</text>
+
+  <rect x="40" y="150" width="480" height="265" rx="16" fill="#eaf2fb" stroke="#6391ba"/>
+  <circle cx="76" cy="189" r="19" fill="#356a97"/><text x="76" y="196" text-anchor="middle" class="step">1</text>
+  <text x="110" y="198" class="heading">Scope and consent</text>
+  <text x="64" y="244" class="body">Two independent, existing participants</text>
+  <text x="64" y="281" class="body">Private consent and manual enrollment</text>
+  <text x="64" y="318" class="body">Technical rehearsal remains separate</text>
+  <text x="64" y="355" class="body">No public signup or cohort expansion</text>
+  <text x="64" y="393" class="small">ADR 0064 narrows closure, not safeguards</text>
+
+  <rect x="560" y="150" width="480" height="265" rx="16" fill="#e9f4ef" stroke="#78a18e"/>
+  <circle cx="596" cy="189" r="19" fill="#397453"/><text x="596" y="196" text-anchor="middle" class="step">2</text>
+  <text x="630" y="198" class="heading">Human and safeguard review</text>
+  <text x="584" y="244" class="body">Two guided primary workflows complete</text>
+  <text x="584" y="281" class="body">Eligible observation exceeds 72 hours</text>
+  <text x="584" y="318" class="body">Saved answers / citations / keyboard checks</text>
+  <text x="584" y="355" class="body">Fresh operations + historical safety proof</text>
+  <text x="584" y="393" class="small">Wider saved scope and assistance qualified</text>
+
+  <rect x="1080" y="150" width="480" height="265" rx="16" fill="#e9f4ef" stroke="#78a18e"/>
+  <circle cx="1116" cy="189" r="19" fill="#397453"/><text x="1116" y="196" text-anchor="middle" class="step">3</text>
+  <text x="1150" y="198" class="heading">Explicit acceptance</text>
+  <text x="1104" y="244" class="body">Approved October 18, 2026</text>
+  <text x="1104" y="281" class="body">Versioned acceptance record</text>
+  <text x="1104" y="318" class="body">No production or unassisted-use claim</text>
+  <text x="1104" y="355" class="body">Historical records are not rewritten</text>
+  <text x="1104" y="393" class="small">Acceptance alone grants no paid execution</text>
+
+  <path d="M520 285 H553" class="flow"/>
+  <path d="M1040 285 H1073" class="flow"/>
+  <path d="M1320 415 V450 H20 V605 H33" class="flow"/>
+
+  <rect x="40" y="480" width="480" height="250" rx="16" fill="#eeedfb" stroke="#8d82b4"/>
+  <circle cx="76" cy="519" r="19" fill="#6b5b99"/><text x="76" y="526" text-anchor="middle" class="step">4</text>
+  <text x="110" y="528" class="heading">CI and source publication</text>
+  <text x="64" y="574" class="body">460 passed / 4 skipped; 83.59% coverage</text>
+  <text x="64" y="611" class="body">PR #31 squash-merged: 768a67f</text>
+  <text x="64" y="648" class="body">Merged tree matches the tested tree</text>
+  <text x="64" y="699" class="small">No runtime deployment or release tag</text>
+
+  <rect x="560" y="480" width="480" height="250" rx="16" fill="#fff6e7" stroke="#b69459"/>
+  <circle cx="596" cy="519" r="19" fill="#92703b"/><text x="596" y="526" text-anchor="middle" class="step">5</text>
+  <text x="630" y="528" class="heading">Retained demo — ADR 0065</text>
+  <text x="584" y="574" class="body">Existing READY files and saved evidence</text>
+  <text x="584" y="611" class="body">Worker STOPPED / restart-no</text>
+  <text x="584" y="648" class="body">Existing maintenance UNCHANGED</text>
+  <text x="584" y="699" class="small">No new questions, paid calls or resources</text>
+
+  <rect x="1080" y="480" width="480" height="250" rx="16" fill="#e9f5f4" stroke="#6c9d9a"/>
+  <circle cx="1116" cy="519" r="19" fill="#3c7778"/><text x="1116" y="526" text-anchor="middle" class="step">6</text>
+  <text x="1150" y="528" class="heading">Manual retention review</text>
+  <text x="1104" y="574" class="body">Aggregate evidence: November 17, 2026</text>
+  <text x="1104" y="611" class="body">Reviewed manual removal only</text>
+  <text x="1104" y="648" class="body">No automatic deletion of product data</text>
+  <text x="1104" y="699" class="small">No retention automation enabled</text>
+  <path d="M520 605 H553" class="flow"/>
+  <path d="M1040 605 H1073" class="flow"/>
+
+  <rect x="40" y="765" width="1520" height="99" rx="12" fill="#fff" stroke="#c5cfdb"/>
+  <text x="64" y="798" class="body">Pilot OpenAI actual export: USD 0.00151422 / 6 requests. OCI USD 0: operator-reported, not independently audited.</text>
+  <text x="64" y="831" class="small">Phase 5 closed without quality acceptance. Worker stop does not block API chat; no new provider action is permitted by the demo disposition.</text>
+  <text x="40" y="890" class="small">Source: ADRs 0064–0065, acceptance/demo contracts and the accepted closure review. Existing access and maintenance remain in place.</text>
+</svg>

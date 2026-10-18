@@ -5,6 +5,14 @@ These 16:9 PNG posters are presentation-ready visual companions to
 built-in ImageGen capability from the canonical architecture and then visually
 reviewed for hierarchy, legibility, component coverage, and flow direction.
 
+These PNGs are historical or target illustrations, not the current demo topology,
+execution permissions or production-readiness evidence. Older pending Phase 10
+labels predate its acceptance. Current status is maintained without paid image
+generation in the [demo SVG](../current/mm-rag-demo-architecture.svg),
+[Phase 11 lifecycle SVG](../current/mm-rag-phase11-closure-demo.svg), handbook
+Mermaid and [gallery captions](../ARCHITECTURE_POSTERS.md). Existing demo only:
+worker stopped, maintenance unchanged, no new paid calls or resources.
+
 | File | Purpose |
 | --- | --- |
 | `00-complete-production-architecture.png` | Complete system with evolution roadmap |
@@ -17,8 +25,8 @@ reviewed for hierarchy, legibility, component coverage, and flow direction.
 | `07-phase-7-evaluation-observability.png` | Evaluation and observability target |
 | `08-phase-8-scalable-platform.png` | Scalable production deployment target |
 | `09-phase-9-enterprise-controls.png` | Enterprise and commercial controls target |
-| `10-phase-10-operational-hardening.png` | Implemented operational hardening and pending supervised evidence |
-| `10-final-production-architecture.png` | Final production-state architecture without phase labels |
+| `10-phase-10-operational-hardening.png` | Historical pre-acceptance illustration; pending labels superseded by the handbook |
+| `10-final-production-architecture.png` | Aspirational production target, not current deployment or SLA evidence |
 
 ## Shared visual specification
 

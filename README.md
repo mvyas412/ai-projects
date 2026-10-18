@@ -3,6 +3,22 @@
 This repository preserves versioned MM-RAG releases while future phase work is
 planned in isolated branches and worktrees.
 
+## Current learning-project status — October 18, 2026
+
+The active [3.0 application](mm-rag-full-stack-genai-bootcamp-3.0/README.md) is complete
+for the agreed learning scope. Phase 11's two-person guided pilot was accepted and
+squash-merged in [PR #31](https://github.com/mvyas412/ai-projects/pull/31) at `768a67f`.
+Phase 5 remains closed without quality acceptance; five-/ten-user validation and the
+Next.js candidate remain deferred, not production-readiness claims.
+
+The existing deployment is retained for inspecting existing documents, saved answers
+and citations. Worker stays stopped/restart-no; existing maintenance is unchanged.
+No new paid calls, uploads, questions or resources are authorized. Follow the
+[demo runbook](mm-rag-full-stack-genai-bootcamp-3.0/docs/DEMO_RUNBOOK.md) and
+[current diagrams](mm-rag-full-stack-genai-bootcamp-3.0/docs/architecture/ARCHITECTURE_POSTERS.md).
+Legacy release directories/tags below remain immutable history. Publication of these
+new documentation changes is separate from the already merged acceptance records.
+
 - `mm-rag-full-stack-genai-bootcamp-1.0/` — immutable V1 prototype,
   tagged `mm-rag-v1.0.0`.
 - `mm-rag-full-stack-genai-bootcamp-2.0/` — accepted secure product foundation,
