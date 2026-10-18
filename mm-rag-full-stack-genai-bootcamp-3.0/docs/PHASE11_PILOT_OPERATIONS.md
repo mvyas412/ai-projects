@@ -1,13 +1,358 @@
 # Phase 11 pilot operations
 
-Status: **Technical rehearsal passed; bounded retry profile deployed; two-person canary paused pending workflow evidence**
+Status: **Phase 11 accepted for the two-person learning pilot; worker stopped**
 
-Current checkpoint: the separately approved capacity-recovery continuation passes.
-Eight services are running on the existing host; API/dispatcher/UI use `dba88de`.
-The worker is configured on that image/profile but never started, with restart disabled.
-Fresh capacity, readiness/TLS, anonymous denial and zero-job/queue checks pass; both
-maintenance timers are enabled/active/waiting and no host units are failed.
-Both participants remain paused. The separately approved October 5 local test-isolation
+## October 18 explicit acceptance
+
+The operator explicitly approved recording the limited acceptance at
+`2026-10-18T23:10:45Z` (October 18 Pacific): **Phase 11 accepted for the two-person
+learning pilot. Five- and ten-user product validation stages are deferred and remain
+unvalidated.** The current decision is recorded in
+`operations/phase11-acceptance-v1.json`; the earlier scope-only approval contract and
+frozen rehearsal/review evidence remain unchanged historical records.
+
+Acceptance adopts the closure review below, including guided-workflow and wider saved
+document-scope limitations, direct/operator-relayed human feedback, historical versus
+fresh safeguard evidence, actual OpenAI USD 0.00151422/six requests, and OCI USD 0 as
+operator-reported rather than independently audited. No production, larger-cohort,
+unassisted-discovery or fresh live negative-isolation claim follows.
+
+Worker remains stopped/restart-no and existing Phase 10 maintenance remains unchanged.
+No participant expansion, paid call, service/access/cloud mutation, Git publication,
+merge or release tag is authorized. Post-pilot access/service disposition is separate.
+The 30-day aggregate-evidence retention period now runs to November 17, 2026
+(`2026-11-17T23:10:45Z`); removal requires reviewed manual action. No automatic deletion,
+retention apply or reminder was created. Earlier dated pending/not-accepted statements
+below describe their checkpoints and are superseded only by this final decision.
+
+The operator subsequently separately approves committing and pushing these acceptance
+records on the existing Phase 11 branch, after the required free verification gate.
+That publication approval does not authorize merging, release tags, service changes
+or paid work. The acceptance JSON retains the earlier decision's narrower authority;
+the subsequent publication approval does not rewrite that historical boundary.
+
+The October 18 pre-publication `make check` completes successfully: 448 tests pass,
+16 expected skips, lint and typing (232 source files) pass, protected evaluation/
+deployment contracts pass, schema head remains `20260919_0019` and no drift is detected.
+Offline dependency mode and the previously verified public tokenizer cache are used;
+no dependency upgrade or paid call occurs. Runtime/integration boundaries are unchanged,
+so this documentation/contract publication does not rerun the live-service gate.
+
+## October 18 limited closure review
+
+The operator confirms that only MM-RAG used the provider project on October 8 UTC
+and reports no OCI cost in response to the pilot-period infrastructure-cost question.
+Record OpenAI actual exported cost **USD 0.00151422** (two chat/four embedding requests)
+and OCI **USD 0, operator-reported**. Attribution is corroborated by matching saved
+chat counts/tokens and unchanged upload/question aggregates. This is not a minute-level
+provider audit or independently verified OCI bill/complete cloud-resource inventory.
+Do not leave reported zero labeled unknown, or present it as independently audited.
+
+The retrospective human ledger uses one authorized participant PDF-to-ready-to-answer/
+citation workflow as its unit: **two attempted, two completed, 100%**, meeting the
+90% threshold for these bounded actual-selected-document workflows. Both uploads and
+both questions are included; return visits/component steps are not added to inflate
+the denominator. The operator reports no further failed/repeated/extra attempts and
+database/job/provider aggregates corroborate the two submitted workflows. Unanswered
+draft conversations are not submitted question attempts. Optional ratings and earlier
+technical cancel/retry/revocation scenarios are not counted as human journeys.
+The first saved selection included two authorized documents: intended Webb-only
+selection is not proved, even though the answer/citations complete the actual selected
+scope. Preserve this intent/scope limitation, guided assistance of unquantified amount,
+and direct/operator-relayed usability feedback; do not claim unassisted discovery.
+
+The eligible October 7–11 observation checkpoint exceeds 72 hours with both people
+active and no additional pauses/incidents reported; older recovery/unverified time
+is excluded. Both final personal usability/persistence checks complete October 18.
+The eight safeguard groups are assessed passing with their stated evidence boundaries:
+consent; authorization/isolation; privacy; grounding/integrity; backup/recovery;
+rollback; capacity/bounded execution; and cost. Fresh October 18 health/backup/timer/
+queue/worker checks supplement protected authorization/isolation and accepted Phase 10
+restore/rollback proof. September 20–21 recovery proofs remain within the 31-day drill
+interval; no new restore is claimed. The local rollback-ready template is not live
+pass evidence. Free checks and independently permitted read-only schema checks pass;
+the `make check` shell exit itself remains sandbox-blocked, as recorded below.
+
+The ignored limited-closure review recommends **acceptance for the existing two-person
+guided learning pilot**, subject to an explicit operator decision acknowledging these
+limitations and the operator-reported OCI cost. Phase 11 is **not yet accepted**.
+Five-/ten-user validation remains deferred and unvalidated. No production SLA, broader
+adoption or fresh negative live-tenant audit is claimed. Worker remains stopped and
+maintenance unchanged. Git publication, post-pilot service/access disposition and any
+new operational/paid action remain separately gated. No retention clock or deletion
+is started before actual closure. The earlier checkpoints below remain historical.
+
+## October 18 actual provider usage recovered
+
+After renewed provider sign-in, the one-project October 8 UTC dashboard records two
+chat requests with 3,307 input and 85 output tokens, matching the saved pilot answers,
+and four embedding requests with 2,771 input tokens. Distinct embedding requests do
+not imply automatic retries. A privately retained cost CSV confirms the exact daily
+interval `[2026-10-08T00:00:00Z, 2026-10-09T00:00:00Z)` and actual project-day spend
+of **USD 0.00151422**. This is provider-exported cost, not a token-rate estimate;
+the overview's `$0.00` is a rounded display, not exact zero. The CSV and identifiers
+stay outside Git; the ignored aggregate reconciliation retains its checksum.
+
+The daily export is broader than the bounded approximately 02:08–02:46 UTC session.
+Until unrelated same-project activity is excluded, record the daily amount as a
+session upper bound, not an exactly attributed session charge. Operator exclusivity
+confirmation and existing OCI aggregate cost/resource evidence are requested.
+The export initially opened a prepared-file dialog rather than starting a download;
+that dialog was inspected and its one-day file downloaded without a duplicate export.
+This resolves provider authentication and missing daily usage/cost access, not every
+cost or acceptance gate. Full journey/safeguard reconciliation, infrastructure cost
+and explicit final acceptance remain open. No model call, runtime change or Git
+publication occurred. The earlier checkpoint below remains a historical snapshot.
+
+## October 18 read-only closure checkpoint
+
+Strict SSH checks at `2026-10-18T22:57:01Z`–`22:57:30Z` pass eight running services,
+unchanged `dba88de`/schema `20260919_0019`, worker exited zero/restart-no with its
+October 7 finish unchanged, no active jobs or queue consumers, empty queues and
+one-attempt/zero-SDK-retry controls. Core host services are active, SELinux enforcing,
+failed units zero, maintenance timers enabled/waiting and their last runs successful.
+Capacity passes with a 217-second-old sample: CPU 2.49%, memory 31.83%, disk 43.38%,
+inodes 1.49%, certificate 60.16 days. The owner-only encrypted backup is 10.35 hours
+old, with valid header and checksum matched to successful upload evidence; no
+plaintext staging remains. Public UI/TLS/dependency readiness/anonymous 401 pass.
+These are point-in-time checks, not continuous uptime or fresh restore proof.
+
+Read-only aggregates retain two ready uploads across two accounts/workspaces, two
+succeeded single-attempt jobs, no failed session jobs and two saved question/answer
+pairs. Eleven successful scheduled backup-upload records and no nonpassing records
+occur in the reviewed journal window. Chat totals remain 3,307 input/85 output tokens,
+excluding embeddings; actual provider request counts and charges remain unknown.
+Two completed guided primary workflows are not a reconciled denominator for every
+attempted core journey. Preserve the first answer's wider two-document scope and
+the direct/operator-relayed feedback qualifications.
+
+Free local checks pass lint, typing (232 files), 446 tests (16 skipped), protected
+contract stages and separately permitted read-only local schema head/no-drift checks.
+The `make check` process stopped at sandbox database access; its exit is not reported
+as success. Two benchmark tests initially needed the missing public tokenizer cache;
+the SDK-pinned asset checksum was verified before the successful rerun. No model
+API calls, upgrades, migrations or fresh live negative-isolation proof are claimed.
+
+The recovery key is available, but the provider dashboard reports its previous
+authentication token invalidated; a new sign-in handoff is open. Actual provider
+usage/cost, fresh infrastructure billing/resource evidence, full journey/safeguard
+reconciliation and explicit acceptance remain required. Unknown cost is not zero.
+No runtime/cloud/access change or Git publication occurred during these checks.
+
+## October 18 final participant checks
+
+After the page reports an invalid session, the operator reports signing into the
+own account and the assigned PDF Ready. Browser inspection verifies Ready, one
+version/successful attempt one of one, two saved messages and the unchanged answer
+with its matching citation-one/page-two excerpt. The saved chat labels scope
+`Documents` without displaying the selected-document count; preserve the prior wider
+scope observation. The operator subsequently personally confirms reading the answer
+and citation, working keyboard navigation and understandable document scope. Record
+the guided operator check complete, not unassisted discovery or a changed scope.
+The operator then relays the second participant's own-account review: PDF Ready,
+saved answer/citation readable, keyboard navigation working and scope understandable.
+Browser inspection verifies one Library document/one ready, one version/succeeded
+attempt one of one, two saved messages and citation one/page two containing the
+unchanged characteristics table. All eight visible citations name the assigned PDF.
+Both final participant checks are complete, with human usability attributed to the
+direct report/operator relay rather than agent operation. Guided checks are not full
+negative-isolation or unassisted-discovery proof. Public-only proof stays outside Git.
+No new question/upload, feedback submission, host audit or service change. Actual
+usage/cost, complete journey/safeguard reconciliation and final acceptance remain open.
+
+## October 11 closure checkpoint
+
+Both participants are reported available; the loaded recovery key permits strict
+read-only host checks at `2026-10-12T02:24:40Z` and supplement at `02:24:47Z`
+(October 11 Pacific). Eight services run at unchanged `dba88de`/schema `20260919_0019`.
+Worker remains exited zero/restart-no with its October 7 finish time unchanged;
+jobs and two queues are empty with no consumers. Core host services, enforcing SELinux,
+zero failed units, both maintenance timers, capacity and the one-attempt/zero-retry
+configuration pass. The 13.9-hour-old owner-only encrypted backup has a valid header
+and checksum matched to successful upload evidence; no plaintext staging remains.
+The permanent backup fix, Compose hash and current-boot override remain intact.
+Public UI/TLS/API dependency readiness and anonymous denial pass. No fresh restore,
+cloud-resource inventory or infrastructure billing check is claimed.
+
+Read-only database aggregates at `02:26:59Z` still show exactly two new documents and
+ready versions, two succeeded single-attempt jobs and two question/answer pairs across
+two workspaces. The operator reports no additional incidents, manual pauses, failed/
+repeated attempts or uploads/questions since resumption. About 96.3 hours have elapsed;
+four successful scheduled backup uploads are recorded, with no nonpassing evidence in
+the reviewed journal window. This is not continuous-uptime proof; normal scheduled
+maintenance remains distinct from uninterrupted availability. Final personal
+Ready/saved-citation/keyboard-focus/scope-clarity checks and the complete human journey
+ledger remain pending.
+
+The operator reports provider usage/cost details unavailable. Persisted chat totals
+are 3,307 input and 85 output tokens, but omit embedding requests and do not establish
+actual provider charges; the enterprise usage ledger has no session entries. No zero
+cost or complete request count is inferred. Recover private aggregate billing/usage
+evidence before final acceptance. Fifty-five focused local authorization/object/source/
+citation/provenance/retry/pilot tests pass with one skip; these are current-checkout
+checks, not new live negative-isolation or restore proof. Historical Phase 10 acceptance
+supports the recovery evidence mapping; its local `rollback-drill.json` ready template
+is not relabeled as a live pass. Full safeguard reconciliation, human evidence and
+actual usage/cost remain open. No paid call, service/cloud change or Git publication.
+
+## Accepted two person closure scope
+
+October 11: the operator explicitly approved
+[ADR 0064](architecture/decisions/0064-two-person-pilot-closure-scope.md). Phase 11's
+closure objective is the existing two-person learning pilot, with five-/ten-user
+validation deferred and unproven. ADR 0062's original mandatory stage completion is
+amended only for this limited objective; all other acceptance gates remain intact.
+Phase 11 stays in progress and is not accepted. The separate
+`operations/phase11-closure-scope-v1.json` records scope approval without execution or
+final-acceptance authority. Historical policy/evidence and runtime are unchanged.
+
+The next closure checks are pause-adjusted duration, the human attempted/completed
+journey ledger, targeted accessibility/scope clarity, actual aggregate usage/cost,
+full safeguard mapping and fresh read-only health. The time floor has passed, not
+the evidence gates. No additional paid question/upload is authorized or necessary
+for the next read-only follow-up. Optional ratings remain voluntary. Scope approval
+and final acceptance are separate decisions; neither authorizes Git publication or
+service/access/cloud changes. The October 9 review below remains a historical snapshot;
+its larger-stage closure blocker is now deferred by ADR 0064, not completed. All other
+evidence gaps remain open until reviewed results resolve them.
+
+## Formal canary review — October 9
+
+The read-only review is complete with an **incomplete evidence / not accepted** outcome,
+not a product-failure finding. Two distinct people's guided uploads/questions, original
+source/citation checks, Day 2/3 persistence checks and participant-reported feedback
+are recorded. Earlier same-session host safeguards pass. The original wider saved
+document scope is retained; guided success is not unprompted discovery or complete
+negative isolation proof. Historical synthetic and technical gates remain separate.
+
+| Gate | Review finding | Remaining action |
+| --- | --- | --- |
+| Three-day canary observation | Only 40h22m32s between approved October 7 resumption and latest Day 3 checkpoint; no pre-recovery/unverified time credited | Reconcile further pauses; next time-only review floor October 10 at 19:08:38 Pacific |
+| At least 90% attempted core journeys | Two guided PDF/question workflows pass; a complete human attempted/completed ledger is not recorded | Reconcile attempts, completions and assistance; do not infer a global completion percentage |
+| Accessibility and scope usability | Positive voluntary reports, but no targeted human keyboard/focus/navigation and scope-clarity results | Short read-only human checks; no paid retest or mandatory rating |
+| Actual provider usage/cost | Session request count and cost remain unmeasured | Collect private content-free aggregate usage/cost; zero SDK retries do not imply zero cost |
+| All safeguards | Current host/backup snapshot passes; historical protected authorization/privacy/integrity/recovery evidence is separate | Map applicable evidence and freshness to all gates; no fresh restore or cloud inventory claimed |
+| Full staged rollout/closure | Only the two-person canary is authorized; ADR 0062 also includes five/ten-user stages and an explicit conclusion | Separate expansion authorization, or a reviewed scope change/remediate/stop decision; do not silently accept Phase 11 |
+
+The provisional time floor is `2026-10-11T02:08:38Z` (Saturday, October 10, 19:08:38
+Pacific), anchored to approved resumption at `2026-10-08T02:08:38Z`. Elapsed time is
+not continuous uptime or activity proof, and additional pauses move the review floor.
+Neither person needs continuous online attendance; no new question/upload is needed
+for the next persistence/operational check. Reaching the time floor does not by itself
+accept the canary or full phase. Voluntary structured ratings remain optional.
+
+Accepted policy validation, the existing nine-scenario synthetic gate, the historical
+ten-scenario technical gate and eleven focused free pilot tests pass. These are
+contract checks, not automatic formal live acceptance. Frozen evidence is unchanged.
+The separate ignored review record preserves source hashes and gap statuses; no
+service/provider/cloud change, paid test, commit or push occurs in this review.
+
+## Latest participant checkpoints
+
+October 9 Day 3 completion: the operator reports own-account sign-in, the Webb PDF
+Ready and no issues. Read-only browser inspection verifies the selected `webbfactsheet`
+Library card Ready, one version and successful ingestion attempt one of one. `Webb Test`
+retains two messages; citation one/page two shows the same 21.3-foot/6.5-metre mirror
+and 18 gold-plated hexagonal deployable segments as the original verified answer.
+The original wider two-document saved scope remains recorded; no retest or new
+isolation conclusion is inferred. Together with the independent participant's
+follow-up and the earlier same-session host audit, Day 3 checks are recorded complete.
+Feedback is participant-reported, not a structured application rating. No new question,
+upload, rebuild, feedback submission, worker start or service change. Public-only
+screenshots remain outside Git. Formal pause-adjusted minimum-duration and remaining
+product-evidence review are pending; Phase 11 is not accepted and no later cohort is
+authorized by this checkpoint.
+
+October 9 independent-participant follow-up: the operator reports her assigned PDF
+Ready and everything opening correctly in response to the personal-review instructions.
+Browser inspection verifies one Library document/one ready, the assigned document's
+Ready badge, two persisted chat messages, the unchanged answer and citation one/page
+two with the matching characteristics table. This is operator-reported participation
+plus read-only persistence/citation proof, not agent-performed human validation or an
+application rating. Public-only proof screenshots remain outside Git. No new question,
+upload, rebuild, feedback submission or service change. The operator's own Webb
+follow-up and formal observation/product-evidence review remain pending.
+
+October 9 Day 3 preparation: both participants are operator-confirmed available.
+Strict read-only host checks at `2026-10-09T18:15:54Z` and supplement at `18:16:31Z`
+pass: eight services running, unchanged application revision/schema and retry profile,
+worker exited zero/restart-no with unchanged stop timestamp, zero active jobs and
+empty queues/no consumers. Core host health, enforcing SELinux, zero failed units,
+both enabled active maintenance timers and fresh capacity pass. Latest owner-only
+encrypted backup is 5.8 hours old; header and checksum match successful upload evidence,
+with no plaintext staging. Public readiness/TLS/anonymous denial pass. No service
+change, worker start, paid request, fresh restore or cloud-resource inventory occurs.
+The open browser still displays the saved second-account answer and citation table;
+that alone does not verify fresh human review or PDF Ready. Each person's own-account
+Ready/saved-answer/citation/usability follow-up is pending. Three calendar sessions do
+not alone establish the minimum observation duration or formal Phase 11 acceptance.
+
+Latest October 8 read-only follow-up: the operator reports own-account sign-in and
+the assigned PDF Ready. Browser inspection verifies the saved answer, two persisted
+messages and its original page-two citation excerpt remain available. Public UI/TLS,
+API dependencies and anonymous denial pass. A subsequent second-account check verifies
+its saved answer and page-two table excerpt after the operator reports PDF Ready.
+Both accounts' persistence checks pass. The operator confirms the independent
+participant personally reviewed her items and reports no issues; this is voluntary
+operator-relayed feedback, not an application rating. Both participant follow-ups are
+recorded, while the operator's separate usability sentiment is not inferred.
+The initial check lacked the recovery key and did not verify fresh internal state.
+The subsequent key-loaded read-only audit at `2026-10-09T03:11:53Z` and supplement at
+`03:12:42Z` pass: eight services run at the unchanged `dba88de` application revision;
+worker remains exited zero/restart-no with its October 7 stop timestamp unchanged.
+Active jobs and queue messages/consumers are zero; effective ingestion budget one and
+provider retries zero remain intact. SELinux is enforcing, core host services active,
+failed units zero and both maintenance timers enabled/active/waiting with successful
+last services. Fresh capacity passes; the 14.6-hour-old encrypted backup has its
+owner-only mode, age-v1 header and SHA-256 matched to successful upload evidence.
+No plaintext staging remains; the permanent backup-resume fix is unchanged. Public
+UI/TLS/readiness/anonymous denial pass. No new restore or cloud-resource inventory is
+claimed. No new question, upload, rebuild, worker start or service change occurs.
+Day 2 participant checks and current read-only host safeguards are verified; formal
+observation, remaining product evidence and Phase 11 acceptance remain pending.
+
+Day 1 October 7 checkpoint: the approved two-PDF/two-question maximum is consumed.
+Both guided answers match their public source facts and cited page. The second saved
+conversation selects only its assigned document; all eight sources remain within
+that selection and workspace. Exactly two question/answer pairs are persisted across
+two workspaces. Worker remains stopped, exit zero/restart-no, and API is ready.
+The first conversation's wider two-document selection remains recorded; no automatic
+resubmission or full isolation proof is claimed. Optional genuine feedback and formal
+active-observation/safeguard review remain pending; Phase 11 is not accepted.
+
+Ingestion cleanup checkpoint: both approved uploads are ready with active generations,
+each succeeded at attempt one of one under separate accounts/workspaces. The second
+Library shows only its assigned PDF. After fresh zero-job/queue/in-flight checks, the
+existing worker is stopped gracefully at `2026-10-08T02:42:16Z`, exit zero, restart-no
+preserved. API remains ready for the second person's single question. No further
+uploads, rebuilds or first-question resubmission are authorized by this run. Account
+counts do not by themselves prove independent human participation or full isolation.
+
+Session startup checkpoint — October 7 Pacific: renewed explicit approval covers one PDF and
+at most one question per independent participant, required embeddings and optional
+feedback, with no automatic retries or new cloud resources. Fresh guards pass before
+one in-place start of the existing `dba88de` worker at `2026-10-08T02:08:38Z`.
+Nine services are running; a fresh ready worker heartbeat, one broker consumer and
+empty queues are verified. Worker restart remains disabled. API readiness, public
+UI/TLS and anonymous API denial pass; fresh capacity, encrypted backup age, maintenance
+timers and zero failed host units pass. Participant uploads/questions/feedback have
+not yet occurred in this session. This clearance permits only the supervised bounded
+journey; it does not accept Phase 11 or count paused recovery time as active observation.
+Stop on workflow failure; further attempts require review and separate approval.
+Subsequent October 7 observation: the first participant reports the upload Ready.
+Content-free read-only verification confirms exactly one new document/version/job,
+ready with an active generation and successful ingestion at attempt one of one.
+Worker remains ready, one delivery acknowledged, queues empty and restart count zero.
+The first question and second person's journey remain pending; provider call count
+has not been measured. This is partial workflow evidence, not a completed canary gate.
+The first participant subsequently completes one guided question. The used citation's
+page and both answer facts match the original public PDF. Read-only checks show one
+persisted question/answer pair, but the answered conversation selected two documents
+instead of the intended single document. All six supporting sources belong to that
+saved scope and workspace; this is a scope-selection observation, not proof of an
+authorization leak or UI defect. Do not resubmit the paid question to retest without
+separate approval. Feedback and the independent participant's journey remain pending.
+The separately approved October 5 local test-isolation
 fix passes `make check` (442 tests/16 expected skips) and `make check-live`
 (457 tests/one expected skip); the earlier outbox-test failure is resolved in this gate.
 OCI recovery and the permanent backup-resume fix are preserved. The dated recovery checkpoints
