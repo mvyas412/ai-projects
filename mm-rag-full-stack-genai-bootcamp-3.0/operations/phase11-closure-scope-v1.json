@@ -1,0 +1,49 @@
+{
+  "schema": "mm-rag-phase11-closure-scope-v1",
+  "decision": "ADR-0064",
+  "scope_approved_on": "2026-10-11",
+  "scope": {
+    "objective": "two-person-learning-pilot",
+    "invitation_only": true,
+    "maximum_participants": 2,
+    "minimum_independent_human_participants": 2,
+    "required_stage": "canary-2",
+    "deferred_unvalidated_stages": ["cohort-5", "cohort-10"],
+    "production_readiness_claim": false,
+    "larger_cohort_validation_claim": false
+  },
+  "retained_gates": {
+    "minimum_eligible_elapsed_hours": 72,
+    "exclude_recovery_and_unverified_time": true,
+    "minimum_core_journey_completion_percent": 90,
+    "required_safeguard_pass_percent": 100,
+    "personal_consent_required": true,
+    "human_journey_ledger_required": true,
+    "accessibility_and_scope_clarity_required": true,
+    "actual_aggregate_usage_and_cost_required": true,
+    "safeguard_evidence_and_freshness_required": true,
+    "fresh_read_only_operational_checkpoint_required": true,
+    "structured_feedback_required": false,
+    "explicit_final_decision_required": true
+  },
+  "authority": {
+    "scope_approved": true,
+    "phase11_accepted": false,
+    "final_acceptance_authorized": false,
+    "paid_execution_authorized": false,
+    "worker_start_authorized": false,
+    "additional_enrollment_authorized": false,
+    "operational_mutation_authorized": false,
+    "git_publication_authorized": false
+  },
+  "evidence_governance": {
+    "aggregate_only": true,
+    "raw_content_allowed": false,
+    "identities_allowed": false,
+    "historical_rehearsal_policy": "operations/phase11-pilot-policy.json",
+    "historical_evidence_rewrite_allowed": false,
+    "technical_rehearsal_is_human_product_validation": false,
+    "retention_days_after_actual_closure": 30,
+    "automatic_deletion": false
+  }
+}
