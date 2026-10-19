@@ -1270,6 +1270,86 @@ frontend tests (4), typecheck and production build passed; npm audit reported ze
 vulnerabilities. Schema remains `0019` with no drift. Remote CI must independently
 revalidate the patched source; these checks do not attest to a deployed upgrade.
 
+PR #32 was subsequently explicitly approved and squash-merged as `3782af2`; its
+tree exactly matches tested `8be30e6`. All eight applicable checks passed, with image
+publication skipped. A separate approval now permits application-image publication
+for that exact merged revision through the existing protected workflow. Publication
+[run #42](https://github.com/mvyas412/ai-projects/actions/runs/39181374294) succeeds
+in 22m46s with all eight jobs passing, including the published-image scan and OIDC
+signing. The application index is
+`sha256:857c741df862707da2365c42cc124c030084fc81ece3b9df5d632de77e2535f3`.
+Independent metadata checks verify AMD64/ARM64 revision labels, SLSA provenance,
+SPDX SBOMs and patched Docling versions. Independent signature verification passes
+trusted certificate/transparency checks and exact workflow/repository/main/revision
+constraints. No automatic retry occurred. Publication is not OCI
+deployment, Next.js promotion, worker-start or maintenance-change authority. An exact
+reviewed deployment plan and separate approval remain required before host changes.
+
+October 18 Pacific / October 19 UTC: the operator authorizes **deployment planning
+only** for `3782af2`. Fresh read-only host checks pass: the `dba88de` demo is healthy,
+worker exited/restart-no, queues and active jobs empty, schema `0019`, both maintenance
+timers enabled/active and last services successful. Public TLS/UI/readiness and
+anonymous `401` checks pass. The latest local encrypted backup is about 12.4 hours
+old and capacity evidence passes; no fresh remote-backup, restore or cloud-cost audit
+is claimed. The private plan binds the published target, current rollback baseline,
+configuration and maintenance hashes. It skips unchanged migrations, verifies cached
+models offline in an isolated target-image helper, and replaces only application
+roles with explicit no-dependency commands. Worker configuration remains stopped.
+Timers stay active and unedited; API replacement is bounded between natural capacity
+cycles, with failure reported rather than retried or automatically recovered. No
+deployment, image pull/run or host staging has occurred. Exact plan-hash approval and
+fresh guards remain required; no commit/push follows from preparation.
+
+The operator then explicitly approves the exact private plan hash `8d82fed5…0684d8`
+and confirms both participants paused with no requests in progress. A single supervised
+attempt passes fresh preconditions and signature checks, takes the existing leases,
+saves private originals and pulls the approved image. It stops at step 2 before any
+application-role or runtime-configuration change: the runner incorrectly compares a
+configuration-blob digest with Docker's reported image ID, which on this host denotes
+the OCI index or native manifest instead. Read-only diagnosis confirms both reported
+manifest descriptors and the target revision match the approved publication.
+At `2026-10-19T01:18:37Z` (October 18 Pacific), all original container identities,
+runtime/configuration/unit hashes, `dba88de` health, empty jobs/queues and schema `0019`
+remain unchanged. Worker remains stopped/restart-no; maintenance is active/successful,
+leases released, no retries or rollback. Only private originals and the image cache
+were added on the existing host. No target manifest or success record is staged and
+no target cache-verification helper runs. A corrected, separately reviewed continuation
+and exact-hash approval are required; do not replay the failed attempt or bypass the
+guard. No deployment completion, Git publication, paid call or new resource is claimed.
+
+The subsequent go-ahead authorizes preparing the corrected continuation. A new private
+plan and separately hash-bound runner preserve the failed originals, reuse the cached
+image without another pull, and verify the signed index and explicit ARM64 manifest
+as distinct descriptor identities. The isolated model helper additionally uses
+`--pull never --platform linux/arm64`; all later application steps and operational
+limits remain unchanged. Fourteen offline runner tests include the actual observed
+Docker metadata, incorrect digest/platform/revision rejection, safe authorization
+defaults and simulated success/failure. Fresh read-only host bindings and health
+remain healthy on `dba88de`, with worker stopped and maintenance unchanged.
+The continuation has not executed: the stopped plan requires a new exact-hash
+approval. No further image/container execution, staging or service mutation follows
+from preparation; no new paid calls/resources or Git publication is authorized.
+
+The operator explicitly approves the new continuation hash `2da7a2b2…7f4c5d61`.
+Its single supervised execution completes all twelve steps at
+`2026-10-19T01:41:00Z` (October 18 Pacific): signed cached-image/native metadata and
+all five offline model-cache checks pass, followed by explicit no-dependency
+UI/dispatcher/API updates and never-started worker configuration. Provider-free
+health/access, immutable metadata/configuration, schema `0019`, zero jobs/queues,
+unchanged persistence/edge/setup containers and maintenance hashes pass. The natural
+post-update capacity sample succeeds at `01:40:47Z`; both timers stay active/enabled
+and no units fail. The application revision record now reads `3782af2`, rollback
+`dba88de` is retained, and leases are released. This continuation performs no image
+pull, worker start, migration, maintenance command, paid call, new resource, retry
+or rollback. Independent read-only final checks confirm the result. Local
+`make check-live` also passes: 474 tests/1 skip, protected gates, schema/no drift and
+local API/UI health. At that checkpoint, documentation/current diagram updates remain
+local and uncommitted; execution approval does not authorize Git publication or further
+paid demo activity. The operator subsequently explicitly approves committing and pushing
+only the updated deployment documentation and current diagram after repository checks.
+This separate source-publication approval permits no PR/merge, further deployment,
+worker start, maintenance change, paid call or new resource.
+
 ### Historical closure, implementation and recovery checkpoints
 
 October 11 scope approval: [ADR 0064](architecture/decisions/0064-two-person-pilot-closure-scope.md)
