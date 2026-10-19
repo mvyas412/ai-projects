@@ -7,7 +7,19 @@ merged at `768a67f`. [ADR 0065](architecture/decisions/0065-postpilot-demo-opera
 and [`phase11-demo-v1.json`](../operations/phase11-demo-v1.json) govern current use.
 The existing deployment stays available, the worker stays stopped/restart-no and
 existing Phase 10 backup/capacity maintenance stays unchanged. No new paid calls,
-resources, invitations, deployment, upgrades or release tags are authorized.
+resources, invitations, further deployments, upgrades or release tags are authorized
+by that retained-demo disposition.
+
+### Verified application update — October 18 Pacific
+
+A separate exact-plan approval deploys application revision `3782af2` at
+`2026-10-19T01:41:00Z`, with schema `0019` unchanged. Five offline model checks,
+provider-free health/access/job/queue checks and a natural post-update capacity sample
+pass. The worker is configured but never started, with restart policy `no`; existing
+maintenance and persistence/edge services remain unchanged. The `dba88de` rollback
+image is retained. This completed security update does not authorize another update,
+new prompts/uploads, paid calls, access expansion or resources. Use the inspection-only
+walkthrough below; no new participant test is required by this deployment.
 
 ### Safe five-minute demonstration
 

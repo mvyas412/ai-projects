@@ -41,6 +41,102 @@ worker stop/restart-no, maintenance schedules, providers and frozen pilot eviden
 remain untouched. Keep the original HIGH/CRITICAL security thresholds and publication
 approval boundary; do not silence findings or treat local tests as a clean image scan.
 
+PR #32 later squash-merged as `3782af2` after explicit approval and passing CI.
+Separate exact-revision application-image publication is now approved through the
+existing protected workflow. Prerequisites pass in
+[run #42](https://github.com/mvyas412/ai-projects/actions/runs/39181374294); all eight
+jobs, the published-image scan and OIDC signing succeed in 22m46s. Published application
+index: `sha256:857c741df862707da2365c42cc124c030084fc81ece3b9df5d632de77e2535f3`.
+Independent registry metadata checks confirm both AMD64/ARM64 revision labels,
+SLSA/SPDX attestations and patched Docling versions; independent cryptographic
+signature verification passes trusted certificate/transparency and exact
+workflow/repository/main/revision constraints. No rerun occurred.
+This permits no OCI deployment, worker start,
+maintenance change, Next.js promotion or paid provider proof. Verify the immutable
+index, both architecture attestations, published-image scan and exact-workflow signature
+before preparing a separately authorized host plan; never automatically rerun failures.
+
+### Prepared security-update plan; not executed
+
+The subsequent instruction authorizes planning only for `3782af2`. Read-only preflight
+confirms healthy `dba88de`, stopped/restart-no worker, empty queues and active jobs,
+schema `0019`, successful maintenance and active/enabled timers. Public TLS/UI/API
+readiness and anonymous `401` pass. Record local ciphertext age/checksum separately
+from unperformed remote-backup/restore/cloud-inventory verification.
+
+Keep the private immutable plan, target manifest, signature/publication evidence and
+host file/unit bindings together. Require separate exact-hash approval and fresh guards
+before execution. Do not reuse the older broad release executor or recovery scripts:
+no migration is necessary, and no maintenance timer may be paused or manually triggered.
+Prepare/pull and verify the target only after approval while the old API remains live;
+use an isolated network-disabled helper with read-only existing caches and an explicit
+verify-only entrypoint, never the image's default worker command. Configure the worker
+with supported `up --no-start --no-deps --pull never`, then verify it is not running.
+Replace UI/dispatcher explicitly before a bounded API-only replacement between natural
+capacity samples. Require a naturally successful post-update sample. If timing, guards
+or a command fail, stop and report partial state; do not reset failures, retry, start
+the worker, modify maintenance or automatically roll back. Preserve the `dba88de`
+baseline for a separately approved rollback. This plan is not a completed deployment
+or new paid acceptance test; inspection-only demo restrictions remain in force.
+
+### Approved attempt stopped before application changes
+
+After exact-hash approval and fresh participant-pause confirmation, one attempt pulls
+the image but stops at its image-identity guard. The runner assumes `image inspect Id`
+is the configuration digest; this host reports the index digest by default and native
+manifest digest with `--platform linux/arm64`. Those digest types are not interchangeable.
+Read-only diagnosis confirms the expected index/native descriptors and revision, not
+an unexpected target image. Keep signature and content-addressed platform checks;
+never bypass the guard or automatically retry under the stopped authorization.
+
+Post-abort checks confirm original container IDs/start times/mounts and all bound
+configuration/unit hashes unchanged, healthy `dba88de`, public TLS/UI/readiness `200`,
+anonymous `401`, empty jobs/queues, worker stopped/restart-no, schema `0019`, successful
+active maintenance and no failed units. Leases are released; private originals and
+the cached image remain. No target model helper, runtime update, application recreation,
+migration, rollback or success-record write has occurred. Prepare a separately reviewed
+continuation before requesting a new exact-hash execution approval. Preserve the
+original approved plan and failed runner as evidence; do not silently rewrite them.
+
+The operator subsequently asks to proceed and finish. Prepare the corrected
+continuation, but retain the stopped plan's separate exact-hash approval boundary.
+The new runner verifies default index and explicit ARM64 manifest descriptors,
+repository/revision/platform bindings and the existing signed-manifest evidence;
+neither image ID is compared to a configuration-blob digest. Require the image already
+cached and prohibit another pull. The model verifier uses explicit ARM64 and
+`--pull never`, with network disabled and read-only existing caches. All original
+no-dependency role steps, stopped-worker checks, unchanged maintenance windows,
+natural post-update capacity pass and no-retry/no-rollback limits remain. Preserve
+the failed originals; a new exact hash identifies the continuation, not an edit or
+replay of the spent authorization. Fourteen offline tests cover the observed metadata,
+negative identity cases, authorization defaults and simulated rollout outcomes.
+No host execution of the continuation is claimed until separately approved and verified.
+The free local `make check` gate also passes: 459 tests/16 skips, lint/type checks,
+protected evaluation/contracts and local schema `0019` with no drift. This does not
+replace the still-pending target-image cache verification and deployment postchecks.
+
+### Approved continuation completed — October 18 Pacific
+
+Following explicit exact-hash approval of `2da7a2b2…7f4c5d61`, the single continuation
+passes all twelve steps and records `3782af2` at `2026-10-19T01:41:00Z`. It reuses the
+signed cached image, passes all five offline/read-only model checks, updates the three
+live application roles and configures the worker without starting it. Schema remains
+`0019`; no migrator/default model downloader or infrastructure/edge/setup-container
+recreation occurs. Target manifest and only `MM_RAG_IMAGE` are staged; all other
+runtime values, mounts/networks, maintenance definitions/environment/source/policy
+hashes and schedules remain unchanged. Public TLS/UI/readiness `200`, anonymous
+`401`, retry limits, zero active jobs and empty broker queues/consumers pass.
+
+The natural post-update capacity check passes at `01:40:47Z`; both existing timers
+remain active/enabled with last services successful and no failed units. No timer
+pause, forced sample, reset-failed, additional pull, worker start, paid call, new
+resource, automatic retry or rollback is used. Leases release and the `dba88de`
+rollback image remains cached. Independent read-only result/configuration/health
+checks confirm success. Free local `make check-live` passes 474 tests/1 skip and
+schema/no-drift/API/UI gates. Keep participants inspection-only: no new prompts,
+uploads or paid acceptance follow from this security-image deployment. Documentation
+publication remains separate; preserve the earlier stopped-attempt evidence.
+
 ## Historical acceptance and closure checkpoints
 
 The dated authority and pending statements below retain their original checkpoint
