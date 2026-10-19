@@ -1,8 +1,16 @@
 # Phase 11 invitation-only product pilot kickoff
 
-Status: **Accepted — synthetic implementation foundation in progress**
+Status: **Two-person learning pilot accepted; PR #31 merged; inspection demo retained**
 
-## Recommended direction
+The kickoff proposal below is historical. Final limited acceptance is recorded in
+`operations/phase11-acceptance-v1.json` and ADR 0064; ADR 0065 and the
+[demo runbook](DEMO_RUNBOOK.md) govern the post-pilot deployment. Worker stopped/
+restart-no, existing maintenance unchanged, no new paid calls or resources. Existing
+READY documents and saved answers/citations only. A stopped worker does not disable
+API chat; inspection-only is an operator instruction, not a runtime interlock.
+Five-/ten-user validation remains deferred, not passed; no new enrollment is approved.
+
+## Original recommended direction
 
 Run a small, invitation-only learning pilot for at most ten registered users on the
 accepted free-first OCI deployment. The purpose is to validate onboarding, everyday
@@ -52,11 +60,11 @@ measured pilot evidence demonstrates a need.
 
 ## Implementation boundary
 
-ADRs 0057–0063 are accepted. The versioned policy, synthetic rehearsal, evidence gate,
-tests, and operating guide may be implemented. Real-user invitations, paid work,
-external messages, cloud changes, and Next.js promotion still require separate approval.
-Stage durations, active-user thresholds, support response target, evidence retention,
-acceptance percentages, participant-facing consent, and bounded live execution are
-approved and versioned. Two private accounts are active and covered by one human's
-consent. ADR 0063 authorizes a non-validating two-account technical rehearsal; the
-formal two-user canary still requires a second independent human.
+ADRs 0057–0065 are accepted. The versioned policy, synthetic rehearsal, evidence gate,
+tests and operating guide were implemented. The earlier one-human/two-account
+technical rehearsal remains non-validating historical evidence under ADR 0063.
+The later independently consenting second participant completed the real two-person
+pilot; qualified acceptance was explicitly approved October 18 and merged in PR #31
+at `768a67f`. Larger cohorts and Next.js promotion remain deferred. Retaining the
+existing demo under ADR 0065 does not authorize new workflows, invitations, paid work,
+cloud changes, publication of these follow-up docs, tags or deployments.

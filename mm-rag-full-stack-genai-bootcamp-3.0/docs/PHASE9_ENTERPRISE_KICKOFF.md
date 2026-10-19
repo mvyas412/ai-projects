@@ -1,5 +1,10 @@
 # Phase 9 enterprise kickoff contract
 
+Current status: Phase 9 was accepted and released; this kickoff preserves its design
+checkpoint. The existing deployment is now an [inspection demo](DEMO_RUNBOOK.md),
+ADR 0065: worker stopped, maintenance unchanged, no new paid calls or resources.
+No new integration, sync, enrollment or provider setup is authorized by this document.
+
 ## Status
 
 ADRs 0043–0050 are accepted. Provider-neutral milestones 9.0–9.6 are implemented and

@@ -1,5 +1,13 @@
 # Phase 10 operations handbook
 
+Current disposition: retain the [inspection demo](DEMO_RUNBOOK.md) under ADR 0065.
+Worker stopped/restart-no; existing maintenance unchanged; no new paid calls or
+resources. Preserve the existing encrypted-backup/capacity schedules, private backup
+destination, cost alerts, backup-resume fix and manual-retention safeguards. Do not
+install new schedules or rerun restore/release/recovery drills without their separate
+approval. This documentation update is not a fresh host-health audit. Backup
+quiescence can briefly interrupt the demo; no production SLA is claimed.
+
 This handbook implements accepted ADRs 0051–0056 for the free-first OCI learning
 deployment. It is not an SLA or authority to spend money, delete application data,
 replace a host, expose credentials, or run paid model calls.

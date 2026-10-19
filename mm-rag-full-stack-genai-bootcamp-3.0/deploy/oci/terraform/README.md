@@ -1,5 +1,10 @@
 # OCI learning infrastructure
 
+The existing deployment is retained as an [inspection demo](../../../docs/DEMO_RUNBOOK.md)
+under ADR 0065: worker stopped, maintenance unchanged, no new paid calls or resources.
+This module is a capability reference, not authority to apply a plan, create cloud
+resources, upgrade capacity or change the existing installation.
+
 This module describes one production-shaped learning host and a private, versioned
 off-host backup bucket. It is intentionally not wired to an automatic `terraform apply`.
 

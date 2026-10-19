@@ -1,5 +1,10 @@
 # Phase 8 OCI learning-deployment onboarding
 
+The existing deployment is now retained as an [inspection demo](DEMO_RUNBOOK.md),
+ADR 0065: worker stopped, maintenance unchanged, no new paid calls or resources.
+This historical onboarding checklist does not authorize creating another resource
+or changing the existing deployment.
+
 Use this checklist only after Phase 7 is accepted and the user separately approves
 cloud provisioning. Completing it prepares a reviewed Terraform plan; it does not
 authorize `terraform apply`, image publication, DNS changes, or paid model calls.

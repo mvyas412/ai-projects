@@ -1,6 +1,51 @@
 # Phase 11 pilot operations
 
-Status: **Phase 11 accepted for the two-person learning pilot; worker stopped**
+Status: **Phase 11 accepted; acceptance records merged; existing inspection demo retained**
+
+## Current demo disposition — October 18
+
+Acceptance records were squash-merged in PR #31 at `768a67f`, with 460 CI tests
+passing/4 skips and 83.59% coverage. No deployment or release tag accompanied the
+merge. The subsequent [ADR 0065](architecture/decisions/0065-postpilot-demo-operating-mode.md)
+and [`phase11-demo-v1.json`](../operations/phase11-demo-v1.json) retain the existing
+deployment for inspection-only demonstrations: worker stopped/restart-no, existing
+maintenance unchanged, no new paid calls or resources. Follow the
+[demo runbook](DEMO_RUNBOOK.md), not the historical paid-proof/startup recipes below.
+
+Existing authorized accounts may inspect READY documents and saved answers/citations.
+No new questions, uploads, retries/reprocessing, connector sync, worker start, access
+expansion, upgrades or new cloud resources are approved. A stopped worker does not
+block paid chat/query embeddings; the restriction is operator-controlled, not a new
+runtime/UI interlock. Preserve current backup/capacity schedules, private encrypted
+backup destination, cost guards, backup-resume fix and manual-retention safeguards.
+Scheduled backup quiescence can briefly interrupt access; no production SLA is claimed.
+
+Last verified deployed revision remains `dba88de`, schema `0019`; this documentation
+update is not a fresh host-health audit or deployment. Phase 5 closed without quality
+acceptance, five-/ten-user validation is deferred/unvalidated and Next.js unpromoted.
+Historical OCI USD 0 is operator-reported, not a future zero-cost guarantee. Review
+aggregate-evidence retention manually November 17; no automatic product-data deletion.
+The operator subsequently explicitly approves commit/push of these demo documentation
+and diagram changes after the free verification gate. This source-only approval
+does not authorize a new PR/merge, tag, deployment, service/access change or paid work.
+
+### Approved source-only security remediation in PR #32
+
+The operator separately authorizes fixing the failed dependency scans, committing/
+pushing to the existing PR and reviewing CI again; no merge or deployment. Source
+patches pin Docling/docling-slim `2.132.0`, Next.js `16.3.8`, sharp `0.35.5` and
+source-map-js `1.2.2`, with required related transitive updates only. The Docling
+package guard follows the new package pin while preserving the original model-tree
+checksum and local-only/PDF extraction controls. Existing deployed revision/digests,
+worker stop/restart-no, maintenance schedules, providers and frozen pilot evidence
+remain untouched. Keep the original HIGH/CRITICAL security thresholds and publication
+approval boundary; do not silence findings or treat local tests as a clean image scan.
+
+## Historical acceptance and closure checkpoints
+
+The dated authority and pending statements below retain their original checkpoint
+meaning. The merged acceptance and current demo disposition above supersede pending
+publication/disposition statements; frozen acceptance and review evidence is unchanged.
 
 ## October 18 explicit acceptance
 

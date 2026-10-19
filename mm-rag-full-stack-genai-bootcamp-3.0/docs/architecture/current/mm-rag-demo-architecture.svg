@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1020" viewBox="0 0 1600 1020" role="img" aria-labelledby="title desc">
+  <title id="title">MM-RAG retained inspection demo architecture</title>
+  <desc id="desc">Accepted two-person Phase 11 learning pilot, retained for existing document and saved-answer inspection. Worker stopped with restart disabled. Existing maintenance unchanged. No new questions, uploads, paid provider calls or cloud resources. These are operator controls, not new runtime interlocks.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#274867"/></marker>
+    <style>
+      text { font-family: Arial, sans-serif; fill: #18324c; }
+      .title { font-size: 36px; font-weight: 700; }
+      .subtitle { font-size: 20px; fill: #456078; }
+      .heading { font-size: 25px; font-weight: 700; }
+      .body { font-size: 20px; }
+      .small { font-size: 17px; fill: #456078; }
+      .label { font-size: 17px; font-weight: 700; }
+      .flow { fill: none; stroke: #274867; stroke-width: 3; marker-end: url(#arrow); }
+      .stop { fill: #96382f; }
+    </style>
+  </defs>
+  <rect width="1600" height="1020" fill="#f6f8fc"/>
+  <text x="40" y="55" class="title">MM-RAG — retained inspection demo</text>
+  <text x="40" y="89" class="subtitle">Phase 11 accepted for two people · Demo disposition approved October 18, 2026 · ADR 0065</text>
+  <rect x="40" y="115" width="1520" height="43" rx="10" fill="#e6f3ec" stroke="#6c9d84"/>
+  <text x="61" y="143" class="label">EXISTING DEPLOYMENT ONLY     |     WORKER STOPPED     |     MAINTENANCE UNCHANGED     |     NO NEW PAID CALLS OR RESOURCES</text>
+
+  <rect x="40" y="190" width="480" height="260" rx="16" fill="#eaf2fb" stroke="#6391ba"/>
+  <text x="64" y="230" class="heading">Existing authorized people</text>
+  <text x="64" y="270" class="body">Auth0 / OIDC sign-in and sign-out</text>
+  <text x="64" y="305" class="body">Existing Personal-workspace access</text>
+  <text x="64" y="340" class="body">READY documents and saved answers</text>
+  <text x="64" y="375" class="body">Existing source / page citations</text>
+  <text x="64" y="420" class="small">No new invitation or access expansion</text>
+
+  <rect x="560" y="190" width="480" height="260" rx="16" fill="#eeedfb" stroke="#8d82b4"/>
+  <text x="584" y="230" class="heading">HTTPS → Streamlit → FastAPI</text>
+  <text x="584" y="270" class="body">Caddy edge: public HTTP(S) 80 / 443</text>
+  <text x="584" y="305" class="body">Trusted backend identity and scope</text>
+  <text x="584" y="340" class="body">RBAC / ACL and non-disclosing errors</text>
+  <text x="584" y="375" class="body">Reopen persisted evidence; no new prompt</text>
+  <text x="584" y="420" class="small">Streamlit authoritative; Next.js deferred</text>
+
+  <rect x="1080" y="190" width="480" height="260" rx="16" fill="#e9f4ef" stroke="#78a18e"/>
+  <text x="1104" y="230" class="heading">Existing private data plane</text>
+  <text x="1104" y="270" class="body">PostgreSQL + row-level security</text>
+  <text x="1104" y="305" class="body">Qdrant tenant / generation filtering</text>
+  <text x="1104" y="340" class="body">SeaweedFS immutable artifacts</text>
+  <text x="1104" y="375" class="body">Authorized, validated citation access</text>
+  <text x="1104" y="420" class="small">Schema 20260919_0019; no migration</text>
+  <path d="M520 315 H553" class="flow"/>
+  <path d="M1040 315 H1073" class="flow"/>
+
+  <rect x="40" y="485" width="480" height="255" rx="16" fill="#fff0ed" stroke="#be786c"/>
+  <text x="64" y="525" class="heading stop">Ingestion worker STOPPED</text>
+  <text x="64" y="565" class="body">Restart policy: no</text>
+  <text x="64" y="600" class="body">Dispatcher / RabbitMQ retained</text>
+  <text x="64" y="635" class="body">Do not upload, retry, rebuild or reindex</text>
+  <text x="64" y="670" class="body">No worker start or connector sync</text>
+  <text x="64" y="715" class="small">Idle worker is intentional, not an incident</text>
+
+  <rect x="560" y="485" width="480" height="255" rx="16" fill="#e9f5f4" stroke="#6c9d9a"/>
+  <text x="584" y="525" class="heading">Existing maintenance UNCHANGED</text>
+  <text x="584" y="565" class="body">Daily encrypted backup → existing bucket</text>
+  <text x="584" y="600" class="body">Five-minute capacity / certificate checks</text>
+  <text x="584" y="635" class="body">Existing health and cost guardrails</text>
+  <text x="584" y="670" class="body">Backup may briefly quiesce the demo</text>
+  <text x="584" y="715" class="small">No unattended upgrade or retention apply</text>
+
+  <rect x="1080" y="485" width="480" height="255" rx="16" fill="#fff6e7" stroke="#b69459"/>
+  <text x="1104" y="525" class="heading">Provider path NOT AUTHORIZED</text>
+  <text x="1104" y="565" class="body">No new chat, embeddings or paid tests</text>
+  <text x="1104" y="600" class="body">Worker stop does not disable API chat</text>
+  <text x="1104" y="635" class="body">Operational instructions, not a UI lock</text>
+  <text x="1104" y="670" class="body">No new cloud resource or paid capacity</text>
+  <text x="1104" y="715" class="small">Stop and review any unexpected cost</text>
+
+  <rect x="40" y="765" width="1520" height="80" rx="12" fill="#fff" stroke="#c5cfdb"/>
+  <text x="63" y="796" class="label">SOURCE PUBLICATION ≠ APPLICATION DEPLOYMENT</text>
+  <text x="63" y="825" class="body">Acceptance merged: 768a67f / PR #31. Last verified runtime: dba88de. No deployment or new host audit in this documentation update.</text>
+
+  <rect x="40" y="870" width="360" height="95" rx="12" fill="#fff" stroke="#c5cfdb"/>
+  <text x="60" y="901" class="label">ACCEPTED LEARNING SCOPE</text>
+  <text x="60" y="932" class="small">Two-person guided pilot; no production SLA</text>
+  <rect x="426" y="870" width="360" height="95" rx="12" fill="#fff" stroke="#c5cfdb"/>
+  <text x="446" y="901" class="label">HISTORICAL LIMITS PRESERVED</text>
+  <text x="446" y="932" class="small">Phase 5 closed without quality acceptance</text>
+  <rect x="812" y="870" width="360" height="95" rx="12" fill="#fff" stroke="#c5cfdb"/>
+  <text x="832" y="901" class="label">DEFERRED, NOT VALIDATED</text>
+  <text x="832" y="932" class="small">Five / ten users; Next.js promotion</text>
+  <rect x="1198" y="870" width="362" height="95" rx="12" fill="#fff" stroke="#c5cfdb"/>
+  <text x="1218" y="901" class="label">MANUAL RETENTION REVIEW</text>
+  <text x="1218" y="932" class="small">November 17 · No automatic deletion</text>
+  <text x="40" y="998" class="small">Canonical sources: architecture handbook, demo runbook, ADRs 0064–0065 and versioned acceptance/demo records. Historical target posters are not operating instructions.</text>
+</svg>

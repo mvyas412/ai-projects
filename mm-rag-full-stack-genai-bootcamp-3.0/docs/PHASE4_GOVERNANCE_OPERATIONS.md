@@ -1,5 +1,12 @@
 # Phase 4 governance, lifecycle, and incident operations
 
+Current deployment disposition is the [inspection demo](DEMO_RUNBOOK.md), ADR 0065:
+worker stopped, existing maintenance unchanged, no new paid calls or resources.
+Lifecycle mutation/deletion/restore/apply recipes below need separate authorization;
+retaining the demo does not authorize them. Aggregate-evidence manual review on
+November 17 is not automatic deletion of product records. Existing authorization,
+tenant isolation, holds and retention safeguards remain unchanged.
+
 This runbook covers the accepted ADR 0017 controls in the Phase 4 development
 environment. It contains no credentials or provider coordinates. Use only an
 authenticated owner/admin session and the documented backend APIs; never copy an

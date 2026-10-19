@@ -1,5 +1,59 @@
 # Current MM-RAG demonstration runbook
 
+## Retained demo — approved October 18, 2026
+
+The learning project is closed for its accepted limited two-person scope; PR #31
+merged at `768a67f`. [ADR 0065](architecture/decisions/0065-postpilot-demo-operating-mode.md)
+and [`phase11-demo-v1.json`](../operations/phase11-demo-v1.json) govern current use.
+The existing deployment stays available, the worker stays stopped/restart-no and
+existing Phase 10 backup/capacity maintenance stays unchanged. No new paid calls,
+resources, invitations, deployment, upgrades or release tags are authorized.
+
+### Safe five-minute demonstration
+
+1. Show the [current demo architecture](architecture/current/mm-rag-demo-architecture.svg)
+   and [closure lifecycle](architecture/current/mm-rag-phase11-closure-demo.svg).
+2. Sign into an existing authorized account; never display credentials or identity
+   details in shared evidence. Do not enroll another account.
+3. In Library, inspect an existing READY document/version and its completed job.
+   Do not upload, rebuild, retry or reindex.
+4. Reopen an existing conversation. Read its saved answer and source/page citation;
+   inspect the existing citation without submitting another question or calculation.
+5. Refresh/reopen the saved evidence and sign out. Use only current permissions.
+
+**Do not type or submit a new prompt.** A stopped ingestion worker does not stop
+provider-backed API chat or query embeddings. These are operator instructions, not
+proof of a runtime interlock that disables new provider requests. Do not start the
+worker or connector sync. Stop the walkthrough if it would cross a paid boundary.
+
+### Operations and maintenance
+
+- Do not run the historical setup/start/paid-proof commands below for the retained demo.
+- Keep existing scheduled encrypted backups and capacity checks intact. A backup may
+  briefly quiesce application services; no production SLA is promised.
+- Use the approved read-only operational checks when needed; treat stopped worker as
+  intentional, not a reason to run `make runtime` or broad `docker compose up`.
+- Preserve existing access controls, private networking, immutable images, retry
+  profile, backup-resume fix and cost alerts. No new stack or resource is needed.
+- Stop and review unexpected cost, privacy, integrity, authorization or recovery alerts;
+  this disposition does not authorize upgrades, restore execution or resource changes.
+- The November 17 aggregate-evidence retention review is manual. Product records,
+  documents and conversations are not automatically deleted by closure.
+
+### What completion means
+
+The two-person guided pilot is accepted, not unassisted discovery, five-/ten-user
+validation or production certification. Preserve the first answer's wider actual saved
+document selection. OpenAI pilot cost was USD 0.00151422; OCI USD 0 is operator-reported.
+Neither amount is a promise of future hosting cost. Phase 5 stays closed without
+quality acceptance; `hybrid-v1`, `dense-v1` rollback and evaluation-only `hybrid-v3` stay unchanged.
+
+## Historical developer demonstrations — separate approval required
+
+The following capability/setup/proof instructions are retained as historical reference.
+They are **not** the current demo procedure and do not authorize service starts,
+uploads, provider calls, retries, upgrades or a new acceptance run.
+
 This runbook presents the accepted durable/governed foundation and the closed
 Phase 5 hybrid-retrieval implementation while keeping all release tags immutable.
 PR #5 was squash-merged at `5436614`. Phase 6 ADRs 0025–0030 and Milestones

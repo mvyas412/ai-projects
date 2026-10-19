@@ -1,6 +1,6 @@
 # Multimodal RAG architecture handbook
 
-> Living architecture baseline — updated 2026-09-20
+> Living architecture baseline — updated 2026-10-18; retained inspection demo
 
 This document is the version-controlled architecture source of truth for the
 complete system and Phases 1–11. Update it whenever a component, boundary, data
@@ -13,16 +13,33 @@ milestones, dependencies, completion gates, risks, and immediate next actions.
 
 Presentation-ready rendered diagrams are maintained in the
 [architecture poster gallery](ARCHITECTURE_POSTERS.md). The gallery records the
-accepted architecture through Phase 10. The Mermaid diagrams in this handbook are the
-editable source of truth and now include the accepted Phase 11 pilot-control boundary;
-rendered Phase 11 artwork remains future work.
+accepted learning architecture through limited Phase 11 closure. The current
+[demo architecture](current/mm-rag-demo-architecture.svg) and
+[closure-to-demo lifecycle](current/mm-rag-phase11-closure-demo.svg) are editable SVGs;
+the Mermaid diagrams below are the text source of truth. Older PNGs are historical
+or target illustrations, not current deployment or production-readiness evidence.
 
-The [current workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
+The [historical Phase 7 workflow and DEV architecture](current/mm-rag-current-workflow-dev-architecture.svg)
 records the accepted Phase 6 product path plus the implemented Phase 7 evaluation
 and observability layer. `visual-table-v1` remains the accepted product default and
 `disabled` remains its explicit rollback. ADRs 0031–0036 are Accepted; Phase 7 is
 accepted with its approved numeric pilot SLOs and complete seven-day representative
-baseline. Two pre-fix days reproduced a duration/cardinality routing defect and are
+baseline.
+
+The two-person Phase 11 learning pilot is accepted; PR #31 merged acceptance records
+at `768a67f`. ADR 0065 retains the existing deployment as an inspection-only demo:
+worker stopped/restart-no, maintenance unchanged, no new paid calls or resources.
+Existing authorized users may inspect READY documents and saved answers/citations.
+The restriction is operator-controlled, not a new UI/API interlock: a stopped worker
+does not prevent paid chat or query embeddings. Last verified deployed application
+revision remains `dba88de`, schema `0019`; documentation publication is not deployment.
+Phase 5 closed without quality acceptance; five-/ten-user validation and Next.js
+promotion remain deferred. No new host-health audit is implied by this doc update.
+
+<details>
+<summary>Historical Phase 7 diagnostic checkpoints — the completed baseline was later accepted</summary>
+
+Two pre-fix days reproduced a duration/cardinality routing defect and are
 retained as diagnostic history. The corrected route passed a post-merge browser proof
 with the grounded 30-day answer and page-4 evidence; the post-fix baseline restarted
 on 2026-09-08 with Day 1 of 7 recorded. The 2026-09-09 functional sample passed but is
@@ -42,6 +59,8 @@ work when the authoritative Overview check rejected the expired browser session.
 renewed sign-in, the same-day session passed visual, exact-table, and corrected duration
 checks without upload or retry. Post-fix Day 5 of 7 is recorded; two valid days remain.
 
+</details>
+
 ## Status legend
 
 | Status | Meaning |
@@ -56,6 +75,26 @@ The diagrams describe both current and target states. A displayed component is
 not necessarily implemented; each phase states its status explicitly.
 
 ## Whole-system target architecture
+
+### Current retained demo boundary
+
+```mermaid
+flowchart LR
+    accounts["Existing authorized accounts only"] --> edge["Existing HTTPS / Caddy / Streamlit"]
+    edge --> api["FastAPI: unchanged tenant authorization"]
+    api --> data["Existing Postgres / Qdrant / SeaweedFS"]
+    data --> saved["READY documents and saved answers / citations"]
+    policy["ADR 0065: operator-controlled inspection only"] -.-> api
+    policy --> worker["Worker STOPPED; restart=no"]
+    policy --> maintenance["Existing Phase 10 maintenance UNCHANGED"]
+    policy --> forbidden["No new questions, uploads, paid calls or resources"]
+    warning["Worker stop does NOT disable API chat / embeddings"] -.-> forbidden
+```
+
+### Implemented capabilities and deferred target paths
+
+The following whole-system capability map is not permission to start its deferred
+or paid paths in the retained demo. Current operating permission is ADR 0065 above.
 
 ```mermaid
 flowchart LR
@@ -173,7 +212,7 @@ flowchart LR
 2. **Ingest:** upload or connector intake stores an immutable original, creates an
    idempotent job, parses and enriches content, and writes versioned metadata to
    PostgreSQL and scoped vectors to Qdrant.
-3. **Answer:** FastAPI authorizes scope, runs dense and later sparse retrieval,
+3. **Answer:** FastAPI authorizes scope, runs the implemented dense/sparse retrieval,
    fuses and reranks evidence, sends permitted context to the model, and persists
    the grounded answer and citations.
 4. **Govern:** authorization, audit, quota, retention, and observability apply to
@@ -195,7 +234,8 @@ flowchart LR
     p8["Phase 8<br/>Scalable platform<br/>Accepted"] -->
     p9["Phase 9<br/>Enterprise platform<br/>Accepted"] -->
     p10["Phase 10<br/>Operational hardening<br/>Completed / v10.0.0"] -->
-    p11["Phase 11<br/>Two-person learning pilot<br/>Accepted limited scope"]
+    p11["Phase 11<br/>Two-person learning pilot<br/>Accepted limited scope"] -->
+    demo["Retained inspection demo<br/>Worker stopped; maintenance unchanged<br/>No new paid calls or resources"]
 ```
 
 | Phase | Capability | Main technologies/components | Stores | Status |
@@ -535,7 +575,7 @@ API reads inherit document authorization through RLS. Binary and text artifacts
 are conditionally written to both attempt and generation namespaces, verified by
 size and SHA-256, and exposed only after the existing generation promotion.
 
-The opt-in `structural-v1` adapter pins Docling `2.124.0`, Tesseract CLI English,
+The source-patched `structural-v1` adapter pins Docling `2.132.0`, Tesseract CLI English,
 accurate TableFormer, and a checksum-bound local model tree. It generates page
 renders, crops, captions, OCR/table text, and structured-table artifacts with remote
 services and generated descriptions disabled. Standalone images use deterministic
@@ -940,20 +980,57 @@ and unvalidated. Acceptance retains the closure review's guided-workflow, saved-
 human-feedback and historical-proof qualifications, including provider-exported
 USD 0.00151422 and operator-reported OCI USD 0, not independent billing verification.
 No production, unassisted-discovery or fresh live negative-isolation claim is made.
-Worker remains stopped/restart-no and Phase 10 maintenance unchanged. Git publication,
-tags, post-pilot access/service disposition and further operational/paid work remain
-separately gated. Aggregate evidence reaches its 30-day manual retention review on
+Worker remains stopped/restart-no and Phase 10 maintenance unchanged. Acceptance
+records were squash-merged through PR #31 at `768a67f`; ADR 0065 separately approves
+retaining the inspection demo. Tags, deployment, access expansion and further
+operational/paid work remain separately gated. Aggregate evidence reaches its 30-day manual retention review on
 November 17; automatic deletion/apply remain disabled. Historical scope-only approval
 and frozen evidence are not rewritten; earlier dated unaccepted statements below are
 checkpoint history, superseded by this decision.
 
-The operator subsequently separately approves acceptance-record commit/push on the
-existing Phase 11 branch after free verification. This changes no runtime boundary
-and grants no merge/tag, paid execution, worker start or post-pilot disposition authority.
+The acceptance-record commit/push, PR #31 squash-merge and subsequent ADR 0065
+demo disposition received separate approvals. No runtime boundary changed. Tags,
+paid execution, worker start and deployment remain separately gated. Subsequent
+explicit approval permits commit/push of the demo-doc follow-up after free verification;
+it does not authorize a merge, tag, runtime/access change or new resource.
 
 October 18 pre-publication free verification completes successfully: `make check`
 passes 448 tests/16 skips, lint/typing, protected contracts and schema head/no drift.
 No runtime or integration boundary changes; no paid call, upgrade or live-service rerun.
+
+### Current post-pilot demo disposition
+
+[ADR 0065](decisions/0065-postpilot-demo-operating-mode.md) and
+[`phase11-demo-v1.json`](../../operations/phase11-demo-v1.json) record the approved
+mode. Existing authorized accounts may inspect existing READY documents and saved
+answers/citations. No new questions, uploads, retries, rebuilds, connector syncs,
+worker start, provider calls, enrollment or cloud resources are authorized. The
+stopped worker does not block API chat: these are operator instructions, not a new
+runtime read-only enforcement claim. Existing backup/capacity schedules, private
+backup destination, cost controls and manual-retention safeguards stay unchanged.
+Scheduled backup quiescence may briefly interrupt the demo; no production SLA is
+claimed. CI for the merged acceptance tree passed 460 tests/4 skips, 83.59% coverage.
+No new deployment or release tag accompanied the merge.
+
+### PR #32 dependency-security follow-up — source only
+
+The operator separately approves fixing the failed dependency-security checks,
+committing/pushing to PR #32 and reviewing its new CI results, with no merge or
+deployment. Source pins now use Docling/docling-slim `2.132.0`, Next.js `16.3.8`,
+and exact transitive overrides for sharp `0.35.5` and source-map-js `1.2.2`.
+The Docling update requires related lockfile updates to docling-core `2.102.0`,
+docling-parse `7.22.3` and langcodes `3.5.1`; unrelated package versions are retained.
+Next.js native packages and sharp/libvips platform packages follow the patched
+releases. These are source/development-environment changes, not deployed upgrades.
+
+The application package-version guard is aligned with the new Docling pin. The
+reviewed model-tree checksum, local-only/PDF extraction restrictions, authorization,
+provenance, retrieval profiles and frozen evaluation evidence are unchanged. Security
+gates remain mandatory: no ignores, threshold relaxation or publication bypass.
+The worker remains stopped and existing maintenance unchanged; no provider calls,
+new cloud resources, image publication, frontend promotion or deployment is authorized.
+
+### Historical closure, implementation and recovery checkpoints
 
 October 11 scope amendment: accepted ADR 0064 permits limited two-person learning
 pilot acceptance only after all retained gates pass and an explicit final decision.
@@ -1272,16 +1349,16 @@ security gates. No provider, retry-policy, deployed runtime or operational autho
 
 ```mermaid
 flowchart LR
-    operator["Pilot operator"] --> invite["Manual approved invitation"]
-    invite --> users["2 → 5 → 10 registered users"]
-    users --> product["Accepted Streamlit + FastAPI product"]
-    product --> evidence["Aggregate content-free telemetry"]
-    users --> feedback["Voluntary structured feedback"]
-    evidence --> gate["Stage gate"]
-    feedback --> gate
-    gate -->|"pass"| expand["Next bounded stage"]
-    gate -->|"safety / privacy / integrity / cost failure"| pause["Pause or revoke access"]
-    pause --> product
+    users["Two independently consenting people"] --> observation["Guided workflows and eligible observation"]
+    observation --> review["Qualified human, safeguard and cost review"]
+    review --> acceptance["Limited acceptance: October 18 / ADR 0064"]
+    acceptance --> merge["Free CI passes; PR 31 squash-merged / 768a67f"]
+    merge --> demo["ADR 0065: retain existing inspection demo"]
+    demo --> worker["Worker stopped / restart=no"]
+    demo --> maintenance["Existing maintenance unchanged"]
+    demo --> boundary["No new paid calls or resources"]
+    acceptance --> retention["Manual aggregate-evidence review: November 17"]
+    acceptance -.-> deferred["Five-/ten-user validation DEFERRED; no automatic expansion"]
 ```
 
 The accepted decision keeps Streamlit authoritative, existing Auth0/manual access,
@@ -1289,6 +1366,9 @@ the free-first OCI topology, and current operational controls. No raw prompts, d
 identities, or provider identifiers enter pilot evidence. Public signup, external
 notifications, Next.js promotion, paid capacity, and production-SLA claims remain out
 of scope until separately decided.
+
+The historical rollout defaults below are not current demo permissions. ADRs 0064
+and 0065 close the limited two-person scope without automatic expansion.
 
 The accepted live defaults designate the workspace Owner as access approver, target
 best-effort support within one business day, retain aggregate evidence for 30 days after
@@ -1676,7 +1756,7 @@ acceptance; both participants remain paused.
 | Dependency maintenance | Monthly grouped uv/npm/Actions/container candidates implemented under ADR 0054; first lockfile/test/scan/SBOM/provenance/ARM64/signing/rollback gate passes with no auto-merge or paid acceptance |
 | OCI capacity/cost guardrails | Five-minute collector under ADR 0055 is enabled; live free-first inventory and host metrics are healthy, 15-minute queue and 14-day certificate thresholds pass, and no auto-scale or paid capacity is authorized |
 | Upgrade/rollback/DR automation | Exact-hash executor under ADR 0056 passes upgrade, forward-schema-safe rollback, roll-forward, and clean-host recovery with runtime-only secrets and verified cleanup |
-| Phase 11 pilot boundary | Accepted in ADR 0057; invitation-only, ten-user maximum, free-first, content-free evidence |
+| Phase 11 pilot boundary | Original maximum ten in ADR 0057; final two-person scope accepted in ADR 0064, five-/ten-user validation deferred; ADR 0065 retains inspection demo only |
 | Pilot frontend | Accepted in ADR 0059; Streamlit authoritative and Next.js unpromoted |
 | Pilot feedback | Accepted in ADR 0060; voluntary structured feedback plus aggregate telemetry, no raw-content evidence |
 
@@ -1777,6 +1857,7 @@ Accepted Phase 11 decisions are:
 - [ADR 0062 — Pilot rollout, acceptance, and rollback](decisions/0062-pilot-rollout-acceptance-rollback.md)
 - [ADR 0063 — Two-account technical rehearsal boundary](decisions/0063-two-account-technical-rehearsal.md)
 - [ADR 0064 — Two person pilot closure scope](decisions/0064-two-person-pilot-closure-scope.md)
+- [ADR 0065 — Post-pilot demo operating mode](decisions/0065-postpilot-demo-operating-mode.md)
 
 ## Maintenance checklist
 

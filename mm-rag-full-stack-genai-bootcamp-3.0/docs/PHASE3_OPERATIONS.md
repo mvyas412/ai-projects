@@ -1,5 +1,13 @@
 # Phase 3 ingestion operations
 
+For the retained deployment, use the [inspection demo runbook](DEMO_RUNBOOK.md),
+ADR 0065: worker stopped/restart-no, existing maintenance unchanged, no new paid
+calls or resources. Worker stopped is intentional, not an ingestion incident.
+The local/CI start, upload and retry recipes below are not demo instructions.
+Inspect existing READY documents and saved answers/citations only; worker stop
+does not block API chat. The last verified deployed schema is `0019`; older phase
+schema references below describe their historical milestone.
+
 This runbook covers the free local/CI asynchronous-ingestion runtime. PostgreSQL is
 authoritative for jobs, attempts, active generations, and outbox state. RabbitMQ is
 only a wake-up channel; Qdrant vectors and object artifacts are generation-scoped.

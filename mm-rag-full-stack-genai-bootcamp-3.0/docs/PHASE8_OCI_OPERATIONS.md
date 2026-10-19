@@ -1,5 +1,11 @@
 # Phase 8 OCI learning-deployment operations
 
+Current mode: [inspection demo](DEMO_RUNBOOK.md), ADR 0065. Worker stopped/restart-no;
+existing maintenance unchanged; no new paid calls or resources. Inspect existing
+READY documents and saved answers/citations only. Provisioning, deployment, upload,
+worker-start and paid-proof recipes below require separate approval; they are not
+the current demo procedure. A stopped worker does not prevent paid API chat.
+
 This runbook turns the accepted Phase 8 ADRs into repeatable evidence. It does not
 authorize cloud provisioning, image publication, DNS changes, paid model calls, or
 frontend promotion. Use synthetic/non-sensitive learning data only.

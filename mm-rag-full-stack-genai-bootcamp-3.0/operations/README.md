@@ -1,4 +1,16 @@
-# Phase 10 operations contracts
+# Operations contracts
+
+Current mode: the existing inspection demo is retained under ADR 0065 and
+[`phase11-demo-v1.json`](phase11-demo-v1.json). Phase 11 acceptance was merged in
+PR #31 (`768a67f`). Worker stopped/restart-no; existing Phase 10 maintenance unchanged;
+no new paid calls or resources. Inspect existing READY documents and saved answers/
+citations only. Worker stop does not disable API chat; this is an operator restriction,
+not a new runtime interlock. Follow the [demo runbook](../docs/DEMO_RUNBOOK.md).
+Frozen acceptance/rehearsal evidence is historical and must not be regenerated to
+record this disposition. Aggregate-evidence manual retention review is November 17;
+automatic product-data deletion and retention apply remain disabled.
+
+## Unchanged Phase 10 contracts
 
 `phase10-policy.json` is the tracked, provider-neutral form of accepted ADRs 0051–0056.
 Validate it with `make phase10-policy-check`. The accepted learning thresholds mark an
