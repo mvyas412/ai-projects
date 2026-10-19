@@ -31,10 +31,13 @@ at `768a67f`. ADR 0065 retains the existing deployment as an inspection-only dem
 worker stopped/restart-no, maintenance unchanged, no new paid calls or resources.
 Existing authorized users may inspect READY documents and saved answers/citations.
 The restriction is operator-controlled, not a new UI/API interlock: a stopped worker
-does not prevent paid chat or query embeddings. Last verified deployed application
-revision remains `dba88de`, schema `0019`; documentation publication is not deployment.
+does not prevent paid chat or query embeddings. The separately approved deployment
+now verifies application revision `3782af2`, schema `0019`, on October 18 Pacific
+(`2026-10-19T01:41:00Z`). The worker was configured but never started; infrastructure,
+maintenance and model caches remain unchanged. Documentation publication is not deployment.
 Phase 5 closed without quality acceptance; five-/ten-user validation and Next.js
-promotion remain deferred. No new host-health audit is implied by this doc update.
+promotion remain deferred. Provider-free host/post-deployment checks and the natural
+post-update capacity sample pass; this is not a new paid acceptance, restore or cloud-cost audit.
 
 <details>
 <summary>Historical Phase 7 diagnostic checkpoints — the completed baseline was later accepted</summary>
@@ -1029,6 +1032,74 @@ provenance, retrieval profiles and frozen evaluation evidence are unchanged. Sec
 gates remain mandatory: no ignores, threshold relaxation or publication bypass.
 The worker remains stopped and existing maintenance unchanged; no provider calls,
 new cloud resources, image publication, frontend promotion or deployment is authorized.
+
+The later explicit squash-merge approval integrates PR #32 as `3782af2`, with the
+same tree as tested `8be30e6` and eight passing applicable checks. A subsequent
+separate approval permits publishing only that merged application revision through
+the existing protected image workflow. All prerequisites for
+[run #42](https://github.com/mvyas412/ai-projects/actions/runs/39181374294) pass;
+all eight jobs, published-image scan and OIDC signing succeed in 22m46s. Published
+application index:
+`sha256:857c741df862707da2365c42cc124c030084fc81ece3b9df5d632de77e2535f3`.
+Independent registry checks verify both architecture labels, SLSA provenance and SPDX
+SBOMs with Docling/docling-slim `2.132.0`; independent signature verification passes
+certificate trust/transparency and exact workflow/repository/main/revision constraints.
+No live image/configuration changes follow from
+this approval. Keep the worker stopped, existing maintenance unchanged and Next.js
+unpromoted; host execution still needs a reviewed immutable/rollback-bound plan.
+
+The next explicit instruction authorizes preparing that plan, not deploying it.
+Read-only live checks confirm the existing `dba88de` demo remains healthy with worker
+stopped/restart-no, empty job/queue aggregates, schema `0019` and unchanged active
+maintenance. The prepared image-only plan binds current environment/configuration,
+unit/source/policy hashes, target publication/signature and the `dba88de` rollback
+manifest. It leaves persistence, edge, networks, model bytes and retrieval profiles
+unchanged. No migration runs because the migration trees and head are unchanged.
+Offline target/cache verification is a future approved step, not a completed host test.
+Only explicit no-dependency application-role replacement is proposed; the worker is
+configured without starting. Existing backup/capacity schedules stay active, with a
+bounded API replacement between natural capacity cycles and a required natural
+post-update pass. Timing guards reduce but do not eliminate rollout failure risk;
+failure stops for review without maintenance edits, retries or automatic rollback.
+Planning has performed no host staging, image pull/run or service mutation. Deployment
+still requires separate exact-plan-hash approval and fresh preconditions.
+
+The subsequent exact-plan approval permits one supervised attempt. It pulls the target
+but stops before application changes because the runner mistakes Docker's OCI index/
+native-manifest image ID for a configuration-blob digest. Read-only inspection confirms
+the expected manifest descriptors and revision. This is a verifier defect, not evidence
+of a different approved image. Post-abort all live container identities and bound
+configuration/maintenance hashes remain unchanged; the healthy demo still runs
+`dba88de`, worker stopped/restart-no, schema `0019`, queues/jobs empty and maintenance
+active/successful. Leases are released. Private originals and the cached image are the
+only retained host additions; no target helper, role replacement or revision recording
+occurs. A corrected continuation requires separate review and exact-hash approval,
+not automatic retry, rollback, weakened verification or a new deployment claim.
+
+The subsequent instruction proceeds with corrected-continuation preparation. A new
+hash-bound private runner distinguishes OCI index, native ARM64 manifest and config
+digests, retains exact descriptor/repository/platform/revision checks and signed
+provenance, and reuses only the existing cached image. The isolated verifier explicitly
+disables pulls and selects ARM64; no source, model-tree, schema, persistence, worker or
+maintenance-policy change is introduced. Fourteen offline tests include the real
+host metadata and rejection cases. Fresh read-only state remains healthy `dba88de`;
+the continuation remains unexecuted pending its new exact-hash approval, as required
+by the prior failed attempt's stop boundary.
+
+After explicit approval of continuation `2da7a2b2…7f4c5d61`, all twelve supervised
+steps pass at `2026-10-19T01:41:00Z` (October 18 Pacific). The already-cached signed
+image passes exact index/native identity checks and five offline, network-disabled,
+read-only model checks. Only API/UI/dispatcher and the never-started worker are
+recreated; target manifest and application-image environment binding are recorded.
+Schema `0019`, private persistence/edge/historical setup containers, mounts/networks,
+retrieval profiles, maintenance unit/environment/source/policy hashes and schedules
+are unchanged. Public TLS/UI/readiness `200`, anonymous `401`, zero active jobs and
+empty broker queues/consumers pass. Natural post-update capacity succeeds at
+`01:40:47Z`, with no failed units; both timers remain active/enabled. Rollback image
+`dba88de` remains cached. Leases release; no new pull, worker start, migration, paid
+call, resource, maintenance command, retry or rollback occurs in this continuation.
+The deployed revision record is now `3782af2`; the host checkout and historical
+acceptance/recovery records are preserved, not represented as a full checkout upgrade.
 
 ### Historical closure, implementation and recovery checkpoints
 

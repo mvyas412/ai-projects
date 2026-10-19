@@ -72,8 +72,8 @@
   <text x="1104" y="715" class="small">Stop and review any unexpected cost</text>
 
   <rect x="40" y="765" width="1520" height="80" rx="12" fill="#fff" stroke="#c5cfdb"/>
-  <text x="63" y="796" class="label">SOURCE PUBLICATION ≠ APPLICATION DEPLOYMENT</text>
-  <text x="63" y="825" class="body">Acceptance merged: 768a67f / PR #31. Last verified runtime: dba88de. No deployment or new host audit in this documentation update.</text>
+  <text x="63" y="796" class="label">VERIFIED DEMO — SEPARATE DEPLOYMENT APPROVAL</text>
+  <text x="63" y="825" class="body">Acceptance: 768a67f / PR #31. Verified app: 3782af2 / schema 0019. Worker stopped; maintenance unchanged.</text>
 
   <rect x="40" y="870" width="360" height="95" rx="12" fill="#fff" stroke="#c5cfdb"/>
   <text x="60" y="901" class="label">ACCEPTED LEARNING SCOPE</text>
