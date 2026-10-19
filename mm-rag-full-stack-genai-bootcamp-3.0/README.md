@@ -328,7 +328,8 @@ without provider calls.
 Milestone 6.1 adds immutable `content_regions` and `content_artifacts` at migration
 `20260903_0014`. PostgreSQL remains the provenance authority, generated binaries
 remain opaque in object storage, and visual outputs stay invisible until their
-generation is atomically promoted. Docling `2.124.0`, Tesseract CLI, accurate
+generation is atomically promoted. The source security patch pins Docling `2.132.0`
+(not a deployed upgrade), Tesseract CLI, accurate
 TableFormer, and standalone-image Pillow extraction run locally behind the opt-in
 `structural-v1` profile. Remote services and generated descriptions are disabled.
 

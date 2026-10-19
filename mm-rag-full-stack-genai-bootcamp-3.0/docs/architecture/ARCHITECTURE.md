@@ -575,7 +575,7 @@ API reads inherit document authorization through RLS. Binary and text artifacts
 are conditionally written to both attempt and generation namespaces, verified by
 size and SHA-256, and exposed only after the existing generation promotion.
 
-The opt-in `structural-v1` adapter pins Docling `2.124.0`, Tesseract CLI English,
+The source-patched `structural-v1` adapter pins Docling `2.132.0`, Tesseract CLI English,
 accurate TableFormer, and a checksum-bound local model tree. It generates page
 renders, crops, captions, OCR/table text, and structured-table artifacts with remote
 services and generated descriptions disabled. Standalone images use deterministic
@@ -1011,6 +1011,24 @@ backup destination, cost controls and manual-retention safeguards stay unchanged
 Scheduled backup quiescence may briefly interrupt the demo; no production SLA is
 claimed. CI for the merged acceptance tree passed 460 tests/4 skips, 83.59% coverage.
 No new deployment or release tag accompanied the merge.
+
+### PR #32 dependency-security follow-up — source only
+
+The operator separately approves fixing the failed dependency-security checks,
+committing/pushing to PR #32 and reviewing its new CI results, with no merge or
+deployment. Source pins now use Docling/docling-slim `2.132.0`, Next.js `16.3.8`,
+and exact transitive overrides for sharp `0.35.5` and source-map-js `1.2.2`.
+The Docling update requires related lockfile updates to docling-core `2.102.0`,
+docling-parse `7.22.3` and langcodes `3.5.1`; unrelated package versions are retained.
+Next.js native packages and sharp/libvips platform packages follow the patched
+releases. These are source/development-environment changes, not deployed upgrades.
+
+The application package-version guard is aligned with the new Docling pin. The
+reviewed model-tree checksum, local-only/PDF extraction restrictions, authorization,
+provenance, retrieval profiles and frozen evaluation evidence are unchanged. Security
+gates remain mandatory: no ignores, threshold relaxation or publication bypass.
+The worker remains stopped and existing maintenance unchanged; no provider calls,
+new cloud resources, image publication, frontend promotion or deployment is authorized.
 
 ### Historical closure, implementation and recovery checkpoints
 

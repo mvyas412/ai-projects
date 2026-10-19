@@ -29,6 +29,18 @@ The operator subsequently explicitly approves commit/push of these demo document
 and diagram changes after the free verification gate. This source-only approval
 does not authorize a new PR/merge, tag, deployment, service/access change or paid work.
 
+### Approved source-only security remediation in PR #32
+
+The operator separately authorizes fixing the failed dependency scans, committing/
+pushing to the existing PR and reviewing CI again; no merge or deployment. Source
+patches pin Docling/docling-slim `2.132.0`, Next.js `16.3.8`, sharp `0.35.5` and
+source-map-js `1.2.2`, with required related transitive updates only. The Docling
+package guard follows the new package pin while preserving the original model-tree
+checksum and local-only/PDF extraction controls. Existing deployed revision/digests,
+worker stop/restart-no, maintenance schedules, providers and frozen pilot evidence
+remain untouched. Keep the original HIGH/CRITICAL security thresholds and publication
+approval boundary; do not silence findings or treat local tests as a clean image scan.
+
 ## Historical acceptance and closure checkpoints
 
 The dated authority and pending statements below retain their original checkpoint

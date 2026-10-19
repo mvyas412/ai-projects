@@ -808,7 +808,7 @@ emits protected holdout identities. The intentionally imperfect lexical baseline
 sets the comparison point for later visual/table candidates without changing a
 retrieval profile.
 
-Milestone 6.1 pins Docling `2.124.0` and a 15-file, 701,214,178-byte local layout/
+Milestone 6.1 originally pinned Docling `2.124.0` and a 15-file, 701,214,178-byte local layout/
 TableFormer artifact tree. Runtime verifies its SHA-256 before use and disables
 remote services, external plugins, picture descriptions, and request-time model
 downloads. The worker writes attempt and generation copies, verifies stored bytes,
@@ -1249,6 +1249,26 @@ paid calls, resources, upgrades or new schedules. Backup quiescence can briefly
 interrupt the demo; no SLA is claimed. Merged acceptance CI passed 460 tests/4 skips
 with 83.59% coverage. Last verified deployed revision remains `dba88de`, schema `0019`;
 this documentation update performs no fresh host audit or deployment.
+
+### Approved PR #32 dependency-security correction
+
+The subsequent explicit approval permits fixing the CI findings, commit/push to
+the same PR and CI review, but no merge or deployment. Patch source pins to
+Docling/docling-slim `2.132.0`, Next.js `16.3.8`, sharp `0.35.5` and source-map-js
+`1.2.2`. Retain unrelated versions; Docling's required core/parse/langcodes and
+Next.js/sharp native packages are the bounded transitive changes. Align the Docling
+package guard without changing its reviewed model tree or frozen acceptance evidence.
+Verify locked dependencies, extraction compatibility, candidate tests/type/build/audit,
+free repository/live-service gates and CI's native image/security gates before any
+future merge decision. No weakened scans, paid proof, candidate frontend promotion,
+worker start, maintenance change, image publication or cloud resource is authorized.
+
+Local verification passed before publication: `make check` (459 passed/16 skipped),
+`make check-live` (474 passed/1 skipped), six dependency regression cases, and real
+offline Docling PDF extraction using the unchanged cached model tree. Candidate
+frontend tests (4), typecheck and production build passed; npm audit reported zero
+vulnerabilities. Schema remains `0019` with no drift. Remote CI must independently
+revalidate the patched source; these checks do not attest to a deployed upgrade.
 
 ### Historical closure, implementation and recovery checkpoints
 

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from backend.app.retrieval.artifacts import ModelArtifactSpec
 
-DOCLING_PACKAGE_VERSION = "2.124.0"
+DOCLING_PACKAGE_VERSION = "2.132.0"
 DOCLING_MODEL_PROFILE = "docling-layout-tableformer-v1"
 DOCLING_MODEL_LICENSES = ("apache-2.0", "mit")
 DOCLING_MODEL_TREE_SHA256 = "84c523c99eb4e43b36ebf5aee678b66c7017b18ff4db3de22b67dcd2ab3a92cc"
