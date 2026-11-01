@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:0.8.13-python3.12-bookworm-slim
+FROM ghcr.io/astral-sh/uv:0.9.30-python3.12-bookworm-slim
 
 ARG BUILD_REVISION=uncommitted
 ARG BUILD_CREATED=unknown
